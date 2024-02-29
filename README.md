@@ -28,3 +28,14 @@
 | **`find`** | `find` | -- | -- | -- |
 | **`max_element`** | `max_element` | -- | -- | -- |
 | **`min_element`** | `min_element` | -- | -- | -- |
+
+## 算法
+
+| **`sort`** |
+| :--: |
+| `selection_sort` |
+| `insertion_sort` |
+| `bubble_sort` |
+| `heapsort` |
+| `merge_sort` |
+| `quicksort` |

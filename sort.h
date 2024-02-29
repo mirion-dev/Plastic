@@ -5,6 +5,26 @@
 namespace plastic {
 
 	template<::std::bidirectional_iterator iter, ::std::strict_weak_order<::std::iter_value_t<iter>, ::std::iter_value_t<iter>> compare = ::std::less<>>
+	void selection_sort(iter first, iter last, compare comp = {}) {
+		for (; first != last && first != --last; ++first) {
+			iter min{first}, max{first};
+			for (iter i{first}; i != ::std::next(last); ++i) {
+				if (comp(*max, *i)) {
+					max = i;
+				}
+				if (comp(*i, *min)) {
+					min = i;
+				}
+			}
+			if (min == max) {
+				break;
+			}
+			::std::swap(*min, *first);
+			::std::swap(max == first ? *min : *max, *last);
+		}
+	}
+
+	template<::std::bidirectional_iterator iter, ::std::strict_weak_order<::std::iter_value_t<iter>, ::std::iter_value_t<iter>> compare = ::std::less<>>
 	void insertion_sort(iter first, iter last, compare comp = {}) {
 		for (iter i{first}; i != last; ++i) {
 			iter insertionPoint{first};
@@ -24,26 +44,6 @@ namespace plastic {
 				*j = ::std::move(*::std::prev(j));
 			}
 			*insertionPoint = ::std::move(temp);
-		}
-	}
-
-	template<::std::bidirectional_iterator iter, ::std::strict_weak_order<::std::iter_value_t<iter>, ::std::iter_value_t<iter>> compare = ::std::less<>>
-	void selection_sort(iter first, iter last, compare comp = {}) {
-		for (; first != last && first != --last; ++first) {
-			iter min{first}, max{first};
-			for (iter i{first}; i != ::std::next(last); ++i) {
-				if (comp(*max, *i)) {
-					max = i;
-				}
-				if (comp(*i, *min)) {
-					min = i;
-				}
-			}
-			if (min == max) {
-				break;
-			}
-			::std::swap(*min, *first);
-			::std::swap(max == first ? *min : *max, *last);
 		}
 	}
 

@@ -6,7 +6,7 @@
 #include "list.h"
 
 // bst
-//#include "binary_search_tree.h"
+#include "binary_search_tree.h"
 
 // algorithm
 #include "sort.h"
@@ -107,15 +107,15 @@ void algorithm() {
 	std::cout << std::boolalpha;
 
 	copy = data;
+	selection_sort(copy.begin(), copy.end());
+	std::cout << (copy != data) << ' ';
+
+	copy = data;
 	insertion_sort(copy.begin(), copy.end());
 	std::cout << (copy != data) << ' ';
 
 	copy = data;
 	bubble_sort(copy.begin(), copy.end());
-	std::cout << (copy != data) << ' ';
-
-	copy = data;
-	selection_sort(copy.begin(), copy.end());
 	std::cout << (copy != data) << ' ';
 
 	copy = data;
