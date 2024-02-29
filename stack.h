@@ -1,6 +1,6 @@
 #pragma once
 
-#include <algorithm>
+#include <utility>
 
 namespace plastic {
 
@@ -14,11 +14,15 @@ namespace plastic {
 
 		void _grow() {
 			_capacity <<= 1;
+
 			auto newData{new T[_capacity]};
-			::std::copy(_begin, _end, newData);
+			for (T* i{_begin}, * j{newData}; i != _end; ++i, ++j) {
+				*j = ::std::move(*i);
+			}
 			delete[] _begin;
+
 			_begin = newData;
-			_end = newData + _capacity;
+			_end = _begin + _capacity;
 			_top = _begin + _size;
 		}
 
