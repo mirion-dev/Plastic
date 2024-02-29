@@ -75,7 +75,7 @@ namespace plastic {
 	}
 
 	template<::std::random_access_iterator iter, ::std::strict_weak_order<::std::iter_value_t<iter>, ::std::iter_value_t<iter>> compare = ::std::less<>>
-	void heapsort(iter first, iter last, compare comp = {}) {
+	void heap_sort(iter first, iter last, compare comp = {}) {
 		auto siftDown{[&](::std::ptrdiff_t node, ::std::ptrdiff_t bottom) {
 			while (node < bottom >> 1) {
 				::std::ptrdiff_t child{(node << 1) + 1};
@@ -140,7 +140,7 @@ namespace plastic {
 	}
 
 	template<::std::bidirectional_iterator iter, ::std::strict_weak_order<::std::iter_value_t<iter>, ::std::iter_value_t<iter>> compare = ::std::less<>>
-	void quicksort(iter first, iter last, compare comp = {}) {
+	void quick_sort(iter first, iter last, compare comp = {}) {
 		::std::ptrdiff_t size{::std::distance(first, last)};
 		if (size <= 16) {
 			::plastic::bubble_sort(first, last, comp);
@@ -177,8 +177,8 @@ namespace plastic {
 				}
 			}
 		}
-		::plastic::quicksort(first, left, comp);
-		::plastic::quicksort(::std::next(left), last, comp);
+		::plastic::quick_sort(first, left, comp);
+		::plastic::quick_sort(::std::next(left), last, comp);
 	}
 
 }

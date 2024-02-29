@@ -36,6 +36,6 @@
 | `selection_sort` |
 | `insertion_sort` |
 | `bubble_sort` |
-| `heapsort` |
+| `heap_sort` |
 | `merge_sort` |
-| `quicksort` |
+| `quick_sort` |

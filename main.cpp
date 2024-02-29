@@ -119,7 +119,7 @@ void algorithm() {
 	std::cout << (copy != data) << ' ';
 
 	copy = data;
-	heapsort(copy.begin(), copy.end());
+	heap_sort(copy.begin(), copy.end());
 	std::cout << (copy != data) << ' ';
 
 	copy = data;
@@ -127,10 +127,10 @@ void algorithm() {
 	std::cout << (copy != data) << ' ';
 
 	copy = data;
-	quicksort(copy.begin(), copy.end());
+	quick_sort(copy.begin(), copy.end());
 	std::cout << (copy != data) << '\n';
 }
 
 int main() {
-	algorithm();
+	bst();
 }
