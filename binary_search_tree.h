@@ -60,7 +60,7 @@ namespace plastic {
 		}
 
 		void erase(const T& value) {
-			if (nd == nullptr) {
+			/*if (nd == nullptr) {
 				return;
 			}
 			if (nd->_left == nullptr) {
@@ -84,7 +84,7 @@ namespace plastic {
 				}
 				i->_parent->_right = i->_left;
 				nd = i;
-			}
+			}*/
 		}
 
 		node* find(const T& value) {

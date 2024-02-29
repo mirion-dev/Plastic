@@ -4,8 +4,6 @@
 #include "forward_list.h"
 #include "list.h"
 
-#include "binary_search_tree.h"
-
 #include <iostream>
 
 using namespace std;
@@ -86,7 +84,7 @@ void basic() {
 }
 
 void tree() {
-	binary_search_tree<int> bst;
+	//binary_search_tree<int> bst;
 }
 
 int main() {
