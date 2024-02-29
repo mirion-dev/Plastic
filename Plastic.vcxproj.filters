@@ -16,7 +16,7 @@
     <Filter Include="Header Files\basic">
       <UniqueIdentifier>{0d782316-5d29-4c08-a165-94e0412d3093}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\tree">
+    <Filter Include="Header Files\bst">
       <UniqueIdentifier>{6fa2d5df-4ed1-4962-8736-4534987ae2b8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -31,7 +31,7 @@
       <Filter>Header Files\basic</Filter>
     </ClCompile>
     <ClCompile Include="binary_search_tree.h">
-      <Filter>Header Files\tree</Filter>
+      <Filter>Header Files\bst</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

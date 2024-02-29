@@ -1,10 +1,11 @@
 #pragma once
 
 #include <functional>
+#include <concepts>
 
 namespace plastic {
 
-	template<class T, class compare = ::std::less<T>>
+	template<class T, ::std::strict_weak_order<T, T> auto _compare = ::std::less<>{} >
 	class binary_search_tree {
 		struct node {
 			T _value;
@@ -49,7 +50,7 @@ namespace plastic {
 					++i->_count;
 					break;
 				}
-				if (value < i->_value) {
+				if (_compare(value, i->_value)) {
 					i = i->_left;
 				}
 				else {
@@ -92,7 +93,7 @@ namespace plastic {
 				if (value == i->_value) {
 					return i;
 				}
-				if (compare{}(value, i->_value)) {
+				if (_compare(value, i->_value)) {
 					i = i->_left;
 				}
 				else {
