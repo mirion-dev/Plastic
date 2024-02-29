@@ -33,13 +33,13 @@ namespace plastic {
 		}
 
 	public:
-		explicit deque(::std::size_t size = 1) {
-			_begin = new T[size];
-			_end = _begin + size;
+		explicit deque(::std::size_t capacity = 1) {
+			_begin = new T[capacity];
+			_end = _begin + capacity;
 			_head = _begin;
 			_tail = _begin;
 			_size = 0;
-			_capacity = size;
+			_capacity = capacity;
 		}
 
 		~deque() {

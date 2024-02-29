@@ -27,12 +27,12 @@ namespace plastic {
 		}
 
 	public:
-		explicit stack(::std::size_t size = 1) {
-			_begin = new T[size];
-			_end = _begin + size;
+		explicit stack(::std::size_t capacity = 1) {
+			_begin = new T[capacity];
+			_end = _begin + capacity;
 			_top = _begin;
 			_size = 0;
-			_capacity = size;
+			_capacity = capacity;
 		}
 
 		~stack() {
