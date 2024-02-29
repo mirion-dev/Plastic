@@ -10,20 +10,43 @@ namespace plastic {
 			T _value;
 			node* _prev;
 			node* _next;
+		};
 
-			node* advance(::std::ptrdiff_t n) {
-				node* result{this};
-				if (n < 0) {
-					for (::std::ptrdiff_t i{0}; i > n; --i) {
-						result = result->_prev;
-					}
-				}
-				else if (n > 0) {
-					for (::std::ptrdiff_t i{0}; i < n; ++i) {
-						result = result->_next;
-					}
-				}
-				return result;
+		struct iterator {
+			node* _node;
+
+			explicit iterator(node* nd) {
+				_node = nd;
+			}
+
+			T& operator*() {
+				return _node->_value;
+			}
+
+			bool operator==(iterator it) {
+				return _node == it._node;
+			}
+
+			iterator& operator++() {
+				_node = _node->_next;
+				return *this;
+			}
+
+			iterator operator++(int) {
+				iterator temp{*this};
+				operator++();
+				return temp;
+			}
+
+			iterator& operator--() {
+				_node = _node->_prev;
+				return *this;
+			}
+
+			iterator operator--(int) {
+				iterator temp{*this};
+				operator--();
+				return temp;
 			}
 		};
 
@@ -39,12 +62,11 @@ namespace plastic {
 		}
 
 		~list() {
-			for (node* i{begin()}; i != end();) {
-				node* next{i->_next};
-				delete i;
-				i = next;
+			iterator i{begin()};
+			while (i != end()) {
+				delete i++._node;
 			}
-			delete _sentinel;
+			delete i._node;
 		}
 
 		bool empty() {
@@ -55,32 +77,30 @@ namespace plastic {
 			return _size;
 		}
 
-		node* begin() {
-			return _sentinel->_next;
+		iterator begin() {
+			return iterator{_sentinel->_next};
 		}
 
-		node* end() {
-			return _sentinel;
+		iterator end() {
+			return iterator{_sentinel};
 		}
 
-		void insert(node* nd, const T& value) {
-			auto newNode{new node};
+		void insert(iterator pos, const T& value) {
+			node* posNode{pos._node}, * newNode{new node};
 			newNode->_value = value;
-			newNode->_prev = nd->_prev;
-			newNode->_next = nd;
-			nd->_prev->_next = newNode;
-			nd->_prev = newNode;
+			newNode->_prev = posNode->_prev;
+			newNode->_next = posNode;
+			posNode->_prev->_next = newNode;
+			posNode->_prev = newNode;
 			++_size;
 		}
 
-		T erase(node* nd) {
-			if (nd == _sentinel) {
-				return {};
-			}
-			T value{nd->_value};
-			nd->_prev->_next = nd->_next;
-			nd->_next->_prev = nd->_prev;
-			delete nd;
+		T erase(iterator pos) {
+			T value{*pos};
+			node* posNode{pos._node};
+			posNode->_prev->_next = posNode->_next;
+			posNode->_next->_prev = posNode->_prev;
+			delete posNode;
 			--_size;
 			return value;
 		}
@@ -98,7 +118,7 @@ namespace plastic {
 		}
 
 		T pop_back() {
-			return erase(end()->_prev);
+			return erase(--end());
 		}
 	};
 

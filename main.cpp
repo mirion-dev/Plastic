@@ -62,8 +62,8 @@ void basic() {
 	ls.push_front(2);
 	ls.push_front(1);
 	ls.push_back(4);
-	ls.insert(ls.begin()->advance(2), 3);
-	ls.insert(ls.end()->advance(-1), 5);
+	ls.insert(++++ls.begin(), 3);
+	ls.insert(--ls.end(), 5);
 	cout << ls.pop_front() << ' ';
 	cout << ls.pop_front() << ' ';
 	cout << ls.pop_front() << ' ';
