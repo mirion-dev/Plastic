@@ -19,6 +19,9 @@
     <Filter Include="Header Files\bst">
       <UniqueIdentifier>{6fa2d5df-4ed1-4962-8736-4534987ae2b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\algorithm">
+      <UniqueIdentifier>{9076ef21-f339-4b49-a710-07ca4ae95271}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -32,6 +35,9 @@
     </ClCompile>
     <ClCompile Include="binary_search_tree.h">
       <Filter>Header Files\bst</Filter>
+    </ClCompile>
+    <ClCompile Include="sort.h">
+      <Filter>Header Files\algorithm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
