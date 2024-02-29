@@ -9,13 +9,32 @@ namespace plastic {
 		struct node {
 			T _value;
 			node* _next;
+		};
 
-			node* advance(::std::size_t n) {
-				node* result{this};
-				for (::std::size_t i{0}; i < n; ++i) {
-					result = result->_next;
-				}
-				return result;
+		struct iterator {
+			node* _node;
+
+			explicit iterator(node* nd) {
+				_node = nd;
+			}
+
+			T& operator*() {
+				return _node->_value;
+			}
+
+			bool operator==(iterator it) {
+				return _node == it._node;
+			}
+
+			iterator& operator++() {
+				_node = _node->_next;
+				return *this;
+			}
+
+			iterator operator++(int) {
+				iterator temp{*this};
+				operator++();
+				return temp;
 			}
 		};
 
@@ -30,12 +49,11 @@ namespace plastic {
 		}
 
 		~forward_list() {
-			for (node* i{begin()}; i != end();) {
-				node* next{i->_next};
-				delete i;
-				i = next;
+			iterator i{begin()};
+			while (i != end()) {
+				delete i++._node;
 			}
-			delete _sentinel;
+			delete i._node;
 		}
 
 		bool empty() {
@@ -46,29 +64,26 @@ namespace plastic {
 			return _size;
 		}
 
-		node* begin() {
-			return _sentinel->_next;
+		iterator begin() {
+			return iterator{_sentinel->_next};
 		}
 
-		node* end() {
-			return _sentinel;
+		iterator end() {
+			return iterator{_sentinel};
 		}
 
-		void insert_after(node* nd, const T& value) {
-			auto newNode{new node};
+		void insert_after(iterator pos, const T& value) {
+			node* posNode{pos._node}, * newNode{new node};
 			newNode->_value = value;
-			newNode->_next = nd->_next;
-			nd->_next = newNode;
+			newNode->_next = posNode->_next;
+			posNode->_next = newNode;
 			++_size;
 		}
 
-		T erase_after(node* nd) {
-			if (nd->_next == _sentinel) {
-				return {};
-			}
-			node* next{nd->_next};
+		T erase_after(iterator pos) {
+			node* posNode{pos._node}, * next{posNode->_next};
 			T value{next->_value};
-			nd->_next = next->_next;
+			posNode->_next = next->_next;
 			delete next;
 			--_size;
 			return value;

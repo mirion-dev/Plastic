@@ -50,8 +50,8 @@ void basic() {
 	fl.push_front(5);
 	fl.push_front(2);
 	fl.push_front(1);
-	fl.insert_after(fl.begin()->advance(1), 3);
-	fl.insert_after(fl.begin()->advance(2), 4);
+	fl.insert_after(++fl.begin(), 3);
+	fl.insert_after(++++fl.begin(), 4);
 	cout << fl.pop_front() << ' ';
 	cout << fl.pop_front() << ' ';
 	cout << fl.pop_front() << ' ';
