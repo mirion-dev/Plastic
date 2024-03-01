@@ -25,9 +25,9 @@
 | **`size`** | `size` | -- | -- | -- |
 | **`insert`** | `insert` | -- | -- | -- |
 | **`erase`** | `erase` | -- | -- | -- |
-| **`find`** | `find` | -- | -- | -- |
-| **`max_element`** | `max_element` | -- | -- | -- |
-| **`min_element`** | `min_element` | -- | -- | -- |
+| **`count`** | `count` | -- | -- | -- |
+| **`max`** | `max` | -- | -- | -- |
+| **`min`** | `min` | -- | -- | -- |
 
 ## 算法
 

@@ -81,22 +81,25 @@ void basic() {
 }
 
 void bst() {
-	//binary_search_tree<int> bst;
-	//bst.insert(12);
-	//bst.insert(5);
-	//bst.insert(18);
-	//bst.insert(2);
-	//bst.insert(9);
-	//bst.insert(15);
-	//bst.insert(19);
-	//bst.insert(13);
-	//bst.insert(17);
-	//bst.insert(1);
-	//bst.insert(3);
-	//bst.insert(20);
-	//bst.erase(1);
-	//bst.erase(3);
-	//bst.erase(20);
+	binary_search_tree<int> bst;
+	bst.insert(12);
+	bst.insert(5);
+	bst.insert(18);
+	bst.insert(2);
+	bst.insert(9);
+	bst.insert(15);
+	bst.insert(19);
+	bst.insert(13);
+	bst.insert(17);
+	std::cout << bst.max() << ' ' << bst.min() << '\n';
+	bst.insert(1);
+	bst.insert(3);
+	bst.insert(20);
+	std::cout << bst.max() << ' ' << bst.min() << '\n';
+	bst.erase(1);
+	bst.erase(3);
+	bst.erase(20);
+	std::cout << bst.max() << ' ' << bst.min() << '\n';
 }
 
 void algorithm() {
@@ -132,5 +135,5 @@ void algorithm() {
 }
 
 int main() {
-	algorithm();
+	bst();
 }

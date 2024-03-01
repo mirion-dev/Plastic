@@ -9,13 +9,82 @@ namespace plastic {
 		struct node {
 			T _value;
 			::std::size_t _count;
-			node* _parent;
 			node* _left;
 			node* _right;
 		};
 
 		node* _root;
 		::std::size_t _size;
+
+		node** _findNode(const T& value) {
+			node** i{&_root};
+			while (true) {
+				if (*i == nullptr) {
+					return nullptr;
+				}
+				if (value == (*i)->_value) {
+					return i;
+				}
+				if (_compare(value, (*i)->_value)) {
+					i = &(*i)->_left;
+				}
+				else {
+					i = &(*i)->_right;
+				}
+			}
+		}
+
+		void _eraseNode(node*& nd) {
+			if (nd->_left == nullptr) {
+				node* temp{nd};
+				nd = nd->_right;
+				delete temp;
+			}
+			else if (nd->_right == nullptr) {
+				node* temp{nd};
+				nd = nd->_left;
+				delete temp;
+			}
+			else {
+				node** replaced{_minChild(nd->_right)};
+				nd->_value = (*replaced)->_value;
+				nd->_count = (*replaced)->_count;
+				node* temp{*replaced};
+				*replaced = (*replaced)->_right;
+				delete temp;
+			}
+		}
+
+		void _freeNode(node*& nd) {
+			if (nd == nullptr) {
+				return;
+			}
+			_freeNode(nd->_left);
+			_freeNode(nd->_right);
+			delete nd;
+		}
+
+		node** _minChild(node*& nd) {
+			node** i{&nd};
+			while (true) {
+				node** temp{&(*i)->_left};
+				if (*temp == nullptr) {
+					return i;
+				}
+				i = temp;
+			}
+		}
+
+		node** _maxChild(node*& nd) {
+			node** i{&nd};
+			while (true) {
+				node** temp{&(*i)->_right};
+				if (*temp == nullptr) {
+					return i;
+				}
+				i = temp;
+			}
+		}
 
 	public:
 		explicit binary_search_tree() {
@@ -24,7 +93,7 @@ namespace plastic {
 		}
 
 		~binary_search_tree() {
-			// TODO
+			_freeNode(_root);
 		}
 
 		bool empty() {
@@ -35,97 +104,61 @@ namespace plastic {
 			return _size;
 		}
 
-		void insert(const T& value) {
-			for (node* i{_root};;) {
-				if (i == nullptr) {
-					i = new node;
-					i->_value = value;
-					i->_count = 1;
-					i->_left = nullptr;
-					i->_right = nullptr;
+		void insert(const T& value, ::std::size_t count = 1) {
+			for (node** i{&_root};;) {
+				if (*i == nullptr) {
+					*i = new node;
+					(*i)->_value = value;
+					(*i)->_count = count;
+					(*i)->_left = nullptr;
+					(*i)->_right = nullptr;
 					break;
 				}
-				if (value == i->_value) {
-					++i->_count;
+				if (value == (*i)->_value) {
+					++(*i)->_count;
 					break;
 				}
-				if (_compare(value, i->_value)) {
-					i = i->_left;
+				if (_compare(value, (*i)->_value)) {
+					i = &(*i)->_left;
 				}
 				else {
-					i = i->_right;
+					i = &(*i)->_right;
 				}
 			}
-			++_size;
+			_size += count;
 		}
 
-		void erase(const T& value) {
-			/*if (nd == nullptr) {
+		void erase(const T& value, ::std::size_t count = 1) {
+			node** nd{_findNode(value)};
+			if (nd == nullptr) {
 				return;
 			}
-			if (nd->_left == nullptr) {
-				node* temp{nd->_right};
-				delete nd;
-				nd = temp;
+			if ((*nd)->_count > count) {
+				(*nd)->_count -= count;
+				_size -= count;
+				return;
 			}
-			else if (nd->_right == nullptr) {
-				node* temp{nd->_left};
-				delete nd;
-				nd = temp;
-			}
-			else {
-				node* i{nd->_left};
-				while (true) {
-					node* t{i->_right};
-					if (t == nullptr) {
-						break;
-					}
-					i = t;
-				}
-				i->_parent->_right = i->_left;
-				nd = i;
-			}*/
+			_size -= (*nd)->_count;
+			_eraseNode(*nd);
 		}
 
-		node* find(const T& value) {
-			for (node* i{_root}; i != nullptr;) {
-				if (value == i->_value) {
-					return i;
-				}
-				if (_compare(value, i->_value)) {
-					i = i->_left;
-				}
-				else {
-					i = i->_right;
-				}
-			}
-			return nullptr;
+		::std::size_t count(const T& value) {
+			node** nd{_findNode(value)};
+			return nd == nullptr ? 0 : (*nd)->_count;
 		}
 
-		node* max_element() {
+		T min() {
 			if (_root == nullptr) {
-				return nullptr;
+				return {};
 			}
-			for (node* i{_root};;) {
-				node* temp{i->_right};
-				if (temp == nullptr) {
-					return i;
-				}
-				i = temp;
-			}
+			return (*_minChild(_root))->_value;
 		}
 
-		node* min_element() {
+		T max() {
 			if (_root == nullptr) {
-				return nullptr;
+				return {};
 			}
-			for (node* i{_root};;) {
-				node* temp{i->_left};
-				if (temp == nullptr) {
-					return i;
-				}
-				i = temp;
-			}
+			return (*_maxChild(_root))->_value;
 		}
 	};
 
