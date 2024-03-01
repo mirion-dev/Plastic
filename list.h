@@ -86,10 +86,8 @@ namespace plastic {
 		}
 
 		void insert(iterator pos, const T& value) {
-			node* posNode{pos._node}, * newNode{new node};
-			newNode->_value = value;
-			newNode->_prev = posNode->_prev;
-			newNode->_next = posNode;
+			node* posNode{pos._node};
+			node* newNode{new node{value, posNode->_prev, posNode}};
 			posNode->_prev->_next = newNode;
 			posNode->_prev = newNode;
 			++_size;

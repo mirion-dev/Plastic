@@ -105,17 +105,14 @@ namespace plastic {
 		}
 
 		void insert(const T& value, ::std::size_t count = 1) {
-			for (node** i{&_root};;) {
+			node** i{&_root};
+			while (true) {
 				if (*i == nullptr) {
-					*i = new node;
-					(*i)->_value = value;
-					(*i)->_count = count;
-					(*i)->_left = nullptr;
-					(*i)->_right = nullptr;
+					*i = new node{value, count, nullptr, nullptr};
 					break;
 				}
 				if (value == (*i)->_value) {
-					++(*i)->_count;
+					(*i)->_count += count;
 					break;
 				}
 				if (_compare(value, (*i)->_value)) {
