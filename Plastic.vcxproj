@@ -29,6 +29,7 @@
     <ClInclude Include="deque.h" />
     <ClInclude Include="forward_list.h" />
     <ClInclude Include="list.h" />
+    <ClInclude Include="priority_queue.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

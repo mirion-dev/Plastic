@@ -1,6 +1,7 @@
 // basic
 #include "stack.h"
 #include "queue.h"
+#include "priority_queue.h"
 #include "deque.h"
 #include "forward_list.h"
 #include "list.h"
@@ -135,5 +136,5 @@ void algorithm() {
 }
 
 int main() {
-	bst();
+	basic();
 }

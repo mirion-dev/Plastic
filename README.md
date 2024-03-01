@@ -4,18 +4,18 @@
 
 ## 基本数据结构
 
-| | **`stack`** | **`queue`** | **`deque`** | **`forward_list`** | **`list`** |
-| :--: | :--: | :--: | :--: | :--: | :--: |
-| **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` |
-| **`size`** | `size` | `size` | `size` | `size` | `size` |
-| **`begin`** | | | | `begin` | `begin` |
-| **`end`** | | | | `end` | `end` |
-| **`push_back`** | `push` | `push` | `push_back` | | `push_back` |
-| **`pop_back`** | `pop` | | `pop_back` | | `pop_back` |
-| **`push_front`** | | | `push_front` | `push_front` | `push_front` |
-| **`pop_front`** | | `pop` | `pop_front` | `pop_front` | `pop_front` |
-| **`insert`** | | | | `insert_after` | `insert` |
-| **`erase`** | | | | `erase_after` | `erase` |
+| | **`stack`** | **`queue`** | **`priority_queue`** | **`deque`** | **`forward_list`** | **`list`** |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` |
+| **`size`** | `size` | `size` | `size` | `size` | `size` | `size` |
+| **`begin`** | | | | | `begin` | `begin` |
+| **`end`** | | | | | `end` | `end` |
+| **`push_back`** | `push` | `push` | `push` | `push_back` | | `push_back` |
+| **`pop_back`** | `pop` | | | `pop_back` | | `pop_back` |
+| **`push_front`** | | | | `push_front` | `push_front` | `push_front` |
+| **`pop_front`** | | `pop` | `pop` | `pop_front` | `pop_front` | `pop_front` |
+| **`insert`** | | | | | `insert_after` | `insert` |
+| **`erase`** | | | | | `erase_after` | `erase` |
 
 ## 二叉搜索树
 
