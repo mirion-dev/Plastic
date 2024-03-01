@@ -108,29 +108,29 @@ void algorithm() {
 
 	copy = data;
 	selection_sort(copy.begin(), copy.end());
-	std::cout << (copy != data) << ' ';
+	std::cout << (copy == sorted) << ' ';
 
 	copy = data;
 	insertion_sort(copy.begin(), copy.end());
-	std::cout << (copy != data) << ' ';
+	std::cout << (copy == sorted) << ' ';
 
 	copy = data;
 	bubble_sort(copy.begin(), copy.end());
-	std::cout << (copy != data) << ' ';
+	std::cout << (copy == sorted) << ' ';
 
 	copy = data;
 	heap_sort(copy.begin(), copy.end());
-	std::cout << (copy != data) << ' ';
+	std::cout << (copy == sorted) << ' ';
 
 	copy = data;
 	merge_sort(copy.begin(), copy.end());
-	std::cout << (copy != data) << ' ';
+	std::cout << (copy == sorted) << ' ';
 
 	copy = data;
 	quick_sort(copy.begin(), copy.end());
-	std::cout << (copy != data) << '\n';
+	std::cout << (copy == sorted) << '\n';
 }
 
 int main() {
-	bst();
+	algorithm();
 }
