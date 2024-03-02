@@ -8,6 +8,7 @@
 
 // bst
 #include "binary_search_tree.h"
+#include "red_black_tree.h"
 
 // algorithm
 #include "sort.h"
@@ -113,6 +114,8 @@ void bst() {
 	bst.erase(3);
 	bst.erase(20);
 	std::cout << bst.max() << ' ' << bst.min() << '\n';
+
+	red_black_tree<int> rbt;
 }
 
 void algorithm() {
@@ -148,5 +151,5 @@ void algorithm() {
 }
 
 int main() {
-	basic();
+	bst();
 }

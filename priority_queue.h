@@ -64,7 +64,7 @@ namespace plastic {
 		}
 
 	public:
-		priority_queue(::std::size_t capacity = 2) {
+		explicit priority_queue(::std::size_t capacity = 2) {
 			_begin = new T[capacity];
 			_size = 1;
 			_capacity = capacity;

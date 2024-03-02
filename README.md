@@ -21,13 +21,13 @@
 
 | | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | **`treap`** |
 | :--: | :--: | :--: | :--: | :--: |
-| **`empty`** | `empty` | -- | -- | -- |
-| **`size`** | `size` | -- | -- | -- |
-| **`insert`** | `insert` | -- | -- | -- |
-| **`erase`** | `erase` | -- | -- | -- |
-| **`count`** | `count` | -- | -- | -- |
-| **`max`** | `max` | -- | -- | -- |
-| **`min`** | `min` | -- | -- | -- |
+| **`empty`** | `empty` | `empty` | -- | -- |
+| **`size`** | `size` | `size` | -- | -- |
+| **`insert`** | `insert` | `insert` | -- | -- |
+| **`erase`** | `erase` | `erase` | -- | -- |
+| **`count`** | `count` | `count` | -- | -- |
+| **`max`** | `max` | `max` | -- | -- |
+| **`min`** | `min` | `min` | -- | -- |
 
 ## 算法
 
