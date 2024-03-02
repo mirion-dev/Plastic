@@ -30,7 +30,7 @@ void basic() {
 	std::cout << st.pop() << ' ';
 	std::cout << st.pop() << '\n';
 
-	queue<int> qu(10);
+	queue<int> qu;
 	qu.push(1);
 	qu.push(2);
 	qu.push(3);
@@ -42,7 +42,19 @@ void basic() {
 	std::cout << qu.pop() << ' ';
 	std::cout << qu.pop() << '\n';
 
-	deque<int> dq(10);
+	priority_queue<int, std::greater<>{} > pq;
+	pq.push(3);
+	pq.push(1);
+	pq.push(2);
+	pq.push(5);
+	pq.push(4);
+	std::cout << pq.pop() << ' ';
+	std::cout << pq.pop() << ' ';
+	std::cout << pq.pop() << ' ';
+	std::cout << pq.pop() << ' ';
+	std::cout << pq.pop() << '\n';
+
+	deque<int> dq;
 	dq.push_front(2);
 	dq.push_front(1);
 	dq.push_back(3);
