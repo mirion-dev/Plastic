@@ -25,6 +25,7 @@
 | **`size`** | `size` | `size` | -- | -- |
 | **`insert`** | `insert` | `insert` | -- | -- |
 | **`erase`** | `erase` | `erase` | -- | -- |
+| **`find`** | `find` | `find` | -- | -- |
 | **`count`** | `count` | `count` | -- | -- |
 | **`max`** | `max` | `max` | -- | -- |
 | **`min`** | `min` | `min` | -- | -- |
