@@ -46,11 +46,11 @@ namespace plastic {
 				delete temp;
 			}
 			else {
-				node** replaced{_minChild(nd->_right)};
-				nd->_value = (*replaced)->_value;
-				nd->_count = (*replaced)->_count;
-				node* temp{*replaced};
-				*replaced = (*replaced)->_right;
+				node*& replaced{_minChild(nd->_right)};
+				nd->_value = replaced->_value;
+				nd->_count = replaced->_count;
+				node* temp{replaced};
+				replaced = replaced->_right;
 				delete temp;
 			}
 		}
@@ -64,25 +64,25 @@ namespace plastic {
 			delete nd;
 		}
 
-		node** _minChild(node*& nd) {
+		node*& _minChild(node*& nd) {
 			node** i{&nd};
 			while (true) {
-				node** temp{&(*i)->_left};
-				if (*temp == nullptr) {
-					return i;
+				node*& temp{(*i)->_left};
+				if (temp == nullptr) {
+					return *i;
 				}
-				i = temp;
+				i = &temp;
 			}
 		}
 
-		node** _maxChild(node*& nd) {
+		node*& _maxChild(node*& nd) {
 			node** i{&nd};
 			while (true) {
-				node** temp{&(*i)->_right};
-				if (*temp == nullptr) {
-					return i;
+				node*& temp{(*i)->_right};
+				if (temp == nullptr) {
+					return *i;
 				}
-				i = temp;
+				i = &temp;
 			}
 		}
 
@@ -126,17 +126,18 @@ namespace plastic {
 		}
 
 		void erase(const T& value, ::std::size_t count = 1) {
-			node** nd{_findNode(value)};
-			if (nd == nullptr) {
+			node** pnd{_findNode(value)};
+			if (pnd == nullptr) {
 				return;
 			}
-			if ((*nd)->_count > count) {
-				(*nd)->_count -= count;
+			node*& nd{*pnd};
+			if (nd->_count > count) {
+				nd->_count -= count;
 				_size -= count;
 				return;
 			}
-			_size -= (*nd)->_count;
-			_eraseNode(*nd);
+			_size -= nd->_count;
+			_eraseNode(nd);
 		}
 
 		bool find(const T& value) {
@@ -144,22 +145,22 @@ namespace plastic {
 		}
 
 		::std::size_t count(const T& value) {
-			node** nd{_findNode(value)};
-			return nd == nullptr ? 0 : (*nd)->_count;
+			node** pnd{_findNode(value)};
+			return pnd == nullptr ? 0 : (*pnd)->_count;
 		}
 
 		T min() {
 			if (_root == nullptr) {
 				return {};
 			}
-			return (*_minChild(_root))->_value;
+			return _minChild(_root)->_value;
 		}
 
 		T max() {
 			if (_root == nullptr) {
 				return {};
 			}
-			return (*_maxChild(_root))->_value;
+			return _maxChild(_root)->_value;
 		}
 	};
 
