@@ -122,29 +122,22 @@ void algorithm() {
 	std::array data{2, 5, 12, 20, 4, 7, 16, 8, 10, 8, 12, 6, 10, 2, 19, 14, 17, 3, 18, 19};
 	std::array sorted{2, 2, 3, 4, 5, 6, 7, 8, 8, 10, 10, 12, 12, 14, 16, 17, 18, 19, 19, 20};
 	std::array<int, 20> copy;
-
 	std::cout << std::boolalpha;
-
 	copy = data;
 	selection_sort(copy.begin(), copy.end());
 	std::cout << (copy == sorted) << ' ';
-
 	copy = data;
 	insertion_sort(copy.begin(), copy.end());
 	std::cout << (copy == sorted) << ' ';
-
 	copy = data;
 	bubble_sort(copy.begin(), copy.end());
 	std::cout << (copy == sorted) << ' ';
-
 	copy = data;
 	heap_sort(copy.begin(), copy.end());
 	std::cout << (copy == sorted) << ' ';
-
 	copy = data;
 	merge_sort(copy.begin(), copy.end());
 	std::cout << (copy == sorted) << ' ';
-
 	copy = data;
 	quick_sort(copy.begin(), copy.end());
 	std::cout << (copy == sorted) << '\n';

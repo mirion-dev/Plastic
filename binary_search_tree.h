@@ -41,27 +41,6 @@ namespace plastic {
 			}
 		}
 
-		void _eraseNode(node*& nd) {
-			if (nd->_left == nullptr) {
-				node* temp{nd};
-				nd = nd->_right;
-				delete temp;
-			}
-			else if (nd->_right == nullptr) {
-				node* temp{nd};
-				nd = nd->_left;
-				delete temp;
-			}
-			else {
-				node*& next{_minChild(nd->_right)};
-				nd->_value = next->_value;
-				nd->_count = next->_count;
-				node* temp{next};
-				next = next->_right;
-				delete temp;
-			}
-		}
-
 		node*& _minChild(node*& nd) {
 			node** i{&nd};
 			while (true) {
@@ -124,7 +103,24 @@ namespace plastic {
 				return;
 			}
 			_size -= nd->_count;
-			_eraseNode(nd);
+			if (nd->_left == nullptr) {
+				node* temp{nd};
+				nd = nd->_right;
+				delete temp;
+			}
+			else if (nd->_right == nullptr) {
+				node* temp{nd};
+				nd = nd->_left;
+				delete temp;
+			}
+			else {
+				node*& next{_minChild(nd->_right)};
+				nd->_value = next->_value;
+				nd->_count = next->_count;
+				node* temp{next};
+				next = next->_right;
+				delete temp;
+			}
 		}
 
 		bool find(const T& value) {

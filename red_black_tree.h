@@ -15,6 +15,7 @@ namespace plastic {
 			T _value;
 			::std::size_t _count;
 			color _color;
+			node* _parent;
 			node* _left;
 			node* _right;
 		};
@@ -31,13 +32,15 @@ namespace plastic {
 			delete nd;
 		}
 
-		node*& _findNode(const T& value) {
+		::std::pair<node*&, node*&> _findNodeWithParent(const T& value) {
 			node** i{&_root};
+			node** parent{i};
 			while (true) {
 				node*& temp{*i};
 				if (temp == nullptr || value == temp->_value) {
-					return temp;
+					return ::std::make_pair(temp, *parent);
 				}
+				parent = i;
 				if (_compare(value, temp->_value)) {
 					i = &temp->_left;
 				}
@@ -45,6 +48,10 @@ namespace plastic {
 					i = &temp->_right;
 				}
 			}
+		}
+
+		node*& _findNode(const T& node) {
+			return _findNodeWithParent(node).first;
 		}
 
 		node*& _minChild(node*& nd) {
