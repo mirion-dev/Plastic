@@ -16,20 +16,27 @@ namespace plastic {
 		node* _root;
 		::std::size_t _size;
 
-		node** _findNode(const T& value) {
+		void _freeNode(node*& nd) {
+			if (nd == nullptr) {
+				return;
+			}
+			_freeNode(nd->_left);
+			_freeNode(nd->_right);
+			delete nd;
+		}
+
+		node*& _findNode(const T& value) {
 			node** i{&_root};
 			while (true) {
-				if (*i == nullptr) {
-					return nullptr;
+				node*& temp{*i};
+				if (temp == nullptr || value == temp->_value) {
+					return temp;
 				}
-				if (value == (*i)->_value) {
-					return i;
-				}
-				if (_compare(value, (*i)->_value)) {
-					i = &(*i)->_left;
+				if (_compare(value, temp->_value)) {
+					i = &temp->_left;
 				}
 				else {
-					i = &(*i)->_right;
+					i = &temp->_right;
 				}
 			}
 		}
@@ -46,22 +53,13 @@ namespace plastic {
 				delete temp;
 			}
 			else {
-				node*& replaced{_minChild(nd->_right)};
-				nd->_value = replaced->_value;
-				nd->_count = replaced->_count;
-				node* temp{replaced};
-				replaced = replaced->_right;
+				node*& next{_minChild(nd->_right)};
+				nd->_value = next->_value;
+				nd->_count = next->_count;
+				node* temp{next};
+				next = next->_right;
 				delete temp;
 			}
-		}
-
-		void _freeNode(node*& nd) {
-			if (nd == nullptr) {
-				return;
-			}
-			_freeNode(nd->_left);
-			_freeNode(nd->_right);
-			delete nd;
 		}
 
 		node*& _minChild(node*& nd) {
@@ -105,32 +103,21 @@ namespace plastic {
 		}
 
 		void insert(const T& value, ::std::size_t count = 1) {
-			node** i{&_root};
-			while (true) {
-				if (*i == nullptr) {
-					*i = new node{value, count, nullptr, nullptr};
-					break;
-				}
-				if (value == (*i)->_value) {
-					(*i)->_count += count;
-					break;
-				}
-				if (_compare(value, (*i)->_value)) {
-					i = &(*i)->_left;
-				}
-				else {
-					i = &(*i)->_right;
-				}
+			node*& nd{_findNode(value)};
+			if (nd == nullptr) {
+				nd = new node{value, count, nullptr, nullptr};
+			}
+			else {
+				nd->_count += count;
 			}
 			_size += count;
 		}
 
 		void erase(const T& value, ::std::size_t count = 1) {
-			node** pnd{_findNode(value)};
-			if (pnd == nullptr) {
+			node*& nd{_findNode(value)};
+			if (nd == nullptr) {
 				return;
 			}
-			node*& nd{*pnd};
 			if (nd->_count > count) {
 				nd->_count -= count;
 				_size -= count;
@@ -145,8 +132,8 @@ namespace plastic {
 		}
 
 		::std::size_t count(const T& value) {
-			node** pnd{_findNode(value)};
-			return pnd == nullptr ? 0 : (*pnd)->_count;
+			node*& nd{_findNode(value)};
+			return nd == nullptr ? 0 : nd->_count;
 		}
 
 		T min() {

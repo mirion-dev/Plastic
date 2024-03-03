@@ -22,6 +22,53 @@ namespace plastic {
 		node* _root;
 		::std::size_t _size;
 
+		void _freeNode(node*& nd) {
+			if (nd == nullptr) {
+				return;
+			}
+			_freeNode(nd->_left);
+			_freeNode(nd->_right);
+			delete nd;
+		}
+
+		node*& _findNode(const T& value) {
+			node** i{&_root};
+			while (true) {
+				node*& temp{*i};
+				if (temp == nullptr || value == temp->_value) {
+					return temp;
+				}
+				if (_compare(value, temp->_value)) {
+					i = &temp->_left;
+				}
+				else {
+					i = &temp->_right;
+				}
+			}
+		}
+
+		node*& _minChild(node*& nd) {
+			node** i{&nd};
+			while (true) {
+				node*& temp{(*i)->_left};
+				if (temp == nullptr) {
+					return *i;
+				}
+				i = &temp;
+			}
+		}
+
+		node*& _maxChild(node*& nd) {
+			node** i{&nd};
+			while (true) {
+				node*& temp{(*i)->_right};
+				if (temp == nullptr) {
+					return *i;
+				}
+				i = &temp;
+			}
+		}
+
 	public:
 		explicit red_black_tree() {
 			_root = nullptr;
@@ -29,7 +76,7 @@ namespace plastic {
 		}
 
 		~red_black_tree() {
-			// todo
+			_freeNode(_root);
 		}
 
 		bool empty() {
@@ -41,11 +88,12 @@ namespace plastic {
 		}
 
 		bool find(const T& value) {
-
+			return _findNode(value) != nullptr;
 		}
 
 		::std::size_t count(const T& value) {
-
+			node*& nd{_findNode(value)};
+			return nd == nullptr ? 0 : nd->_count;
 		}
 
 		void insert(const T& value, ::std::size_t count = 1) {
@@ -54,6 +102,20 @@ namespace plastic {
 
 		void erase(const T& value, ::std::size_t count = 1) {
 
+		}
+
+		T min() {
+			if (_root == nullptr) {
+				return {};
+			}
+			return _minChild(_root)->_value;
+		}
+
+		T max() {
+			if (_root == nullptr) {
+				return {};
+			}
+			return _maxChild(_root)->_value;
 		}
 	};
 
