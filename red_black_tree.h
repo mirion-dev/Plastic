@@ -34,19 +34,19 @@ namespace plastic {
 
 		::std::pair<node*&, node*&> _findNodeWithParent(const T& value) {
 			node** i{&_root};
-			node** j{i};
+			node** j{&_root->_right};
 			while (true) {
-				node*& current{*i};
-				node*& parent{*j};
+				node*& parent{*i};
+				node*& current{*j};
 				if (current == nullptr || value == current->_value) {
 					return {current, parent};
 				}
-				j = i;
+				i = j;
 				if (_compare(value, current->_value)) {
-					i = &current->_left;
+					j = &current->_left;
 				}
 				else {
-					i = &current->_right;
+					j = &current->_right;
 				}
 			}
 		}
@@ -83,17 +83,18 @@ namespace plastic {
 			node* left{nd->_left};
 			node* parent{nd->_parent};
 			node* grandparent{parent->_parent};
-			bool isLeft{grandparent->_left == parent};
 			parent->_parent = nd;
 			nd->_left = parent;
 			nd->_parent = grandparent;
-			if (isLeft) {
+			if (grandparent->_left == parent) {
 				grandparent->_left = nd;
 			}
 			else {
 				grandparent->_right = nd;
 			}
-			left->_parent = parent;
+			if (left != nullptr) {
+				left->_parent = parent;
+			}
 			parent->_right = left;
 		}
 
@@ -101,23 +102,24 @@ namespace plastic {
 			node* right{nd->_right};
 			node* parent{nd->_parent};
 			node* grandparent{parent->_parent};
-			bool isLeft{grandparent->_left == parent};
 			parent->_parent = nd;
 			nd->_right = parent;
 			nd->_parent = grandparent;
-			if (isLeft) {
+			if (grandparent->_left == parent) {
 				grandparent->_left = nd;
 			}
 			else {
 				grandparent->_right = nd;
 			}
-			right->_parent = parent;
+			if (right != nullptr) {
+				right->_parent = parent;
+			}
 			parent->_left = right;
 		}
 
 	public:
 		explicit red_black_tree() {
-			_root = nullptr;
+			_root = new node{{}, 0, node::color::black, nullptr, nullptr, nullptr};
 			_size = 0;
 		}
 
@@ -143,18 +145,13 @@ namespace plastic {
 		}
 
 		void insert(const T& value, ::std::size_t count = 1) {
-			if (_root == nullptr) {
-				_root = new node{value, count, node::color::black, nullptr, nullptr, nullptr};
-				_size += count;
-				return;
-			}
 			auto [nd, pr] {_findNodeWithParent(value)};
 			if (nd == nullptr) {
 				nd = new node{value, count, node::color::red, pr, nullptr, nullptr};
 				node** i{&nd};
 				while (true) {
 					node*& current{*i};
-					if (current == _root) {
+					if (current == _root->_right) {
 						current->_color = node::color::black;
 						break;
 					}
@@ -207,17 +204,17 @@ namespace plastic {
 		}
 
 		T min() {
-			if (_root == nullptr) {
+			if (_root->_right == nullptr) {
 				return {};
 			}
-			return _minChild(_root)->_value;
+			return _minChild(_root->_right)->_value;
 		}
 
 		T max() {
-			if (_root == nullptr) {
+			if (_root->_right == nullptr) {
 				return {};
 			}
-			return _maxChild(_root)->_value;
+			return _maxChild(_root->_right)->_value;
 		}
 	};
 
