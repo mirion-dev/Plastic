@@ -148,26 +148,25 @@ namespace plastic {
 			auto [nd, pr] {_findNodeWithParent(value)};
 			if (nd == nullptr) {
 				nd = new node{value, count, node::color::red, pr, nullptr, nullptr};
-				node** i{&nd};
+				node* current{nd};
 				while (true) {
-					node*& current{*i};
 					if (current == _root->_right) {
 						current->_color = node::color::black;
 						break;
 					}
-					node*& parent{current->_parent};
+					node* parent{current->_parent};
 					if (parent->_color == node::color::black) {
 						break;
 					}
-					node*& grandparent{parent->_parent};
+					node* grandparent{parent->_parent};
 					bool isXL{current == parent->_left};
 					bool isLX{parent == grandparent->_left};
-					node*& uncle{isLX ? grandparent->_right : grandparent->_left};
+					node* uncle{isLX ? grandparent->_right : grandparent->_left};
 					if (uncle != nullptr && uncle->_color == node::color::red) {
 						parent->_color = node::color::black;
 						uncle->_color = node::color::black;
 						grandparent->_color = node::color::red;
-						i = &grandparent;
+						current = grandparent;
 					}
 					else {
 						grandparent->_color = node::color::red;
