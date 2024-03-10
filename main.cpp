@@ -9,6 +9,7 @@
 // bst
 #include "binary_search_tree.h"
 #include "red_black_tree.h"
+#include "avl_tree.h"
 
 // algorithm
 #include "sort.h"
@@ -158,6 +159,17 @@ void bst() {
 		  /   /  \
 		[2]  17  19
 	*/
+
+	avl_tree<int> avl;
+	avl.insert(18);
+	avl.insert(5);
+	avl.insert(12);
+	avl.insert(15);
+	avl.insert(2);
+	avl.insert(9);
+	avl.insert(13);
+	avl.insert(19);
+	avl.insert(17);
 }
 
 void algorithm() {
