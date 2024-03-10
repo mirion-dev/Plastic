@@ -93,7 +93,7 @@ namespace plastic {
 
 		T pop() {
 			if (empty()) {
-				return {};
+				::std::abort();
 			}
 			T value{_begin[1]};
 			--_size;

@@ -80,7 +80,7 @@ namespace plastic {
 
 		T pop_front() {
 			if (empty()) {
-				return {};
+				::std::abort();
 			}
 			T value{*_head};
 			++_head;
@@ -93,7 +93,7 @@ namespace plastic {
 
 		T pop_back() {
 			if (empty()) {
-				return {};
+				::std::abort();
 			}
 			if (_tail == _begin) {
 				_tail = _end;

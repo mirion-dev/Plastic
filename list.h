@@ -14,9 +14,11 @@ namespace plastic {
 
 		struct iterator {
 			node* _node;
+			node* _sentinel;
 
-			explicit iterator(node* nd) {
+			explicit iterator(node* nd, node* sentinel) {
 				_node = nd;
+				_sentinel = sentinel;
 			}
 
 			T& operator*() {
@@ -28,6 +30,9 @@ namespace plastic {
 			}
 
 			iterator& operator++() {
+				if (_node == _sentinel) {
+					::std::abort();
+				}
 				_node = _node->_next;
 				return *this;
 			}
@@ -39,6 +44,9 @@ namespace plastic {
 			}
 
 			iterator& operator--() {
+				if (_node == _sentinel->_next) {
+					::std::abort();
+				}
 				_node = _node->_prev;
 				return *this;
 			}
@@ -62,11 +70,12 @@ namespace plastic {
 		}
 
 		~list() {
-			iterator i{begin()};
-			while (i != end()) {
-				delete i++._node;
+			for (node* i{_sentinel->_next}; i != _sentinel;) {
+				node* temp{i->_next};
+				delete i;
+				i = temp;
 			}
-			delete i._node;
+			delete _sentinel;
 		}
 
 		bool empty() {
@@ -78,11 +87,11 @@ namespace plastic {
 		}
 
 		iterator begin() {
-			return iterator{_sentinel->_next};
+			return iterator{_sentinel->_next, _sentinel};
 		}
 
 		iterator end() {
-			return iterator{_sentinel};
+			return iterator{_sentinel, _sentinel};
 		}
 
 		void insert(iterator pos, const T& value) {
@@ -94,8 +103,11 @@ namespace plastic {
 		}
 
 		T erase(iterator pos) {
-			T value{*pos};
 			node* posNode{pos._node};
+			if (posNode == _sentinel) {
+				::std::abort();
+			}
+			T value{*pos};
 			posNode->_prev->_next = posNode->_next;
 			posNode->_next->_prev = posNode->_prev;
 			delete posNode;

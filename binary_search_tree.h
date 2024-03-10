@@ -26,40 +26,41 @@ namespace plastic {
 		}
 
 		node*& _findNode(const T& value) {
-			node** i{&_root};
+			node** p{&_root};
 			while (true) {
-				node*& temp{*i};
-				if (temp == nullptr || value == temp->_value) {
-					return temp;
+				node*& current{*p};
+				if (current == nullptr || current->_value == value) {
+					return current;
 				}
-				if (_compare(value, temp->_value)) {
-					i = &temp->_left;
-				}
-				else {
-					i = &temp->_right;
-				}
+				p = _compare(value, current->_value) ? &current->_left : &current->_right;
 			}
 		}
 
 		node*& _minChild(node*& nd) {
-			node** i{&nd};
+			if (nd == nullptr) {
+				::std::abort();
+			}
+			node** p{&nd};
 			while (true) {
-				node*& temp{(*i)->_left};
-				if (temp == nullptr) {
-					return *i;
+				node*& current{*p};
+				if (current->_left == nullptr) {
+					return current;
 				}
-				i = &temp;
+				p = &current->_left;
 			}
 		}
 
 		node*& _maxChild(node*& nd) {
-			node** i{&nd};
+			if (nd == nullptr) {
+				::std::abort();
+			}
+			node** p{&nd};
 			while (true) {
-				node*& temp{(*i)->_right};
-				if (temp == nullptr) {
-					return *i;
+				node*& current{*p};
+				if (current->_right == nullptr) {
+					return current;
 				}
-				i = &temp;
+				p = &current->_right;
 			}
 		}
 
@@ -114,11 +115,11 @@ namespace plastic {
 				delete temp;
 			}
 			else {
-				node*& next{_minChild(nd->_right)};
-				nd->_value = next->_value;
-				nd->_count = next->_count;
-				node* temp{next};
-				next = next->_right;
+				node*& successor{_minChild(nd->_right)};
+				nd->_value = successor->_value;
+				nd->_count = successor->_count;
+				node* temp{successor};
+				successor = successor->_right;
 				delete temp;
 			}
 		}
@@ -133,16 +134,10 @@ namespace plastic {
 		}
 
 		T min() {
-			if (_root == nullptr) {
-				return {};
-			}
 			return _minChild(_root)->_value;
 		}
 
 		T max() {
-			if (_root == nullptr) {
-				return {};
-			}
 			return _maxChild(_root)->_value;
 		}
 	};

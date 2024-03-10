@@ -58,7 +58,7 @@ namespace plastic {
 
 		T pop() {
 			if (empty()) {
-				return {};
+				::std::abort();
 			}
 			--_top;
 			--_size;

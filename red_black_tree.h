@@ -33,22 +33,15 @@ namespace plastic {
 		}
 
 		::std::pair<node*&, node*&> _findNodeWithParent(const T& value) {
-			node** i{&_root};
-			node** j{&_root->_right};
-			while (true) {
-				node*& parent{*i};
-				node*& current{*j};
-				if (current == nullptr || value == current->_value) {
-					return {current, parent};
-				}
-				i = j;
-				if (_compare(value, current->_value)) {
-					j = &current->_left;
-				}
-				else {
-					j = &current->_right;
-				}
+			node** pLast{&_root};
+			node** p{&_root->_right};
+			node*& parent{*pLast};
+			node*& current{*p};
+			while (current != nullptr && current->_value != value) {
+				pLast = p;
+				p = _compare(value, current->_value) ? &current->_left : &current->_right;
 			}
+			return {current, parent};
 		}
 
 		node*& _findNode(const T& node) {
@@ -56,27 +49,27 @@ namespace plastic {
 		}
 
 		node*& _minChild(node*& nd) {
-			node** i{&nd};
-			while (true) {
-				node*& current{*i};
-				node*& left{current->_left};
-				if (left == nullptr) {
-					return current;
-				}
-				i = &left;
+			if (nd == nullptr) {
+				::std::abort();
 			}
+			node** p{&nd};
+			node*& current{*p};
+			while (current->_left != nullptr) {
+				p = &current->_left;
+			}
+			return current;
 		}
 
 		node*& _maxChild(node*& nd) {
-			node** i{&nd};
-			while (true) {
-				node*& current{*i};
-				node*& right{current->_right};
-				if (right == nullptr) {
-					return current;
-				}
-				i = &right;
+			if (nd == nullptr) {
+				::std::abort();
 			}
+			node** p{&nd};
+			node*& current{*p};
+			while (current->_right != nullptr) {
+				p = &current->_right;
+			}
+			return current;
 		}
 
 		void _leftRotate(node* nd) {
@@ -288,16 +281,10 @@ namespace plastic {
 		}
 
 		T min() {
-			if (_root->_right == nullptr) {
-				return {};
-			}
 			return _minChild(_root->_right)->_value;
 		}
 
 		T max() {
-			if (_root->_right == nullptr) {
-				return {};
-			}
 			return _maxChild(_root->_right)->_value;
 		}
 	};

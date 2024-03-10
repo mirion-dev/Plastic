@@ -13,9 +13,11 @@ namespace plastic {
 
 		struct iterator {
 			node* _node;
+			node* _sentinel;
 
-			explicit iterator(node* nd) {
+			explicit iterator(node* nd, node* sentinel) {
 				_node = nd;
+				_sentinel = sentinel;
 			}
 
 			T& operator*() {
@@ -27,6 +29,9 @@ namespace plastic {
 			}
 
 			iterator& operator++() {
+				if (_node == _sentinel) {
+					::std::abort();
+				}
 				_node = _node->_next;
 				return *this;
 			}
@@ -49,11 +54,12 @@ namespace plastic {
 		}
 
 		~forward_list() {
-			iterator i{begin()};
-			while (i != end()) {
-				delete i++._node;
+			for (node* i{_sentinel->_next}; i != _sentinel;) {
+				node* temp{i->_next};
+				delete i;
+				i = temp;
 			}
-			delete i._node;
+			delete _sentinel;
 		}
 
 		bool empty() {
@@ -65,11 +71,11 @@ namespace plastic {
 		}
 
 		iterator begin() {
-			return iterator{_sentinel->_next};
+			return iterator{_sentinel->_next, _sentinel};
 		}
 
 		iterator end() {
-			return iterator{_sentinel};
+			return iterator{_sentinel, _sentinel};
 		}
 
 		void insert_after(iterator pos, const T& value) {
@@ -82,6 +88,9 @@ namespace plastic {
 		T erase_after(iterator pos) {
 			node* posNode{pos._node};
 			node* next{posNode->_next};
+			if (next == _sentinel) {
+				::std::abort();
+			}
 			T value{next->_value};
 			posNode->_next = next->_next;
 			delete next;
