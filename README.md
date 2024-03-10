@@ -19,16 +19,16 @@
 
 ## 二叉搜索树
 
-| | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | **`treap`** |
-| :--: | :--: | :--: | :--: | :--: |
-| **`empty`** | `empty` | `empty` | -- | -- |
-| **`size`** | `size` | `size` | -- | -- |
-| **`insert`** | `insert` | `insert` | -- | -- |
-| **`erase`** | `erase` | `erase` | -- | -- |
-| **`find`** | `find` | `find` | -- | -- |
-| **`count`** | `count` | `count` | -- | -- |
-| **`max`** | `max` | `max` | -- | -- |
-| **`min`** | `min` | `min` | -- | -- |
+| | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** |
+| :--: | :--: | :--: | :--: |
+| **`empty`** | `empty` | `empty` | -- |
+| **`size`** | `size` | `size` | -- |
+| **`insert`** | `insert` | `insert` | -- |
+| **`erase`** | `erase` | `erase` | -- |
+| **`find`** | `find` | `find` | -- |
+| **`count`** | `count` | `count` | -- |
+| **`max`** | `max` | `max` | -- |
+| **`min`** | `min` | `min` | -- |
 
 ## 算法
 
