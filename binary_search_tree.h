@@ -16,7 +16,7 @@ namespace plastic {
 		node* _root;
 		::std::size_t _size;
 
-		void _freeNode(node*& nd) {
+		void _freeNode(node* nd) {
 			if (nd == nullptr) {
 				return;
 			}
@@ -128,7 +128,7 @@ namespace plastic {
 		}
 
 		::std::size_t count(const T& value) {
-			node*& nd{_findNode(value)};
+			node* nd{_findNode(value)};
 			return nd == nullptr ? 0 : nd->_count;
 		}
 

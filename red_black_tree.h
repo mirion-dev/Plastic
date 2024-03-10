@@ -23,7 +23,7 @@ namespace plastic {
 		node* _root;
 		::std::size_t _size;
 
-		void _freeNode(node*& nd) {
+		void _freeNode(node* nd) {
 			if (nd == nullptr) {
 				return;
 			}
@@ -79,7 +79,7 @@ namespace plastic {
 			}
 		}
 
-		void _leftRotate(node*& nd) {
+		void _leftRotate(node* nd) {
 			node* left{nd->_left};
 			node* parent{nd->_parent};
 			node* grandparent{parent->_parent};
@@ -98,7 +98,7 @@ namespace plastic {
 			parent->_right = left;
 		}
 
-		void _rightRotate(node*& nd) {
+		void _rightRotate(node* nd) {
 			node* right{nd->_right};
 			node* parent{nd->_parent};
 			node* grandparent{parent->_parent};
@@ -140,7 +140,7 @@ namespace plastic {
 		}
 
 		::std::size_t count(const T& value) {
-			node*& nd{_findNode(value)};
+			node* nd{_findNode(value)};
 			return nd == nullptr ? 0 : nd->_count;
 		}
 
@@ -174,12 +174,12 @@ namespace plastic {
 							parent->_color = node::color::black;
 							_rightRotate(parent);
 						}
-						else if (isLX && !isXL) {
+						else if (isLX) {
 							current->_color = node::color::black;
 							_leftRotate(current);
 							_rightRotate(current);
 						}
-						else if (!isLX && isXL) {
+						else if (isXL) {
 							current->_color = node::color::black;
 							_rightRotate(current);
 							_leftRotate(current);
@@ -199,7 +199,92 @@ namespace plastic {
 		}
 
 		void erase(const T& value, ::std::size_t count = 1) {
-
+			node** pnd{&_findNode(value)};
+			node*& nd{*pnd};
+			if (nd == nullptr) {
+				return;
+			}
+			if (nd->_count > count) {
+				nd->_count -= count;
+				_size -= count;
+				return;
+			}
+			_size -= nd->_count;
+			if (nd->_left != nullptr && nd->_right != nullptr) {
+				node*& next{_minChild(nd->_right)};
+				nd->_value = next->_value;
+				nd->_count = next->_count;
+				pnd = &next;
+			}
+			if (nd->_left != nullptr) {
+				node* temp{nd};
+				nd = nd->_left;
+				nd->_color = node::color::black;
+				delete temp;
+				return;
+			}
+			if (nd->_right != nullptr) {
+				node* temp{nd};
+				nd = nd->_right;
+				nd->_color = node::color::black;
+				delete temp;
+				return;
+			}
+			node* current{nd};
+			while (true) {
+				if (current == _root->_right || current->_color == node::color::red) {
+					return;
+				}
+				node* parent{current->_parent};
+				bool isLX{current == parent->_left};
+				node* sibling{isLX ? parent->_right : parent->_left};
+				bool isXL{sibling->_left != nullptr && sibling->_left->_color == node::color::red};
+				bool isBlack{(sibling->_left == nullptr || sibling->_left->_color == node::color::black)
+						&& (sibling->_right == nullptr || sibling->_right->_color == node::color::black)};
+				if (sibling->_color == node::color::black && isBlack) {
+					bool isBlack{parent->_color == node::color::black};
+					parent->_color = node::color::black;
+					sibling->_color = node::color::red;
+					if (isBlack) {
+						current = parent;
+						continue;
+					}
+					break;
+				}
+				if (sibling->_color == node::color::red) {
+					sibling->_color = node::color::black;
+					parent->_color = node::color::red;
+					if (isLX) {
+						_rightRotate(sibling);
+					}
+					else {
+						_leftRotate(sibling);
+					}
+				}
+				if (sibling->_color == node::color::black) {
+					if (isLX && isXL) {
+						sibling->_color = parent->_color;
+						sibling->_left->_color = node::color::black;
+						_rightRotate(sibling->_left);
+					}
+					else if (!isLX && !isXL) {
+						sibling->_color = parent->_color;
+						sibling->_right->_color = node::color::black;
+						_leftRotate(sibling->_right);
+					}
+					else if (isLX) {
+						sibling->_right->_color = parent->_color;
+						_leftRotate(sibling->_right);
+						_rightRotate(sibling->_right);
+					}
+					else {
+						sibling->_left->_color = parent->_color;
+						_rightRotate(sibling->_left);
+						_leftRotate(sibling->_left);
+					}
+					parent->_color = node::color::black;
+				}
+			}
 		}
 
 		T min() {
