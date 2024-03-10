@@ -105,15 +105,29 @@ void bst() {
 	bst.insert(13);
 	bst.insert(19);
 	bst.insert(17);
-	std::cout << bst.max() << ' ' << bst.min() << '\n';
-	bst.insert(1);
-	bst.insert(3);
-	bst.insert(20);
-	std::cout << bst.max() << ' ' << bst.min() << '\n';
-	bst.erase(20);
-	bst.erase(3);
-	bst.erase(1);
-	std::cout << bst.max() << ' ' << bst.min() << '\n';
+	/*
+			18
+		   /  \
+		  5	  19
+		 / \
+		2  12
+		  /  \
+		 9   15
+			/  \
+		   13  17
+	*/
+	bst.erase(12);
+	bst.erase(5);
+	bst.erase(13);
+	/*
+			18
+		   /  \
+		  9   19
+		 / \
+		2  15
+			 \
+			 17
+	*/
 
 	red_black_tree<int> rbt;
 	rbt.insert(18);
@@ -125,6 +139,25 @@ void bst() {
 	rbt.insert(13);
 	rbt.insert(19);
 	rbt.insert(17);
+	/*
+			   12
+			/      \
+		   5      [15]
+		  / \     /  \
+		[2] [9]  13  18
+					/  \
+				  [17][19]
+	*/
+	rbt.erase(12);
+	rbt.erase(5);
+	rbt.erase(13);
+	/*
+			 15
+			/  \
+		   9  [18]
+		  /   /  \
+		[2]  17  19
+	*/
 }
 
 void algorithm() {
