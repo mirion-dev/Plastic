@@ -83,6 +83,7 @@ namespace plastic {
 		}
 
 		void insert(const T& value, ::std::size_t count = 1) {
+			_size += count;
 			node*& nd{_findNode(value)};
 			if (nd == nullptr) {
 				nd = new node{value, count, nullptr, nullptr};
@@ -90,7 +91,6 @@ namespace plastic {
 			else {
 				nd->_count += count;
 			}
-			_size += count;
 		}
 
 		void erase(const T& value, ::std::size_t count = 1) {
@@ -99,8 +99,8 @@ namespace plastic {
 				return;
 			}
 			if (nd->_count > count) {
-				nd->_count -= count;
 				_size -= count;
+				nd->_count -= count;
 				return;
 			}
 			_size -= nd->_count;

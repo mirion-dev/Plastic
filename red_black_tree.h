@@ -34,14 +34,16 @@ namespace plastic {
 
 		::std::pair<node*&, node*&> _findNodeWithParent(const T& value) {
 			node** pLast{&_root};
-			node** p{&_root->_right};
-			node*& parent{*pLast};
-			node*& current{*p};
-			while (current != nullptr && current->_value != value) {
+			node** p{&_root};
+			while (true) {
+				node*& parent{*pLast};
+				node*& current{*p};
+				if (current == nullptr || current->_value == value) {
+					return {current, parent};
+				}
 				pLast = p;
 				p = _compare(value, current->_value) ? &current->_left : &current->_right;
 			}
-			return {current, parent};
 		}
 
 		node*& _findNode(const T& node) {
@@ -53,11 +55,13 @@ namespace plastic {
 				::std::abort();
 			}
 			node** p{&nd};
-			node*& current{*p};
-			while (current->_left != nullptr) {
+			while (true) {
+				node*& current{*p};
+				if (current->_left == nullptr) {
+					return current;
+				}
 				p = &current->_left;
 			}
-			return current;
 		}
 
 		node*& _maxChild(node*& nd) {
@@ -65,54 +69,56 @@ namespace plastic {
 				::std::abort();
 			}
 			node** p{&nd};
-			node*& current{*p};
-			while (current->_right != nullptr) {
+			while (true) {
+				node*& current{*p};
+				if (current->_right == nullptr) {
+					return current;
+				}
 				p = &current->_right;
 			}
-			return current;
 		}
 
 		void _leftRotate(node* nd) {
 			node* left{nd->_left};
 			node* parent{nd->_parent};
 			node* grandparent{parent->_parent};
-			parent->_parent = nd;
 			nd->_left = parent;
 			nd->_parent = grandparent;
-			if (grandparent->_left == parent) {
-				grandparent->_left = nd;
-			}
-			else {
-				grandparent->_right = nd;
-			}
+			parent->_right = left;
+			parent->_parent = nd;
 			if (left != nullptr) {
 				left->_parent = parent;
 			}
-			parent->_right = left;
+			if (grandparent != nullptr) {
+				(parent == grandparent->_left ? grandparent->_left : grandparent->_right) = nd;
+			}
+			else {
+				_root = nd;
+			}
 		}
 
 		void _rightRotate(node* nd) {
 			node* right{nd->_right};
 			node* parent{nd->_parent};
 			node* grandparent{parent->_parent};
-			parent->_parent = nd;
 			nd->_right = parent;
 			nd->_parent = grandparent;
-			if (grandparent->_left == parent) {
-				grandparent->_left = nd;
-			}
-			else {
-				grandparent->_right = nd;
-			}
+			parent->_left = right;
+			parent->_parent = nd;
 			if (right != nullptr) {
 				right->_parent = parent;
 			}
-			parent->_left = right;
+			if (grandparent != nullptr) {
+				(parent == grandparent->_left ? grandparent->_left : grandparent->_right) = nd;
+			}
+			else {
+				_root = nd;
+			}
 		}
 
 	public:
 		explicit red_black_tree() {
-			_root = new node{{}, 0, node::color::black, nullptr, nullptr, nullptr};
+			_root = nullptr;
 			_size = 0;
 		}
 
@@ -138,57 +144,58 @@ namespace plastic {
 		}
 
 		void insert(const T& value, ::std::size_t count = 1) {
+			_size += count;
+			if (_root == nullptr) {
+				_root = new node{value, count, node::color::black, nullptr, nullptr, nullptr};
+				return;
+			}
 			auto [nd, pr] {_findNodeWithParent(value)};
-			if (nd == nullptr) {
-				nd = new node{value, count, node::color::red, pr, nullptr, nullptr};
-				node* current{nd};
-				while (true) {
-					if (current == _root->_right) {
-						current->_color = node::color::black;
-						break;
-					}
-					node* parent{current->_parent};
-					if (parent->_color == node::color::black) {
-						break;
-					}
-					node* grandparent{parent->_parent};
-					bool isXL{current == parent->_left};
-					bool isLX{parent == grandparent->_left};
-					node* uncle{isLX ? grandparent->_right : grandparent->_left};
-					if (uncle != nullptr && uncle->_color == node::color::red) {
+			if (nd != nullptr) {
+				nd->_count += count;
+				return;
+			}
+			nd = new node{value, count, node::color::red, pr, nullptr, nullptr};
+			node* current{nd};
+			while (true) {
+				if (current == _root) {
+					current->_color = node::color::black;
+					return;
+				}
+				node* parent{current->_parent};
+				if (parent->_color == node::color::black) {
+					return;
+				}
+				node* grandparent{parent->_parent};
+				bool isXL{current == parent->_left};
+				bool isLX{parent == grandparent->_left};
+				node* uncle{isLX ? grandparent->_right : grandparent->_left};
+				if (uncle == nullptr || uncle->_color == node::color::black) {
+					if (isLX && isXL) {
+						_rightRotate(parent);
 						parent->_color = node::color::black;
-						uncle->_color = node::color::black;
-						grandparent->_color = node::color::red;
-						current = grandparent;
+					}
+					else if (isLX) {
+						_leftRotate(current);
+						_rightRotate(current);
+						current->_color = node::color::black;
+					}
+					else if (isXL) {
+						_rightRotate(current);
+						_leftRotate(current);
+						current->_color = node::color::black;
 					}
 					else {
-						grandparent->_color = node::color::red;
-						if (isLX && isXL) {
-							parent->_color = node::color::black;
-							_rightRotate(parent);
-						}
-						else if (isLX) {
-							current->_color = node::color::black;
-							_leftRotate(current);
-							_rightRotate(current);
-						}
-						else if (isXL) {
-							current->_color = node::color::black;
-							_rightRotate(current);
-							_leftRotate(current);
-						}
-						else {
-							parent->_color = node::color::black;
-							_leftRotate(parent);
-						}
-						break;
+						_leftRotate(parent);
+						parent->_color = node::color::black;
 					}
+					grandparent->_color = node::color::red;
+					return;
 				}
+				parent->_color = node::color::black;
+				uncle->_color = node::color::black;
+				grandparent->_color = node::color::red;
+				current = grandparent;
 			}
-			else {
-				nd->_count += count;
-			}
-			_size += count;
 		}
 
 		void erase(const T& value, ::std::size_t count = 1) {
@@ -225,7 +232,7 @@ namespace plastic {
 			}
 			node* current{nd};
 			while (true) {
-				if (current == _root->_right || current->_color == node::color::red) {
+				if (current == _root || current->_color == node::color::red) {
 					return;
 				}
 				node* parent{current->_parent};
@@ -281,11 +288,11 @@ namespace plastic {
 		}
 
 		T min() {
-			return _minChild(_root->_right)->_value;
+			return _minChild(_root)->_value;
 		}
 
 		T max() {
-			return _maxChild(_root->_right)->_value;
+			return _maxChild(_root)->_value;
 		}
 	};
 

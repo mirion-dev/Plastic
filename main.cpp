@@ -96,35 +96,35 @@ void basic() {
 
 void bst() {
 	binary_search_tree<int> bst;
-	bst.insert(12);
-	bst.insert(5);
 	bst.insert(18);
+	bst.insert(5);
+	bst.insert(12);
+	bst.insert(15);
 	bst.insert(2);
 	bst.insert(9);
-	bst.insert(15);
-	bst.insert(19);
 	bst.insert(13);
+	bst.insert(19);
 	bst.insert(17);
 	std::cout << bst.max() << ' ' << bst.min() << '\n';
 	bst.insert(1);
 	bst.insert(3);
 	bst.insert(20);
 	std::cout << bst.max() << ' ' << bst.min() << '\n';
-	bst.erase(1);
-	bst.erase(3);
 	bst.erase(20);
+	bst.erase(3);
+	bst.erase(1);
 	std::cout << bst.max() << ' ' << bst.min() << '\n';
 
 	red_black_tree<int> rbt;
-	rbt.insert(1);
-	rbt.insert(2);
-	rbt.insert(3);
-	rbt.insert(4);
+	rbt.insert(18);
 	rbt.insert(5);
-	rbt.insert(6);
-	rbt.insert(7);
-	rbt.insert(8);
+	rbt.insert(12);
+	rbt.insert(15);
+	rbt.insert(2);
 	rbt.insert(9);
+	rbt.insert(13);
+	rbt.insert(19);
+	rbt.insert(17);
 }
 
 void algorithm() {
