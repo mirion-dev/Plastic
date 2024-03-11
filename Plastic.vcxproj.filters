@@ -13,14 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\basic">
-      <UniqueIdentifier>{0d782316-5d29-4c08-a165-94e0412d3093}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\bst">
-      <UniqueIdentifier>{6fa2d5df-4ed1-4962-8736-4534987ae2b8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\algorithm">
       <UniqueIdentifier>{9076ef21-f339-4b49-a710-07ca4ae95271}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\data structure">
+      <UniqueIdentifier>{0d782316-5d29-4c08-a165-94e0412d3093}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -28,36 +25,36 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="queue.h">
-      <Filter>Header Files\basic</Filter>
+      <Filter>Header Files\data structure</Filter>
     </ClCompile>
     <ClCompile Include="stack.h">
-      <Filter>Header Files\basic</Filter>
-    </ClCompile>
-    <ClCompile Include="binary_search_tree.h">
-      <Filter>Header Files\bst</Filter>
+      <Filter>Header Files\data structure</Filter>
     </ClCompile>
     <ClCompile Include="sort.h">
       <Filter>Header Files\algorithm</Filter>
     </ClCompile>
+    <ClCompile Include="binary_search_tree.h">
+      <Filter>Header Files\data structure</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="deque.h">
-      <Filter>Header Files\basic</Filter>
+      <Filter>Header Files\data structure</Filter>
     </ClInclude>
     <ClInclude Include="forward_list.h">
-      <Filter>Header Files\basic</Filter>
+      <Filter>Header Files\data structure</Filter>
     </ClInclude>
     <ClInclude Include="list.h">
-      <Filter>Header Files\basic</Filter>
+      <Filter>Header Files\data structure</Filter>
     </ClInclude>
     <ClInclude Include="priority_queue.h">
-      <Filter>Header Files\basic</Filter>
-    </ClInclude>
-    <ClInclude Include="red_black_tree.h">
-      <Filter>Header Files\bst</Filter>
+      <Filter>Header Files\data structure</Filter>
     </ClInclude>
     <ClInclude Include="avl_tree.h">
-      <Filter>Header Files\bst</Filter>
+      <Filter>Header Files\data structure</Filter>
+    </ClInclude>
+    <ClInclude Include="red_black_tree.h">
+      <Filter>Header Files\data structure</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

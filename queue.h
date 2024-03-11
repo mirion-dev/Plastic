@@ -5,14 +5,11 @@
 namespace plastic {
 
 	template<class T>
-	class queue : public deque<T> {
+	class queue : private deque<T> {
 	public:
 		using deque<T>::deque;
-
-		void push_front(const T&) = delete;
-		void push_back(const T&) = delete;
-		T pop_front() = delete;
-		T pop_back() = delete;
+		using deque<T>::empty;
+		using deque<T>::size;
 
 		void push(const T& value) {
 			deque<T>::push_back(value);

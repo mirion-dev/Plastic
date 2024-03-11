@@ -1,12 +1,10 @@
-// basic
+// data structure
 #include "stack.h"
 #include "queue.h"
 #include "priority_queue.h"
 #include "deque.h"
 #include "forward_list.h"
 #include "list.h"
-
-// bst
 #include "binary_search_tree.h"
 #include "red_black_tree.h"
 #include "avl_tree.h"
@@ -19,7 +17,7 @@
 
 using namespace plastic;
 
-void basic() {
+void dataStructure() {
 	stack<int> st;
 	st.push(5);
 	st.push(4);
@@ -92,10 +90,6 @@ void basic() {
 	std::cout << ls.pop_back() << ' ';
 	std::cout << ls.pop_back() << '\n';
 
-	std::cout << '\n';
-}
-
-void bst() {
 	binary_search_tree<int> bst;
 	bst.insert(18);
 	bst.insert(5);
@@ -201,5 +195,5 @@ void algorithm() {
 }
 
 int main() {
-	bst();
+	dataStructure();
 }
