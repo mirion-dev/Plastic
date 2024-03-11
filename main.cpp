@@ -170,6 +170,9 @@ void bst() {
 	avl.insert(13);
 	avl.insert(19);
 	avl.insert(17);
+	avl.erase(12);
+	avl.erase(5);
+	avl.erase(13);
 }
 
 void algorithm() {

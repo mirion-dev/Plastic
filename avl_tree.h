@@ -9,6 +9,7 @@ namespace plastic {
 		struct node {
 			T _value;
 			::std::size_t _count;
+			::std::size_t _balanceFactor;
 			node* _parent;
 			node* _left;
 			node* _right;
@@ -26,15 +27,22 @@ namespace plastic {
 			delete nd;
 		}
 
-		node*& _findNode(const T& value) {
+		::std::pair<node*&, node*&> _findNodeWithParent(const T& value) {
+			node** pLast{&_root};
 			node** p{&_root};
 			while (true) {
+				node*& parent{*pLast};
 				node*& current{*p};
 				if (current == nullptr || current->_value == value) {
-					return current;
+					return {current, parent};
 				}
+				pLast = p;
 				p = _compare(value, current->_value) ? &current->_left : &current->_right;
 			}
+		}
+
+		node*& _findNode(const T& node) {
+			return _findNodeWithParent(node).first;
 		}
 
 		node*& _minChild(node*& nd) {
@@ -83,13 +91,13 @@ namespace plastic {
 			return _size;
 		}
 
-		bool find(const T& value) {
-			return _findNode(value) != nullptr;
-		}
-
 		::std::size_t count(const T& value) {
 			node* nd{_findNode(value)};
 			return nd == nullptr ? 0 : nd->_count;
+		}
+
+		bool contains(const T& value) {
+			return _findNode(value) != nullptr;
 		}
 
 		void insert(const T& value, ::std::size_t count = 1) {

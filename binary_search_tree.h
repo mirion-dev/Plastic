@@ -124,13 +124,13 @@ namespace plastic {
 			}
 		}
 
-		bool find(const T& value) {
-			return _findNode(value) != nullptr;
-		}
-
 		::std::size_t count(const T& value) {
 			node* nd{_findNode(value)};
 			return nd == nullptr ? 0 : nd->_count;
+		}
+
+		bool contains(const T& value) {
+			return _findNode(value) != nullptr;
 		}
 
 		T min() {
