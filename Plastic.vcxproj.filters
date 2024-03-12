@@ -56,6 +56,9 @@
     <ClInclude Include="red_black_tree.h">
       <Filter>Header Files\data structure</Filter>
     </ClInclude>
+    <ClInclude Include="b_tree.h">
+      <Filter>Header Files\data structure</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
