@@ -164,9 +164,25 @@ void dataStructure() {
 	avl.insert(13);
 	avl.insert(19);
 	avl.insert(17);
+	/*
+			 12
+		   /    \
+		  5      15
+		 / \    /  \
+		2   9  13  18
+				  /  \
+				 17  19
+	*/
 	avl.erase(12);
 	avl.erase(5);
 	avl.erase(13);
+	/*
+			15
+		   /  \
+		  9   18
+		 /   /  \
+		2   17  19
+	*/
 }
 
 void algorithm() {

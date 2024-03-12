@@ -221,6 +221,7 @@ namespace plastic {
 				node* temp{erased};
 				erased = erased->_left;
 				erased->_color = node::color::black;
+				erased->_parent = temp->_parent;
 				delete temp;
 				return;
 			}
@@ -228,6 +229,7 @@ namespace plastic {
 				node* temp{erased};
 				erased = erased->_right;
 				erased->_color = node::color::black;
+				erased->_parent = temp->_parent;
 				delete temp;
 				return;
 			}
