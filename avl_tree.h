@@ -220,7 +220,7 @@ namespace plastic {
 				nd->_count = successor->_count;
 				pErased = &successor;
 			}
-			if (node*& erased{*pErased}, *& left{(*pErased)->_left}, *& right{(*pErased)->_right};
+			if (node*& erased{*pErased}, *& left{erased->_left}, *& right{erased->_right};
 				left != nullptr) {
 				erased->_value = left->_value;
 				erased->_count = left->_count;

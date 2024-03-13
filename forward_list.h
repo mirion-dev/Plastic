@@ -21,6 +21,9 @@ namespace plastic {
 			}
 
 			T& operator*() {
+				if (_node == _sentinel) {
+					::std::abort();
+				}
 				return _node->_value;
 			}
 
