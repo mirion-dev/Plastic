@@ -23,11 +23,7 @@
 
 ## 算法
 
-| **`sort`** |
-| :--: |
-| `selection_sort` |
-| `insertion_sort` |
-| `bubble_sort` |
-| `heap_sort` |
-| `merge_sort` |
-| `quick_sort` |
+| | 前缀运算符 | 后缀运算符 | 二元运算符 | 转换运算符 | 成员函数 | 非成员函数 |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| **`sort`** | | | | | | `selection_sort`<br>`insertion_sort`<br>`bubble_sort`<br>`heap_sort`<br>`merge_sort`<br>`quick_sort` |
+| **`bigint`** | `+`<br>`-`<br>`++`<br>`--` | `++`<br>`--` | `+`<br>`-`<br>`*`<br>`+=`<br>`-=`<br>`*=`<br>`==`<br>`!=`<br>`<`<br>`>`<br>`<=`<br>`>=`<br>`<=>` | `bool`<br>`intmax_t` | `sign`<br>`data`<br>`clear`<br>`negate` | <br>`>>`<br>`<<`<br>`to_string` |

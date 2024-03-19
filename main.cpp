@@ -11,6 +11,7 @@
 
 // algorithm
 #include "sort.h"
+#include "bigint.h"
 
 #include <iostream>
 #include <array>

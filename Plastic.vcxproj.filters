@@ -59,6 +59,9 @@
     <ClInclude Include="b_tree.h">
       <Filter>Header Files\data structure</Filter>
     </ClInclude>
+    <ClInclude Include="bigint.h">
+      <Filter>Header Files\algorithm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
