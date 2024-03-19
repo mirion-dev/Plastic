@@ -20,14 +20,14 @@ namespace plastic {
 				_sentinel = sentinel;
 			}
 
-			T& operator*() {
+			T& operator*() const {
 				if (_node == _sentinel) {
 					::std::abort();
 				}
 				return _node->_value;
 			}
 
-			bool operator==(iterator it) {
+			bool operator==(iterator it) const {
 				return _node == it._node;
 			}
 
@@ -65,19 +65,19 @@ namespace plastic {
 			delete _sentinel;
 		}
 
-		bool empty() {
+		bool empty() const {
 			return _size == 0;
 		}
 
-		bool size() {
+		bool size() const {
 			return _size;
 		}
 
-		iterator begin() {
+		iterator begin() const {
 			return iterator{_sentinel->_next, _sentinel};
 		}
 
-		iterator end() {
+		iterator end() const {
 			return iterator{_sentinel, _sentinel};
 		}
 

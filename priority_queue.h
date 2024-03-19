@@ -22,19 +22,19 @@ namespace plastic {
 			_begin = newData;
 		}
 
-		::std::size_t _parent(::std::size_t pos) {
+		static ::std::size_t _parent(::std::size_t pos) {
 			return pos >> 1;
 		}
 
-		::std::size_t _leftChild(::std::size_t pos) {
+		static ::std::size_t _leftChild(::std::size_t pos) {
 			return pos << 1;
 		}
 
-		::std::size_t _rightChild(::std::size_t pos) {
+		static ::std::size_t _rightChild(::std::size_t pos) {
 			return (pos << 1) + 1;
 		}
 
-		void _siftUp(::std::size_t pos) {
+		void _siftUp(::std::size_t pos) const {
 			while (true) {
 				::std::size_t parent{_parent(pos)};
 				if (parent == 0 || !_compare(_begin[parent], _begin[pos])) {
@@ -45,7 +45,7 @@ namespace plastic {
 			}
 		}
 
-		void _siftDown(::std::size_t pos) {
+		void _siftDown(::std::size_t pos) const {
 			while (true) {
 				::std::size_t left{_leftChild(pos)};
 				if (left > _size) {
@@ -74,11 +74,11 @@ namespace plastic {
 			delete[] _begin;
 		}
 
-		bool empty() {
+		bool empty() const {
 			return _size == 1;
 		}
 
-		::std::size_t size() {
+		::std::size_t size() const {
 			return _size - 1;
 		}
 

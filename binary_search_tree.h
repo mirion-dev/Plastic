@@ -74,12 +74,29 @@ namespace plastic {
 			_freeNode(_root);
 		}
 
-		bool empty() {
+		bool empty() const {
 			return _size == 0;
 		}
 
-		::std::size_t size() {
+		::std::size_t size() const {
 			return _size;
+		}
+
+		::std::size_t count(const T& value) const {
+			node* nd{_findNode(value)};
+			return nd == nullptr ? 0 : nd->_count;
+		}
+
+		bool contains(const T& value) const {
+			return _findNode(value) != nullptr;
+		}
+
+		T min() const {
+			return _minChild(_root)->_value;
+		}
+
+		T max() const {
+			return _maxChild(_root)->_value;
 		}
 
 		void insert(const T& value, ::std::size_t count = 1) {
@@ -122,23 +139,6 @@ namespace plastic {
 				successor = successor->_right;
 				delete temp;
 			}
-		}
-
-		::std::size_t count(const T& value) {
-			node* nd{_findNode(value)};
-			return nd == nullptr ? 0 : nd->_count;
-		}
-
-		bool contains(const T& value) {
-			return _findNode(value) != nullptr;
-		}
-
-		T min() {
-			return _minChild(_root)->_value;
-		}
-
-		T max() {
-			return _maxChild(_root)->_value;
 		}
 	};
 

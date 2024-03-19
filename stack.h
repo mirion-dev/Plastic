@@ -39,11 +39,11 @@ namespace plastic {
 			delete[] _begin;
 		}
 
-		bool empty() {
+		bool empty() const {
 			return _size == 0;
 		}
 
-		::std::size_t size() {
+		::std::size_t size() const {
 			return _size;
 		}
 

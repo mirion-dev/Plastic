@@ -212,5 +212,5 @@ void algorithm() {
 }
 
 int main() {
-	algorithm();
+	dataStructure();
 }
