@@ -17,7 +17,7 @@ namespace plastic {
 				}
 			}
 			if (min == max) {
-				break;
+				return;
 			}
 			::std::swap(*min, *first);
 			::std::swap(max == first ? *min : *max, *last);
@@ -59,7 +59,7 @@ namespace plastic {
 				}
 			}
 			if (isSorted) {
-				break;
+				return;
 			}
 			do {
 				--i, --j;
@@ -69,7 +69,7 @@ namespace plastic {
 				}
 			} while (i != first);
 			if (isSorted) {
-				break;
+				return;
 			}
 		}
 	}
@@ -77,7 +77,7 @@ namespace plastic {
 	template<::std::random_access_iterator iter, ::std::strict_weak_order<::std::iter_value_t<iter>, ::std::iter_value_t<iter>> compare = ::std::less<>>
 	void heap_sort(iter first, iter last, compare comp = {}) {
 		auto siftDown{[&](::std::ptrdiff_t node, ::std::ptrdiff_t bottom) {
-			while (node < bottom >> 1) {
+			while (node < (bottom >> 1)) {
 				::std::ptrdiff_t child{(node << 1) + 1};
 				if (child + 1 < bottom && comp(first[child], first[child + 1])) {
 					++child;
@@ -87,7 +87,7 @@ namespace plastic {
 					node = child;
 				}
 				else {
-					break;
+					return;
 				}
 			}
 		}};
@@ -146,7 +146,7 @@ namespace plastic {
 			::plastic::bubble_sort(first, last, comp);
 			return;
 		}
-		iter left{first}, middle{::std::next(first, size >> 1)}, right{::std::prev(last)};
+		iter left{first}, middle{::std::next(first, size >> 1)}, right{--last};
 		if (comp(*middle, *left)) {
 			::std::swap(*middle, *left);
 		}
@@ -156,12 +156,12 @@ namespace plastic {
 		if (comp(*middle, *left)) {
 			::std::swap(*middle, *left);
 		}
-		bool status{true};
+		bool isLeft{true};
 		while (left != right) {
-			if (status) {
+			if (isLeft) {
 				if (comp(*right, *left)) {
 					::std::swap(*left, *right);
-					status = false;
+					isLeft = false;
 				}
 				else {
 					--right;
@@ -170,7 +170,7 @@ namespace plastic {
 			else {
 				if (comp(*right, *left)) {
 					::std::swap(*left, *right);
-					status = true;
+					isLeft = true;
 				}
 				else {
 					++left;
@@ -178,7 +178,7 @@ namespace plastic {
 			}
 		}
 		::plastic::quick_sort(first, left, comp);
-		::plastic::quick_sort(::std::next(left), last, comp);
+		::plastic::quick_sort(++left, ++last, comp);
 	}
 
 }
