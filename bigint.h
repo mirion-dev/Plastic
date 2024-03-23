@@ -79,19 +79,18 @@ namespace plastic {
 				return 0;
 			}
 			while (begin != end) {
-				::std::uint64_t temp{*begin < num};
+				::std::uint64_t borrow{*begin < num};
 				*dest++ = *begin++ - num;
-				num = temp;
+				num = borrow;
 			}
 			return num;
 		}
 
 		static ::std::uint64_t _sub(data_type::const_iterator begin1, data_type::const_iterator end1, data_type::const_iterator begin2, data_type::const_iterator end2, data_type::iterator dest, ::std::uint64_t borrow = 0) {
 			while (begin2 != end2) {
-				::std::uint64_t temp{*begin2++ + borrow};
-				borrow = temp < borrow;
-				borrow += *begin1 < temp;
-				*dest++ = *begin1++ - temp;
+				::std::uint64_t sub{*begin2++ + borrow};
+				borrow = *begin1 < sub || sub < borrow;
+				*dest++ = *begin1++ - sub;
 			}
 			return _sub(begin1, end1, borrow, dest);
 		}
