@@ -14,7 +14,98 @@ namespace plastic {
 		sign_type _sign;
 		data_type _data;
 
-		static ::std::pair<::std::uint64_t, ::std::uint64_t> _mul128(::std::uint64_t a, ::std::uint64_t b) {
+		static sign_type _cmp(data_type::const_iterator aBegin, data_type::const_iterator aEnd, ::std::uint64_t b) {
+			return aEnd - aBegin == 1 ? *aBegin <=> b : sign_type::greater;
+		}
+
+		static sign_type _cmp(data_type::const_iterator aBegin, data_type::const_iterator aEnd, data_type::const_iterator bBegin, data_type::const_iterator bEnd) {
+			::std::ptrdiff_t aSize{aEnd - aBegin}, bSize{bEnd - bBegin};
+			if (aSize != bSize) {
+				return aSize <=> bSize;
+			}
+			while (aBegin != aEnd) {
+				if (*--aEnd != *--bEnd) {
+					return *aEnd <=> *bEnd;
+				}
+			}
+			return sign_type::equal;
+		}
+
+		static sign_type _cmp(const bigint& a, ::std::uint64_t b) {
+			sign_type cmp{_cmp(a._data.begin(), a._data.end(), b)};
+			return a._sign > 0 ? cmp : 0 <=> cmp;
+		}
+
+		static sign_type _cmp(const bigint& a, const bigint& b) {
+			sign_type cmp{_cmp(a._data.begin(), a._data.end(), b._data.begin(), b._data.end())};
+			return a._sign > 0 ? cmp : 0 <=> cmp;
+		}
+
+		static ::std::uint64_t _add(data_type::iterator aBegin, data_type::iterator aEnd, ::std::uint64_t b) {
+			while (aBegin != aEnd) {
+				*aBegin += b;
+				b = *aBegin++ < b;
+			}
+			return b;
+		}
+
+		static ::std::uint64_t _add(data_type::iterator aBegin, data_type::iterator aEnd, data_type::const_iterator bBegin, data_type::const_iterator bEnd, ::std::uint64_t carry = 0) {
+			while (bBegin != bEnd) {
+				*aBegin += carry += *bBegin;
+				carry = *aBegin++ < carry || carry < *bBegin++;
+			}
+			return carry == 0 ? 0 : _add(aBegin, aEnd, carry);
+		}
+
+		static void _add(bigint& a, ::std::uint64_t b) {
+			::std::uint64_t carry{_add(a._data.begin(), a._data.end(), b)};
+			if (carry != 0) {
+				a._data.emplace_back(carry);
+			}
+		}
+
+		static void _add(bigint& a, const bigint& b) {
+
+		}
+
+		static ::std::uint64_t _sub(data_type::iterator aBegin, data_type::iterator aEnd, ::std::uint64_t b) {
+			while (aBegin != aEnd) {
+				*aBegin -= b;
+				b = *aBegin++ > b;
+			}
+			return b;
+		}
+
+		static ::std::uint64_t _sub(data_type::iterator aBegin, data_type::iterator aEnd, data_type::const_iterator bBegin, data_type::const_iterator bEnd, ::std::uint64_t borrow = 0) {
+			while (bBegin != bEnd) {
+				*aBegin -= borrow += *bBegin;
+				borrow = *aBegin++ > borrow || borrow < *bBegin++;
+			}
+			return borrow == 0 ? 0 : _sub(aBegin, aEnd, borrow);
+		}
+
+		static void _sub(bigint& a, ::std::uint64_t b) {
+			sign_type cmp{_cmp(a, b)};
+			if (cmp == 0) {
+				a._sign = sign_type::equal;
+			}
+			else if (cmp > 0) {
+				_sub(a._data.begin(), a._data.end(), b);
+				if (a._data.back() == 0) {
+					a._data.pop_back();
+				}
+			}
+			else {
+				a.negate();
+				a._data.front() = b - a._data.front();
+			}
+		}
+
+		static void _sub(bigint& a, const bigint& b) {
+
+		}
+
+		static ::std::pair<::std::uint64_t, ::std::uint64_t> _mul(::std::uint64_t a, ::std::uint64_t b) {
 #ifdef _MSC_VER
 			::std::uint64_t high, low;
 			low = _umul128(a, b, &high);
@@ -32,6 +123,16 @@ namespace plastic {
 			}
 			return {x3 + (x1 >> 32), (x1 << 32) + (x0 & 0xffffffff)};
 #endif
+		}
+
+		static ::std::uint64_t _mul(data_type::iterator aBegin, data_type::iterator aEnd, ::std::uint64_t b, ::std::uint64_t carry = 0) {
+			while (aBegin != aEnd) {
+				auto [high, low] {_mul(*aBegin, b)};
+				low += carry;
+				carry = high + (low < carry);
+				*aBegin++ = low;
+			}
+			return carry;
 		}
 
 	public:
@@ -184,58 +285,65 @@ namespace plastic {
 			int chunkSize{chunkSizeTable[base]};
 			::std::uint64_t chunkBase{chunkBaseTable[base]};
 
-			_data.resize((_mul128(end - begin, log2Base).first >> 3) + 2);
+			_data.resize((_mul(end - begin, log2Base).first >> 3) + 2);
 			auto dBegin{_data.begin()}, dEnd{dBegin};
 
-			//if (end - begin <= 2000) {
-			while (begin != end) {
-				::std::uint64_t value{0};
-				if (end - begin >= chunkSize) {
-					auto sentinel{begin + chunkSize};
-					while (begin != sentinel) {
-						::std::uint8_t digit{fromCharTable[static_cast<::std::uint8_t>(*begin++)]};
-						if (digit >= base) {
-							::std::abort();
+			if (end - begin <= 2000) {
+				while (begin != end) {
+					::std::uint64_t value{0};
+					if (end - begin >= chunkSize) {
+						auto sentinel{begin + chunkSize};
+						while (begin != sentinel) {
+							::std::uint8_t digit{fromCharTable[static_cast<::std::uint8_t>(*begin++)]};
+							if (digit >= base) {
+								::std::abort();
+							}
+							value = value * base + digit;
 						}
-						value = value * base + digit;
+					}
+					else {
+						chunkBase = 1;
+						while (begin != end) {
+							::std::uint8_t digit{fromCharTable[static_cast<::std::uint8_t>(*begin++)]};
+							if (digit >= base) {
+								::std::abort();
+							}
+							value = value * base + digit;
+							chunkBase *= base;
+						}
+					}
+					::std::uint64_t carry{_mul(dBegin, dEnd, chunkBase, value)};
+					if (carry != 0) {
+						*dEnd++ = carry;
 					}
 				}
-				else {
-					chunkBase = 1;
-					while (begin != end) {
-						::std::uint8_t digit{fromCharTable[static_cast<::std::uint8_t>(*begin++)]};
-						if (digit >= base) {
-							::std::abort();
-						}
-						value = value * base + digit;
-						chunkBase *= base;
-					}
-				}
-				for (auto i{dBegin}; i != dEnd; ++i) {
-					auto [high, low] {_mul128(*i, chunkBase)};
-					low += value;
-					value = high + (low < value);
-					*i = low;
-				}
-				if (value != 0) {
-					*dEnd++ = value;
-				}
+
+				_data.resize(dEnd - dBegin);
+
+				return;
 			}
 
-			_data.resize(dEnd - dBegin);
-
-			return;
-			//}
-
 
 		}
 
-		::std::strong_ordering operator<=>(::std::int64_t num) const {
-			// TODO
+		sign_type operator<=>(::std::int64_t num) const {
+			if (_sign == 0) {
+				return 0 <=> num;
+			}
+			if (_sign != num <=> 0) {
+				return _sign;
+			}
+			return _cmp(*this, num);
 		}
 
-		::std::strong_ordering operator<=>(const bigint& num) const {
-			// TODO
+		sign_type operator<=>(const bigint& num) const {
+			if (_sign == 0) {
+				return 0 <=> num._sign;
+			}
+			if (_sign != num._sign) {
+				return _sign;
+			}
+			return _cmp(*this, num);
 		}
 
 		bigint operator+() const {
@@ -271,27 +379,84 @@ namespace plastic {
 		}
 
 		bigint& operator+=(::std::int64_t num) {
-			// TODO
+			if (_sign == 0) {
+				return *this = bigint{num};
+			}
+			if (num == 0) {
+				return *this;
+			}
+			if (_sign == num <=> 0) {
+				_add(*this, num);
+			}
+			else {
+				_sub(*this, num);
+			}
+			return *this;
 		}
 
 		bigint& operator+=(const bigint& num) {
-			// TODO
+			if (_sign == 0) {
+				return *this = num;
+			}
+			if (num._sign == 0) {
+				return *this;
+			}
+			if (_sign == num._sign) {
+				_add(*this, num);
+			}
+			else {
+				_sub(*this, num);
+			}
+			return *this;
 		}
 
 		bigint& operator-=(::std::int64_t num) {
-			// TODO
+			if (_sign == 0) {
+				return *this = bigint{-num};
+			}
+			if (num == 0) {
+				return *this;
+			}
+			if (_sign != num <=> 0) {
+				_add(*this, num);
+			}
+			else {
+				_sub(*this, num);
+			}
+			return *this;
 		}
 
 		bigint& operator-=(const bigint& num) {
-			// TODO
+			if (_sign == 0) {
+				return *this = -num;
+			}
+			if (num._sign == 0) {
+				return *this;
+			}
+			if (_sign != num._sign) {
+				_add(*this, num);
+			}
+			else {
+				_sub(*this, num);
+			}
+			return *this;
 		}
 
 		bigint& operator*=(::std::int64_t num) {
-			// TODO
+			if (_sign == 0 || num == 0) {
+				_sign = sign_type::equal;
+				return *this;
+			}
+			_sign = _sign == num <=> 0 ? sign_type::greater : sign_type::less;
+			::std::uint64_t carry{_mul(_data.begin(), _data.end(), num)};
+			if (carry != 0) {
+				_data.emplace_back(carry);
+			}
+			return *this;
 		}
 
 		bigint& operator*=(const bigint& num) {
-			// TODO
+
 		}
 
 		bigint& operator++() {
@@ -327,24 +492,20 @@ namespace plastic {
 			return *this;
 		}
 
-		operator bool() const {
-			return _sign != 0;
-		}
-
-		operator ::std::int64_t() const {
-			return _sign == 0 ? 0 : _sign > 0 ? _data.front() : -static_cast<::std::int64_t>(_data.front());
+		explicit operator ::std::int64_t() const {
+			return _sign == 0 ? 0 : _sign > 0 ? _data.front() : ~_data.front() + 1;
 		}
 
 		friend ::std::string to_string(const bigint& num, int base = 0) {
-			// TODO
+
 		}
 
 		friend ::std::istream& operator>>(::std::istream& is, bigint& num) {
-			// TODO
+
 		}
 
 		friend ::std::ostream& operator<<(::std::ostream& os, const bigint& num) {
-			// TODO
+
 		}
 	};
 
