@@ -23,7 +23,7 @@
 
 ## 算法
 
-| | 前缀运算符 | 后缀运算符 | 二元运算符 | 转换运算符 | 成员函数 | 非成员函数 |
+| | 运算符重载 | 成员函数 | 非成员函数 |
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
-| **`sort`** | | | | | | `selection_sort`<br>`insertion_sort`<br>`bubble_sort`<br>`heap_sort`<br>`merge_sort`<br>`quick_sort` |
-| **`bigint`** | `+`<br>`-`<br>`++`<br>`--` | `++`<br>`--` | `+`<br>`-`<br>`*`<br>`+=`<br>`-=`<br>`*=`<br>`==`<br>`!=`<br>`<`<br>`>`<br>`<=`<br>`>=`<br>`<=>` | `int64_t` | `sign`<br>`data`<br>`negate` | <br>`>>`<br>`<<`<br>`to_string` |
+| **`sort`** | | |`selection_sort`<br>`insertion_sort`<br>`bubble_sort`<br>`heap_sort`<br>`merge_sort`<br>`quick_sort` |
+| **`bigint`** | `+n`<br>`-n`<br>`++n`<br>`--n`<br>`n++`<br>`n--`<br>`+`<br>`-`<br>`*`<br>`/`<br>`%`<br>`+=`<br>`-=`<br>`*=`<br>`/=`<br>`%=`<br>`==`<br>`!=`<br>`<`<br>`>`<br>`<=`<br>`>=`<br>`<=>`<br>`int64_t` | `sign`<br>`data`<br>`negate` | `to_string` |
