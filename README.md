@@ -1,8 +1,8 @@
 # Plastic
 
-算法竞赛复健期写的一些东西. 
+by Mirion
 
-## 数据结构
+## Data Structure
 
 | | **`stack`** | **`queue`** | **`priority_queue`** | **`forward_list`** | **`list`** | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | **`b_tree`** | |
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
@@ -10,7 +10,7 @@
 | **`size`** | `size` | `size` | `size` | `size` | `size` | `size` | `size` | `size` | `size` | **`size`** |
 | **`begin`** | | | | `begin` | `begin` | | | | | **`begin`** |
 | **`end`** | | | | `end` | `end` | | | | | **`end`** |
-| **`front`** | | `front` | `front` | | | | | | | **`front`** |
+| **`front`** | | `front` | `top` | | | | | | | **`front`** |
 | **`back`** | `top` | `back` | | | | | | | | **`back`** |
 | **`push_front`** | | | | `push_front` | `push_front` | | | | | **`push_front`** |
 | **`pop_front`** | | `pop` | `pop` | `pop_front` | `pop_front` | | | | | **`pop_front`** |
@@ -23,9 +23,9 @@
 | **`max`** | | | | | | `max` | `max` | `max` | `max` | **`max`** |
 | **`min`** | | | | | | `min` | `min` | `min` | `min` | **`min`** |
 
-## 算法
+## Algorithm
 
-| | 运算符重载 | 成员函数 | 非成员函数 |
+| | `operator` | `member` | `non-member` |
 | :--: | :--: | :--: | :--: |
 | **`sort`** | | |`selection_sort`<br>`insertion_sort`<br>`bubble_sort`<br>`heap_sort`<br>`merge_sort`<br>`quick_sort` |
 | **`bigint`** | `+n`<br>`-n`<br>`++n`<br>`--n`<br>`n++`<br>`n--`<br>`+`<br>`-`<br>`*`<br>`/`<br>`%`<br>`+=`<br>`-=`<br>`*=`<br>`/=`<br>`%=`<br>`==`<br>`!=`<br>`<`<br>`>`<br>`<=`<br>`>=`<br>`<=>`<br>`int64_t` | `sign`<br>`data`<br>`negate` | `to_string` |

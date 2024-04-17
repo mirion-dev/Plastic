@@ -14,69 +14,72 @@
 
 #include <iostream>
 #include <array>
+#include <vector>
 
 using namespace plastic;
 
 void dataStructure() {
-	stack<int> st;
-	st.push(5);
-	st.push(4);
-	st.push(3);
-	st.push(2);
-	st.push(1);
-	std::cout << st.top() << ' '; st.pop();
-	std::cout << st.top() << ' '; st.pop();
-	std::cout << st.top() << ' '; st.pop();
-	std::cout << st.top() << ' '; st.pop();
-	std::cout << st.top() << '\n'; st.pop();
+	std::vector<int> a;
 
-	queue<int> qu;
-	qu.push(1);
-	qu.push(2);
-	qu.push(3);
-	qu.push(4);
-	qu.push(5);
-	std::cout << qu.front() << ' '; qu.pop();
-	std::cout << qu.front() << ' '; qu.pop();
-	std::cout << qu.front() << ' '; qu.pop();
-	std::cout << qu.front() << ' '; qu.pop();
-	std::cout << qu.front() << '\n'; qu.pop();
+	stack<int> s;
+	s.push(5);
+	s.push(4);
+	s.push(3);
+	s.push(2);
+	s.push(1);
+	std::cout << s.top() << ' '; s.pop();
+	std::cout << s.top() << ' '; s.pop();
+	std::cout << s.top() << ' '; s.pop();
+	std::cout << s.top() << ' '; s.pop();
+	std::cout << s.top() << '\n';
 
-	priority_queue<int, std::greater<>{} > pq;
-	pq.push(3);
-	pq.push(1);
-	pq.push(2);
-	pq.push(5);
-	pq.push(4);
-	std::cout << pq.top() << ' '; pq.pop();
-	std::cout << pq.top() << ' '; pq.pop();
-	std::cout << pq.top() << ' '; pq.pop();
-	std::cout << pq.top() << ' '; pq.pop();
-	std::cout << pq.top() << '\n'; pq.pop();
+	queue<int> q;
+	q.push(1);
+	q.push(2);
+	q.push(3);
+	q.push(4);
+	q.push(5);
+	std::cout << q.front() << ' '; q.pop();
+	std::cout << q.front() << ' '; q.pop();
+	std::cout << q.front() << ' '; q.pop();
+	std::cout << q.front() << ' '; q.pop();
+	std::cout << q.front() << '\n';
 
-	forward_list<int> fl;
-	fl.push_front(5);
-	fl.push_front(2);
-	fl.push_front(1);
-	fl.insert_after(++fl.begin(), 3);
-	fl.insert_after(++++fl.begin(), 4);
-	std::cout << fl.pop_front() << ' ';
-	std::cout << fl.pop_front() << ' ';
-	std::cout << fl.pop_front() << ' ';
-	std::cout << fl.pop_front() << ' ';
-	std::cout << fl.pop_front() << '\n';
+	priority_queue<int, std::greater<>> p;
+	p.push(3);
+	p.push(1);
+	p.push(2);
+	p.push(5);
+	p.push(4);
+	std::cout << p.top() << ' '; p.pop();
+	std::cout << p.top() << ' '; p.pop();
+	std::cout << p.top() << ' '; p.pop();
+	std::cout << p.top() << ' '; p.pop();
+	std::cout << p.top() << '\n';
 
-	list<int> ls;
-	ls.push_front(2);
-	ls.push_front(1);
-	ls.push_back(4);
-	ls.insert(++++ls.begin(), 3);
-	ls.insert(--ls.end(), 5);
-	std::cout << ls.pop_front() << ' ';
-	std::cout << ls.pop_front() << ' ';
-	std::cout << ls.pop_front() << ' ';
-	std::cout << ls.pop_back() << ' ';
-	std::cout << ls.pop_back() << '\n';
+	forward_list<int> f;
+	f.push_front(5);
+	f.push_front(2);
+	f.push_front(1);
+	f.insert_after(++f.begin(), 3);
+	f.insert_after(++++f.begin(), 4);
+	std::cout << f.pop_front() << ' ';
+	std::cout << f.pop_front() << ' ';
+	std::cout << f.pop_front() << ' ';
+	std::cout << f.pop_front() << ' ';
+	std::cout << f.pop_front() << '\n';
+
+	list<int> l;
+	l.push_front(2);
+	l.push_front(1);
+	l.push_back(4);
+	l.insert(++++l.begin(), 3);
+	l.insert(--l.end(), 5);
+	std::cout << l.pop_front() << ' ';
+	std::cout << l.pop_front() << ' ';
+	std::cout << l.pop_front() << ' ';
+	std::cout << l.pop_back() << ' ';
+	std::cout << l.pop_back() << '\n';
 
 	binary_search_tree<int> bst;
 	bst.insert(18);

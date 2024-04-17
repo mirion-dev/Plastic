@@ -4,17 +4,23 @@
 
 namespace plastic {
 
-	template<class T, ::std::strict_weak_order<T, T> auto _compare = ::std::less<>{} >
+	template<class T, ::std::strict_weak_order<T, T> compare = ::std::less<>, bool unchecked = false>
 	class priority_queue {
 		T* _begin;
 		::std::size_t _size;
 		::std::size_t _capacity;
+		static constexpr compare _compare{};
 
 		void _grow() {
 			_capacity += _capacity <= 1 ? 1 : _capacity >> 1;
 
-			auto newBegin{new T[_capacity]};
-			for (::std::size_t i{1}; i != _size; ++i) {
+			T* newBegin{new T[_capacity]};
+			if constexpr (!unchecked) {
+				if (newBegin == nullptr) {
+					::std::abort();
+				}
+			}
+			for (::std::size_t i{0}; i != _size; ++i) {
 				newBegin[i] = ::std::move(_begin[i]);
 			}
 			delete[] _begin;
@@ -22,52 +28,40 @@ namespace plastic {
 			_begin = newBegin;
 		}
 
-		static ::std::size_t _parent(::std::size_t pos) {
-			return pos >> 1;
-		}
-
-		static ::std::size_t _leftChild(::std::size_t pos) {
-			return pos << 1;
-		}
-
-		static ::std::size_t _rightChild(::std::size_t pos) {
-			return (pos << 1) + 1;
-		}
-
-		void _siftUp(::std::size_t pos) const {
-			while (true) {
-				::std::size_t parent{_parent(pos)};
-				if (parent == 0 || !_compare(_begin[parent], _begin[pos])) {
+		void _siftUp(::std::size_t i) const {
+			while (i != 0) {
+				::std::size_t parent{(i - 1) >> 1};
+				if (!_compare(_begin[parent], _begin[i])) {
 					return;
 				}
-				::std::swap(_begin[pos], _begin[parent]);
-				pos = parent;
+				::std::swap(_begin[i], _begin[parent]);
+				i = parent;
 			}
 		}
 
-		void _siftDown(::std::size_t pos) const {
+		void _siftDown(::std::size_t i) const {
 			while (true) {
-				::std::size_t left{_leftChild(pos)};
-				if (left > _size) {
+				::std::size_t left{(i << 1) + 1};
+				if (left >= _size) {
 					return;
 				}
 				::std::size_t right{left + 1}, max{right};
-				if (right > _size || _compare(_begin[right], _begin[left])) {
+				if (right >= _size || _compare(_begin[right], _begin[left])) {
 					max = left;
 				}
-				if (!_compare(_begin[pos], _begin[max])) {
+				if (!_compare(_begin[i], _begin[max])) {
 					return;
 				}
-				::std::swap(_begin[pos], _begin[max]);
-				pos = max;
+				::std::swap(_begin[i], _begin[max]);
+				i = max;
 			}
 		}
 
 	public:
-		explicit priority_queue(::std::size_t capacity = 1) {
-			_begin = new T[capacity + 1];
-			_size = 1;
-			_capacity = capacity + 1;
+		explicit priority_queue(::std::size_t capacity = 0) {
+			_begin = new T[capacity];
+			_size = 0;
+			_capacity = capacity;
 		}
 
 		~priority_queue() {
@@ -75,15 +69,20 @@ namespace plastic {
 		}
 
 		bool empty() const {
-			return _size == 1;
+			return _size == 0;
 		}
 
 		::std::size_t size() const {
-			return _size - 1;
+			return _size;
 		}
 
 		T& top() {
-			return _begin[1];
+			if constexpr (!unchecked) {
+				if (empty()) {
+					::std::abort();
+				}
+			}
+			return *_begin;
 		}
 
 		void push(const T& value) {
@@ -96,12 +95,14 @@ namespace plastic {
 		}
 
 		void pop() {
-			if (empty()) {
-				::std::abort();
+			if constexpr (!unchecked) {
+				if (empty()) {
+					::std::abort();
+				}
 			}
 			--_size;
-			_begin[1] = ::std::move(_begin[_size]);
-			_siftDown(1);
+			_begin[0] = ::std::move(_begin[_size]);
+			_siftDown(0);
 		}
 	};
 

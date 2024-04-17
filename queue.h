@@ -4,7 +4,7 @@
 
 namespace plastic {
 
-	template<class T>
+	template<class T, bool unchecked = false>
 	class queue {
 		T* _begin;
 		T* _end;
@@ -17,6 +17,11 @@ namespace plastic {
 			_capacity += _capacity <= 1 ? 1 : _capacity >> 1;
 
 			T* newBegin{new T[_capacity]};
+			if constexpr (!unchecked) {
+				if (newBegin == nullptr) {
+					::std::abort();
+				}
+			}
 			T* j{newBegin};
 			for (T* i{_head}; i != _end; ++i, ++j) {
 				*j = ::std::move(*i);
@@ -33,7 +38,7 @@ namespace plastic {
 		}
 
 	public:
-		explicit queue(::std::size_t capacity = 1) {
+		explicit queue(::std::size_t capacity = 0) {
 			_begin = new T[capacity];
 			_end = _begin + capacity;
 			_head = _begin;
@@ -54,7 +59,6 @@ namespace plastic {
 			return _size;
 		}
 
-		template<bool unchecked = false>
 		T& front() {
 			if constexpr (!unchecked) {
 				if (empty()) {
@@ -64,7 +68,6 @@ namespace plastic {
 			return *_head;
 		}
 
-		template<bool unchecked = false>
 		T& back() {
 			if constexpr (!unchecked) {
 				if (empty()) {
@@ -86,7 +89,6 @@ namespace plastic {
 			}
 		}
 
-		template<bool unchecked = false>
 		void pop() {
 			if constexpr (!unchecked) {
 				if (empty()) {

@@ -4,7 +4,7 @@
 
 namespace plastic {
 
-	template<class T>
+	template<class T, bool unchecked = false>
 	class stack {
 		T* _begin;
 		T* _end;
@@ -16,6 +16,11 @@ namespace plastic {
 			_capacity += _capacity <= 1 ? 1 : _capacity >> 1;
 
 			T* newBegin{new T[_capacity]};
+			if constexpr (!unchecked) {
+				if (newBegin == nullptr) {
+					::std::abort();
+				}
+			}
 			for (T* i{_begin}, * j{newBegin}; i != _end; ++i, ++j) {
 				*j = ::std::move(*i);
 			}
@@ -27,7 +32,7 @@ namespace plastic {
 		}
 
 	public:
-		explicit stack(::std::size_t capacity = 1) {
+		explicit stack(::std::size_t capacity = 0) {
 			_begin = new T[capacity];
 			_end = _begin + capacity;
 			_top = _begin;
@@ -47,7 +52,6 @@ namespace plastic {
 			return _size;
 		}
 
-		template<bool unchecked = false>
 		T& top() {
 			if constexpr (!unchecked) {
 				if (empty()) {
@@ -66,7 +70,6 @@ namespace plastic {
 			++_top;
 		}
 
-		template<bool unchecked = false>
 		void pop() {
 			if constexpr (!unchecked) {
 				if (empty()) {
