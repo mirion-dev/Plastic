@@ -1,22 +1,103 @@
 #pragma once
 
-#include "deque.h"
+#include <utility>
 
 namespace plastic {
 
 	template<class T>
-	class queue : private deque<T> {
-	public:
-		using deque<T>::deque;
-		using deque<T>::empty;
-		using deque<T>::size;
+	class queue {
+		T* _begin;
+		T* _end;
+		T* _head;
+		T* _tail;
+		::std::size_t _size;
+		::std::size_t _capacity;
 
-		void push(const T& value) {
-			deque<T>::push_back(value);
+		void _grow() {
+			_capacity += _capacity <= 1 ? 1 : _capacity >> 1;
+
+			T* newBegin{new T[_capacity]};
+			T* j{newBegin};
+			for (T* i{_head}; i != _end; ++i, ++j) {
+				*j = ::std::move(*i);
+			}
+			for (T* i{_begin}; i != _head; ++i, ++j) {
+				*j = ::std::move(*i);
+			}
+			delete[] _begin;
+
+			_begin = newBegin;
+			_end = _begin + _capacity;
+			_head = _begin;
+			_tail = _begin + _size;
 		}
 
-		T pop() {
-			return deque<T>::pop_front();
+	public:
+		explicit queue(::std::size_t capacity = 1) {
+			_begin = new T[capacity];
+			_end = _begin + capacity;
+			_head = _begin;
+			_tail = _begin;
+			_size = 0;
+			_capacity = capacity;
+		}
+
+		~queue() {
+			delete[] _begin;
+		}
+
+		bool empty() const {
+			return _size == 0;
+		}
+
+		::std::size_t size() const {
+			return _size;
+		}
+
+		template<bool unchecked = false>
+		T& front() {
+			if constexpr (!unchecked) {
+				if (empty()) {
+					::std::abort();
+				}
+			}
+			return *_head;
+		}
+
+		template<bool unchecked = false>
+		T& back() {
+			if constexpr (!unchecked) {
+				if (empty()) {
+					::std::abort();
+				}
+			}
+			return *(_tail - 1);
+		}
+
+		void push(const T& value) {
+			if (_size == _capacity) {
+				_grow();
+			}
+			++_size;
+			*_tail = value;
+			++_tail;
+			if (_tail == _end) {
+				_tail = _begin;
+			}
+		}
+
+		template<bool unchecked = false>
+		void pop() {
+			if constexpr (!unchecked) {
+				if (empty()) {
+					::std::abort();
+				}
+			}
+			--_size;
+			++_head;
+			if (_head == _end) {
+				_head = _begin;
+			}
 		}
 	};
 

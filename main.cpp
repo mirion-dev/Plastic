@@ -2,7 +2,6 @@
 #include "stack.h"
 #include "queue.h"
 #include "priority_queue.h"
-#include "deque.h"
 #include "forward_list.h"
 #include "list.h"
 #include "binary_search_tree.h"
@@ -25,11 +24,11 @@ void dataStructure() {
 	st.push(3);
 	st.push(2);
 	st.push(1);
-	std::cout << st.pop() << ' ';
-	std::cout << st.pop() << ' ';
-	std::cout << st.pop() << ' ';
-	std::cout << st.pop() << ' ';
-	std::cout << st.pop() << '\n';
+	std::cout << st.top() << ' '; st.pop();
+	std::cout << st.top() << ' '; st.pop();
+	std::cout << st.top() << ' '; st.pop();
+	std::cout << st.top() << ' '; st.pop();
+	std::cout << st.top() << '\n'; st.pop();
 
 	queue<int> qu;
 	qu.push(1);
@@ -37,11 +36,11 @@ void dataStructure() {
 	qu.push(3);
 	qu.push(4);
 	qu.push(5);
-	std::cout << qu.pop() << ' ';
-	std::cout << qu.pop() << ' ';
-	std::cout << qu.pop() << ' ';
-	std::cout << qu.pop() << ' ';
-	std::cout << qu.pop() << '\n';
+	std::cout << qu.front() << ' '; qu.pop();
+	std::cout << qu.front() << ' '; qu.pop();
+	std::cout << qu.front() << ' '; qu.pop();
+	std::cout << qu.front() << ' '; qu.pop();
+	std::cout << qu.front() << '\n'; qu.pop();
 
 	priority_queue<int, std::greater<>{} > pq;
 	pq.push(3);
@@ -49,23 +48,11 @@ void dataStructure() {
 	pq.push(2);
 	pq.push(5);
 	pq.push(4);
-	std::cout << pq.pop() << ' ';
-	std::cout << pq.pop() << ' ';
-	std::cout << pq.pop() << ' ';
-	std::cout << pq.pop() << ' ';
-	std::cout << pq.pop() << '\n';
-
-	deque<int> dq;
-	dq.push_front(2);
-	dq.push_front(1);
-	dq.push_back(3);
-	dq.push_back(5);
-	dq.push_back(4);
-	std::cout << dq.pop_front() << ' ';
-	std::cout << dq.pop_front() << ' ';
-	std::cout << dq.pop_front() << ' ';
-	std::cout << dq.pop_back() << ' ';
-	std::cout << dq.pop_back() << '\n';
+	std::cout << pq.top() << ' '; pq.pop();
+	std::cout << pq.top() << ' '; pq.pop();
+	std::cout << pq.top() << ' '; pq.pop();
+	std::cout << pq.top() << ' '; pq.pop();
+	std::cout << pq.top() << '\n'; pq.pop();
 
 	forward_list<int> fl;
 	fl.push_front(5);
@@ -212,5 +199,5 @@ void algorithm() {
 }
 
 int main() {
-	algorithm();
+	dataStructure();
 }

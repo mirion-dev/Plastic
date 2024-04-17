@@ -11,15 +11,15 @@ namespace plastic {
 		::std::size_t _capacity;
 
 		void _grow() {
-			_capacity <<= 1;
+			_capacity += _capacity <= 1 ? 1 : _capacity >> 1;
 
-			auto newData{new T[_capacity]};
+			auto newBegin{new T[_capacity]};
 			for (::std::size_t i{1}; i != _size; ++i) {
-				newData[i] = ::std::move(_begin[i]);
+				newBegin[i] = ::std::move(_begin[i]);
 			}
 			delete[] _begin;
 
-			_begin = newData;
+			_begin = newBegin;
 		}
 
 		static ::std::size_t _parent(::std::size_t pos) {
@@ -82,6 +82,10 @@ namespace plastic {
 			return _size - 1;
 		}
 
+		T& top() {
+			return _begin[1];
+		}
+
 		void push(const T& value) {
 			if (_size == _capacity) {
 				_grow();
@@ -91,15 +95,13 @@ namespace plastic {
 			++_size;
 		}
 
-		T pop() {
+		void pop() {
 			if (empty()) {
 				::std::abort();
 			}
-			T value{_begin[1]};
 			--_size;
 			_begin[1] = ::std::move(_begin[_size]);
 			_siftDown(1);
-			return value;
 		}
 	};
 

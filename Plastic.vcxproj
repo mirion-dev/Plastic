@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="binary_search_tree.h" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="queue.h" />
     <ClCompile Include="sort.h" />
     <ClCompile Include="stack.h" />
   </ItemGroup>
@@ -29,7 +28,7 @@
     <ClInclude Include="avl_tree.h" />
     <ClInclude Include="bigint.h" />
     <ClInclude Include="b_tree.h" />
-    <ClInclude Include="deque.h" />
+    <ClInclude Include="queue.h" />
     <ClInclude Include="forward_list.h" />
     <ClInclude Include="list.h" />
     <ClInclude Include="priority_queue.h" />
