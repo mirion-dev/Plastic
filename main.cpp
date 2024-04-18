@@ -18,7 +18,6 @@
 // For Test
 #include <iostream>
 #include <array>
-#include <vector>
 
 using namespace plastic;
 

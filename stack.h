@@ -11,15 +11,15 @@ namespace plastic {
 		using vector<T>::size;
 		using vector<T>::reserve;
 
-		T& top() {
+		T& top() noexcept {
 			return this->back();
 		}
 
-		void push(const T& value) {
+		void push(const T& value) noexcept {
 			this->push_back(value);
 		}
 
-		void pop() {
+		void pop() noexcept {
 			this->pop_back();
 		}
 	};

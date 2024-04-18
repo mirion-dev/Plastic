@@ -1,107 +1,71 @@
 #pragma once
 
-#include <functional>
+#include "vector.h"
 
 namespace plastic {
 
-	template<class T, ::std::strict_weak_order<T, T> compare = ::std::less<>, bool unchecked = false>
-	class priority_queue {
-		T* _begin;
-		::std::size_t _size;
-		::std::size_t _capacity;
+	template<class T, ::std::strict_weak_order<T, T> compare = ::std::less<>>
+	class priority_queue : private vector<T> {
 		static constexpr compare _compare{};
 
-		void _grow() {
-			_capacity += _capacity <= 1 ? 1 : _capacity >> 1;
-
-			T* newBegin{new T[_capacity]};
-			if constexpr (!unchecked) {
-				if (newBegin == nullptr) {
-					::std::abort();
-				}
-			}
-			for (::std::size_t i{0}; i != _size; ++i) {
-				newBegin[i] = ::std::move(_begin[i]);
-			}
-			delete[] _begin;
-
-			_begin = newBegin;
-		}
-
-		void _siftUp(::std::size_t i) const {
-			while (i != 0) {
-				::std::size_t parent{(i - 1) >> 1};
-				if (!_compare(_begin[parent], _begin[i])) {
+		void _siftUp(::std::size_t index) noexcept {
+			while (index != 0) {
+				::std::size_t parent{(index - 1) >> 1};
+				if (!_compare((*this)[parent], (*this)[index])) {
 					return;
 				}
-				::std::swap(_begin[i], _begin[parent]);
-				i = parent;
+				::std::swap((*this)[index], (*this)[parent]);
+				index = parent;
 			}
 		}
 
-		void _siftDown(::std::size_t i) const {
+		void _siftDown(::std::size_t index) noexcept {
+			::std::size_t size{this->size()};
 			while (true) {
-				::std::size_t left{(i << 1) + 1};
-				if (left >= _size) {
+				::std::size_t left{(index << 1) + 1};
+				if (left >= size) {
 					return;
 				}
-				::std::size_t right{left + 1}, max{right};
-				if (right >= _size || _compare(_begin[right], _begin[left])) {
-					max = left;
+				::std::size_t right{left + 1}, max{left};
+				if (right < size && _compare((*this)[left], (*this)[right])) {
+					max = right;
 				}
-				if (!_compare(_begin[i], _begin[max])) {
+				if (!_compare((*this)[index], (*this)[max])) {
 					return;
 				}
-				::std::swap(_begin[i], _begin[max]);
-				i = max;
+				::std::swap((*this)[index], (*this)[max]);
+				index = max;
 			}
 		}
 
 	public:
-		explicit priority_queue(::std::size_t capacity = 0) {
-			_begin = new T[capacity];
-			_size = 0;
-			_capacity = capacity;
-		}
+		using vector<T>::empty;
+		using vector<T>::size;
+		using vector<T>::reserve;
 
-		~priority_queue() {
-			delete[] _begin;
-		}
-
-		bool empty() const {
-			return _size == 0;
-		}
-
-		::std::size_t size() const {
-			return _size;
-		}
-
-		T& top() {
-			if constexpr (!unchecked) {
-				if (empty()) {
-					::std::abort();
-				}
+		T& top() noexcept {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				::std::abort();
 			}
-			return *_begin;
+#endif
+			return this->front();
 		}
 
-		void push(const T& value) {
-			if (_size == _capacity) {
-				_grow();
-			}
-			_begin[_size] = value;
-			_siftUp(_size);
-			++_size;
+		void push(const T& value) noexcept {
+			::std::size_t i{this->size()};
+			this->push_back(value);
+			_siftUp(i);
 		}
 
-		void pop() {
-			if constexpr (!unchecked) {
-				if (empty()) {
-					::std::abort();
-				}
+		void pop() noexcept {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				::std::abort();
 			}
-			--_size;
-			_begin[0] = ::std::move(_begin[_size]);
+#endif
+			this->front() = ::std::move(this->back());
+			this->pop_back();
 			_siftDown(0);
 		}
 	};

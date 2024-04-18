@@ -128,7 +128,7 @@ namespace plastic {
 			if (count == 0) {
 				return pos;
 			}
-			if (_end - _last < count) {
+			if (static_cast<::std::size_t>(_end - _last) < count) {
 				::std::ptrdiff_t offset{pos - _begin};
 				reserve(::std::max(size() + count, _capacity + (_capacity >> 1)));
 				pos = _begin + offset;
