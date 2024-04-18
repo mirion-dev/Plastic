@@ -21,7 +21,7 @@ namespace plastic {
 		}
 
 		~vector() noexcept {
-			::std::destroy(_begin, _end);
+			delete[] _begin;
 		}
 
 		bool empty() const noexcept {
@@ -40,7 +40,7 @@ namespace plastic {
 			T* newBegin{new T[capacity]};
 			T* newLast{::std::uninitialized_move(_begin, _last, newBegin)};
 			T* newEnd{newBegin + capacity};
-			delete _begin;
+			delete[] _begin;
 
 			_begin = newBegin;
 			_end = newEnd;
@@ -176,21 +176,20 @@ namespace plastic {
 			while (j != _last) {
 				*i++ = ::std::move(*j++);
 			}
-			::std::destroy_at(j);
+			::std::destroy_at(i);
 			_last = i;
 			return pos;
 		}
 
 		T* erase(T* first, T* last) {
-			::std::ptrdiff_t d{::std::distance(first, last)};
-			if (d <= 0) {
+			if (first >= last) {
 				return last;
 			}
 			T* i{first}, * j{last};
 			while (j != _last) {
 				*i++ = ::std::move(*j++);
 			}
-			::std::destroy(j, _last);
+			::std::destroy(i, _last);
 			_last = i;
 			return first;
 		}

@@ -1,4 +1,7 @@
-// data structure
+#define PLASTIC_VERIFY _DEBUG
+
+// Data Structure
+#include "vector.h"
 #include "stack.h"
 #include "queue.h"
 #include "priority_queue.h"
@@ -8,10 +11,11 @@
 #include "red_black_tree.h"
 #include "avl_tree.h"
 
-// algorithm
+// Algorithm
 #include "sort.h"
 #include "bigint.h"
 
+// For Test
 #include <iostream>
 #include <array>
 #include <vector>
@@ -19,7 +23,21 @@
 using namespace plastic;
 
 void dataStructure() {
-	std::vector<int> a;
+	vector<int> v;
+	v.push_back(1);
+	v.push_back(2);
+	v.push_back(3);
+	v.back() = 2;
+	v.erase(v.begin() + 1);
+	v.insert(v.end(), 3, 5);
+	v[3] = 4;
+	v.erase(v.end() - 2, v.end());
+	v.pop_back();
+	v.push_back(5);
+	for (auto& i : v) {
+		std::cout << i << ' ';
+	}
+	std::cout << '\n';
 
 	stack<int> s;
 	s.push(5);

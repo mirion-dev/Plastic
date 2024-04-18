@@ -59,6 +59,9 @@
     <ClInclude Include="bigint.h">
       <Filter>Header Files\algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>Header Files\data structure</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
