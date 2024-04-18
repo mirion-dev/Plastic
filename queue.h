@@ -1,10 +1,10 @@
 #pragma once
 
-#include <utility>
+#include <memory>
 
 namespace plastic {
 
-	template<class T, bool unchecked = false>
+	template<class T>
 	class queue {
 		T* _begin;
 		T* _end;
@@ -13,73 +13,65 @@ namespace plastic {
 		::std::size_t _size;
 		::std::size_t _capacity;
 
-		void _grow() {
-			_capacity += _capacity <= 1 ? 1 : _capacity >> 1;
-
-			T* newBegin{new T[_capacity]};
-			if constexpr (!unchecked) {
-				if (newBegin == nullptr) {
-					::std::abort();
-				}
-			}
-			T* j{newBegin};
-			for (T* i{_head}; i != _end; ++i, ++j) {
-				*j = ::std::move(*i);
-			}
-			for (T* i{_begin}; i != _head; ++i, ++j) {
-				*j = ::std::move(*i);
-			}
-			delete[] _begin;
-
-			_begin = newBegin;
-			_end = _begin + _capacity;
-			_head = _begin;
-			_tail = _begin + _size;
-		}
-
 	public:
-		explicit queue(::std::size_t capacity = 0) {
-			_begin = new T[capacity];
-			_end = _begin + capacity;
+		explicit queue() noexcept {
+			_begin = new T[0];
+			_end = _begin;
 			_head = _begin;
 			_tail = _begin;
 			_size = 0;
-			_capacity = capacity;
+			_capacity = 0;
 		}
 
-		~queue() {
+		~queue() noexcept {
 			delete[] _begin;
 		}
 
-		bool empty() const {
+		bool empty() const noexcept {
 			return _size == 0;
 		}
 
-		::std::size_t size() const {
+		::std::size_t size() const noexcept {
 			return _size;
 		}
 
-		T& front() {
-			if constexpr (!unchecked) {
-				if (empty()) {
-					::std::abort();
-				}
+		void reserve(::std::size_t capacity) noexcept {
+			if (capacity <= _capacity) {
+				return;
 			}
+
+			T* newBegin{new T[capacity]};
+			::std::uninitialized_move(_begin, _head, ::std::uninitialized_move(_head, _end, newBegin));
+			delete[] _begin;
+
+			_begin = newBegin;
+			_end = _begin + capacity;
+			_head = _begin;
+			_tail = _begin + _size;
+			_capacity = capacity;
+		}
+
+		T& front() noexcept {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				::std::abort();
+			}
+#endif
 			return *_head;
 		}
 
-		T& back() {
-			if constexpr (!unchecked) {
-				if (empty()) {
-					::std::abort();
-				}
+		T& back() noexcept {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				::std::abort();
 			}
+#endif
 			return *(_tail - 1);
 		}
 
-		void push(const T& value) {
+		void push(const T& value) noexcept {
 			if (_size == _capacity) {
-				_grow();
+				reserve(::std::max(_size + 1, _capacity + (_capacity >> 1)));
 			}
 			++_size;
 			*_tail = value;
@@ -89,12 +81,12 @@ namespace plastic {
 			}
 		}
 
-		void pop() {
-			if constexpr (!unchecked) {
-				if (empty()) {
-					::std::abort();
-				}
+		void pop() noexcept {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				::std::abort();
 			}
+#endif
 			--_size;
 			++_head;
 			if (_head == _end) {

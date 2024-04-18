@@ -8,8 +8,8 @@ by Mirion
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | | **`empty`** |
 | **`size`** | `size` | `size` | `size` | `size` | `size` | `size` | `size` | `size` | `size` | | **`size`** |
-| **`reserve`** | `reserve` | `reserve` | -- | `reserve` | -- | -- | -- | -- | -- | | **`reserve`** |
-| **`resize`** | `resize` | | -- | | -- | -- | -- | -- | -- | | **`resize`** |
+| **`reserve`** | `reserve` | `reserve` | `reserve` | `reserve` | -- | -- | -- | -- | -- | | **`reserve`** |
+| **`resize`** | `resize` | | | | -- | -- | -- | -- | -- | | **`resize`** |
 | **`begin`** | `begin` | | | | `begin` | `begin` | | | | | **`begin`** |
 | **`end`** | `end` | | | | `end` | `end` | | | | | **`end`** |
 | **`front`** | `front` | | `front` | `top` | | | | | | | **`front`** |
