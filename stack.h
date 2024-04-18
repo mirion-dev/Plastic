@@ -9,6 +9,7 @@ namespace plastic {
 	public:
 		using vector<T>::empty;
 		using vector<T>::size;
+		using vector<T>::capacity;
 		using vector<T>::reserve;
 
 		T& top() noexcept {

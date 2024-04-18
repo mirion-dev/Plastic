@@ -8,6 +8,7 @@ by Mirion
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | | **`empty`** |
 | **`size`** | `size` | `size` | `size` | `size` | `size` | `size` | `size` | `size` | `size` | | **`size`** |
+| **`capacity`** | `capacity` | `capacity` | `capacity` | `capacity` | -- | -- | -- | -- | -- | -- | -- |
 | **`reserve`** | `reserve` | `reserve` | `reserve` | `reserve` | -- | -- | -- | -- | -- | | **`reserve`** |
 | **`resize`** | `resize` | | | | -- | -- | -- | -- | -- | | **`resize`** |
 | **`begin`** | `begin` | | | | `begin` | `begin` | | | | | **`begin`** |

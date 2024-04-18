@@ -9,14 +9,11 @@ namespace plastic {
 		T* _begin;
 		T* _last;
 		T* _end;
-		::std::size_t _capacity;
 
 	public:
 		vector(::std::size_t size = 0, const T& value = {}) noexcept {
 			_begin = new T[size];
-			_last = _begin + size;
-			_end = _last;
-			_capacity = size;
+			_last = _end = _begin + size;
 			::std::uninitialized_fill(_begin, _end, value);
 		}
 
@@ -32,8 +29,12 @@ namespace plastic {
 			return _last - _begin;
 		}
 
+		::std::size_t capacity() const noexcept {
+			return _end - _begin;
+		}
+
 		void reserve(::std::size_t capacity) noexcept {
-			if (capacity <= _capacity) {
+			if (capacity <= this->capacity()) {
 				return;
 			}
 
@@ -43,9 +44,8 @@ namespace plastic {
 			delete[] _begin;
 
 			_begin = newBegin;
-			_end = newEnd;
 			_last = newLast;
-			_capacity = capacity;
+			_end = newEnd;
 		}
 
 		void resize(::std::size_t size, const T& value = {}) noexcept {
@@ -56,15 +56,14 @@ namespace plastic {
 			if (size < this->size()) {
 				T* newEnd{_begin + size};
 				::std::destroy(newEnd, _end);
-				_end = newEnd;
+				_last = _end = newEnd;
 				return;
 			}
 
-			if (size <= _capacity) {
+			if (size <= capacity()) {
 				T* newEnd{_begin + size};
 				::std::uninitialized_fill(_last, newEnd, value);
-				_last = newEnd;
-				_end = newEnd;
+				_last = _end = newEnd;
 				return;
 			}
 
@@ -110,7 +109,7 @@ namespace plastic {
 
 		void push_back(const T& value) {
 			if (_last == _end) {
-				reserve(::std::max(size() + 1, _capacity + (_capacity >> 1)));
+				reserve(size() + ::std::max(size() >> 1, ::std::size_t{1}));
 			}
 			*_last++ = value;
 		}
@@ -130,7 +129,7 @@ namespace plastic {
 			}
 			if (static_cast<::std::size_t>(_end - _last) < count) {
 				::std::ptrdiff_t offset{pos - _begin};
-				reserve(::std::max(size() + count, _capacity + (_capacity >> 1)));
+				reserve(size() + ::std::max(size() >> 1, count));
 				pos = _begin + offset;
 			}
 			T* i{_last + count}, * j{_last};
@@ -152,7 +151,7 @@ namespace plastic {
 			}
 			if (_end - _last < d) {
 				::std::ptrdiff_t offset{pos - _begin};
-				reserve(::std::max(size() + d, _capacity + (_capacity >> 1)));
+				reserve(size() + ::std::max(size() >> 1, d));
 				pos = _begin + offset;
 			}
 			T* i{_last + d}, * j{_last};

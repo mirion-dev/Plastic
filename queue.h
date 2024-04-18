@@ -11,16 +11,11 @@ namespace plastic {
 		T* _head;
 		T* _tail;
 		::std::size_t _size;
-		::std::size_t _capacity;
 
 	public:
 		explicit queue() noexcept {
-			_begin = new T[0];
-			_end = _begin;
-			_head = _begin;
-			_tail = _begin;
+			_begin = _end = _head = _tail = new T[0];
 			_size = 0;
-			_capacity = 0;
 		}
 
 		~queue() noexcept {
@@ -35,20 +30,23 @@ namespace plastic {
 			return _size;
 		}
 
+		::std::size_t capacity() const noexcept {
+			return _end - _begin;
+		}
+
 		void reserve(::std::size_t capacity) noexcept {
-			if (capacity <= _capacity) {
+			if (capacity <= this->capacity()) {
 				return;
 			}
 
 			T* newBegin{new T[capacity]};
-			::std::uninitialized_move(_begin, _head, ::std::uninitialized_move(_head, _end, newBegin));
+			T* newEnd{newBegin + capacity};
+			T* newTail{::std::uninitialized_move(_begin, _head, ::std::uninitialized_move(_head, _end, newBegin))};
 			delete[] _begin;
 
-			_begin = newBegin;
-			_end = _begin + capacity;
-			_head = _begin;
-			_tail = _begin + _size;
-			_capacity = capacity;
+			_begin = _head = newBegin;
+			_end = newEnd;
+			_tail = newTail;
 		}
 
 		T& front() noexcept {
@@ -70,15 +68,14 @@ namespace plastic {
 		}
 
 		void push(const T& value) noexcept {
-			if (_size == _capacity) {
-				reserve(::std::max(_size + 1, _capacity + (_capacity >> 1)));
+			if (_size == capacity()) {
+				reserve(_size + ::std::max(_size >> 1, ::std::size_t{1}));
 			}
-			++_size;
 			*_tail = value;
-			++_tail;
-			if (_tail == _end) {
+			if (++_tail == _end) {
 				_tail = _begin;
 			}
+			++_size;
 		}
 
 		void pop() noexcept {
@@ -87,11 +84,10 @@ namespace plastic {
 				::std::abort();
 			}
 #endif
-			--_size;
-			++_head;
-			if (_head == _end) {
+			if (++_head == _end) {
 				_head = _begin;
 			}
+			--_size;
 		}
 	};
 
