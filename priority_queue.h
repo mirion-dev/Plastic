@@ -20,14 +20,13 @@ namespace plastic {
 		}
 
 		void _siftDown(::std::size_t index) noexcept {
-			::std::size_t size{this->size()};
 			while (true) {
 				::std::size_t left{(index << 1) + 1};
-				if (left >= size) {
+				if (left >= this->size()) {
 					return;
 				}
 				::std::size_t right{left + 1}, max{left};
-				if (right < size && _compare((*this)[left], (*this)[right])) {
+				if (right < this->size() && _compare((*this)[left], (*this)[right])) {
 					max = right;
 				}
 				if (!_compare((*this)[index], (*this)[max])) {
@@ -43,6 +42,17 @@ namespace plastic {
 		using vector<T>::size;
 		using vector<T>::capacity;
 		using vector<T>::reserve;
+
+		priority_queue() noexcept {}
+
+		template<::std::input_iterator iter>
+		priority_queue(iter first, iter last) noexcept : vector<T>{first, last}
+		{
+			::std::ptrdiff_t i{::std::distance(first, last) >> 1};
+			while (i != 0) {
+				_siftDown(--i);
+			}
+		}
 
 		T& top() noexcept {
 			return this->front();
