@@ -18,6 +18,15 @@ namespace plastic {
 			_size = 0;
 		}
 
+		template<::std::input_iterator iter>
+		explicit queue(iter first, iter last) noexcept {
+			::std::size_t size{::std::distance(first, last)};
+			_begin = _head = new T[size];
+			_end = _tail = _begin + size;
+			_size = size;
+			::std::uninitialized_copy(first, last, _begin);
+		}
+
 		~queue() noexcept {
 			delete[] _begin;
 		}
