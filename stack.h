@@ -12,6 +12,13 @@ namespace plastic {
 		using vector<T>::capacity;
 		using vector<T>::reserve;
 
+		stack() noexcept {}
+
+		template<::std::input_iterator iter>
+		stack(iter first, iter last) noexcept : vector<T>{first, last}
+		{
+		}
+
 		T& top() noexcept {
 			return this->back();
 		}
