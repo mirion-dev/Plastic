@@ -43,10 +43,10 @@ namespace plastic {
 		using vector<T>::capacity;
 		using vector<T>::reserve;
 
-		priority_queue() noexcept {}
+		explicit priority_queue() noexcept {}
 
 		template<::std::input_iterator iter>
-		priority_queue(iter first, iter last) noexcept : vector<T>{first, last}
+		explicit priority_queue(iter first, iter last) noexcept : vector<T>{first, last}
 		{
 			::std::ptrdiff_t i{::std::distance(first, last) >> 1};
 			while (i != 0) {
