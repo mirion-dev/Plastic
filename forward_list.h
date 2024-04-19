@@ -6,107 +6,110 @@ namespace plastic {
 
 	template<class T>
 	class forward_list {
-		struct node {
+		struct _node {
 			T _value;
-			node* _next;
+			_node* _next;
 		};
 
-		struct iterator {
-			node* _node;
-			node* _sentinel;
+	public:
+		class iterator {
+			_node* _nd;
 
-			explicit iterator(node* nd, node* sentinel) {
-				_node = nd;
-				_sentinel = sentinel;
+			friend forward_list;
+
+		public:
+			explicit iterator(_node* node) noexcept {
+				_nd = node;
 			}
 
-			T& operator*() const {
-				if (_node == _sentinel) {
-					::std::abort();
-				}
-				return _node->_value;
+			T& operator*() const noexcept {
+				return _nd->_value;
 			}
 
-			bool operator==(iterator it) const {
-				return _node == it._node;
+			bool operator==(iterator it) const noexcept {
+				return _nd == it._nd;
 			}
 
-			iterator& operator++() {
-				if (_node == _sentinel) {
-					::std::abort();
-				}
-				_node = _node->_next;
+			iterator& operator++() noexcept {
+				_nd = _nd->_next;
 				return *this;
 			}
 
-			iterator operator++(int) {
+			iterator operator++(int) noexcept {
 				iterator temp{*this};
-				operator++();
+				++*this;
 				return temp;
 			}
 		};
 
-		node* _sentinel;
-		::std::size_t _size;
+	private:
+		_node* _sentinel;
 
 	public:
-		explicit forward_list() {
-			_sentinel = new node;
+		explicit forward_list() noexcept {
+			_sentinel = new _node;
 			_sentinel->_next = _sentinel;
-			_size = 0;
 		}
 
-		~forward_list() {
-			for (node* i{_sentinel->_next}; i != _sentinel;) {
-				node* temp{i->_next};
+		~forward_list() noexcept {
+			_node* i{_sentinel->_next};
+			while (i != _sentinel) {
+				_node* temp{i->_next};
 				delete i;
 				i = temp;
 			}
-			delete _sentinel;
+			delete i;
 		}
 
-		bool empty() const {
-			return _size == 0;
+		bool empty() const noexcept {
+			return _sentinel->_next == _sentinel;
 		}
 
-		bool size() const {
-			return _size;
+		void resize(::std::size_t count, const T& value = {}) noexcept {
+			// TODO
 		}
 
-		iterator begin() const {
-			return iterator{_sentinel->_next, _sentinel};
+		iterator begin() const noexcept {
+			return iterator{_sentinel->_next};
 		}
 
-		iterator end() const {
-			return iterator{_sentinel, _sentinel};
+		iterator end() const noexcept {
+			return iterator{_sentinel};
 		}
 
-		void insert_after(iterator pos, const T& value) {
-			node* posNode{pos._node};
-			node* newNode{new node{value, posNode->_next}};
-			posNode->_next = newNode;
-			++_size;
-		}
-
-		T erase_after(iterator pos) {
-			node* posNode{pos._node};
-			node* next{posNode->_next};
-			if (next == _sentinel) {
+		T& front() noexcept {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
 				::std::abort();
 			}
-			T value{next->_value};
-			posNode->_next = next->_next;
-			delete next;
-			--_size;
-			return value;
+#endif
+			return begin()->_data;
 		}
 
-		void push_front(const T& value) {
+		void push_front(const T& value) noexcept {
 			insert_after(end(), value);
 		}
 
-		T pop_front() {
-			return erase_after(end());
+		void pop_front() noexcept {
+			erase_after(end());
+		}
+
+		void insert_after(iterator pos, const T& value) noexcept {
+			_node* posNode{pos._nd};
+			_node* newNode{new _node{value, posNode->_next}};
+			posNode->_next = newNode;
+		}
+
+		void erase_after(iterator pos) noexcept {
+			_node* posNode{pos._nd};
+			_node* temp{posNode->_next};
+#ifdef PLASTIC_VERIFY
+			if (temp == _sentinel) {
+				::std::abort();
+			}
+#endif
+			posNode->_next = temp->_next;
+			delete temp;
 		}
 	};
 

@@ -18,6 +18,7 @@
 // For Test
 #include <iostream>
 #include <array>
+#include <forward_list>
 
 using namespace plastic;
 
@@ -80,11 +81,10 @@ void dataStructure() {
 	f.push_front(1);
 	f.insert_after(++f.begin(), 3);
 	f.insert_after(++++f.begin(), 4);
-	std::cout << f.pop_front() << ' ';
-	std::cout << f.pop_front() << ' ';
-	std::cout << f.pop_front() << ' ';
-	std::cout << f.pop_front() << ' ';
-	std::cout << f.pop_front() << '\n';
+	for (auto& i : f) {
+		std::cout << i << ' ';
+	}
+	std::cout << '\n';
 
 	list<int> l;
 	l.push_front(2);
@@ -92,11 +92,10 @@ void dataStructure() {
 	l.push_back(4);
 	l.insert(++++l.begin(), 3);
 	l.insert(--l.end(), 5);
-	std::cout << l.pop_front() << ' ';
-	std::cout << l.pop_front() << ' ';
-	std::cout << l.pop_front() << ' ';
-	std::cout << l.pop_back() << ' ';
-	std::cout << l.pop_back() << '\n';
+	for (auto& i : f) {
+		std::cout << i << ' ';
+	}
+	std::cout << '\n';
 
 	binary_search_tree<int> bst;
 	bst.insert(18);

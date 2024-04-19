@@ -45,26 +45,16 @@ namespace plastic {
 		using vector<T>::reserve;
 
 		T& top() noexcept {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				::std::abort();
-			}
-#endif
 			return this->front();
 		}
 
 		void push(const T& value) noexcept {
-			::std::size_t i{this->size()};
+			::std::size_t back{this->size()};
 			this->push_back(value);
-			_siftUp(i);
+			_siftUp(back);
 		}
 
 		void pop() noexcept {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				::std::abort();
-			}
-#endif
 			this->front() = ::std::move(this->back());
 			this->pop_back();
 			_siftDown(0);

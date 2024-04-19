@@ -7,14 +7,15 @@ by Mirion
 | | **`vector`** | **`stack`** | **`queue`** | **`priority_queue`** | **`forward_list`** | **`list`** | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | **`b_tree`** | |
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | | **`empty`** |
-| **`size`** | `size` | `size` | `size` | `size` | `size` | `size` | `size` | `size` | `size` | | **`size`** |
-| **`capacity`** | `capacity` | `capacity` | `capacity` | `capacity` | -- | -- | -- | -- | -- | -- | -- |
-| **`reserve`** | `reserve` | `reserve` | `reserve` | `reserve` | -- | -- | -- | -- | -- | | **`reserve`** |
-| **`resize`** | `resize` | | | | -- | -- | -- | -- | -- | | **`resize`** |
+| **`size`** | `size` | `size` | `size` | `size` | | `size` | `size` | `size` | `size` | | **`size`** |
+| **`capacity`** | `capacity` | `capacity` | `capacity` | `capacity` | | | | | | | **`capacity`** |
+| **`reserve`** | `reserve` | `reserve` | `reserve` | `reserve` | | | | | | | **`reserve`** |
+| **`resize`** | `resize` | | | | `resize` | `resize` | | | | | **`resize`** |
 | **`begin`** | `begin` | | | | `begin` | `begin` | | | | | **`begin`** |
 | **`end`** | `end` | | | | `end` | `end` | | | | | **`end`** |
-| **`front`** | `front` | | `front` | `top` | | | | | | | **`front`** |
-| **`back`** | `back` | `top` | `back` | | | | | | | | **`back`** |
+| **`front`** | `front` | | `front` | `top` | `front` | `front` | | | | | **`front`** |
+| **`back`** | `back` | `top` | `back` | | | `back` | | | | | **`back`** |
+| **`operator[]`** | `operator[]` | | | | | | | | | | **`operator[]`** |
 | **`push_front`** | | | | | `push_front` | `push_front` | | | | | **`push_front`** |
 | **`pop_front`** | | | `pop` | `pop` | `pop_front` | `pop_front` | | | | | **`pop_front`** |
 | **`push_back`** | `push_back` | `push` | `push` | `push` | | `push_back` | | | | | **`push_back`** |
