@@ -115,14 +115,14 @@ namespace plastic {
 			return _begin[index];
 		}
 
-		void push_back(const T& value) {
+		void push_back(const T& value) noexcept {
 			if (_last == _end) {
 				reserve(size() + ::std::max(size() >> 1, ::std::size_t{1}));
 			}
 			*_last++ = value;
 		}
 
-		void pop_back() {
+		void pop_back() noexcept {
 #ifdef PLASTIC_VERIFY
 			if (empty()) {
 				::std::abort();
@@ -131,7 +131,7 @@ namespace plastic {
 			::std::destroy_at(--_last);
 		}
 
-		T* insert(T* pos, const T& value, ::std::size_t count = 1) {
+		T* insert(T* pos, const T& value, ::std::size_t count = 1) noexcept {
 			if (count == 0) {
 				return pos;
 			}
@@ -151,8 +151,8 @@ namespace plastic {
 			return i;
 		}
 
-		template<::std::random_access_iterator iter> requires ::std::convertible_to<::std::iter_value_t<iter>, T>
-		T* insert(T* pos, iter first, iter last) {
+		template<::std::input_iterator iter>
+		T* insert(T* pos, iter first, iter last) noexcept {
 			::std::ptrdiff_t d{::std::distance(first, last)};
 			if (d <= 0) {
 				return pos;
@@ -173,7 +173,7 @@ namespace plastic {
 			return i;
 		}
 
-		T* erase(T* pos) {
+		T* erase(T* pos) noexcept {
 #ifdef PLASTIC_VERIFY
 			if (pos == _end) {
 				::std::abort();
@@ -188,7 +188,7 @@ namespace plastic {
 			return pos;
 		}
 
-		T* erase(T* first, T* last) {
+		T* erase(T* first, T* last) noexcept {
 			if (first >= last) {
 				return last;
 			}
