@@ -17,6 +17,14 @@ namespace plastic {
 			::std::uninitialized_fill(_begin, _end, value);
 		}
 
+		template<::std::input_iterator iter>
+		vector(iter first, iter last) noexcept {
+			::std::ptrdiff_t size{::std::distance(first, last)};
+			_begin = new T[size];
+			_last = _end = _begin + size;
+			::std::uninitialized_copy(first, last, _begin);
+		}
+
 		~vector() noexcept {
 			delete[] _begin;
 		}
