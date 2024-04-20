@@ -18,12 +18,22 @@ namespace plastic {
 			_node* _ptr;
 
 		public:
+			using difference_type = ::std::ptrdiff_t;
+			using value_type = T;
+			using pointer = T*;
+			using reference = T&;
+			using iterator_category = ::std::input_iterator_tag;
+
 			explicit iterator(_node* node) noexcept {
 				_ptr = node;
 			}
 
-			T& operator*() const noexcept {
+			reference operator*() const noexcept {
 				return _ptr->_value;
+			}
+
+			pointer operator->() const noexcept {
+				return &_ptr->_value;
 			}
 
 			bool operator==(iterator it) const noexcept {

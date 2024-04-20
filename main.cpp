@@ -82,8 +82,8 @@ void dataStructure() {
 	f.pop_front();
 	f.front() = 1;
 	f.insert_after(f.begin(), 2, 4);
-	*++++f.begin() = 3;
-	f.erase_after(++++f.begin(), ++++++++++f.begin());
+	*std::next(f.begin(), 2) = 3;
+	f.erase_after(std::next(f.begin(), 2), std::next(f.begin(), 5));
 	for (auto& i : f) {
 		std::cout << i << ' ';
 	}
