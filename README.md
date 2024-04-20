@@ -7,7 +7,7 @@ by Mirion
 | | **`vector`** | **`deque`** | **`stack`** | **`queue`** | **`priority_queue`** | **`forward_list`** | **`list`** | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | |
 | :--: | :--: | -- | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | **`empty`** | `empty` | -- | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` | **`empty`** |
-| **`size`** | `size` | -- | `size` | `size` | `size` | | `size` | `size` | `size` | `size` | **`size`** |
+| **`size`** | `size` | -- | `size` | `size` | `size` | | | `size` | `size` | `size` | **`size`** |
 | **`capacity`** | `capacity` | -- | `capacity` | `capacity` | `capacity` | | | | | | **`capacity`** |
 | **`reserve`** | `reserve` | -- | `reserve` | `reserve` | `reserve` | | | | | | **`reserve`** |
 | **`resize`** | `resize` | -- | | | | `resize` | `resize` | | | | **`resize`** |
@@ -26,6 +26,7 @@ by Mirion
 | **`contains`** | | -- | | | | | | `contains` | `contains` | `contains` | **`contains`** |
 | **`max`** | | -- | | | | | | `max` | `max` | `max` | **`max`** |
 | **`min`** | | -- | | | | | | `min` | `min` | `min` | **`min`** |
+| | **`vector`** | **`deque`** | **`stack`** | **`queue`** | **`priority_queue`** | **`forward_list`** | **`list`** | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | |
 
 ## Algorithm
 

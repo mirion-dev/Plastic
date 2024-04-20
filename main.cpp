@@ -91,11 +91,18 @@ void dataStructure() {
 
 	list<int> l;
 	l.push_front(2);
-	l.push_front(1);
-	l.push_back(4);
-	l.insert(++++l.begin(), 3);
-	l.insert(--l.end(), 5);
-	for (auto& i : f) {
+	l.push_back(1);
+	l.push_front(4);
+	l.push_back(5);
+	l.push_front(3);
+	l.pop_front();
+	l.pop_back();
+	l.front() = 1;
+	l.back() = 5;
+	l.insert(std::prev(l.end()), 4, 4);
+	*std::next(l.begin(), 4) = 3;
+	l.erase(std::next(l.begin(), 2), std::prev(l.end(), 3));
+	for (auto& i : l) {
 		std::cout << i << ' ';
 	}
 	std::cout << '\n';

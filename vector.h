@@ -11,9 +11,9 @@ namespace plastic {
 		T* _end;
 
 	public:
-		explicit vector(::std::size_t size = 0, const T& value = {}) noexcept {
-			_begin = new T[size];
-			_last = _end = _begin + size;
+		explicit vector(::std::size_t count = 0, const T& value = {}) noexcept {
+			_begin = new T[count];
+			_last = _end = _begin + count;
 			::std::uninitialized_fill(_begin, _end, value);
 		}
 
@@ -80,15 +80,15 @@ namespace plastic {
 			_last = _end;
 		}
 
-		T* begin() noexcept {
+		T* begin() const noexcept {
 			return _begin;
 		}
 
-		T* end() noexcept {
+		T* end() const noexcept {
 			return _last;
 		}
 
-		T& front() noexcept {
+		T& front() const noexcept {
 #ifdef PLASTIC_VERIFY
 			if (empty()) {
 				::std::abort();
@@ -97,7 +97,7 @@ namespace plastic {
 			return *_begin;
 		}
 
-		T& back() noexcept {
+		T& back() const noexcept {
 #ifdef PLASTIC_VERIFY
 			if (empty()) {
 				::std::abort();
@@ -106,7 +106,7 @@ namespace plastic {
 			return _last[-1];
 		}
 
-		T& operator[](::std::size_t index) noexcept {
+		T& operator[](::std::size_t index) const noexcept {
 #ifdef PLASTIC_VERIFY
 			if (index >= size()) {
 				::std::abort();

@@ -56,9 +56,10 @@ namespace plastic {
 		_node* _sentinel;
 
 	public:
-		explicit forward_list() noexcept {
+		explicit forward_list(::std::size_t count = 0, const T& value = {}) noexcept {
 			_sentinel = new _node;
 			_sentinel->_next = _sentinel;
+			resize(count, value);
 		}
 
 		template<::std::input_iterator iter>
@@ -66,7 +67,7 @@ namespace plastic {
 			_sentinel = new _node;
 			_sentinel->_next = _sentinel;
 			while (first != last) {
-				_sentinel = new _node{*first++, _sentinel};
+				push_front(*--last);
 			}
 		}
 
@@ -84,21 +85,21 @@ namespace plastic {
 			return _sentinel->_next == _sentinel;
 		}
 
-		void resize(::std::size_t count, const T& value = {}) noexcept {
+		void resize(::std::size_t count, const T& value = {}) const noexcept {
 			for (::std::size_t i{0}; i < count; ++i) {
-				_sentinel = new _node{value, _sentinel};
+				push_front(value);
 			}
 		}
 
-		iterator begin() noexcept {
+		iterator begin() const noexcept {
 			return iterator{_sentinel->_next};
 		}
 
-		iterator end() noexcept {
+		iterator end() const noexcept {
 			return iterator{_sentinel};
 		}
 
-		T& front() noexcept {
+		T& front() const noexcept {
 #ifdef PLASTIC_VERIFY
 			if (empty()) {
 				::std::abort();
@@ -107,17 +108,22 @@ namespace plastic {
 			return _sentinel->_next->_value;
 		}
 
-		void push_front(const T& value) noexcept {
+		void push_front(const T& value) const noexcept {
 			_sentinel->_next = new _node{value, _sentinel->_next};
 		}
 
-		void pop_front() noexcept {
+		void pop_front() const noexcept {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				::std::abort();
+			}
+#endif
 			_node* temp{_sentinel->_next};
 			_sentinel->_next = temp->_next;
 			delete temp;
 		}
 
-		iterator insert_after(iterator pos, const T& value, std::size_t count = 1) noexcept {
+		iterator insert_after(iterator pos, const T& value, std::size_t count = 1) const noexcept {
 			_node* i{pos._ptr};
 			for (::std::size_t j{0}; j < count; ++j) {
 				i = i->_next = new _node{value, i->_next};
@@ -126,7 +132,7 @@ namespace plastic {
 		}
 
 		template<::std::input_iterator iter>
-		iterator insert_after(iterator pos, iter first, iter last) noexcept {
+		iterator insert_after(iterator pos, iter first, iter last) const noexcept {
 			_node* i{pos._ptr};
 			while (first != last) {
 				i = i->_next = new _node{*first++, i->_next};
@@ -134,7 +140,7 @@ namespace plastic {
 			return iterator{i};
 		}
 
-		iterator erase_after(iterator pos) noexcept {
+		iterator erase_after(iterator pos) const noexcept {
 			_node* i{pos._ptr};
 			_node* next{i->_next};
 #ifdef PLASTIC_VERIFY
@@ -147,7 +153,7 @@ namespace plastic {
 			return ++pos;
 		}
 
-		iterator erase_after(iterator first, iterator last) noexcept {
+		iterator erase_after(iterator first, iterator last) const noexcept {
 			if (first == last) {
 				return last;
 			}

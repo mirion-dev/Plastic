@@ -7,19 +7,13 @@ namespace plastic {
 	template<class T>
 	class stack : private vector<T> {
 	public:
+		using vector<T>::vector;
 		using vector<T>::empty;
 		using vector<T>::size;
 		using vector<T>::capacity;
 		using vector<T>::reserve;
 
-		explicit stack() noexcept {}
-
-		template<::std::input_iterator iter>
-		explicit stack(iter first, iter last) noexcept : vector<T>{first, last}
-		{
-		}
-
-		T& top() noexcept {
+		T& top() const noexcept {
 			return this->back();
 		}
 

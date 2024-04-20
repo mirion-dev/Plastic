@@ -8,7 +8,7 @@ namespace plastic {
 	class priority_queue : private vector<T> {
 		static constexpr compare _compare{};
 
-		void _siftUp(::std::size_t index) noexcept {
+		void _siftUp(::std::size_t index) const noexcept {
 			while (index != 0) {
 				::std::size_t parent{(index - 1) >> 1};
 				if (!_compare((*this)[parent], (*this)[index])) {
@@ -19,7 +19,7 @@ namespace plastic {
 			}
 		}
 
-		void _siftDown(::std::size_t index) noexcept {
+		void _siftDown(::std::size_t index) const noexcept {
 			while (true) {
 				::std::size_t left{(index << 1) + 1};
 				if (left >= this->size()) {
@@ -38,12 +38,11 @@ namespace plastic {
 		}
 
 	public:
+		using vector<T>::vector;
 		using vector<T>::empty;
 		using vector<T>::size;
 		using vector<T>::capacity;
 		using vector<T>::reserve;
-
-		explicit priority_queue() noexcept {}
 
 		template<::std::input_iterator iter>
 		explicit priority_queue(iter first, iter last) noexcept : vector<T>{first, last}
@@ -54,7 +53,7 @@ namespace plastic {
 			}
 		}
 
-		T& top() noexcept {
+		T& top() const noexcept {
 			return this->front();
 		}
 
