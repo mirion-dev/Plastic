@@ -2,6 +2,7 @@
 
 // Data Structure
 #include "vector.h"
+#include "deque.h"
 #include "stack.h"
 #include "queue.h"
 #include "priority_queue.h"
@@ -37,6 +38,9 @@ void dataStructure() {
 		std::cout << i << ' ';
 	}
 	std::cout << '\n';
+
+	deque<int> d;
+
 
 	stack<int> s;
 	s.push(5);

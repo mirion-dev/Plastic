@@ -11,6 +11,8 @@ namespace plastic {
 			_node* _next;
 		};
 
+		_node* _sentinel;
+
 	public:
 		class iterator {
 			friend forward_list;
@@ -52,10 +54,6 @@ namespace plastic {
 			}
 		};
 
-	private:
-		_node* _sentinel;
-
-	public:
 		explicit forward_list(::std::size_t count = 0, const T& value = {}) noexcept {
 			_sentinel = new _node;
 			_sentinel->_next = _sentinel;

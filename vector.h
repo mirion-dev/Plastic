@@ -19,9 +19,9 @@ namespace plastic {
 
 		template<::std::input_iterator iter>
 		explicit vector(iter first, iter last) noexcept {
-			::std::ptrdiff_t size{::std::distance(first, last)};
-			_begin = new T[size];
-			_last = _end = _begin + size;
+			::std::ptrdiff_t d{::std::distance(first, last)};
+			_begin = new T[d];
+			_last = _end = _begin + d;
 			::std::uninitialized_copy(first, last, _begin);
 		}
 
@@ -88,6 +88,15 @@ namespace plastic {
 			return _last;
 		}
 
+		T& operator[](::std::size_t index) const noexcept {
+#ifdef PLASTIC_VERIFY
+			if (index >= size()) {
+				::std::abort();
+			}
+#endif
+			return _begin[index];
+		}
+
 		T& front() const noexcept {
 #ifdef PLASTIC_VERIFY
 			if (empty()) {
@@ -104,15 +113,6 @@ namespace plastic {
 			}
 #endif
 			return _last[-1];
-		}
-
-		T& operator[](::std::size_t index) const noexcept {
-#ifdef PLASTIC_VERIFY
-			if (index >= size()) {
-				::std::abort();
-			}
-#endif
-			return _begin[index];
 		}
 
 		void push_back(const T& value) noexcept {
