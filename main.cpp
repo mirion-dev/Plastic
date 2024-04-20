@@ -76,10 +76,14 @@ void dataStructure() {
 
 	forward_list<int> f;
 	f.push_front(5);
+	f.push_front(4);
+	f.push_front(3);
 	f.push_front(2);
-	f.push_front(1);
-	f.insert_after(++f.begin(), 3);
-	f.insert_after(++++f.begin(), 4);
+	f.pop_front();
+	f.front() = 1;
+	f.insert_after(f.begin(), 2, 4);
+	*++++f.begin() = 3;
+	f.erase_after(++++f.begin(), ++++++++++f.begin());
 	for (auto& i : f) {
 		std::cout << i << ' ';
 	}

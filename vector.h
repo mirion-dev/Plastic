@@ -154,7 +154,7 @@ namespace plastic {
 		template<::std::input_iterator iter>
 		T* insert(T* pos, iter first, iter last) noexcept {
 			::std::ptrdiff_t d{::std::distance(first, last)};
-			if (d <= 0) {
+			if (d == 0) {
 				return pos;
 			}
 			if (_end - _last < d) {
@@ -189,8 +189,8 @@ namespace plastic {
 		}
 
 		T* erase(T* first, T* last) noexcept {
-			if (first >= last) {
-				return last;
+			if (first == last) {
+				return first;
 			}
 			T* i{first}, * j{last};
 			while (j != _last) {
