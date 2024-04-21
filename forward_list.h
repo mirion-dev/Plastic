@@ -26,7 +26,7 @@ namespace plastic {
 			using reference = T&;
 			using iterator_category = ::std::input_iterator_tag;
 
-			explicit iterator(_node* node) noexcept {
+			explicit iterator(_node* node = nullptr) noexcept {
 				_ptr = node;
 			}
 
