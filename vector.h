@@ -62,16 +62,16 @@ namespace plastic {
 			}
 
 			if (size < this->size()) {
-				T* newEnd{_begin + size};
-				::std::destroy(newEnd, _end);
-				_last = _end = newEnd;
+				T* newLast{_begin + size};
+				::std::destroy(newLast, _last);
+				_last = newLast;
 				return;
 			}
 
 			if (size <= capacity()) {
-				T* newEnd{_begin + size};
-				::std::uninitialized_fill(_last, newEnd, value);
-				_last = _end = newEnd;
+				T* newLast{_begin + size};
+				::std::uninitialized_fill(_last, newLast, value);
+				_last = newLast;
 				return;
 			}
 
@@ -148,7 +148,7 @@ namespace plastic {
 				*--i = value;
 			}
 			_last += count;
-			return i;
+			return pos;
 		}
 
 		template<::std::input_iterator iter>
@@ -170,7 +170,7 @@ namespace plastic {
 				*--i = static_cast<T>(*--last);
 			}
 			_last += d;
-			return i;
+			return pos;
 		}
 
 		T* erase(T* pos) noexcept {
