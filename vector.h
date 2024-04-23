@@ -57,11 +57,13 @@ namespace plastic {
 		}
 
 		void resize(::std::size_t size, const T& value = {}) noexcept {
-			if (size == this->size()) {
+			::std::size_t oldSize{this->size()};
+
+			if (size == oldSize) {
 				return;
 			}
 
-			if (size < this->size()) {
+			if (size < oldSize) {
 				T* newLast{_begin + size};
 				::std::destroy(newLast, _last);
 				_last = newLast;
@@ -117,7 +119,8 @@ namespace plastic {
 
 		void push_back(const T& value) noexcept {
 			if (_last == _end) {
-				reserve(size() + ::std::max(size() >> 1, ::std::size_t{1}));
+				::std::size_t capacity{this->capacity()};
+				reserve(capacity + ::std::max(capacity >> 1, ::std::size_t{1}));
 			}
 			*_last++ = value;
 		}
@@ -136,8 +139,9 @@ namespace plastic {
 				return pos;
 			}
 			if (static_cast<::std::size_t>(_end - _last) < count) {
+				::std::size_t capacity{this->capacity()};
 				::std::ptrdiff_t offset{pos - _begin};
-				reserve(size() + ::std::max(size() >> 1, count));
+				reserve(capacity + ::std::max(capacity >> 1, count));
 				pos = _begin + offset;
 			}
 			T* i{_last + count}, * j{_last};
@@ -153,13 +157,14 @@ namespace plastic {
 
 		template<::std::input_iterator iter>
 		T* insert(T* pos, iter first, iter last) noexcept {
-			::std::ptrdiff_t d{::std::distance(first, last)};
-			if (d == 0) {
+			if (first == last) {
 				return pos;
 			}
+			::std::ptrdiff_t d{::std::distance(first, last)};
 			if (_end - _last < d) {
+				::std::size_t capacity{this->capacity()};
 				::std::ptrdiff_t offset{pos - _begin};
-				reserve(size() + ::std::max(size() >> 1, d));
+				reserve(capacity + ::std::max(capacity >> 1, d));
 				pos = _begin + offset;
 			}
 			T* i{_last + d}, * j{_last};

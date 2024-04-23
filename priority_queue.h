@@ -20,13 +20,14 @@ namespace plastic {
 		}
 
 		void _siftDown(::std::size_t index) const noexcept {
+			::std::size_t size{this->size()};
 			while (true) {
 				::std::size_t left{(index << 1) + 1};
-				if (left >= this->size()) {
+				if (left >= size) {
 					return;
 				}
 				::std::size_t right{left + 1}, max{left};
-				if (right < this->size() && _compare((*this)[left], (*this)[right])) {
+				if (right < size && _compare((*this)[left], (*this)[right])) {
 					max = right;
 				}
 				if (!_compare((*this)[index], (*this)[max])) {
