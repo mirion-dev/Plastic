@@ -180,7 +180,7 @@ namespace plastic {
 
 		T* erase(T* pos) noexcept {
 #ifdef PLASTIC_VERIFY
-			if (pos == _end) {
+			if (pos == _last) {
 				::std::abort();
 			}
 #endif
