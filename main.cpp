@@ -40,7 +40,23 @@ void dataStructure() {
 	std::cout << '\n';
 
 	deque<int> d;
-
+	d.push_back(3);
+	d.push_back(1);
+	d.push_front(2);
+	d.push_front(4);
+	d.back() = 2;
+	d.erase(d.begin() + 1);
+	d.insert(d.end(), 4, 5);
+	d[3] = 3;
+	d.erase(d.end() - 2, d.end());
+	d.pop_back();
+	d.pop_front();
+	d.push_back(5);
+	d.front() = 1;
+	for (auto& i : d) {
+		std::cout << i << ' ';
+	}
+	std::cout << '\n';
 
 	stack<int> s;
 	s.push(5);
