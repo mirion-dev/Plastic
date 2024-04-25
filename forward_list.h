@@ -176,13 +176,6 @@ namespace plastic {
 			return last;
 		}
 
-		void swap(const forward_list& container) noexcept {
-			if (this == &container) {
-				return;
-			}
-			::std::swap(_sentinel, container._sentinel);
-		}
-
 		::std::compare_three_way_result<T> operator<=>(const forward_list& container) const noexcept {
 			iterator i{_sentinel->_next}, j{container._sentinel->_next};
 			while (i != _sentinel && j != container._sentinel) {

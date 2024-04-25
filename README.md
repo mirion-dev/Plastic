@@ -23,7 +23,7 @@ by Mirion
 | **`pop_back`** | `pop_back` | `pop_back` | | `pop_back` | | | | | **`pop_back`** |
 | **`insert`** | `insert` | `insert` | `insert_after` | `insert` | | | | | **`insert`** |
 | **`erase`** | `erase` | `erase` | `erase_after` | `erase` | | | | | **`erase`** |
-| **`swap`** | `swap` | `swap` | `swap` | `swap` | `swap` | | | | **`swap`** |
+| **`merge`** | | | | | | | | | **`merge`** |
 | **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | | | | | **`operator<=>`** |
 | | **`vector`** | **`deque`** | **`forward_list`** | **`list`** | **`priority_queue`** | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | |
 

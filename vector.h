@@ -210,15 +210,6 @@ namespace plastic {
 			return first;
 		}
 
-		void swap(const vector& container) noexcept {
-			if (this == &container) {
-				return;
-			}
-			::std::swap(_begin, container._begin);
-			::std::swap(_last, container._last);
-			::std::swap(_end, container._end);
-		}
-
 		::std::compare_three_way_result<T> operator<=>(const vector& container) const noexcept {
 			T* i{_begin}, j{container._begin};
 			while (i != _last && j != container._last) {

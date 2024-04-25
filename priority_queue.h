@@ -44,7 +44,6 @@ namespace plastic {
 		using vector<T>::size;
 		using vector<T>::capacity;
 		using vector<T>::reserve;
-		using vector<T>::swap;
 
 		explicit priority_queue() noexcept : vector<T>{}
 		{

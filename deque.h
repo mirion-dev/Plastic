@@ -375,16 +375,6 @@ namespace plastic {
 			return first;
 		}
 
-		void swap(const deque& container) noexcept {
-			if (this == &container) {
-				return;
-			}
-			::std::swap(_begin, container._begin);
-			::std::swap(_end, container._end);
-			::std::swap(_first, container._first);
-			::std::swap(_last, container._last);
-		}
-
 		::std::compare_three_way_result<T> operator<=>(const deque& container) const noexcept {
 			iterator i{begin()}, j{container.begin()}, ie{end()}, je{container.end()};
 			while (i != ie && j != je) {
