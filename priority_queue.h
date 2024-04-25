@@ -42,8 +42,10 @@ namespace plastic {
 		using vector<T>::vector;
 		using vector<T>::empty;
 		using vector<T>::size;
+		using vector<T>::clear;
 		using vector<T>::capacity;
 		using vector<T>::reserve;
+		using vector<T>::swap;
 
 		template<::std::input_iterator iter>
 		explicit priority_queue(iter first, iter last) noexcept : vector<T>{first, last}

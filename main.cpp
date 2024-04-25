@@ -3,8 +3,6 @@
 // Data Structure
 #include "vector.h"
 #include "deque.h"
-#include "stack.h"
-#include "queue.h"
 #include "priority_queue.h"
 #include "forward_list.h"
 #include "list.h"
@@ -57,30 +55,6 @@ void dataStructure() {
 		std::cout << i << ' ';
 	}
 	std::cout << '\n';
-
-	stack<int> s;
-	s.push(5);
-	s.push(4);
-	s.push(3);
-	s.push(2);
-	s.push(1);
-	std::cout << s.top() << ' '; s.pop();
-	std::cout << s.top() << ' '; s.pop();
-	std::cout << s.top() << ' '; s.pop();
-	std::cout << s.top() << ' '; s.pop();
-	std::cout << s.top() << '\n';
-
-	queue<int> q;
-	q.push(1);
-	q.push(2);
-	q.push(3);
-	q.push(4);
-	q.push(5);
-	std::cout << q.front() << ' '; q.pop();
-	std::cout << q.front() << ' '; q.pop();
-	std::cout << q.front() << ' '; q.pop();
-	std::cout << q.front() << ' '; q.pop();
-	std::cout << q.front() << '\n';
 
 	priority_queue<int, std::greater<>> p;
 	p.push(3);

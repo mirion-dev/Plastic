@@ -22,10 +22,8 @@
     <ClCompile Include="binary_search_tree.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sort.h" />
-    <ClCompile Include="stack.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="queue.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="avl_tree.h" />
     <ClInclude Include="bigint.h" />

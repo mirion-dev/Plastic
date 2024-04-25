@@ -24,9 +24,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stack.h">
-      <Filter>Header Files\data structure</Filter>
-    </ClCompile>
     <ClCompile Include="sort.h">
       <Filter>Header Files\algorithm</Filter>
     </ClCompile>
@@ -60,9 +57,6 @@
       <Filter>Header Files\algorithm</Filter>
     </ClInclude>
     <ClInclude Include="vector.h">
-      <Filter>Header Files\data structure</Filter>
-    </ClInclude>
-    <ClInclude Include="queue.h">
       <Filter>Header Files\data structure</Filter>
     </ClInclude>
   </ItemGroup>
