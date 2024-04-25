@@ -120,7 +120,7 @@ namespace plastic {
 		void push_back(const T& value) noexcept {
 			if (_last == _end) {
 				::std::size_t capacity{this->capacity()};
-				reserve(capacity + ::std::max(capacity >> 1, ::std::size_t{1}));
+				reserve(capacity + (capacity <= 1 ? 1 : capacity >> 1));
 			}
 			*_last++ = value;
 		}
@@ -141,7 +141,7 @@ namespace plastic {
 			if (static_cast<::std::size_t>(_end - _last) < count) {
 				::std::size_t capacity{this->capacity()};
 				::std::ptrdiff_t offset{pos - _begin};
-				reserve(capacity + ::std::max(capacity >> 1, count));
+				reserve(capacity + ((capacity >> 1) < count ? count : capacity >> 1));
 				pos = _begin + offset;
 			}
 			T* i{_last + count}, * j{_last};
@@ -164,7 +164,7 @@ namespace plastic {
 			if (_end - _last < d) {
 				::std::size_t capacity{this->capacity()};
 				::std::ptrdiff_t offset{pos - _begin};
-				reserve(capacity + ::std::max(capacity >> 1, d));
+				reserve(capacity + ((capacity >> 1) < d ? d : capacity >> 1));
 				pos = _begin + offset;
 			}
 			T* i{_last + d}, * j{_last};

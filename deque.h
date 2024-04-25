@@ -256,7 +256,7 @@ namespace plastic {
 		void push_front(const T& value) noexcept {
 			if ((_first == _begin ? _end : _first) - 1 == _last) {
 				::std::size_t capacity{this->capacity()};
-				reserve(capacity + ::std::max(capacity >> 1, ::std::size_t{1}));
+				reserve(capacity + (capacity <= 1 ? 1 : capacity >> 1));
 			}
 			if (_first == _begin) {
 				_first = _end;
@@ -279,7 +279,7 @@ namespace plastic {
 		void push_back(const T& value) noexcept {
 			if ((_first == _begin ? _end : _first) - 1 == _last) {
 				::std::size_t capacity{this->capacity()};
-				reserve(capacity + ::std::max(capacity >> 1, ::std::size_t{1}));
+				reserve(capacity + (capacity <= 1 ? 1 : capacity >> 1));
 			}
 			*_last++ = value;
 			if (_last == _end) {
@@ -306,7 +306,7 @@ namespace plastic {
 			::std::size_t capacity{this->capacity()};
 			if (capacity - size() < count) {
 				::std::ptrdiff_t offset{pos - begin()};
-				reserve(capacity + ::std::max(capacity >> 1, count));
+				reserve(capacity + ((capacity >> 1) < count ? count : capacity >> 1));
 				pos = begin() + offset;
 			}
 			iterator i{end() + count}, j{end()};
@@ -329,7 +329,7 @@ namespace plastic {
 			::std::size_t capacity{this->capacity()};
 			if (capacity - size() < d) {
 				::std::ptrdiff_t offset{pos - begin()};
-				reserve(capacity + ::std::max(capacity >> 1, d));
+				reserve(capacity + ((capacity >> 1) < d ? d : capacity >> 1));
 				pos = begin() + offset;
 			}
 			iterator i{end() + d}, j{end()};
