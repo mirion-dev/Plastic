@@ -26,26 +26,29 @@ namespace plastic {
 				if (left >= size) {
 					return;
 				}
-				::std::size_t right{left + 1}, max{left};
+				::std::size_t right{left + 1}, swapped{left};
 				if (right < size && _compare((*this)[left], (*this)[right])) {
-					max = right;
+					swapped = right;
 				}
-				if (!_compare((*this)[index], (*this)[max])) {
+				if (!_compare((*this)[index], (*this)[swapped])) {
 					return;
 				}
-				::std::swap((*this)[index], (*this)[max]);
-				index = max;
+				::std::swap((*this)[index], (*this)[swapped]);
+				index = swapped;
 			}
 		}
 
 	public:
-		using vector<T>::vector;
 		using vector<T>::empty;
-		using vector<T>::size;
 		using vector<T>::clear;
+		using vector<T>::size;
 		using vector<T>::capacity;
 		using vector<T>::reserve;
 		using vector<T>::swap;
+
+		explicit priority_queue() noexcept : vector<T>{}
+		{
+		}
 
 		template<::std::input_iterator iter>
 		explicit priority_queue(iter first, iter last) noexcept : vector<T>{first, last}

@@ -82,17 +82,21 @@ namespace plastic {
 		}
 
 		~list() noexcept {
+			clear();
+			delete _sentinel;
+		}
+
+		bool empty() const noexcept {
+			return _sentinel->_next == _sentinel;
+		}
+
+		void clear() const noexcept {
 			_node* i{_sentinel->_next};
 			while (i != _sentinel) {
 				_node* next{i->_next};
 				delete i;
 				i = next;
 			}
-			delete i;
-		}
-
-		bool empty() const noexcept {
-			return _sentinel->_next == _sentinel;
 		}
 
 		void resize(::std::size_t count, const T& value = {}) const noexcept {
@@ -202,6 +206,26 @@ namespace plastic {
 				i = next;
 			}
 			return last;
+		}
+
+		void swap(const list& container) noexcept {
+			if (this == &container) {
+				return;
+			}
+			::std::swap(_sentinel, container._sentinel);
+		}
+
+		::std::compare_three_way_result<T> operator<=>(const list& container) const noexcept {
+			iterator i{_sentinel->_next}, j{container._sentinel->_next};
+			while (i != _sentinel && j != container._sentinel) {
+				::std::compare_three_way_result<T> cmp{*i++ <=> *j++};
+				if (cmp != 0) {
+					return cmp;
+				}
+			}
+			return i == _sentinel && j != container._sentinel ? ::std::strong_ordering::less
+				: i != _sentinel && j == container._sentinel ? ::std::strong_ordering::greater
+				: ::std::strong_ordering::equal;
 		}
 	};
 

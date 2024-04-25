@@ -56,18 +56,6 @@ void dataStructure() {
 	}
 	std::cout << '\n';
 
-	priority_queue<int, std::greater<>> p;
-	p.push(3);
-	p.push(1);
-	p.push(2);
-	p.push(5);
-	p.push(4);
-	std::cout << p.top() << ' '; p.pop();
-	std::cout << p.top() << ' '; p.pop();
-	std::cout << p.top() << ' '; p.pop();
-	std::cout << p.top() << ' '; p.pop();
-	std::cout << p.top() << '\n';
-
 	forward_list<int> f;
 	f.push_front(5);
 	f.push_front(4);
@@ -100,6 +88,22 @@ void dataStructure() {
 		std::cout << i << ' ';
 	}
 	std::cout << '\n';
+
+	priority_queue<int, std::greater<>> p;
+	p.push(3);
+	p.push(1);
+	p.push(2);
+	p.push(5);
+	p.push(4);
+	std::cout << p.top() << ' ';
+	p.pop();
+	std::cout << p.top() << ' ';
+	p.pop();
+	std::cout << p.top() << ' ';
+	p.pop();
+	std::cout << p.top() << ' ';
+	p.pop();
+	std::cout << p.top() << '\n';
 
 	binary_search_tree<int> bst;
 	bst.insert(18);

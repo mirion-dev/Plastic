@@ -33,12 +33,12 @@ namespace plastic {
 			return _begin == _last;
 		}
 
-		::std::size_t size() const noexcept {
-			return _last - _begin;
-		}
-
 		void clear() noexcept {
 			resize(0);
+		}
+
+		::std::size_t size() const noexcept {
+			return _last - _begin;
 		}
 
 		void resize(::std::size_t size, const T& value = {}) noexcept {
