@@ -37,23 +37,8 @@ namespace plastic {
 			return _last - _begin;
 		}
 
-		::std::size_t capacity() const noexcept {
-			return _end - _begin;
-		}
-
-		void reserve(::std::size_t capacity) noexcept {
-			if (capacity <= this->capacity()) {
-				return;
-			}
-
-			T* newBegin{new T[capacity]};
-			T* newLast{::std::uninitialized_move(_begin, _last, newBegin)};
-			T* newEnd{newBegin + capacity};
-			delete[] _begin;
-
-			_begin = newBegin;
-			_last = newLast;
-			_end = newEnd;
+		void clear() noexcept {
+			resize(0);
 		}
 
 		void resize(::std::size_t size, const T& value = {}) noexcept {
@@ -80,6 +65,25 @@ namespace plastic {
 			reserve(size);
 			::std::uninitialized_fill(_last, _end, value);
 			_last = _end;
+		}
+
+		::std::size_t capacity() const noexcept {
+			return _end - _begin;
+		}
+
+		void reserve(::std::size_t capacity) noexcept {
+			if (capacity <= this->capacity()) {
+				return;
+			}
+
+			T* newBegin{new T[capacity]};
+			T* newLast{::std::uninitialized_move(_begin, _last, newBegin)};
+			T* newEnd{newBegin + capacity};
+			delete[] _begin;
+
+			_begin = newBegin;
+			_last = newLast;
+			_end = newEnd;
 		}
 
 		T* begin() const noexcept {
@@ -204,6 +208,28 @@ namespace plastic {
 			::std::destroy(i, _last);
 			_last = i;
 			return first;
+		}
+
+		void swap(const vector& container) noexcept {
+			if (this == &container) {
+				return;
+			}
+			::std::swap(_begin, container._begin);
+			::std::swap(_last, container._last);
+			::std::swap(_end, container._end);
+		}
+
+		::std::compare_three_way_result<T> operator<=>(const vector& container) const noexcept {
+			T* i{_begin}, j{container._begin};
+			while (i != _last && j != container._last) {
+				::std::compare_three_way_result<T> cmp{*i++ <=> *j++};
+				if (cmp != 0) {
+					return cmp;
+				}
+			}
+			return i == _last && j != container._last ? ::std::strong_ordering::less
+				: i != _last && j == container._last ? ::std::strong_ordering::greater
+				: ::std::strong_ordering::equal;
 		}
 	};
 

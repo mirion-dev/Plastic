@@ -154,29 +154,8 @@ namespace plastic {
 			return end() - begin();
 		}
 
-		::std::size_t capacity() const noexcept {
-			return _end - _begin - 1;
-		}
-
-		void reserve(::std::size_t capacity) noexcept {
-			if (capacity <= this->capacity()) {
-				return;
-			}
-
-			T* newBegin{new T[capacity + 1]};
-			T* newEnd{newBegin + capacity + 1};
-			T* newLast;
-			if (_first <= _last) {
-				newLast = ::std::uninitialized_move(_first, _last, newBegin);
-			}
-			else {
-				newLast = ::std::uninitialized_move(_begin, _last, ::std::uninitialized_move(_first, _end, newBegin));
-			}
-			delete[] _begin;
-
-			_begin = _first = newBegin;
-			_end = newEnd;
-			_last = newLast;
+		void clear() noexcept {
+			resize(0);
 		}
 
 		void resize(::std::size_t size, const T& value = {}) noexcept {
@@ -215,6 +194,31 @@ namespace plastic {
 			reserve(size);
 			T* newLast{_end - 1};
 			::std::uninitialized_fill(_last, newLast, value);
+			_last = newLast;
+		}
+
+		::std::size_t capacity() const noexcept {
+			return _end - _begin - 1;
+		}
+
+		void reserve(::std::size_t capacity) noexcept {
+			if (capacity <= this->capacity()) {
+				return;
+			}
+
+			T* newBegin{new T[capacity + 1]};
+			T* newEnd{newBegin + capacity + 1};
+			T* newLast;
+			if (_first <= _last) {
+				newLast = ::std::uninitialized_move(_first, _last, newBegin);
+			}
+			else {
+				newLast = ::std::uninitialized_move(_begin, _last, ::std::uninitialized_move(_first, _end, newBegin));
+			}
+			delete[] _begin;
+
+			_begin = _first = newBegin;
+			_end = newEnd;
 			_last = newLast;
 		}
 
@@ -369,6 +373,29 @@ namespace plastic {
 			::std::destroy(i, e);
 			_last = i._ptr;
 			return first;
+		}
+
+		void swap(const deque& container) noexcept {
+			if (this == &container) {
+				return;
+			}
+			::std::swap(_begin, container._begin);
+			::std::swap(_end, container._end);
+			::std::swap(_first, container._first);
+			::std::swap(_last, container._last);
+		}
+
+		::std::compare_three_way_result<T> operator<=>(const deque& container) const noexcept {
+			iterator i{begin()}, j{container.begin()}, ie{end()}, je{container.end()};
+			while (i != ie && j != je) {
+				::std::compare_three_way_result<T> cmp{*i++ <=> *j++};
+				if (cmp != 0) {
+					return cmp;
+				}
+			}
+			return i == ie && j != je ? ::std::strong_ordering::less
+				: i != ie && j == je ? ::std::strong_ordering::greater
+				: ::std::strong_ordering::equal;
 		}
 	};
 
