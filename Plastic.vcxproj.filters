@@ -13,48 +13,42 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\algorithm">
-      <UniqueIdentifier>{9076ef21-f339-4b49-a710-07ca4ae95271}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\data structure">
-      <UniqueIdentifier>{0d782316-5d29-4c08-a165-94e0412d3093}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sort.h">
-      <Filter>Header Files\algorithm</Filter>
-    </ClCompile>
     <ClCompile Include="binary_search_tree.h">
-      <Filter>Header Files\data structure</Filter>
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="deque.h">
-      <Filter>Header Files\data structure</Filter>
-    </ClInclude>
-    <ClInclude Include="forward_list.h">
-      <Filter>Header Files\data structure</Filter>
-    </ClInclude>
-    <ClInclude Include="list.h">
-      <Filter>Header Files\data structure</Filter>
-    </ClInclude>
-    <ClInclude Include="priority_queue.h">
-      <Filter>Header Files\data structure</Filter>
-    </ClInclude>
     <ClInclude Include="avl_tree.h">
-      <Filter>Header Files\data structure</Filter>
-    </ClInclude>
-    <ClInclude Include="red_black_tree.h">
-      <Filter>Header Files\data structure</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="b_tree.h">
-      <Filter>Header Files\data structure</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="deque.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="forward_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="priority_queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="red_black_tree.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vector.h">
-      <Filter>Header Files\data structure</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithm.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
