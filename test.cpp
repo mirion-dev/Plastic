@@ -145,42 +145,6 @@ namespace all_of {
 
 }
 
-namespace count {
-
-	void run() {
-		constexpr std::array v{1, 2, 3, 4, 4, 3, 7, 8, 9, 10};
-		std::cout << "v: ";
-		std::copy(v.cbegin(), v.cend(), std::ostream_iterator<int>(std::cout, " "));
-		std::cout << '\n';
-
-		// Determine how many integers match a target value.
-		for (const int target : {3, 4, 5}) {
-			const int num_items = plastic::count(v.cbegin(), v.cend(), target);
-			std::cout << "number: " << target << ", count: " << num_items << '\n';
-		}
-
-		// Use a lambda expression to count elements divisible by 4.
-		int count_div4 = plastic::count_if(v.begin(), v.end(), [](int i) { return i % 4 == 0; });
-		std::cout << "numbers divisible by four: " << count_div4 << '\n';
-
-		// A simplified version of `distance` with O(N) complexity:
-		auto distance = [](auto first, auto last) {
-			return plastic::count_if(first, last, [](auto) { return true; });
-		};
-		//static_assert(distance(v.begin(), v.end()) == 10);
-
-		std::array<std::complex<double>, 3> nums{{{4, 2}, {1, 3}, {4, 2}}};
-#ifdef __cpp_lib_algorithm_default_value_type
-		// T gets deduced making list-initialization possible
-		auto c = plastic::count(nums.cbegin(), nums.cend(), {4, 2});
-#else
-		auto c = plastic::count(nums.cbegin(), nums.cend(), std::complex<double>{4, 2});
-#endif
-		assert(c == 2);
-	}
-
-}
-
 namespace search {
 
 	using namespace std::literals;
@@ -353,6 +317,42 @@ namespace mismatch {
 
 }
 
+namespace count {
+
+	void run() {
+		constexpr std::array v{1, 2, 3, 4, 4, 3, 7, 8, 9, 10};
+		std::cout << "v: ";
+		std::copy(v.cbegin(), v.cend(), std::ostream_iterator<int>(std::cout, " "));
+		std::cout << '\n';
+
+		// Determine how many integers match a target value.
+		for (const int target : {3, 4, 5}) {
+			const int num_items = plastic::count(v.cbegin(), v.cend(), target);
+			std::cout << "number: " << target << ", count: " << num_items << '\n';
+		}
+
+		// Use a lambda expression to count elements divisible by 4.
+		int count_div4 = plastic::count_if(v.begin(), v.end(), [](int i) { return i % 4 == 0; });
+		std::cout << "numbers divisible by four: " << count_div4 << '\n';
+
+		// A simplified version of `distance` with O(N) complexity:
+		auto distance = [](auto first, auto last) {
+			return plastic::count_if(first, last, [](auto) { return true; });
+		};
+		//static_assert(distance(v.begin(), v.end()) == 10);
+
+		std::array<std::complex<double>, 3> nums{{{4, 2}, {1, 3}, {4, 2}}};
+#ifdef __cpp_lib_algorithm_default_value_type
+		// T gets deduced making list-initialization possible
+		auto c = plastic::count(nums.cbegin(), nums.cend(), {4, 2});
+#else
+		auto c = plastic::count(nums.cbegin(), nums.cend(), std::complex<double>{4, 2});
+#endif
+		assert(c == 2);
+	}
+
+}
+
 namespace equal {
 
 	constexpr bool is_palindrome(const std::string_view& s) {
@@ -368,6 +368,187 @@ namespace equal {
 	void run() {
 		test("radar");
 		test("hello");
+	}
+
+}
+
+namespace copy {
+
+	void run() {
+		std::vector<int> from_vector(10);
+		std::iota(from_vector.begin(), from_vector.end(), 0);
+
+		std::vector<int> to_vector;
+		plastic::copy(from_vector.begin(), from_vector.end(),
+			std::back_inserter(to_vector));
+		// or, alternatively,
+		//  std::vector<int> to_vector(from_vector.size());
+		//  std::copy(from_vector.begin(), from_vector.end(), to_vector.begin());
+		// either way is equivalent to
+		//  std::vector<int> to_vector = from_vector;
+
+		std::cout << "to_vector contains: ";
+
+		plastic::copy(to_vector.begin(), to_vector.end(),
+			std::ostream_iterator<int>(std::cout, " "));
+		std::cout << '\n';
+
+		std::cout << "odd numbers in to_vector are: ";
+
+		plastic::copy_if(to_vector.begin(), to_vector.end(),
+			std::ostream_iterator<int>(std::cout, " "),
+			[](int x) { return x % 2 != 0; });
+		std::cout << '\n';
+
+		std::cout << "to_vector contains these multiples of 3: ";
+
+		to_vector.clear();
+		plastic::copy_if(from_vector.begin(), from_vector.end(),
+			std::back_inserter(to_vector),
+			[](int x) { return x % 3 == 0; });
+
+		for (const int x : to_vector)
+			std::cout << x << ' ';
+		std::cout << '\n';
+	}
+
+}
+
+namespace copy_n {
+
+	void run() {
+		std::string in{"1234567890"};
+		std::string out;
+
+		plastic::copy_n(in.begin(), 4, std::back_inserter(out));
+		std::cout << out << '\n';
+
+		std::vector<int> v_in(128);
+		std::iota(v_in.begin(), v_in.end(), 1);
+		std::vector<int> v_out(v_in.size());
+
+		plastic::copy_n(v_in.cbegin(), 100, v_out.begin());
+		std::cout << std::accumulate(v_out.begin(), v_out.end(), 0) << '\n';
+	}
+
+}
+
+namespace copy_backward {
+
+	void run() {
+		std::vector<int> source(4);
+		std::iota(source.begin(), source.end(), 1); // fills with 1, 2, 3, 4
+
+		std::vector<int> destination(6);
+
+		plastic::copy_backward(source.begin(), source.end(), destination.end());
+
+		std::cout << "destination contains: ";
+		for (auto i : destination)
+			std::cout << i << ' ';
+		std::cout << '\n';
+	}
+
+}
+
+namespace move {
+
+	using container = std::vector<std::string>;
+
+	void print(std::string_view comment, const container& src, const container& dst = {}) {
+		auto prn = [](std::string_view name, const container& cont) {
+			std::cout << name;
+			for (const auto& s : cont)
+				std::cout << (s.empty() ? "." : s.data()) << ' ';
+			std::cout << '\n';
+		};
+		std::cout << comment << '\n';
+		prn("src: ", src);
+		if (dst.empty())
+			return;
+		prn("dst: ", dst);
+	}
+
+	void run() {
+		container src{"foo", "bar", "baz"};
+		container dst{"qux", "quux", "quuz", "corge"};
+		print("Non-overlapping case; before move:", src, dst);
+		plastic::move(src.begin(), src.end(), dst.begin());
+		print("After:", src, dst);
+
+		src = {"snap", "crackle", "pop", "lock", "drop"};
+		print("Overlapping case; before move:", src);
+		plastic::move(std::next(src.begin(), 3), src.end(), src.begin());
+		print("After:", src);
+	}
+
+}
+
+namespace move_backward {
+
+	using container = std::vector<std::string>;
+
+	void print(std::string_view comment, const container& src, const container& dst = {}) {
+		auto prn = [](std::string_view name, const container& cont) {
+			std::cout << name;
+			for (const auto& s : cont)
+				std::cout << (s.empty() ? "." : s.data()) << ' ';
+			std::cout << '\n';
+		};
+		std::cout << comment << '\n';
+		prn("src: ", src);
+		if (dst.empty())
+			return;
+		prn("dst: ", dst);
+	}
+
+	void run() {
+		container src{"foo", "bar", "baz"};
+		container dst{"qux", "quux", "quuz", "corge"};
+		print("Non-overlapping case; before move_backward:", src, dst);
+		plastic::move_backward(src.begin(), src.end(), dst.end());
+		print("After:", src, dst);
+
+		src = {"snap", "crackle", "pop", "lock", "drop"};
+		print("Overlapping case; before move_backward:", src);
+		plastic::move_backward(src.begin(), std::next(src.begin(), 3), src.end());
+		print("After:", src);
+	}
+
+}
+
+namespace swap_ranges {
+
+	auto print = [](auto comment, auto const& seq) {
+		std::cout << comment;
+		for (const auto& e : seq)
+			std::cout << e << ' ';
+		std::cout << '\n';
+	};
+
+	void run() {
+		std::vector<char> v{'a', 'b', 'c', 'd', 'e'};
+		std::list<char> l{'1', '2', '3', '4', '5'};
+
+		print("Before swap_ranges:\n" "v: ", v);
+		print("l: ", l);
+
+		plastic::swap_ranges(v.begin(), v.begin() + 3, l.begin());
+
+		print("After swap_ranges:\n" "v: ", v);
+		print("l: ", l);
+	}
+
+}
+
+namespace iter_swap {
+
+	void run() {
+		std::vector<int> v{1, 2};
+		plastic::iter_swap(v.begin(), v.end() - 1);
+		for (auto& i : v) {
+			std::cout << i << ' ';
+		}
 	}
 
 }
@@ -397,14 +578,6 @@ Among the numbers: 2 4 6 8 10 12 14 16 18 20
 All numbers are even
 None of them are odd
 At least one number is divisible by 7
-)");
-
-	test("count/count_if", count::run, R"(
-v: 1 2 3 4 4 3 7 8 9 10
-number: 3, count: 2
-number: 4, count: 2
-number: 5, count: 0
-numbers divisible by four: 3
 )");
 
 	test("search", search::run, R"(
@@ -437,6 +610,14 @@ The first adjacent pair of equal elements is at 4, *i1 = 40
 The last element in the non-decreasing subsequence is at 7, *i2 = 41
 )");
 
+	test("count/count_if", count::run, R"(
+v: 1 2 3 4 4 3 7 8 9 10
+number: 3, count: 2
+number: 4, count: 2
+number: 5, count: 0
+numbers divisible by four: 3
+)");
+
 	test("mismatch", mismatch::run, R"(
 ab
 a
@@ -446,6 +627,60 @@ aba
 	test("equal", equal::run, R"(
 "radar" is a palindrome
 "hello" is not a palindrome
+)");
+
+	test("copy/copy_if", copy::run, R"(
+to_vector contains: 0 1 2 3 4 5 6 7 8 9
+odd numbers in to_vector are: 1 3 5 7 9
+to_vector contains these multiples of 3: 0 3 6 9
+)");
+
+	test("copy_n", copy_n::run, R"(
+1234
+5050
+)");
+
+	test("copy_backward", copy_backward::run, R"(
+destination contains: 0 0 1 2 3 4
+)");
+
+	test("move", move::run, R"(
+Non-overlapping case; before move:
+src: foo bar baz
+dst: qux quux quuz corge
+After:
+src: . . .
+dst: foo bar baz corge
+Overlapping case; before move:
+src: snap crackle pop lock drop
+After:
+src: lock drop pop . .
+)");
+
+	test("move_backward", move_backward::run, R"(
+Non-overlapping case; before move_backward:
+src: foo bar baz
+dst: qux quux quuz corge
+After:
+src: . . .
+dst: qux foo bar baz
+Overlapping case; before move_backward:
+src: snap crackle pop lock drop
+After:
+src: . . snap crackle pop
+)");
+
+	test("swap_ranges", swap_ranges::run, R"(
+Before swap_ranges:
+v: a b c d e
+l: 1 2 3 4 5
+After swap_ranges:
+v: 1 2 3 d e
+l: a b c 4 5
+)");
+
+	test("iter_swap", iter_swap::run, R"(
+2 1
 )");
 
 }

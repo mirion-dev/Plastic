@@ -61,30 +61,6 @@ namespace plastic {
 		return ::plastic::find_if(first, last, pred) == last;
 	}
 
-	template<::std::input_iterator iter, class T = ::std::iter_value_t<iter>>
-	std::iter_difference_t<iter> count(iter first, iter last, const T& value) {
-		std::iter_difference_t<iter> res{0};
-		while (first != last) {
-			if (*first == value) {
-				++res;
-			}
-			++first;
-		}
-		return res;
-	}
-
-	template<::std::input_iterator iter, class unary_predicate>
-	std::iter_difference_t<iter> count_if(iter first, iter last, unary_predicate pred) {
-		std::iter_difference_t<iter> res{0};
-		while (first != last) {
-			if (pred(*first)) {
-				++res;
-			}
-			++first;
-		}
-		return res;
-	}
-
 	template<::std::forward_iterator iter1, ::std::forward_iterator iter2, class binary_predicate = ::std::equal_to<>>
 	iter1 search(iter1 first1, iter1 last1, iter2 first2, iter2 last2, binary_predicate pred = {}) {
 		while (true) {
@@ -163,6 +139,30 @@ namespace plastic {
 		return first;
 	}
 
+	template<::std::input_iterator iter, class T = ::std::iter_value_t<iter>>
+	std::iter_difference_t<iter> count(iter first, iter last, const T& value) {
+		std::iter_difference_t<iter> res{0};
+		while (first != last) {
+			if (*first == value) {
+				++res;
+			}
+			++first;
+		}
+		return res;
+	}
+
+	template<::std::input_iterator iter, class unary_predicate>
+	std::iter_difference_t<iter> count_if(iter first, iter last, unary_predicate pred) {
+		std::iter_difference_t<iter> res{0};
+		while (first != last) {
+			if (pred(*first)) {
+				++res;
+			}
+			++first;
+		}
+		return res;
+	}
+
 	template<::std::input_iterator iter1, ::std::input_iterator iter2, class binary_predicate = ::std::equal_to<>>
 	::std::pair<iter1, iter2> mismatch(iter1 first1, iter1 last1, iter2 first2, binary_predicate pred = {}) {
 		while (first1 != last1 && pred(*first1, *first2)) {
@@ -199,6 +199,73 @@ namespace plastic {
 			++first1, ++first2;
 		}
 		return first1 == last1 && first2 == last2;
+	}
+
+	template<::std::input_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter>
+	d_iter copy(iter first, iter last, d_iter d_first) {
+		while (first != last) {
+			*d_first = *first;
+			++d_first, ++first;
+		}
+		return d_first;
+	}
+
+	template<::std::input_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter, class unary_predicate>
+	d_iter copy_if(iter first, iter last, d_iter d_first, unary_predicate pred) {
+		while (first != last) {
+			if (pred(*first)) {
+				*d_first = *first;
+			}
+			++d_first, ++first;
+		}
+		return d_first;
+	}
+
+	template<::std::input_iterator iter, ::std::integral size_t, ::std::output_iterator<::std::iter_value_t<iter>> d_iter>
+	d_iter copy_n(iter first, size_t count, d_iter d_first) {
+		while (count-- != 0) {
+			*d_first = *first;
+			++d_first, ++first;
+		}
+		return d_first;
+	}
+
+	template<::std::bidirectional_iterator iter, ::std::bidirectional_iterator d_iter>
+	d_iter copy_backward(iter first, iter last, d_iter d_last) {
+		while (first != last) {
+			*--d_last = *--last;
+		}
+		return d_last;
+	}
+
+	template<::std::input_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter>
+	d_iter move(iter first, iter last, d_iter d_first) {
+		while (first != last) {
+			*d_first = ::std::move(*first);
+			++d_first, ++first;
+		}
+		return d_first;
+	}
+
+	template<::std::bidirectional_iterator iter, ::std::bidirectional_iterator d_iter>
+	d_iter move_backward(iter first, iter last, d_iter d_last) {
+		while (first != last) {
+			*--d_last = ::std::move(*--last);
+		}
+		return d_last;
+	}
+
+	template<::std::forward_iterator iter1,::std::forward_iterator iter2>
+	iter2 swap_ranges(iter1 first1, iter1 last1, iter2 first2) {
+		while (first1 != last1) {
+			::std::swap(*first1++, *first2++);
+		}
+		return first2;
+	}
+
+	template<::std::forward_iterator iter1, ::std::forward_iterator iter2>
+	void iter_swap(iter1 i1, iter2 i2) {
+		::std::swap(*i1, *i2);
 	}
 
 }
