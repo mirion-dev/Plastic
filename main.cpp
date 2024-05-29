@@ -12,7 +12,6 @@
 
 // Algorithm
 #include "sort.h"
-#include "bigint.h"
 
 // For Test
 #include <iostream>

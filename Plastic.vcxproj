@@ -26,7 +26,6 @@
   <ItemGroup>
     <ClInclude Include="vector.h" />
     <ClInclude Include="avl_tree.h" />
-    <ClInclude Include="bigint.h" />
     <ClInclude Include="b_tree.h" />
     <ClInclude Include="deque.h" />
     <ClInclude Include="forward_list.h" />
