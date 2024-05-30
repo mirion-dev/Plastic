@@ -8,6 +8,8 @@
 #include <complex>
 #include <cassert>
 #include <numeric>
+#include <algorithm>
+#include <random>
 
 template<class function>
 void test(const std::string& label, function func, const std::string& expected) {
@@ -544,11 +546,224 @@ namespace swap_ranges {
 namespace iter_swap {
 
 	void run() {
-		std::vector<int> v{1, 2};
+		std::vector<int> v{1, 2, 3, 4, 5};
 		plastic::iter_swap(v.begin(), v.end() - 1);
 		for (auto& i : v) {
 			std::cout << i << ' ';
 		}
+	}
+
+}
+
+namespace transform {
+
+	void print_ordinals(const std::vector<unsigned>& ordinals) {
+		std::cout << "ordinals: ";
+		for (unsigned ord : ordinals)
+			std::cout << std::setw(3) << ord << ' ';
+		std::cout << '\n';
+	}
+
+	char to_uppercase(unsigned char c) {
+		return std::toupper(c);
+	}
+
+	void to_uppercase_inplace(char& c) {
+		c = to_uppercase(c);
+	}
+
+	void unary_transform_example(std::string& hello, std::string world) {
+		// Transform string to uppercase in-place
+
+		plastic::transform(hello.cbegin(), hello.cend(), hello.begin(), to_uppercase);
+		std::cout << "hello = " << std::quoted(hello) << '\n';
+
+		// for_each version (see Notes above)
+		std::for_each(world.begin(), world.end(), to_uppercase_inplace);
+		std::cout << "world = " << std::quoted(world) << '\n';
+	}
+
+	void binary_transform_example(std::vector<unsigned> ordinals) {
+		// Transform numbers to doubled values
+
+		print_ordinals(ordinals);
+
+		plastic::transform(ordinals.cbegin(), ordinals.cend(), ordinals.cbegin(),
+			ordinals.begin(), std::plus<>{});
+
+		print_ordinals(ordinals);
+	}
+
+	void run() {
+		std::string hello("hello");
+		unary_transform_example(hello, "world");
+
+		std::vector<unsigned> ordinals;
+		std::copy(hello.cbegin(), hello.cend(), std::back_inserter(ordinals));
+		binary_transform_example(std::move(ordinals));
+	}
+
+}
+
+namespace replace {
+
+	void println(const auto& seq) {
+		for (const auto& e : seq)
+			std::cout << e << ' ';
+		std::cout << '\n';
+	}
+
+	void run() {
+		std::array<int, 10> s{5, 7, 4, 2, 8, 6, 1, 9, 0, 3};
+
+		// Replace all occurrences of 8 with 88.
+		plastic::replace(s.begin(), s.end(), 8, 88);
+		println(s);
+
+		// Replace all values less than 5 with 55.
+		plastic::replace_if(s.begin(), s.end(),
+			std::bind(std::less<int>(), std::placeholders::_1, 5), 55);
+		println(s);
+
+		std::array<std::complex<double>, 2> nums{{{1, 3}, {1, 3}}};
+#ifdef __cpp_lib_algorithm_default_value_type
+		plastic::replace(nums.begin(), nums.end(), {1, 3}, {4, 2});
+#else
+		plastic::replace(nums.begin(), nums.end(), std::complex<double>{1, 3},
+			std::complex<double>{4, 2});
+#endif
+		println(nums);
+	}
+
+}
+
+namespace replace_copy {
+
+	void println(const auto& seq) {
+		for (const auto& e : seq)
+			std::cout << e << ' ';
+		std::cout << '\n';
+	}
+
+	void run() {
+		std::vector<short> src{3, 1, 4, 1, 5, 9, 2, 6, 5};
+		println(src);
+		std::vector<int> dst(src.size());
+		plastic::replace_copy_if(src.cbegin(), src.cend(),
+			dst.begin(),
+			[](short n) { return n > 5; }, 0);
+		println(dst);
+
+		std::vector<std::complex<double>> src2{{1, 3}, {2, 4}, {3, 5}},
+			dst2(src2.size());
+		println(src2);
+#ifdef __cpp_lib_algorithm_default_value_type
+		plastic::replace_copy_if(src2.cbegin(), src2.cend(), dst2.begin(),
+			[](std::complex<double> z) { return std::abs(z) < 5; },
+			{4, 2}); // Possible, since the T is deduced.
+#else
+		plastic::replace_copy_if(src2.cbegin(), src2.cend(), dst2.begin(),
+			[](std::complex<double> z) { return std::abs(z) < 5; },
+			std::complex<double>{4, 2});
+#endif
+		println(dst2);
+	}
+
+}
+
+namespace fill {
+
+	void println(const auto& seq) {
+		for (const auto& e : seq)
+			std::cout << e << ' ';
+		std::cout << '\n';
+	}
+
+	void run() {
+		std::vector<int> v{0, 1, 2, 3, 4, 5, 6, 7, 8};
+		println(v);
+
+		// set all of the elements to 8
+		plastic::fill(v.begin(), v.end(), 8);
+		println(v);
+
+		std::vector<std::complex<double>> nums{{1, 3}, {2, 2}, {4, 8}};
+		println(nums);
+#ifdef __cpp_lib_algorithm_default_value_type
+		plastic::fill(nums.begin(), nums.end(), {4, 2});
+#else
+		plastic::fill(nums.begin(), nums.end(), std::complex<double>{4, 2});
+#endif
+		println(nums);
+	}
+
+}
+
+namespace fill_n {
+
+	void run() {
+		std::vector<int> v1{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+		// replace values of the first 5 elements with -1
+		plastic::fill_n(v1.begin(), 5, -1);
+
+		std::copy_n(v1.cbegin(), v1.size(), std::ostream_iterator<int>(std::cout, " "));
+		std::cout << '\n';
+
+		std::vector<std::complex<double>> nums{{1, 3}, {2, 2}, {4, 8}};
+#ifdef __cpp_lib_algorithm_default_value_type
+		plastic::fill_n(nums.begin(), 2, {4, 2});
+#else
+		plastic::fill_n(nums.begin(), 2, std::complex<double>{4, 2});
+#endif
+		std::copy_n(nums.cbegin(), nums.size(),
+			std::ostream_iterator<std::complex<double>>(std::cout, " "));
+		std::cout << '\n';
+	}
+
+}
+
+namespace generate {
+
+	void println(std::string_view fmt, const auto& v) {
+		for (std::cout << fmt; const auto & e : v)
+			std::cout << e << ' ';
+		std::cout << '\n';
+	};
+
+
+	int f() {
+		static int i;
+		return ++i;
+	}
+
+	void run() {
+		std::vector<int> v(5);
+
+		plastic::generate(v.begin(), v.end(), f);
+		println("v: ", v);
+
+		// Initialize with default values 0,1,2,3,4 from a lambda function
+		// Equivalent to std::iota(v.begin(), v.end(), 0);
+		plastic::generate(v.begin(), v.end(), [n = 0]() mutable { return n++; });
+		println("v: ", v);
+	}
+
+}
+
+namespace generate_n {
+
+	void println(std::string_view fmt, const auto& v) {
+		for (std::cout << fmt; const auto & e : v)
+			std::cout << e << ' ';
+		std::cout << '\n';
+	};
+
+	void run() {
+		std::vector<int> v(5);
+		println("v: ", v);
+		plastic::generate(v.begin(), v.end(), [n = 0]() mutable { return n++; });
+		println("v: ", v);
 	}
 
 }
@@ -680,7 +895,49 @@ l: a b c 4 5
 )");
 
 	test("iter_swap", iter_swap::run, R"(
-2 1
+5 2 3 4 1
+)");
+
+	test("transform", transform::run, R"(
+hello = "HELLO"
+world = "WORLD"
+ordinals:  72  69  76  76  79 
+ordinals: 144 138 152 152 158
+)");
+
+	test("replace/replace_if", replace::run, R"(
+5 7 4 2 88 6 1 9 0 3
+5 7 55 55 88 6 55 9 55 55
+(4,2) (4,2)
+)");
+
+	test("replace_copy/replace_copy_if", replace_copy::run, R"(
+3 1 4 1 5 9 2 6 5 
+3 1 4 1 5 0 2 0 5 
+(1,3) (2,4) (3,5) 
+(4,2) (4,2) (3,5)
+)");
+
+	test("fill", fill::run, R"(
+0 1 2 3 4 5 6 7 8
+8 8 8 8 8 8 8 8 8
+(1,3) (2,2) (4,8) 
+(4,2) (4,2) (4,2)
+)");
+
+	test("fill_n", fill_n::run, R"(
+-1 -1 -1 -1 -1 5 6 7 8 9
+(4,2) (4,2) (4,8)
+)");
+
+	test("generate", generate::run, R"(
+v: 1 2 3 4 5
+v: 0 1 2 3 4
+)");
+
+	test("generate_n", generate_n::run, R"(
+v: 0 0 0 0 0
+v: 0 1 2 3 4
 )");
 
 }

@@ -255,7 +255,7 @@ namespace plastic {
 		return d_last;
 	}
 
-	template<::std::forward_iterator iter1,::std::forward_iterator iter2>
+	template<::std::forward_iterator iter1, ::std::forward_iterator iter2>
 	iter2 swap_ranges(iter1 first1, iter1 last1, iter2 first2) {
 		while (first1 != last1) {
 			::std::swap(*first1++, *first2++);
@@ -266,6 +266,92 @@ namespace plastic {
 	template<::std::forward_iterator iter1, ::std::forward_iterator iter2>
 	void iter_swap(iter1 i1, iter2 i2) {
 		::std::swap(*i1, *i2);
+	}
+
+	template<::std::input_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter, class unary_function>
+	d_iter transform(iter first, iter last, d_iter d_first, unary_function func) {
+		while (first != last) {
+			*d_first = func(*first);
+			++d_first, ++first;
+		}
+		return d_first;
+	}
+
+	template<::std::input_iterator iter1, ::std::input_iterator iter2, ::std::output_iterator<::std::iter_value_t<iter1>> d_iter, class binary_function>
+	d_iter transform(iter1 first1, iter1 last1, iter2 first2, d_iter d_first, binary_function func) {
+		while (first1 != last1) {
+			*d_first = func(*first1, *first2);
+			++d_first, ++first1, ++first2;
+		}
+		return d_first;
+	}
+
+	template<::std::forward_iterator iter, class T = ::std::iter_value_t<iter>>
+	void replace(iter first, iter last, const T& old_value, const T& value) {
+		while (first != last) {
+			if (*first == old_value) {
+				*first = value;
+			}
+			++first;
+		}
+	}
+
+	template<::std::forward_iterator iter, class unary_predicate, class T = ::std::iter_value_t<iter>>
+	void replace_if(iter first, iter last, unary_predicate pred, const T& value) {
+		while (first != last) {
+			if (pred(*first)) {
+				*first = value;
+			}
+			++first;
+		}
+	}
+
+	template<::std::input_iterator iter, class d_iter, class T = ::std::iter_value_t<iter>> requires ::std::output_iterator<d_iter, T>
+	d_iter replace_copy(iter first, iter last, d_iter d_first, const T& old_value, const T& value) {
+		while (first != last) {
+			*d_first = *first == old_value ? value : *first;
+			++first, ++d_first;
+		}
+		return d_first;
+	}
+
+	template<::std::input_iterator iter, class d_iter, class unary_predicate, class T = ::std::iter_value_t<iter>> requires ::std::output_iterator<d_iter, T>
+	d_iter replace_copy_if(iter first, iter last, d_iter d_first, unary_predicate pred, const T& value) {
+		while (first != last) {
+			*d_first = pred(*first) ? value : *first;
+			++first, ++d_first;
+		}
+		return d_first;
+	}
+
+	template<::std::forward_iterator iter, class T = ::std::iter_value_t<iter>>
+	void fill(iter first, iter last, const T& value) {
+		while (first != last) {
+			*first++ = value;
+		}
+	}
+
+	template<class iter, ::std::integral size_t, class T> requires ::std::output_iterator<iter, T>
+	iter fill_n(iter first, size_t count, const T& value) {
+		while (count-- != 0) {
+			*first++ = value;
+		}
+		return first;
+	}
+
+	template<::std::forward_iterator iter, class nullary_function>
+	void generate(iter first, iter last, nullary_function func) {
+		while (first != last) {
+			*first++ = func();
+		}
+	}
+
+	template<class iter, ::std::integral size_t, class nullary_function> requires ::std::output_iterator<iter, ::std::invoke_result<nullary_function>>
+	iter generate_n(iter first, size_t count, nullary_function func) {
+		while (count-- != 0) {
+			*first++ = func();
+		}
+		return first;
 	}
 
 }
