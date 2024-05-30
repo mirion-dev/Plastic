@@ -99,8 +99,8 @@ namespace find {
 
 		auto is_even = [](int i) { return i % 2 == 0; };
 
-		for (const auto& w : {std::array{3, 1, 4}, {1, 3, 5}})
-			if (auto it = plastic::find_if(begin(w), end(w), is_even); it != std::end(w))
+		for (const auto& w : {std::array{3, 1, 4}, std::array{1, 3, 5}})
+			if (auto it = plastic::find_if(std::begin(w), std::end(w), is_even); it != std::end(w))
 				std::cout << "w contains an even number " << *it << '\n';
 			else
 				std::cout << "w does not contain even numbers\n";
@@ -225,12 +225,12 @@ namespace find_end {
 	void run() {
 		const auto v = {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4};
 
-		for (auto const& x : {std::array{1, 2, 3}, {4, 5, 6}}) {
+		for (auto const& x : {std::array{1, 2, 3}, std::array{4, 5, 6}}) {
 			auto iter = plastic::find_end(v.begin(), v.end(), x.begin(), x.end()); // overload (1)
 			print_result(iter, v);
 		}
 
-		for (auto const& x : {std::array{-1, -2, -3}, {-4, -5, -6}}) {
+		for (auto const& x : {std::array{-1, -2, -3}, std::array{-4, -5, -6}}) {
 			auto iter = plastic::find_end(v.begin(), v.end(), x.begin(), x.end(), // overload (3)
 				[](int x, int y) {
 				return std::abs(x) == std::abs(y);
@@ -270,7 +270,7 @@ namespace find_first_of {
 				const auto pos = std::distance(v.begin(), result);
 				std::cout << "Found a match (" << *result << ") at position " << pos;
 				print_sequence(", where t = ", t);
-				print_sequence("v = ", v, pos);
+				print_sequence("v = ", v, static_cast<int>(pos));
 			}
 		};
 
@@ -329,12 +329,12 @@ namespace count {
 
 		// Determine how many integers match a target value.
 		for (const int target : {3, 4, 5}) {
-			const int num_items = plastic::count(v.cbegin(), v.cend(), target);
+			const int num_items = static_cast<int>(plastic::count(v.cbegin(), v.cend(), target));
 			std::cout << "number: " << target << ", count: " << num_items << '\n';
 		}
 
 		// Use a lambda expression to count elements divisible by 4.
-		int count_div4 = plastic::count_if(v.begin(), v.end(), [](int i) { return i % 4 == 0; });
+		int count_div4 = static_cast<int>(plastic::count_if(v.begin(), v.end(), [](int i) { return i % 4 == 0; }));
 		std::cout << "numbers divisible by four: " << count_div4 << '\n';
 
 		// A simplified version of `distance` with O(N) complexity:
@@ -768,6 +768,281 @@ namespace generate_n {
 
 }
 
+namespace remove_test {
+
+	void run() {
+		std::string str1{"Text with some   spaces"};
+
+		auto noSpaceEnd = plastic::remove(str1.begin(), str1.end(), ' ');
+
+		// The spaces are removed from the string only logically.
+		// Note, we use view, the original string is still not shrunk:
+		std::cout << std::string_view(str1.begin(), noSpaceEnd)
+			<< " size: " << str1.size() << '\n';
+
+		str1.erase(noSpaceEnd, str1.end());
+
+		// The spaces are removed from the string physically.
+		std::cout << str1 << " size: " << str1.size() << '\n';
+
+		std::string str2 = "Text\n with\tsome \t  whitespaces\n\n";
+		str2.erase(plastic::remove_if(str2.begin(),
+			str2.end(),
+			[](unsigned char x) { return std::isspace(x); }),
+			str2.end());
+		std::cout << str2 << '\n';
+
+		std::vector<std::complex<double>> nums{{2, 2}, {1, 3}, {4, 8}};
+#ifdef __cpp_lib_algorithm_default_value_type
+		nums.erase(plastic::remove(nums.begin(), nums.end(), {1, 3}), nums.end());
+#else
+		nums.erase(plastic::remove(nums.begin(), nums.end(), std::complex<double>{1, 3}),
+			nums.end());
+#endif
+		assert((nums == std::vector<std::complex<double>>{{2, 2}, {4, 8}}));
+	}
+
+}
+
+namespace remove_copy {
+
+	void run() {
+		// Erase the hash characters '#' on the fly.
+		std::string str = "#Return #Value #Optimization";
+		std::cout << "before: " << std::quoted(str) << '\n';
+
+		std::cout << "after:  \"";
+		plastic::remove_copy(str.begin(), str.end(),
+			std::ostream_iterator<char>(std::cout), '#');
+		std::cout << "\"\n";
+
+		// Erase {1, 3} value on the fly.
+		std::vector<std::complex<double>> nums{{2, 2}, {1, 3}, {4, 8}, {1, 3}};
+		plastic::remove_copy(nums.begin(), nums.end(),
+			std::ostream_iterator<std::complex<double>>(std::cout),
+#ifdef __cpp_lib_algorithm_default_value_type
+			{1, 3}); // T gets deduced
+#else
+			std::complex<double>{1, 3});
+#endif
+	}
+
+}
+
+namespace unique {
+
+	void run() {
+		// a vector containing several duplicate elements
+		std::vector<int> v{1, 2, 1, 1, 3, 3, 3, 4, 5, 4};
+		auto print = [&](int id) {
+			std::cout << "@" << id << ": ";
+			for (int i : v)
+				std::cout << i << ' ';
+			std::cout << '\n';
+		};
+		print(1);
+
+		// remove consecutive (adjacent) duplicates
+		auto last = plastic::unique(v.begin(), v.end());
+		// v now holds {1 2 1 3 4 5 4 x x x}, where 'x' is indeterminate
+		v.erase(last, v.end());
+		print(2);
+
+		// sort followed by unique, to remove all duplicates
+		std::sort(v.begin(), v.end()); // {1 1 2 3 4 4 5}
+		print(3);
+
+		last = plastic::unique(v.begin(), v.end());
+		// v now holds {1 2 3 4 5 x x}, where 'x' is indeterminate
+		v.erase(last, v.end());
+		print(4);
+	}
+
+}
+
+namespace unique_copy {
+
+	void run() {
+		std::string s1{"A string with mmmany letters!"};
+		std::cout << "Before: " << s1 << '\n';
+
+		std::string s2;
+		plastic::unique_copy(s1.begin(), s1.end(), std::back_inserter(s2),
+			[](char c1, char c2) { return c1 == 'm' && 'm' == c2; });
+
+		std::cout << "After:  " << s2 << '\n';
+	}
+
+}
+
+namespace reverse {
+
+	void println(auto rem, auto const& v) {
+		for (std::cout << rem; auto e : v)
+			std::cout << e << ' ';
+		std::cout << '\n';
+	}
+
+	void run() {
+		std::vector<int> v{1, 2, 3};
+		plastic::reverse(v.begin(), v.end());
+		println("after reverse, v = ", v);
+
+		int a[] = {4, 5, 6, 7};
+		plastic::reverse(std::begin(a), std::end(a));
+		println("after reverse, a = ", a);
+	}
+
+}
+
+namespace reverse_copy {
+
+	void run() {
+		auto print = [](const std::vector<int>& v) {
+			for (const auto& value : v)
+				std::cout << value << ' ';
+			std::cout << '\n';
+		};
+
+		std::vector<int> v{1, 2, 3};
+		print(v);
+
+		std::vector<int> destination(3);
+		plastic::reverse_copy(std::begin(v), std::end(v), std::begin(destination));
+		print(destination);
+
+		plastic::reverse_copy(std::rbegin(v), std::rend(v), std::begin(destination));
+		print(destination);
+	}
+
+}
+
+namespace rotate {
+
+	auto print = [](const auto remark, const auto& v) {
+		std::cout << remark;
+		for (auto n : v)
+			std::cout << n << ' ';
+		std::cout << '\n';
+	};
+
+	void run() {
+		std::vector<int> v{2, 4, 2, 0, 5, 10, 7, 3, 7, 1};
+		print("before sort:\t\t", v);
+
+		// insertion sort
+		for (auto i = v.begin(); i != v.end(); ++i)
+			plastic::rotate(std::upper_bound(v.begin(), i, *i), i, i + 1);
+		print("after sort:\t\t", v);
+
+		// simple rotation to the left
+		plastic::rotate(v.begin(), v.begin() + 1, v.end());
+		print("simple rotate left:\t", v);
+
+		// simple rotation to the right
+		plastic::rotate(v.rbegin(), v.rbegin() + 1, v.rend());
+		print("simple rotate right:\t", v);
+	}
+
+}
+
+namespace rotate_copy {
+
+	void run() {
+		std::vector<int> src{1, 2, 3, 4, 5};
+		std::vector<int> dest(src.size());
+		auto pivot = std::find(src.begin(), src.end(), 3);
+
+		plastic::rotate_copy(src.begin(), pivot, src.end(), dest.begin());
+		for (int i : dest)
+			std::cout << i << ' ';
+		std::cout << '\n';
+
+		// copy the rotation result directly to the std::cout
+		pivot = std::find(dest.begin(), dest.end(), 1);
+		plastic::rotate_copy(dest.begin(), pivot, dest.end(),
+			std::ostream_iterator<int>(std::cout, " "));
+		std::cout << '\n';
+	}
+
+}
+
+namespace shift_left {
+
+	struct S {
+		int value{0};
+		bool specified_state{true};
+
+		S(int v = 0) : value{v} {}
+		S(S const& rhs) = default;
+		S(S&& rhs) {
+			*this = std::move(rhs);
+		}
+		S& operator=(S const& rhs) = default;
+		S& operator=(S&& rhs) {
+			if (this != &rhs) {
+				value = rhs.value;
+				specified_state = rhs.specified_state;
+				rhs.specified_state = false;
+			}
+			return *this;
+		}
+	};
+
+	template<typename T>
+	std::ostream& operator<<(std::ostream& os, std::vector<T> const& v) {
+		for (const auto& s : v) {
+			if constexpr (std::is_same_v<T, S>)
+				s.specified_state ? os << s.value << ' ' : os << ". ";
+			else if constexpr (std::is_same_v<T, std::string>)
+				os << (s.empty() ? "." : s) << ' ';
+			else
+				os << s << ' ';
+		}
+		return os;
+	}
+
+	void run() {
+		std::cout << std::left;
+
+		std::vector<S>           a{1, 2, 3, 4, 5, 6, 7};
+		std::vector<std::string> c{"¦Á", "¦Â", "¦Ã", "¦Ä", "¦Å", "¦Æ", "¦Ç"};
+
+		std::cout << "vector<S> \tvector<string>\n";
+		std::cout << a << "  " << c << '\n';
+
+		plastic::shift_left(begin(a), end(a), 3);
+		plastic::shift_left(begin(c), end(c), 3);
+		std::cout << a << "  " << c << '\n';
+
+		plastic::shift_right(begin(a), end(a), 2);
+		plastic::shift_right(begin(c), end(c), 2);
+		std::cout << a << "  " << c << '\n';
+
+		plastic::shift_left(begin(a), end(a), 8); // has no effect: n >= last - first
+		plastic::shift_left(begin(c), end(c), 8); // ditto
+		std::cout << a << "  " << c << '\n';
+
+		//  std::shift_left(begin(a), end(a), -3); // UB, e.g. segfault
+	}
+
+}
+
+namespace shuffle {
+
+	void run() {
+		std::vector<int> v{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+		std::mt19937 g{std::random_device{}()};
+		plastic::shuffle(v.begin(), v.end(), g);
+
+		std::string in{"ABCDEFGHIJK"}, out;
+		plastic::sample(in.begin(), in.end(), std::back_inserter(out), 4, g);
+
+		std::cout << "No Compile Error.";
+	}
+
+}
+
 int main() {
 
 	test("for_each", for_each::run, R"(
@@ -938,6 +1213,65 @@ v: 0 1 2 3 4
 	test("generate_n", generate_n::run, R"(
 v: 0 0 0 0 0
 v: 0 1 2 3 4
+)");
+
+	test("remove/remove_if", remove_test::run, R"(
+Textwithsomespaces size: 23
+Textwithsomespaces size: 18
+Textwithsomewhitespaces
+)");
+
+	test("remove_copy/remove_copy_if", remove_copy::run, R"(
+before: "#Return #Value #Optimization"
+after:  "Return Value Optimization"
+(2,2)(4,8)
+)");
+
+	test("unique", unique::run, R"(
+@1: 1 2 1 1 3 3 3 4 5 4
+@2: 1 2 1 3 4 5 4
+@3: 1 1 2 3 4 4 5
+@4: 1 2 3 4 5
+)");
+
+	test("unique_copy", unique_copy::run, R"(
+Before: A string with mmmany letters!
+After:  A string with many letters!
+)");
+
+	test("reverse", reverse::run, R"(
+after reverse, v = 3 2 1
+after reverse, a = 7 6 5 4
+)");
+
+	test("reverse_copy", reverse_copy::run, R"(
+1 2 3 
+3 2 1 
+1 2 3
+)");
+
+	test("rotate", rotate::run, R"(
+before sort:		2 4 2 0 5 10 7 3 7 1
+after sort:		0 1 2 2 3 4 5 7 7 10
+simple rotate left:	1 2 2 3 4 5 7 7 10 0
+simple rotate right:	0 1 2 2 3 4 5 7 7 10
+)");
+
+	test("rotate_copy", rotate_copy::run, R"(
+3 4 5 1 2
+1 2 3 4 5
+)");
+
+	test("shift_left/shift_right", shift_left::run, R"(
+vector<S>       vector<string>
+1 2 3 4 5 6 7   ¦Á ¦Â ¦Ã ¦Ä ¦Å ¦Æ ¦Ç
+4 5 6 7 . . .   ¦Ä ¦Å ¦Æ ¦Ç . . .
+. . 4 5 6 7 .   . . ¦Ä ¦Å ¦Æ ¦Ç .
+. . 4 5 6 7 .   . . ¦Ä ¦Å ¦Æ ¦Ç .
+)");
+
+	test("shuffle/sample", shuffle::run, R"(
+No Compile Error.
 )");
 
 }

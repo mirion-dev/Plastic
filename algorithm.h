@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <random>
 
 namespace plastic {
 
@@ -352,6 +353,224 @@ namespace plastic {
 			*first++ = func();
 		}
 		return first;
+	}
+
+	template<::std::forward_iterator iter, class T = ::std::iter_value_t<iter>>
+	iter remove(iter first, iter last, const T& value) {
+		first = ::plastic::find(first, last, value);
+		if (first != last) {
+			iter i{first};
+			while (++i != last) {
+				if (*i != value) {
+					*first++ = ::std::move(*i);
+				}
+			}
+		}
+		return first;
+	}
+
+	template<::std::forward_iterator iter, class unary_predicate>
+	iter remove_if(iter first, iter last, unary_predicate pred) {
+		first = ::plastic::find_if(first, last, pred);
+		if (first != last) {
+			iter i{first};
+			while (++i != last) {
+				if (!pred(*i)) {
+					*first++ = ::std::move(*i);
+				}
+			}
+		}
+		return first;
+	}
+
+	template<::std::input_iterator iter, class d_iter, class T = ::std::iter_value_t<iter>> requires ::std::output_iterator<d_iter, T>
+	d_iter remove_copy(iter first, iter last, d_iter d_first, const T& value) {
+		while (first != last) {
+			if (*first != value) {
+				*d_first++ = *first;
+			}
+			++first;
+		}
+		return d_first;
+	}
+
+	template<::std::input_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter, class unary_predicate>
+	d_iter remove_copy_if(iter first, iter last, d_iter d_first, unary_predicate pred) {
+		while (first != last) {
+			if (!pred(*first)) {
+				*d_first++ = *first;
+			}
+			++first;
+		}
+		return d_first;
+	}
+
+	template<::std::forward_iterator iter, class binary_predicate = ::std::equal_to<>>
+	iter unique(iter first, iter last, binary_predicate pred = {}) {
+		if (first != last) {
+			iter i{first};
+			while (++i != last) {
+				if (!pred(*first, *i)) {
+					*++first = ::std::move(*i);
+				}
+			}
+			++first;
+		}
+		return first;
+	}
+
+	template<::std::input_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter, class binary_predicate = ::std::equal_to<>>
+	d_iter unique_copy(iter first, iter last, d_iter d_first, binary_predicate pred = {}) {
+		if (first != last) {
+			::std::iter_value_t<iter> value;
+			*d_first++ = value = *first;
+			while (++first != last) {
+				if (!pred(value, *first)) {
+					*d_first++ = value = *first;
+				}
+			}
+		}
+		return d_first;
+	}
+
+	template<::std::bidirectional_iterator iter>
+	void reverse(iter first, iter last) {
+		while (first != last && first != --last) {
+			::std::swap(*first++, *last);
+		}
+	}
+
+	template<::std::bidirectional_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter>
+	d_iter reverse_copy(iter first, iter last, d_iter d_first) {
+		while (first != last) {
+			*d_first++ = *--last;
+		}
+		return d_first;
+	}
+
+	template<::std::forward_iterator iter>
+	iter rotate(iter first, iter middle, iter last) {
+		if (first == middle) {
+			return last;
+		}
+		if (middle == last) {
+			return first;
+		}
+		iter i{middle};
+		do {
+			::std::swap(*first++, *i++);
+			if (first == middle) {
+				middle = i;
+			}
+		} while (i != last);
+		iter res{first};
+		while (middle != last) {
+			iter i{middle};
+			do {
+				::std::swap(*first++, *i++);
+				if (first == middle) {
+					middle = i;
+				}
+			} while (i != last);
+		}
+		return res;
+	}
+
+	template<::std::forward_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter>
+	d_iter rotate_copy(iter first, iter middle, iter last, d_iter d_first) {
+		return ::plastic::copy(first, middle, ::plastic::copy(middle, last, d_first));
+	}
+
+	template<::std::forward_iterator iter>
+	iter shift_left(iter first, iter last, ::std::iter_difference_t<iter> count) {
+		iter dest{first};
+		while (count-- != 0) {
+			if (dest == last) {
+				return first;
+			}
+			++dest;
+		}
+		return ::plastic::move(dest, last, first);
+	}
+
+	template<::std::forward_iterator iter>
+	iter shift_right(iter first, iter last, ::std::iter_difference_t<iter> count) {
+		iter dest{first};
+		while (count-- != 0) {
+			if (dest == last) {
+				return last;
+			}
+			++dest;
+		}
+		iter i{first}, j{dest};
+		while (i != dest) {
+			if (j == last) {
+				::plastic::move(first, i, dest);
+				return dest;
+			}
+			++i, ++j;
+		}
+		iter buf{first};
+		while (j != last) {
+			::std::swap(*buf++, *i);
+			++i, ++j;
+			if (buf == dest) {
+				buf = first;
+			}
+		}
+		::plastic::move(first, buf, ::plastic::move(buf, dest, i));
+		return dest;
+	}
+
+	template<::std::random_access_iterator iter, class uniform_random_bit_generator>
+	void shuffle(iter first, iter last, uniform_random_bit_generator&& gene) {
+		using diff_t = ::std::iter_difference_t<iter>;
+		using distr_t = ::std::uniform_int_distribution<diff_t>;
+		using param_t = distr_t::param_type;
+		distr_t dist;
+		if (first != last) {
+			diff_t size{last - first};
+			while (--size != 0) {
+				::std::swap(first[size], first[dist(gene, param_t{0, size})]);
+			}
+		}
+	}
+
+	template<::std::input_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter, ::std::integral diff_t, class uniform_random_bit_generator> requires ::std::forward_iterator<iter> || ::std::random_access_iterator<d_iter>
+	d_iter sample(iter first, iter last, d_iter d_first, diff_t count, uniform_random_bit_generator && gene) {
+		using distr_t = ::std::uniform_int_distribution<diff_t>;
+		using param_t = distr_t::param_type;
+		distr_t dist;
+		if constexpr (::std::forward_iterator<iter>) {
+			diff_t size{static_cast<diff_t>(::std::distance(first, last))};
+			if (count >= size) {
+				return ::plastic::copy(first, last, d_first);
+			}
+			while (count != 0) {
+				if (dist(gene, param_t{0, --size}) < count) {
+					*d_first++ = *first;
+					--count;
+				}
+				++first;
+			}
+			return d_first;
+		}
+		else {
+			diff_t size{0};
+			while (first != last && size != count) {
+				d_first[size++] = *first;
+				++first;
+			}
+			diff_t res{d_first + size};
+			while (first != last) {
+				diff_t r{dist(gene, param_t{0, size++})};
+				if (r < count) {
+					d_first[r] = *first;
+				}
+				++first;
+			}
+			return res;
+		}
 	}
 
 }
