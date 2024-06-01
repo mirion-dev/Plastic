@@ -483,14 +483,14 @@ namespace plastic {
 
 	template<::std::forward_iterator iter>
 	iter shift_left(iter first, iter last, ::std::iter_difference_t<iter> count) {
-		iter dest{first};
+		iter source{first};
 		while (count-- != 0) {
-			if (dest == last) {
+			if (source == last) {
 				return first;
 			}
-			++dest;
+			++source;
 		}
-		return ::plastic::move(dest, last, first);
+		return ::plastic::move(source, last, first);
 	}
 
 	template<::std::forward_iterator iter>
@@ -510,15 +510,15 @@ namespace plastic {
 			}
 			++i, ++j;
 		}
-		iter buf{first};
+		iter buffer{first};
 		while (j != last) {
-			::std::swap(*buf++, *i);
+			::std::swap(*buffer++, *i);
 			++i, ++j;
-			if (buf == dest) {
-				buf = first;
+			if (buffer == dest) {
+				buffer = first;
 			}
 		}
-		::plastic::move(first, buf, ::plastic::move(buf, dest, i));
+		::plastic::move(first, buffer, ::plastic::move(buffer, dest, i));
 		return dest;
 	}
 
@@ -528,11 +528,9 @@ namespace plastic {
 		using distr_t = ::std::uniform_int_distribution<diff_t>;
 		using param_t = distr_t::param_type;
 		distr_t dist;
-		if (first != last) {
-			diff_t size{last - first};
-			while (--size != 0) {
-				::std::swap(first[size], first[dist(gene, param_t{0, size})]);
-			}
+		diff_t size{last - first};
+		while (size-- != 0) {
+			::std::swap(first[size], first[dist(gene, param_t{0, size})]);
 		}
 	}
 
@@ -561,7 +559,7 @@ namespace plastic {
 				d_first[size++] = *first;
 				++first;
 			}
-			diff_t res{d_first + size};
+			iter res{d_first + size};
 			while (first != last) {
 				diff_t r{dist(gene, param_t{0, size++})};
 				if (r < count) {
@@ -571,6 +569,100 @@ namespace plastic {
 			}
 			return res;
 		}
+	}
+
+	template<::std::input_iterator iter, class unary_predicate>
+	bool is_partitioned(iter first, iter last, unary_predicate pred) {
+		while (first != last && pred(*first)) {
+			++first;
+		}
+		while (first != last && !pred(*first)) {
+			++first;
+		}
+		return first == last;
+	}
+
+	template<::std::forward_iterator iter, class unary_predicate>
+	iter partition(iter first, iter last, unary_predicate pred) {
+		first = ::plastic::find_if_not(first, last, pred);
+		if (first != last) {
+			iter i{first};
+			while (++i != last) {
+				if (pred(*i)) {
+					::std::swap(*i, *first);
+					++first;
+				}
+			}
+		}
+		return first;
+	}
+
+	template<::std::input_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter1, ::std::output_iterator<::std::iter_value_t<iter>> d_iter2, class unary_predicate>
+	::std::pair<d_iter1, d_iter2> partition_copy(iter first, iter last, d_iter1 d_first1, d_iter2 d_first2, unary_predicate pred) {
+		while (first != last) {
+			(pred(*first) ? *d_first1++ : *d_first2++) = *first;
+			++first;
+		}
+		return {d_first1, d_first2};
+	}
+
+	template<::std::bidirectional_iterator iter, class unary_predicate>
+	iter stable_partition(iter first, iter last, unary_predicate pred) {
+		first = ::plastic::find_if_not(first, last, pred);
+		while (first != last && !pred(*--last));
+		if (first != last) {
+			using value_t = ::std::iter_value_t<iter>;
+			value_t* buffer{new value_t[::std::distance(first, last) + 1]};
+			value_t* p{buffer};
+			iter i{first};
+			*p++ = ::std::move(*i++);
+			while (i != last) {
+				(pred(*i++) ? *first++ : *p++) = ::std::move(*i);
+			}
+			*first++ = ::std::move(*last);
+			::plastic::move(buffer, p, first);
+			delete[] buffer;
+		}
+		return first;
+	}
+
+	template<::std::forward_iterator iter, class unary_predicate>
+	iter partition_point(iter first, iter last, unary_predicate pred) {
+		using diff_t = ::std::iter_difference_t<iter>;
+		diff_t size{::std::distance(first, last)};
+		while (size != 0) {
+			diff_t half{size / 2};
+			iter next{::std::next(first, half)};
+			if (pred(*next)) {
+				first = ++next;
+				size -= half + 1;
+			}
+			else {
+				size = half;
+			}
+		}
+		return first;
+	}
+
+	template<::std::forward_iterator iter, class T = ::std::iter_value_t<iter>, class compare = ::std::less<>>
+	iter lower_bound(iter first, iter last, const T& value, compare comp = {}) {
+		return ::plastic::partition_point(first, last, [&](auto&& param) { return comp(param, value); });
+	}
+
+	template<::std::forward_iterator iter, class T = ::std::iter_value_t<iter>, class compare = ::std::less<>>
+	iter upper_bound(iter first, iter last, const T& value, compare comp = {}) {
+		return ::plastic::partition_point(first, last, [&](auto&& param) { return !comp(value, param); });
+	}
+
+	template<::std::forward_iterator iter, class T = ::std::iter_value_t<iter>, class compare = ::std::less<>>
+	::std::pair<iter, iter> equal_range(iter first, iter last, const T& value, compare comp = {}) {
+		return {::plastic::lower_bound(first, last, value, comp), ::plastic::upper_bound(first, last, value, comp)};
+	}
+
+	template<::std::forward_iterator iter, class T = ::std::iter_value_t<iter>, class compare = ::std::less<>>
+	bool binary_search(iter first, iter last, const T& value, compare comp = {}) {
+		first = ::plastic::lower_bound(first, last, value, comp);
+		return first != last && !comp(value, *first);
 	}
 
 }

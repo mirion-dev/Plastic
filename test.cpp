@@ -5,11 +5,11 @@
 #include <sstream>
 #include <array>
 #include <vector>
+#include <forward_list>
+#include <algorithm>
+#include <numeric>
 #include <complex>
 #include <cassert>
-#include <numeric>
-#include <algorithm>
-#include <random>
 
 template<class function>
 void test(const std::string& label, function func, const std::string& expected) {
@@ -1043,6 +1043,302 @@ namespace shuffle {
 
 }
 
+namespace is_partitioned {
+
+	void run() {
+		std::array<int, 9> v{1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+		auto is_even = [](int i) { return i % 2 == 0; };
+		std::cout.setf(std::ios_base::boolalpha);
+		std::cout << plastic::is_partitioned(v.begin(), v.end(), is_even) << ' ';
+
+		std::partition(v.begin(), v.end(), is_even);
+		std::cout << plastic::is_partitioned(v.begin(), v.end(), is_even) << ' ';
+
+		std::reverse(v.begin(), v.end());
+		std::cout << plastic::is_partitioned(v.cbegin(), v.cend(), is_even) << ' ';
+		std::cout << plastic::is_partitioned(v.crbegin(), v.crend(), is_even) << '\n';
+	}
+
+}
+
+namespace partition {
+
+	template<class ForwardIt>
+	void quicksort(ForwardIt first, ForwardIt last) {
+		if (first == last)
+			return;
+
+		auto pivot = *std::next(first, std::distance(first, last) / 2);
+		auto middle1 = plastic::partition(first, last, [pivot](const auto& em) {
+			return em < pivot;
+		});
+		auto middle2 = plastic::partition(middle1, last, [pivot](const auto& em) {
+			return !(pivot < em);
+		});
+
+		quicksort(first, middle1);
+		quicksort(middle2, last);
+	}
+
+	void run() {
+		std::vector<int> v{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+		std::cout << "Original vector: ";
+		for (int elem : v)
+			std::cout << elem << ' ';
+
+		auto it = plastic::partition(v.begin(), v.end(), [](int i) {return i % 2 == 0; });
+
+		std::forward_list<int> fl{1, 30, -4, 3, 5, -4, 1, 6, -8, 2, -5, 64, 1, 92};
+		std::cout << "\nUnsorted list: ";
+		for (int n : fl)
+			std::cout << n << ' ';
+
+		quicksort(std::begin(fl), std::end(fl));
+		std::cout << "\nSorted using quicksort: ";
+		for (int fi : fl)
+			std::cout << fi << ' ';
+		std::cout << '\n';
+	}
+
+}
+
+namespace partition_copy {
+
+	void print(auto rem, const auto& v) {
+		for (std::cout << rem; const auto & x : v)
+			std::cout << x << ' ';
+		std::cout << '\n';
+	}
+
+	void run() {
+		int arr[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+		int true_arr[5] = {0};
+		int false_arr[5] = {0};
+
+		plastic::partition_copy(std::begin(arr), std::end(arr),
+			std::begin(true_arr), std::begin(false_arr),
+			[](int i) { return 4 < i; });
+
+		print("true_arr:  ", true_arr);
+		print("false_arr: ", false_arr);
+	}
+
+}
+
+namespace stable_partition {
+
+	void run() {
+		std::vector<int> v{0, 0, 3, -1, 2, 4, 5, 0, 7};
+		plastic::stable_partition(v.begin(), v.end(), [](int n) { return n > 0; });
+		for (int n : v)
+			std::cout << n << ' ';
+		std::cout << '\n';
+	}
+
+}
+
+namespace partition_point {
+
+	auto print_seq = [](auto rem, auto first, auto last) {
+		for (std::cout << rem; first != last; std::cout << *first++ << ' ') {
+		}
+		std::cout << '\n';
+	};
+
+	void run() {
+		std::array v{1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+		auto is_even = [](int i) { return i % 2 == 0; };
+
+		std::partition(v.begin(), v.end(), is_even);
+		print_seq("After partitioning, v: ", v.cbegin(), v.cend());
+
+		const auto pp = plastic::partition_point(v.cbegin(), v.cend(), is_even);
+		const auto i = std::distance(v.cbegin(), pp);
+		std::cout << "Partition point is at " << i << "; v[" << i << "] = " << *pp << '\n';
+
+		print_seq("First partition (all even elements): ", v.cbegin(), pp);
+		print_seq("Second partition (all odd elements): ", pp, v.cend());
+	}
+
+}
+
+namespace lower_bound {
+
+	struct PriceInfo {
+		double price;
+	};
+
+	void run() {
+		const std::vector<int> data{1, 2, 4, 5, 5, 6};
+
+		for (int i = 0; i < 8; ++i) {
+			// Search for first element x such that i ¡Ü x
+			auto lower = plastic::lower_bound(data.begin(), data.end(), i);
+
+			std::cout << i << " ¡Ü ";
+			lower != data.end()
+				? std::cout << *lower << " at index " << std::distance(data.begin(), lower)
+				: std::cout << "not found";
+			std::cout << '\n';
+		}
+
+		std::vector<PriceInfo> prices{{100.0}, {101.5}, {102.5}, {102.5}, {107.3}};
+
+		for (const double to_find : {102.5, 110.2}) {
+			auto prc_info = plastic::lower_bound(prices.begin(), prices.end(), to_find,
+				[](const PriceInfo& info, double value) {
+				return info.price < value;
+			});
+
+			prc_info != prices.end()
+				? std::cout << prc_info->price << " at index " << prc_info - prices.begin()
+				: std::cout << to_find << " not found";
+			std::cout << '\n';
+		}
+
+		using CD = std::complex<double>;
+		std::vector<CD> nums{{1, 0}, {2, 2}, {2, 1}, {3, 0}};
+		auto cmpz = [](CD x, CD y) { return x.real() < y.real(); };
+#ifdef __cpp_lib_algorithm_default_value_type
+		auto it = plastic::lower_bound(nums.cbegin(), nums.cend(), {2, 0}, cmpz);
+#else
+		auto it = plastic::lower_bound(nums.cbegin(), nums.cend(), CD{2, 0}, cmpz);
+#endif
+		assert((*it == CD{2, 2}));
+	}
+
+}
+
+namespace upper_bound {
+
+	struct PriceInfo {
+		double price;
+	};
+
+	void run() {
+		const std::vector<int> data{1, 2, 4, 5, 5, 6};
+
+		for (int i = 0; i < 7; ++i) {
+			// Search first element that is greater than i
+			auto upper = plastic::upper_bound(data.begin(), data.end(), i);
+
+			std::cout << i << " < ";
+			upper != data.end()
+				? std::cout << *upper << " at index " << std::distance(data.begin(), upper)
+				: std::cout << "not found";
+			std::cout << '\n';
+		}
+
+		std::vector<PriceInfo> prices{{100.0}, {101.5}, {102.5}, {102.5}, {107.3}};
+
+		for (double to_find : {102.5, 110.2}) {
+			auto prc_info = plastic::upper_bound(prices.begin(), prices.end(), to_find,
+				[](double value, const PriceInfo& info) {
+				return value < info.price;
+			});
+
+			prc_info != prices.end()
+				? std::cout << prc_info->price << " at index " << prc_info - prices.begin()
+				: std::cout << to_find << " not found";
+			std::cout << '\n';
+		}
+
+		using CD = std::complex<double>;
+		std::vector<CD> nums{{1, 0}, {2, 2}, {2, 1}, {3, 0}, {3, 1}};
+		auto cmpz = [](CD x, CD y) { return x.real() < y.real(); };
+#ifdef __cpp_lib_algorithm_default_value_type
+		auto it = plastic::upper_bound(nums.cbegin(), nums.cend(), {2, 0}, cmpz);
+#else
+		auto it = plastic::upper_bound(nums.cbegin(), nums.cend(), CD{2, 0}, cmpz);
+#endif
+		assert((*it == CD{3, 0}));
+	}
+
+}
+
+namespace equal_range {
+
+	struct S {
+		int number;
+		char name;
+		// note: name is ignored by this comparison operator
+		bool operator<(const S& s) const {
+			return number < s.number;
+		}
+	};
+
+	struct Comp {
+		bool operator()(const S& s, int i) const {
+			return s.number < i;
+		}
+		bool operator()(int i, const S& s) const {
+			return i < s.number;
+		}
+	};
+
+	void run() {
+		// note: not ordered, only partitioned w.r.t. S defined below
+		const std::vector<S> vec{{1, 'A'}, {2, 'B'}, {2, 'C'},
+								 {2, 'D'}, {4, 'G'}, {3, 'F'}};
+		const S value{2, '?'};
+
+		std::cout << "Compare using S::operator<(): ";
+		const auto p = plastic::equal_range(vec.begin(), vec.end(), value);
+
+		for (auto it = p.first; it != p.second; ++it)
+			std::cout << it->name << ' ';
+		std::cout << '\n';
+
+		std::cout << "Using heterogeneous comparison: ";
+		const auto p2 = plastic::equal_range(vec.begin(), vec.end(), 2, Comp{});
+
+		for (auto it = p2.first; it != p2.second; ++it)
+			std::cout << it->name << ' ';
+		std::cout << '\n';
+
+		using CD = std::complex<double>;
+		std::vector<CD> nums{{1, 0}, {2, 2}, {2, 1}, {3, 0}, {3, 1}};
+		auto cmpz = [](CD x, CD y) { return x.real() < y.real(); };
+#ifdef __cpp_lib_algorithm_default_value_type
+		auto p3 = plastic::equal_range(nums.cbegin(), nums.cend(), {2, 0}, cmpz);
+#else
+		auto p3 = plastic::equal_range(nums.cbegin(), nums.cend(), CD{2, 0}, cmpz);
+#endif
+
+		for (auto it = p3.first; it != p3.second; ++it)
+			std::cout << *it << ' ';
+		std::cout << '\n';
+	}
+
+}
+
+namespace binary_search {
+
+	void run() {
+		const auto haystack = {1, 3, 4, 5, 9};
+
+		for (const auto needle : {1, 2, 3}) {
+			std::cout << "Searching for " << needle << '\n';
+			if (plastic::binary_search(haystack.begin(), haystack.end(), needle))
+				std::cout << "Found " << needle << '\n';
+			else
+				std::cout << "No dice!\n";
+		}
+
+		using CD = std::complex<double>;
+		std::vector<CD> nums{{1, 1}, {2, 3}, {4, 2}, {4, 3}};
+		auto cmpz = [](CD x, CD y) { return abs(x) < abs(y); };
+#ifdef __cpp_lib_algorithm_default_value_type
+		assert(plastic::binary_search(nums.cbegin(), nums.cend(), {4, 2}, cmpz));
+#else
+		assert(plastic::binary_search(nums.cbegin(), nums.cend(), CD{4, 2}, cmpz));
+#endif
+	}
+
+}
+
 int main() {
 
 	test("for_each", for_each::run, R"(
@@ -1272,6 +1568,72 @@ vector<S>       vector<string>
 
 	test("shuffle/sample", shuffle::run, R"(
 No Compile Error.
+)");
+
+	test("is_partitioned", is_partitioned::run, R"(
+false true false true
+)");
+
+	test("partition", partition::run, R"(
+Original vector: 0 1 2 3 4 5 6 7 8 9
+Unsorted list: 1 30 -4 3 5 -4 1 6 -8 2 -5 64 1 92
+Sorted using quicksort: -8 -5 -4 -4 1 1 1 2 3 5 6 30 64 92
+)");
+
+	test("partition_copy", partition_copy::run, R"(
+true_arr:  5 6 7 8 9
+false_arr: 0 1 2 3 4
+)");
+
+	test("stable_partition", stable_partition::run, R"(
+3 2 4 5 7 0 0 -1 0
+)");
+
+	test("partition_point", partition_point::run, R"(
+After partitioning, v: 8 2 6 4 5 3 7 1 9
+Partition point is at 4; v[4] = 5
+First partition (all even elements): 8 2 6 4
+Second partition (all odd elements): 5 3 7 1 9
+)");
+
+	test("lower_bound", lower_bound::run, R"(
+0 ¡Ü 1 at index 0
+1 ¡Ü 1 at index 0
+2 ¡Ü 2 at index 1
+3 ¡Ü 4 at index 2
+4 ¡Ü 4 at index 2
+5 ¡Ü 5 at index 3
+6 ¡Ü 6 at index 5
+7 ¡Ü not found
+102.5 at index 2
+110.2 not found
+)");
+
+	test("upper_bound", upper_bound::run, R"(
+0 < 1 at index 0
+1 < 2 at index 1
+2 < 4 at index 2
+3 < 4 at index 2
+4 < 5 at index 3
+5 < 6 at index 5
+6 < not found 
+107.3 at index 4
+110.2 not found
+)");
+
+	test("equal_range", equal_range::run, R"(
+Compare using S::operator<(): B C D 
+Using heterogeneous comparison: B C D
+(2,2) (2, 1)
+)");
+
+	test("binary_search", binary_search::run, R"(
+Searching for 1
+Found 1
+Searching for 2
+No dice!
+Searching for 3
+Found 3
 )");
 
 }
