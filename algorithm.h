@@ -665,4 +665,179 @@ namespace plastic {
 		return first != last && !comp(value, *first);
 	}
 
+	template<::std::input_iterator iter1, ::std::input_iterator iter2, class compare = ::std::less<>>
+	bool includes(iter1 first1, iter1 last1, iter2 first2, iter2 last2, compare comp = {}) {
+		while (first1 != last1 && first2 != last2) {
+			if (comp(*first2, *first1)) {
+				return false;
+			}
+			if (!comp(*first1, *first2)) {
+				++first2;
+			}
+			++first1;
+		}
+		return first2 == last2;
+	}
+
+	template<::std::input_iterator iter1, ::std::input_iterator iter2, ::std::output_iterator<::std::iter_value_t<iter1>> d_iter, class compare = ::std::less<>>
+	d_iter set_union(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
+		while (first1 != last1 && first2 != last2) {
+			if (comp(*first1, *first2)) {
+				*d_first++ = *first1;
+				++first1;
+			}
+			else if (comp(*first2, *first1)) {
+				*d_first++ = *first2;
+				++first2;
+			}
+			else {
+				*d_first++ = *first1;
+				++first1, ++first2;
+			}
+		}
+		return ::plastic::copy(first2, last2, ::plastic::copy(first1, last1, d_first));
+	}
+
+	template<::std::input_iterator iter1, ::std::input_iterator iter2, ::std::output_iterator<::std::iter_value_t<iter1>> d_iter, class compare = ::std::less<>>
+	d_iter set_intersection(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
+		while (first1 != last1 && first2 != last2) {
+			if (comp(*first1, *first2)) {
+				++first1;
+			}
+			else if (comp(*first2, *first1)) {
+				++first2;
+			}
+			else {
+				*d_first++ = *first1;
+				++first1, ++first2;
+			}
+		}
+		return d_first;
+	}
+
+	template<::std::input_iterator iter1, ::std::input_iterator iter2, ::std::output_iterator<::std::iter_value_t<iter1>> d_iter, class compare = ::std::less<>>
+	d_iter set_difference(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
+		while (first1 != last1 && first2 != last2) {
+			if (comp(*first1, *first2)) {
+				*d_first++ = *first1;
+				++first1;
+			}
+			else {
+				if (!comp(*first2, *first1)) {
+					++first1;
+				}
+				++first2;
+			}
+		}
+		return ::plastic::copy(first1, last1, d_first);
+	}
+
+	template<::std::input_iterator iter1, ::std::input_iterator iter2, ::std::output_iterator<::std::iter_value_t<iter1>> d_iter, class compare = ::std::less<>>
+	d_iter set_symmetric_difference(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
+		while (first1 != last1 && first2 != last2) {
+			if (comp(*first1, *first2)) {
+				*d_first++ = *first1;
+				++first1;
+			}
+			else if (comp(*first2, *first1)) {
+				*d_first++ = *first2;
+				++first2;
+			}
+			else {
+				++first1, ++first2;
+			}
+		}
+		return ::plastic::copy(first2, last2, ::plastic::copy(first1, last1, d_first));
+	}
+
+	template<::std::forward_iterator iter, class compare = ::std::less<>>
+	iter max_element(iter first, iter last, compare comp = {}) {
+		iter res{first};
+		if (first != last) {
+			while (++first != last) {
+				if (comp(*res, *first)) {
+					res = first;
+				}
+			}
+		}
+		return res;
+	}
+
+	template<::std::forward_iterator iter, class compare = ::std::less<>>
+	iter min_element(iter first, iter last, compare comp = {}) {
+		iter res{first};
+		if (first != last) {
+			while (++first != last) {
+				if (comp(*first, *res)) {
+					res = first;
+				}
+			}
+		}
+		return res;
+	}
+
+	template<::std::forward_iterator iter, class compare = ::std::less<>>
+	::std::pair<iter, iter> minmax_element(iter first, iter last, compare comp = {}) {
+		return {::plastic::min_element(first, last, comp), ::plastic::max_element(first, last, comp)};
+	}
+
+	template<class T, class compare = ::std::less<>>
+	const T& max(const T& a, const T& b, compare comp = {}) {
+		return comp(a, b) ? b : a;
+	}
+
+	template<class T, class compare = ::std::less<>>
+	T max(::std::initializer_list<T> list, compare comp = {}) {
+		return *::plastic::max_element(list.begin(), list.end(), comp);
+	}
+
+	template<class T, class compare = ::std::less<>>
+	const T& min(const T& a, const T& b, compare comp = {}) {
+		return comp(b, a) ? b : a;
+	}
+
+	template<class T, class compare = ::std::less<>>
+	T min(::std::initializer_list<T> list, compare comp = {}) {
+		return *::plastic::min_element(list.begin(), list.end(), comp);
+	}
+
+	template<class T, class compare = ::std::less<>>
+	::std::pair<const T&, const T&> minmax(const T& a, const T& b, compare comp = {}) {
+		return {::plastic::min(a, b, comp), ::plastic::max(a, b, comp)};
+	}
+
+	template<class T, class compare = ::std::less<>>
+	::std::pair<T, T> minmax(::std::initializer_list<T> list, compare comp = {}) {
+		return {::plastic::min(list, comp), ::plastic::max(list, comp)};
+	}
+
+	template<class T, class compare = ::std::less<>>
+	const T& clamp(const T& value, const T& lowest, const T& highest, compare comp = {}) {
+		return comp(value, lowest) ? lowest : comp(highest, value) ? highest : value;
+	}
+
+	template<::std::forward_iterator iter1, ::std::forward_iterator iter2, class compare = ::std::less<>>
+	bool lexicographical_compare(iter1 first1, iter1 last1, iter2 first2, iter2 last2, compare comp = {}) {
+		while (first1 != last1 && first2 != last2) {
+			if (comp(*first1, *first2)) {
+				return true;
+			}
+			if (comp(*first2++, *first1++)) {
+				return false;
+			}
+		}
+		return first1 == last1 && first2 != last2;
+	}
+
+	template<::std::forward_iterator iter1, ::std::forward_iterator iter2, class compare = ::std::compare_three_way>
+	::std::compare_three_way_result_t<iter1, iter2> lexicographical_compare_three_way(iter1 first1, iter1 last1, iter2 first2, iter2 last2, compare comp = {}) {
+		while (first1 != last1 && first2 != last2) {
+			::std::compare_three_way_result_t<iter1, iter2> cmp{comp(*first1++, *first2++)};
+			if (cmp != 0) {
+				return cmp;
+			}
+		}
+		return first1 != last1 ? ::std::strong_ordering::greater : first2 != last2 ? ::std::strong_ordering::less : ::std::strong_ordering::equal;
+	}
+
 }

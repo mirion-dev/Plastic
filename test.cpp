@@ -22,7 +22,7 @@ void test(const std::string& label, function func, const std::string& expected) 
 	char c1{}, c2{};
 	while (s1 >> c1 && s2 >> c2 && c1 == c2);
 	s1 >> std::ws || s2 >> std::ws;
-	size_t space{std::max(label.size() + 1, size_t{32})};
+	size_t space{std::max(label.size() + 1, size_t{36})};
 	if (s1.eof() && s2.eof() && c1 == c2) {
 		std::cout << "\033[32m" << std::left << std::setw(space) << label << "Test Passed\n"
 			<< "\033[m";
@@ -1339,6 +1339,293 @@ namespace binary_search {
 
 }
 
+namespace includes {
+
+	template<class Os, class Co>
+	Os& operator<<(Os& os, const Co& v) {
+		for (const auto& i : v)
+			os << i << ' ';
+		return os << '\t';
+	}
+
+	void run() {
+		const auto
+			v1 = {'a', 'b', 'c', 'f', 'h', 'x'},
+			v2 = {'a', 'b', 'c'},
+			v3 = {'a', 'c'},
+			v4 = {'a', 'a', 'b'},
+			v5 = {'g'},
+			v6 = {'a', 'c', 'g'},
+			v7 = {'A', 'B', 'C'};
+
+		auto no_case = [](char a, char b) { return std::tolower(a) < std::tolower(b); };
+
+		std::cout
+			<< v1 << "\nincludes:\n" << std::boolalpha
+			<< v2 << ": " << plastic::includes(v1.begin(), v1.end(), v2.begin(), v2.end()) << '\n'
+			<< v3 << ": " << plastic::includes(v1.begin(), v1.end(), v3.begin(), v3.end()) << '\n'
+			<< v4 << ": " << plastic::includes(v1.begin(), v1.end(), v4.begin(), v4.end()) << '\n'
+			<< v5 << ": " << plastic::includes(v1.begin(), v1.end(), v5.begin(), v5.end()) << '\n'
+			<< v6 << ": " << plastic::includes(v1.begin(), v1.end(), v6.begin(), v6.end()) << '\n'
+			<< v7 << ": " << plastic::includes(v1.begin(), v1.end(), v7.begin(), v7.end(), no_case)
+			<< " (case-insensitive)\n";
+	}
+
+}
+
+namespace set_union {
+
+	void println(const std::vector<int>& v) {
+		for (int i : v)
+			std::cout << i << ' ';
+		std::cout << '\n';
+	}
+
+	void run() {
+		std::vector<int> v1, v2, dest;
+
+		v1 = {1, 2, 3, 4, 5};
+		v2 = {3, 4, 5, 6, 7};
+
+		plastic::set_union(v1.cbegin(), v1.cend(),
+			v2.cbegin(), v2.cend(),
+			std::back_inserter(dest));
+		println(dest);
+
+		dest.clear();
+
+		v1 = {1, 2, 3, 4, 5, 5, 5};
+		v2 = {3, 4, 5, 6, 7};
+
+		plastic::set_union(v1.cbegin(), v1.cend(),
+			v2.cbegin(), v2.cend(),
+			std::back_inserter(dest));
+		println(dest);
+	}
+
+}
+
+namespace set_intersection {
+
+	void run() {
+		std::vector<int> v1{7, 2, 3, 4, 5, 6, 7, 8};
+		std::vector<int> v2{5, 7, 9, 7};
+		std::sort(v1.begin(), v1.end());
+		std::sort(v2.begin(), v2.end());
+
+		std::vector<int> v_intersection;
+		plastic::set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(),
+			std::back_inserter(v_intersection));
+
+		for (int n : v_intersection)
+			std::cout << n << ' ';
+		std::cout << '\n';
+	}
+
+}
+
+namespace set_difference {
+
+	template<typename T>
+	std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+		os << '{';
+		for (auto n{v.size()}; const auto & e : v)
+			os << e << (--n ? ", " : "");
+		return os << '}';
+	}
+
+	struct Order // a struct with very interesting data
+	{
+		int order_id{};
+
+		friend std::ostream& operator<<(std::ostream& os, const Order& ord) {
+			return os << ord.order_id;
+		}
+	};
+
+	void run() {
+		const std::vector<int> v1{1, 2, 5, 5, 5, 9};
+		const std::vector<int> v2{2, 5, 7};
+		std::vector<int> diff;
+
+		plastic::set_difference(v1.begin(), v1.end(), v2.begin(), v2.end(),
+			std::inserter(diff, diff.begin()));
+
+		std::cout << v1 << " \\ " << v2 << " == " << diff << "\n\n";
+
+		// we want to know which orders "cut" between old and new states:
+		std::vector<Order> old_orders{{1}, {2}, {5}, {9}};
+		std::vector<Order> new_orders{{2}, {5}, {7}};
+		std::vector<Order> cut_orders;
+
+		plastic::set_difference(old_orders.begin(), old_orders.end(),
+			new_orders.begin(), new_orders.end(),
+			std::back_inserter(cut_orders),
+			[](auto& a, auto& b) { return a.order_id < b.order_id; });
+
+		std::cout << "old orders: " << old_orders << '\n'
+			<< "new orders: " << new_orders << '\n'
+			<< "cut orders: " << cut_orders << '\n';
+	}
+
+}
+
+namespace set_symmetric_difference {
+
+	void run() {
+		std::vector<int> v1{1, 2, 3, 4, 5, 6, 7, 8};
+		std::vector<int> v2{5, 7, 9, 10};
+		std::sort(v1.begin(), v1.end());
+		std::sort(v2.begin(), v2.end());
+
+		std::vector<int> v_symDifference;
+
+		plastic::set_symmetric_difference(v1.begin(), v1.end(), v2.begin(), v2.end(),
+			std::back_inserter(v_symDifference));
+
+		for (int n : v_symDifference)
+			std::cout << n << ' ';
+		std::cout << '\n';
+	}
+
+}
+
+namespace max_element {
+
+	void run() {
+		std::vector<int> v{3, 1, -14, 1, 5, 9, -14, 9};
+		std::vector<int>::iterator result;
+
+		result = plastic::max_element(v.begin(), v.end());
+		std::cout << "Max element found at index "
+			<< std::distance(v.begin(), result)
+			<< " has value " << *result << '\n';
+
+		result = plastic::max_element(v.begin(), v.end(), [](int a, int b) {
+			return std::abs(a) < std::abs(b);
+		});
+		std::cout << "Absolute max element found at index "
+			<< std::distance(v.begin(), result)
+			<< " has value " << *result << '\n';
+	}
+
+}
+
+namespace min_element {
+
+	void run() {
+		std::vector<int> v{3, 1, -4, 1, 5, 9};
+
+		std::vector<int>::iterator result = plastic::min_element(v.begin(), v.end());
+		std::cout << "min element has value " << *result << " and index ["
+			<< std::distance(v.begin(), result) << "]\n";
+	}
+
+}
+
+namespace minmax_element {
+
+	void run() {
+		const auto v = {3, 9, 1, 4, 2, 5, 9};
+		const auto [min, max] = plastic::minmax_element(begin(v), end(v));
+
+		std::cout << "min = " << *min << ", max = " << *max << '\n';
+	}
+
+}
+
+namespace max {
+
+	void run() {
+		auto longest = [](const std::string_view s1, const std::string_view s2) {
+			return s1.size() < s2.size();
+		};
+
+		std::cout << "Larger of 69 and 96 is " << plastic::max(69, 96) << "\n"
+			"Larger of 'q' and 'p' is '" << plastic::max('q', 'p') << "'\n"
+			"Largest of 010, 10, 0X10, and 0B10 is "
+			<< plastic::max({010, 10, 0X10, 0B10}) << '\n'
+			<< R"(Longest of "long", "short", and "int" is )"
+			<< std::quoted(plastic::max({"long", "short", "int"}, longest)) << '\n';
+	}
+
+}
+
+namespace min {
+
+	void run() {
+		std::cout << "smaller of 10 and 010 is " << plastic::min(10, 010) << '\n'
+			<< "smaller of 'd' and 'b' is '" << plastic::min('d', 'b') << "'\n"
+			<< "shortest of \"foo\", \"bar\", and \"hello\" is \""
+			<< plastic::min({"foo", "bar", "hello"},
+				[](const std::string_view s1, const std::string_view s2) {
+			return s1.size() < s2.size();
+		}) << "\"\n";
+	}
+
+}
+
+namespace minmax {
+
+	void run() {
+		auto bounds = plastic::minmax({3, 1, 4, 1, 5, 9, 2, 6});
+		std::cout << '(' << bounds.first << ',' << bounds.second << ')';
+	}
+
+}
+
+namespace clamp {
+
+	void run() {
+		std::cout << "[raw] "
+			"[" << static_cast<int>(INT8_MIN) << ',' << static_cast<int>(INT8_MAX) << "] "
+			"[0," << static_cast<int>(UINT8_MAX) << "]\n";
+
+		for (const int v : {-129, -128, -1, 0, 42, 127, 128, 255, 256})
+			std::cout << std::setw(4) << v
+			<< std::setw(11) << std::clamp(v, static_cast<int>(INT8_MIN), static_cast<int>(INT8_MAX))
+			<< std::setw(8) << std::clamp(v, 0, static_cast<int>(UINT8_MAX)) << '\n';
+	}
+
+}
+
+namespace lexicographical_compare {
+
+	void run() {
+		std::vector<char> v1{'a', 'b', 'c', 'd'};
+		std::vector<char> v2{'a', 'c', 'c', 'd'};
+
+		std::cout << std::boolalpha << plastic::lexicographical_compare(v1.begin(), v1.end(), v2.begin(), v2.end());
+	}
+
+}
+
+namespace lexicographical_compare_three_way {
+
+	using namespace std::literals;
+
+	void show_result(std::string_view s1, std::string_view s2, std::strong_ordering o) {
+		std::cout << std::quoted(s1) << " is ";
+		std::is_lt(o) ? std::cout << "less than " :
+			std::is_gt(o) ? std::cout << "greater than " :
+			std::cout << "equal to ";
+		std::cout << std::quoted(s2) << '\n';
+	}
+
+	std::strong_ordering cmp_icase(unsigned char x, unsigned char y) {
+		return std::toupper(x) <=> std::toupper(y);
+	};
+
+	void run() {
+		for (const auto& [s1, s2] : {std::pair{"one"sv, "ONE"sv}, std::pair{"two"sv, "four"sv}, std::pair{"three"sv, "two"sv}}) {
+			const auto res = plastic::lexicographical_compare_three_way(
+				s1.cbegin(), s1.cend(), s2.cbegin(), s2.cend(), cmp_icase);
+			show_result(s1, s2, res);
+		}
+	}
+
+}
+
 int main() {
 
 	test("for_each", for_each::run, R"(
@@ -1634,6 +1921,91 @@ Searching for 2
 No dice!
 Searching for 3
 Found 3
+)");
+
+	test("includes", includes::run, R"(
+a b c f h x
+includes:
+a b c   : true
+a c     : true
+a a b   : false
+g       : false
+a c g   : false
+A B C   : true (case-insensitive)
+)");
+
+	test("set_union", set_union::run, R"(
+1 2 3 4 5 6 7 
+1 2 3 4 5 5 5 6 7
+)");
+
+	test("set_intersection", set_intersection::run, R"(
+5 7 7
+)");
+
+	test("set_difference", set_difference::run, R"(
+{1, 2, 5, 5, 5, 9}\{2, 5, 7} == {1, 5, 5, 9}
+ 
+old orders: {1, 2, 5, 9}
+new orders: {2, 5, 7}
+cut orders: {1, 9}
+)");
+
+	test("set_symmetric_difference", set_symmetric_difference::run, R"(
+1 2 3 4 6 8 9 10
+)");
+
+	test("max_element", max_element::run, R"(
+Max element found at index 5 has value 9
+Absolute max element found at index 2 has value -14
+)");
+
+	test("min_element", min_element::run, R"(
+min element has value -4 and index [2]
+)");
+
+	test("minmax_element", minmax_element::run, R"(
+min = 1, max = 9
+)");
+
+	test("max", max::run, R"(
+Larger of 69 and 96 is 96
+Larger of 'q' and 'p' is 'q'
+Largest of 010, 10, 0X10, and 0B10 is 16
+Longest of "long", "short", and "int" is "short"
+)");
+
+	test("min", min::run, R"(
+smaller of 10 and 010 is 8
+smaller of 'd' and 'b' is 'b'
+shortest of "foo", "bar", and "hello" is "foo"
+)");
+
+	test("minmax", minmax::run, R"(
+(1,9)
+)");
+
+	test("clamp", clamp::run, R"(
+[raw] [-128,127] [0,255]
+-129       -128       0
+-128       -128       0
+  -1         -1       0
+   0          0       0
+  42         42      42
+ 127        127     127
+ 128        127     128
+ 255        127     255
+ 256        127     255
+)");
+
+	test("lexicographical_compare", lexicographical_compare::run, R"(
+true
+)");
+
+	test("lexicographical_compare_three_way", lexicographical_compare_three_way::run, R"(
+"one" is equal to "ONE"
+"two" is greater than "four"
+"three" is less than "two"
 )");
 
 }
