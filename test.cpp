@@ -36,7 +36,7 @@ void test(const std::string& label, function func, const std::string& expected) 
 	}
 }
 
-// the following testing code are from https://en.cppreference.com/w/cpp/algorithm
+// most of the following testing code are taken from https://en.cppreference.com/w/cpp/algorithm
 
 namespace for_each {
 
@@ -1490,6 +1490,208 @@ namespace set_symmetric_difference {
 
 }
 
+namespace merge {
+
+	void run() {
+		std::vector<int> v1{1, 3, 5, 7, 9}, v2{2, 4, 6, 8, 10}, v3;
+		plastic::merge(v1.begin(), v1.end(), v2.begin(), v2.end(), std::back_inserter(v3));
+		for (auto& i : v3) {
+			std::cout << i << ' ';
+		}
+	}
+
+}
+
+namespace inplace_merge {
+
+	template<class Iter>
+	void merge_sort(Iter first, Iter last) {
+		if (last - first > 1) {
+			Iter middle = first + (last - first) / 2;
+			merge_sort(first, middle);
+			merge_sort(middle, last);
+			plastic::inplace_merge(first, middle, last);
+		}
+	}
+
+	void run() {
+		std::vector<int> v{8, 2, -2, 0, 11, 11, 1, 7, 3};
+		merge_sort(v.begin(), v.end());
+		for (const auto& n : v)
+			std::cout << n << ' ';
+		std::cout << '\n';
+	}
+
+}
+
+namespace push_heap {
+
+	void println(std::string_view rem, const std::vector<int>& v) {
+		std::cout << rem;
+		for (int e : v)
+			std::cout << e << ' ';
+		std::cout << '\n';
+	}
+
+	void run() {
+		std::vector<int> v{3, 1, 4, 1, 5, 9};
+
+		std::make_heap(v.begin(), v.end());
+		println("after make_heap: ", v);
+
+		v.push_back(6);
+		println("after push_back: ", v);
+
+		plastic::push_heap(v.begin(), v.end());
+		println("after push_heap: ", v);
+	}
+
+}
+
+namespace pop_heap {
+
+	void println(std::string_view rem, const auto& v) {
+		std::cout << rem;
+		if constexpr (std::is_scalar_v<std::decay_t<decltype(v)>>)
+			std::cout << v;
+		else
+			for (int e : v)
+				std::cout << e << ' ';
+		std::cout << '\n';
+	}
+
+	void run() {
+		std::vector<int> v{3, 1, 4, 1, 5, 9};
+
+		std::make_heap(v.begin(), v.end());
+		println("after make_heap: ", v);
+
+		plastic::pop_heap(v.begin(), v.end()); // moves the largest to the end
+		println("after pop_heap:  ", v);
+
+		int largest = v.back();
+		println("largest element: ", largest);
+
+		v.pop_back(); // actually removes the largest element
+		println("after pop_back:  ", v);
+	}
+
+}
+
+namespace make_heap {
+
+	void print(std::string_view text, const std::vector<int>& v = {}) {
+		std::cout << text << ": ";
+		for (const auto& e : v)
+			std::cout << e << ' ';
+		std::cout << '\n';
+	}
+
+	void run() {
+		print("Max heap");
+
+		std::vector<int> v{3, 2, 4, 1, 5, 9};
+		print("initially, v", v);
+
+		plastic::make_heap(v.begin(), v.end());
+		print("after make_heap, v", v);
+
+		std::pop_heap(v.begin(), v.end());
+		print("after pop_heap, v", v);
+
+		auto top = v.back();
+		v.pop_back();
+		print("former top element", {top});
+		print("after removing the former top element, v", v);
+
+		print("\nMin heap");
+
+		std::vector<int> v1{3, 2, 4, 1, 5, 9};
+		print("initially, v1", v1);
+
+		plastic::make_heap(v1.begin(), v1.end(), std::greater<>{});
+		print("after make_heap, v1", v1);
+
+		std::pop_heap(v1.begin(), v1.end(), std::greater<>{});
+		print("after pop_heap, v1", v1);
+
+		auto top1 = v1.back();
+		v1.pop_back();
+		print("former top element", {top1});
+		print("after removing the former top element, v1", v1);
+	}
+
+}
+
+namespace sort_heap {
+
+	void println(std::string_view fmt, const auto& v) {
+		for (std::cout << fmt; const auto & i : v)
+			std::cout << i << ' ';
+		std::cout << '\n';
+	}
+
+	void run() {
+		std::vector<int> v{3, 1, 4, 1, 5, 9};
+
+		std::make_heap(v.begin(), v.end());
+		println("after make_heap, v: ", v);
+
+		plastic::sort_heap(v.begin(), v.end());
+		println("after sort_heap, v: ", v);
+	}
+
+}
+
+namespace is_heap {
+
+	void run() {
+		std::vector<int> v{3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 9, 7, 9};
+
+		std::cout << "initially, v:\n";
+		for (const auto& i : v)
+			std::cout << i << ' ';
+		std::cout << '\n';
+
+		if (!plastic::is_heap(v.begin(), v.end())) {
+			std::cout << "making heap...\n";
+			std::make_heap(v.begin(), v.end());
+		}
+
+		std::cout << "after make_heap, v:\n";
+		for (auto t{1U}; const auto & i : v)
+			std::cout << i << (std::has_single_bit(++t) ? " | " : " ");
+		std::cout << '\n';
+	}
+
+}
+
+namespace is_heap_until {
+
+	void run() {
+		std::vector<int> v{3, 1, 4, 1, 5, 9};
+
+		std::make_heap(v.begin(), v.end());
+
+		// probably mess up the heap
+		v.push_back(2);
+		v.push_back(6);
+
+		auto heap_end = plastic::is_heap_until(v.begin(), v.end());
+
+		std::cout << "all of v:  ";
+		for (const auto& i : v)
+			std::cout << i << ' ';
+		std::cout << '\n';
+
+		std::cout << "only heap: ";
+		for (auto i = v.begin(); i != heap_end; ++i)
+			std::cout << *i << ' ';
+		std::cout << '\n';
+	}
+
+}
+
 namespace max_element {
 
 	void run() {
@@ -1953,6 +2155,61 @@ cut orders: {1, 9}
 
 	test("set_symmetric_difference", set_symmetric_difference::run, R"(
 1 2 3 4 6 8 9 10
+)");
+
+	test("merge", merge::run, R"(
+1 2 3 4 5 6 7 8 9 10
+)");
+
+	test("inplace_merge", inplace_merge::run, R"(
+-2 0 1 2 3 7 8 11 11
+)");
+
+	test("push_heap", push_heap::run, R"(
+after make_heap: 9 5 4 1 1 3
+after push_back: 9 5 4 1 1 3 6
+after push_heap: 9 5 6 1 1 3 4
+)");
+
+	test("pop_heap", pop_heap::run, R"(
+after make_heap: 9 5 4 1 1 3
+after pop_heap:  5 3 4 1 1 9
+largest element: 9
+after pop_back:  5 3 4 1 1
+)");
+
+	test("make_heap", make_heap::run, R"(
+Max heap:
+initially, v: 3 2 4 1 5 9
+after make_heap, v: 9 5 4 1 2 3
+after pop_heap, v: 5 3 4 1 2 9
+former top element: 9
+after removing the former top element, v: 5 3 4 1 2
+ 
+Min heap:
+initially, v1: 3 2 4 1 5 9
+after make_heap, v1: 1 2 4 3 5 9
+after pop_heap, v1: 2 3 4 9 5 1
+former top element: 1
+after removing the former top element, v1: 2 3 4 9 5
+)");
+
+	test("sort_heap", sort_heap::run, R"(
+after make_heap, v: 9 5 4 1 1 3
+after sort_heap, v: 1 1 3 4 5 9
+)");
+
+	test("is_heap", is_heap::run, R"(
+initially, v:
+3 1 4 1 5 9 2 6 5 3 5 8 9 7 9
+making heap...
+after make_heap, v:
+9 | 6 9 | 5 5 9 7 | 1 1 3 5 8 3 4 2 |
+)");
+
+	test("is_heap_until", is_heap_until::run, R"(
+all of v:  9 5 4 1 1 3 2 6
+only heap: 9 5 4 1 1 3 2
 )");
 
 	test("max_element", max_element::run, R"(

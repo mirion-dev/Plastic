@@ -5,6 +5,50 @@
 
 namespace plastic {
 
+	namespace detail {
+
+		template<::std::random_access_iterator iter, class compare = ::std::less<>>
+		void sift_up(iter first, iter middle, iter last, compare comp = {}) {
+			using value_t = ::std::iter_value_t<iter>;
+			using diff_t = ::std::iter_difference_t<iter>;
+			if (first != last) {
+				value_t value{::std::move(*middle)};
+				diff_t hole{middle - first};
+				while (hole != 0) {
+					diff_t parent{(hole - 1) / 2};
+					if (!comp(first[parent], value)) {
+						break;
+					}
+					first[hole] = ::std::move(first[parent]);
+					hole = parent;
+				}
+				first[hole] = ::std::move(value);
+			}
+		}
+
+		template<::std::random_access_iterator iter, class compare = ::std::less<>>
+		void sift_down(iter first, iter middle, iter last, compare comp = {}) {
+			using value_t = ::std::iter_value_t<iter>;
+			using diff_t = ::std::iter_difference_t<iter>;
+			if (first != last) {
+				value_t value{::std::move(*middle)};
+				diff_t hole{middle - first}, size{last - first}, child;
+				while (child = hole * 2 + 1, child < size) {
+					if (child + 1 < size && comp(first[child], first[child + 1])) {
+						++child;
+					}
+					if (!comp(value, first[child])) {
+						break;
+					}
+					first[hole] = ::std::move(first[child]);
+					hole = child;
+				}
+				first[hole] = ::std::move(value);
+			}
+		}
+
+	}
+
 	template<::std::input_iterator iter, class unary_function>
 	unary_function for_each(iter first, iter last, unary_function func) {
 		while (first != last) {
@@ -142,7 +186,8 @@ namespace plastic {
 
 	template<::std::input_iterator iter, class T = ::std::iter_value_t<iter>>
 	std::iter_difference_t<iter> count(iter first, iter last, const T& value) {
-		std::iter_difference_t<iter> res{0};
+		using diff_t = std::iter_difference_t<iter>;
+		diff_t res{0};
 		while (first != last) {
 			if (*first == value) {
 				++res;
@@ -154,7 +199,8 @@ namespace plastic {
 
 	template<::std::input_iterator iter, class unary_predicate>
 	std::iter_difference_t<iter> count_if(iter first, iter last, unary_predicate pred) {
-		std::iter_difference_t<iter> res{0};
+		using diff_t = std::iter_difference_t<iter>;
+		diff_t res{0};
 		while (first != last) {
 			if (pred(*first)) {
 				++res;
@@ -421,8 +467,9 @@ namespace plastic {
 
 	template<::std::input_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter, class binary_predicate = ::std::equal_to<>>
 	d_iter unique_copy(iter first, iter last, d_iter d_first, binary_predicate pred = {}) {
+		using value_t = ::std::iter_value_t<iter>;
 		if (first != last) {
-			::std::iter_value_t<iter> value;
+			value_t value;
 			*d_first++ = value = *first;
 			while (++first != last) {
 				if (!pred(value, *first)) {
@@ -534,13 +581,14 @@ namespace plastic {
 		}
 	}
 
-	template<::std::input_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter, ::std::integral diff_t, class uniform_random_bit_generator> requires ::std::forward_iterator<iter> || ::std::random_access_iterator<d_iter>
-	d_iter sample(iter first, iter last, d_iter d_first, diff_t count, uniform_random_bit_generator && gene) {
+	template<::std::input_iterator iter, ::std::output_iterator<::std::iter_value_t<iter>> d_iter, ::std::integral size_t, class uniform_random_bit_generator> requires ::std::forward_iterator<iter> || ::std::random_access_iterator<d_iter>
+	d_iter sample(iter first, iter last, d_iter d_first, size_t count, uniform_random_bit_generator && gene) {
+		using diff_t = ::std::iter_difference_t<iter>;
 		using distr_t = ::std::uniform_int_distribution<diff_t>;
 		using param_t = distr_t::param_type;
 		distr_t dist;
 		if constexpr (::std::forward_iterator<iter>) {
-			diff_t size{static_cast<diff_t>(::std::distance(first, last))};
+			diff_t size{::std::distance(first, last)};
 			if (count >= size) {
 				return ::plastic::copy(first, last, d_first);
 			}
@@ -608,10 +656,10 @@ namespace plastic {
 
 	template<::std::bidirectional_iterator iter, class unary_predicate>
 	iter stable_partition(iter first, iter last, unary_predicate pred) {
+		using value_t = ::std::iter_value_t<iter>;
 		first = ::plastic::find_if_not(first, last, pred);
 		while (first != last && !pred(*--last));
 		if (first != last) {
-			using value_t = ::std::iter_value_t<iter>;
 			value_t* buffer{new value_t[::std::distance(first, last) + 1]};
 			value_t* p{buffer};
 			iter i{first};
@@ -750,6 +798,68 @@ namespace plastic {
 		return ::plastic::copy(first2, last2, ::plastic::copy(first1, last1, d_first));
 	}
 
+	template<::std::input_iterator iter1, ::std::input_iterator iter2, ::std::output_iterator<::std::iter_value_t<iter1>> d_iter, class compare = ::std::less<>>
+	d_iter merge(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
+		while (first1 != last1 && first2 != last2) {
+			if (comp(*first2, *first1)) {
+				*d_first++ = *first2;
+				++first2;
+			}
+			else {
+				*d_first++ = *first1;
+				++first1;
+			}
+		}
+		return ::plastic::copy(first2, last2, ::plastic::copy(first1, last1, d_first));
+	}
+
+	template<::std::bidirectional_iterator iter, class compare = ::std::less<>>
+	void inplace_merge(iter first, iter middle, iter last, compare comp = {}) {
+		using value_t = ::std::iter_value_t<iter>;
+		value_t* buffer{new value_t[::std::distance(first, last)]};
+		::plastic::copy(buffer, ::plastic::merge(first, middle, middle, last, buffer, comp), first);
+		delete buffer;
+	}
+
+	template<::std::random_access_iterator iter, class compare = ::std::less<>>
+	void push_heap(iter first, iter last, compare comp = {}) {
+		::plastic::detail::sift_up(first, last - 1, last, comp);
+	}
+
+	template<::std::random_access_iterator iter, class compare = ::std::less<>>
+	void pop_heap(iter first, iter last, compare comp = {}) {
+		::std::swap(*first, *--last);
+		::plastic::detail::sift_down(first, first, last, comp);
+	}
+
+	template<::std::random_access_iterator iter, class compare = ::std::less<>>
+	void make_heap(iter first, iter last, compare comp = {}) {
+		iter i{first + (last - first) / 2};
+		while (i != first) {
+			::plastic::detail::sift_down(first, --i, last, comp);
+		}
+	}
+
+	template<::std::random_access_iterator iter, class compare = ::std::less<>>
+	void sort_heap(iter first, iter last, compare comp = {}) {
+		while (first != last) {
+			::plastic::pop_heap(first, last--, comp);
+		}
+	}
+
+	template<::std::random_access_iterator iter, class compare = ::std::less<>>
+	iter is_heap_until(iter first, iter last, compare comp = {}) {
+		using diff_t = ::std::iter_difference_t<iter>;
+		diff_t i{0}, size{last - first};
+		while (++i != size && !comp(first[(i - 1) >> 1], first[i]));
+		return first + i;
+	}
+
+	template<::std::random_access_iterator iter, class compare = ::std::less<>>
+	bool is_heap(iter first, iter last, compare comp = {}) {
+		return ::plastic::is_heap_until(first, last, comp) == last;
+	}
+
 	template<::std::forward_iterator iter, class compare = ::std::less<>>
 	iter max_element(iter first, iter last, compare comp = {}) {
 		iter res{first};
@@ -831,8 +941,9 @@ namespace plastic {
 
 	template<::std::forward_iterator iter1, ::std::forward_iterator iter2, class compare = ::std::compare_three_way>
 	::std::compare_three_way_result_t<iter1, iter2> lexicographical_compare_three_way(iter1 first1, iter1 last1, iter2 first2, iter2 last2, compare comp = {}) {
+		using result_t = ::std::compare_three_way_result_t<iter1, iter2>;
 		while (first1 != last1 && first2 != last2) {
-			::std::compare_three_way_result_t<iter1, iter2> cmp{comp(*first1++, *first2++)};
+			result_t cmp{comp(*first1++, *first2++)};
 			if (cmp != 0) {
 				return cmp;
 			}
