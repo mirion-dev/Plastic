@@ -850,9 +850,15 @@ namespace plastic {
 	template<::std::random_access_iterator iter, class compare = ::std::less<>>
 	iter is_heap_until(iter first, iter last, compare comp = {}) {
 		using diff_t = ::std::iter_difference_t<iter>;
+		if (first != last) {
 		diff_t i{0}, size{last - first};
-		while (++i != size && !comp(first[(i - 1) >> 1], first[i]));
+			while (++i != size) {
+				if (comp(first[(i - 1) >> 1], first[i])) {
 		return first + i;
+	}
+			}
+		}
+		return last;
 	}
 
 	template<::std::random_access_iterator iter, class compare = ::std::less<>>
