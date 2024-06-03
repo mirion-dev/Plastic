@@ -818,7 +818,7 @@ namespace plastic {
 		using value_t = ::std::iter_value_t<iter>;
 		value_t* buffer{new value_t[::std::distance(first, last)]};
 		::plastic::copy(buffer, ::plastic::merge(first, middle, middle, last, buffer, comp), first);
-		delete buffer;
+		delete[] buffer;
 	}
 
 	template<::std::random_access_iterator iter, class compare = ::std::less<>>
