@@ -1164,6 +1164,36 @@ namespace partition_point {
 
 }
 
+namespace is_sorted {
+
+	void run() {
+		int data[] = {3, 1, 4, 1, 5};
+		if (plastic::is_sorted(std::begin(data), std::end(data))) {
+			std::cout << "Not Sorted.\n";
+		}
+		std::sort(std::begin(data), std::end(data));
+		if (!plastic::is_sorted(std::begin(data), std::end(data))) {
+			std::cout << "Sorted.\n";
+		}
+		if (plastic::is_sorted(std::begin(data), std::end(data), std::greater<>{})) {
+			std::cout << "Not Sorted On Relation std::greater<>.\n";
+		}
+		std::cout << "Test End.";
+	}
+
+}
+
+namespace nth_element {
+
+	void run() {
+		std::vector<int> v{5, 10, 6, 4, 3, 2, 6, 7, 9, 3};
+		auto m = v.begin() + v.size() / 2;
+		plastic::nth_element(v.begin(), m, v.end());
+		std::cout << "\nThe median is " << v[v.size() / 2] << '\n';
+	}
+
+}
+
 namespace lower_bound {
 
 	struct PriceInfo {
@@ -1692,6 +1722,122 @@ namespace is_heap_until {
 
 }
 
+namespace sort {
+
+	void run() {
+		std::array<int, 10> s{5, 7, 4, 2, 8, 6, 1, 9, 0, 3};
+
+		auto print = [&s](std::string_view const rem) {
+			for (auto a : s)
+				std::cout << a << ' ';
+			std::cout << ": " << rem << '\n';
+		};
+
+		plastic::sort(s.begin(), s.end());
+		print("sorted with the default operator<");
+
+		plastic::sort(s.begin(), s.end(), std::greater<int>());
+		print("sorted with the standard library compare function object");
+
+		struct {
+			bool operator()(int a, int b) const {
+				return a < b;
+			}
+		}
+		customLess;
+
+		plastic::sort(s.begin(), s.end(), customLess);
+		print("sorted with a custom function object");
+
+		plastic::sort(s.begin(), s.end(), [](int a, int b) {
+			return a > b;
+		});
+		print("sorted with a lambda expression");
+	}
+
+}
+
+namespace stable_sort {
+
+	struct Employee {
+		int age;
+		std::string name; // Does not participate in comparisons
+	};
+
+	bool operator<(const Employee& lhs, const Employee& rhs) {
+		return lhs.age < rhs.age;
+	}
+
+#if __cpp_lib_constexpr_algorithms >= 202306L
+	consteval auto get_sorted() {
+		auto v = std::array{3, 1, 4, 1, 5, 9};
+		plastic::stable_sort(v.begin(), v.end());
+		return v;
+	}
+	static_assert(std::ranges::is_sorted(get_sorted()));
+#endif
+
+	void run() {
+		std::vector<Employee> v{{108, "Zaphod"}, {32, "Arthur"}, {108, "Ford"}};
+
+		plastic::stable_sort(v.begin(), v.end());
+
+		for (const Employee& e : v)
+			std::cout << e.age << ", " << e.name << '\n';
+	}
+
+}
+
+namespace partial_sort {
+
+	void run() {
+		std::array<int, 10> s{5, 7, 4, 2, 8, 6, 1, 9, 0, 3};
+		for (auto& i : s) {
+			std::cout << i << ' ';
+		}
+		std::cout << '\n';
+		plastic::partial_sort(s.begin(), s.begin() + 5, s.end());
+		for (int i = 0; i < 5; ++i) {
+			std::cout << s[i] << ' ';
+		}
+		std::cout << '\n';
+	}
+
+}
+
+namespace partial_sort_copy {
+
+	void println(std::string_view rem, const auto& v) {
+		std::cout << rem;
+		if constexpr (std::is_scalar_v<std::decay_t<decltype(v)>>)
+			std::cout << v;
+		else
+			for (int e : v)
+				std::cout << e << ' ';
+		std::cout << '\n';
+	}
+
+	void run() {
+		const auto v0 = {4, 2, 5, 1, 3};
+		std::vector<int> v1{10, 11, 12};
+		std::vector<int> v2{10, 11, 12, 13, 14, 15, 16};
+		std::vector<int>::iterator it;
+
+		it = plastic::partial_sort_copy(v0.begin(), v0.end(), v1.begin(), v1.end());
+		println("Writing to the smaller vector in ascending order gives: ", v1);
+
+		if (it == v1.end())
+			println("The return value is the end iterator", ' ');
+
+		it = plastic::partial_sort_copy(v0.begin(), v0.end(), v2.begin(), v2.end(),
+			std::greater<int>());
+
+		println("Writing to the larger vector in descending order gives: ", v2);
+		println("The return value is the iterator to ", *it);
+	}
+
+}
+
 namespace max_element {
 
 	void run() {
@@ -1824,6 +1970,55 @@ namespace lexicographical_compare_three_way {
 				s1.cbegin(), s1.cend(), s2.cbegin(), s2.cend(), cmp_icase);
 			show_result(s1, s2, res);
 		}
+	}
+
+}
+
+namespace next_permutation {
+
+	void run() {
+		std::string s = "aba";
+		do {
+			std::cout << s << '\n';
+		} while (plastic::next_permutation(s.begin(), s.end()));
+
+		std::cout << s << '\n';
+	}
+
+}
+
+namespace prev_permutation {
+
+	void run() {
+		std::string s = "cab";
+		do {
+			std::cout << s << ' ';
+		} while (plastic::prev_permutation(s.begin(), s.end()));
+
+		std::cout << s << '\n';
+	}
+
+}
+
+namespace is_permutation {
+
+	template<typename Os, typename V>
+	Os& operator<<(Os& os, const V& v) {
+		os << "{ ";
+		for (const auto& e : v)
+			os << e << ' ';
+		return os << '}';
+	}
+
+	void run() {
+		static constexpr auto v1 = {1, 2, 3, 4, 5};
+		static constexpr auto v2 = {3, 5, 4, 1, 2};
+		static constexpr auto v3 = {3, 5, 4, 1, 1};
+
+		std::cout << v2 << " is a permutation of " << v1 << ": " << std::boolalpha
+			<< plastic::is_permutation(v1.begin(), v1.end(), v2.begin()) << '\n'
+			<< v3 << " is a permutation of " << v1 << ": "
+			<< plastic::is_permutation(v1.begin(), v1.end(), v3.begin()) << '\n';
 	}
 
 }
@@ -2085,6 +2280,14 @@ First partition (all even elements): 8 2 6 4
 Second partition (all odd elements): 5 3 7 1 9
 )");
 
+	test("is_sorted/is_sorted_until", is_sorted::run, R"(
+Test End.
+)");
+
+	test("nth_element", nth_element::run, R"(
+The median is 6
+)");
+
 	test("lower_bound", lower_bound::run, R"(
 0 ¡Ü 1 at index 0
 1 ¡Ü 1 at index 0
@@ -2212,6 +2415,31 @@ all of v:  9 5 4 1 1 3 2 6
 only heap: 9 5 4 1 1 3 2
 )");
 
+	test("sort", sort::run, R"(
+0 1 2 3 4 5 6 7 8 9 : sorted with the default operator<
+9 8 7 6 5 4 3 2 1 0 : sorted with the standard library compare function object
+0 1 2 3 4 5 6 7 8 9 : sorted with a custom function object
+9 8 7 6 5 4 3 2 1 0 : sorted with a lambda expression
+)");
+
+	test("stable_sort", stable_sort::run, R"(
+32, Arthur
+108, Zaphod
+108, Ford
+)");
+
+	test("partial_sort", partial_sort::run, R"(
+5 7 4 2 8 6 1 9 0 3
+0 1 2 3 4
+)");
+
+	test("partial_sort_copy", partial_sort_copy::run, R"(
+Writing to the smaller vector in ascending order gives: 1 2 3
+The return value is the end iterator
+Writing to the larger vector in descending order gives: 5 4 3 2 1 15 16
+The return value is the iterator to 15
+)");
+
 	test("max_element", max_element::run, R"(
 Max element found at index 5 has value 9
 Absolute max element found at index 2 has value -14
@@ -2263,6 +2491,21 @@ true
 "one" is equal to "ONE"
 "two" is greater than "four"
 "three" is less than "two"
+)");
+
+	test("next_permutation", next_permutation::run, R"(
+aba
+baa
+aab
+)");
+
+	test("prev_permutation", prev_permutation::run, R"(
+cab bca bac acb abc cba
+)");
+
+	test("is_permutation", is_permutation::run, R"(
+{ 3 5 4 1 2 } is a permutation of { 1 2 3 4 5 }: true
+{ 3 5 4 1 1 } is a permutation of { 1 2 3 4 5 }: false
 )");
 
 }
