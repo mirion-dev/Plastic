@@ -817,7 +817,7 @@ namespace plastic {
 	void inplace_merge(iter first, iter middle, iter last, compare comp = {}) {
 		using value_t = ::std::iter_value_t<iter>;
 		value_t* buffer{new value_t[::std::distance(first, last)]};
-		::plastic::copy(buffer, ::plastic::merge(first, middle, middle, last, buffer, comp), first);
+		::plastic::move(buffer, ::plastic::merge(first, middle, middle, last, buffer, comp), first);
 		delete[] buffer;
 	}
 
