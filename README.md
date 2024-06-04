@@ -1,10 +1,8 @@
 # Plastic
 
-by Mirion
+My implementation of common data structures and algorithms for studying.
 
-My implementation of common data structures and algorithms.
-
-## Data Structure
+## Data Structure (waiting for refactoring)
 
 | | **`vector`** | **`deque`** | **`forward_list`** | **`list`** | **`priority_queue`** | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | |
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
@@ -31,6 +29,6 @@ My implementation of common data structures and algorithms.
 
 ## Algorithm
 
-| | |
-| :--: | :--: |
-| **`sort`** | `selection_sort`<br>`insertion_sort`<br>`bubble_sort`<br>`heap_sort`<br>`merge_sort`<br>`quick_sort` |
+| **Header** | **Description** |
+| :--: | -- |
+| `algorithm.h` | same as `<algorithm>` |
