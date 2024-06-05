@@ -1061,13 +1061,13 @@ namespace algorithm_test {
 			int value{0};
 			bool specified_state{true};
 
-			S(int v = 0) : value{v} {}
-			S(S const& rhs) = default;
-			S(S&& rhs) {
+			S(int v = 0) noexcept : value{v} {}
+			S(S const& rhs) noexcept = default;
+			S(S&& rhs) noexcept {
 				*this = std::move(rhs);
 			}
-			S& operator=(S const& rhs) = default;
-			S& operator=(S&& rhs) {
+			S& operator=(S const& rhs) noexcept = default;
+			S& operator=(S&& rhs) noexcept {
 				if (this != &rhs) {
 					value = rhs.value;
 					specified_state = rhs.specified_state;
@@ -1290,7 +1290,7 @@ namespace algorithm_test {
 	namespace stable_sort {
 
 		struct Employee {
-			int age;
+			int age = 0;
 			std::string name; // Does not participate in comparisons
 		};
 
