@@ -20,48 +20,48 @@ namespace plastic {
 			_node* _ptr;
 
 		public:
-			using difference_type = ::std::ptrdiff_t;
+			using difference_type = ptrdiff_t;
 			using value_type = T;
 			using pointer = T*;
 			using reference = T&;
-			using iterator_category = ::std::input_iterator_tag;
+			using iterator_category = std::input_iterator_tag;
 
-			explicit iterator(_node* node = nullptr) noexcept {
+			explicit iterator(_node* node = nullptr) {
 				_ptr = node;
 			}
 
-			reference operator*() const noexcept {
+			reference operator*() const {
 				return _ptr->_value;
 			}
 
-			pointer operator->() const noexcept {
+			pointer operator->() const {
 				return &_ptr->_value;
 			}
 
-			bool operator==(iterator it) const noexcept {
+			bool operator==(iterator it) const {
 				return _ptr == it._ptr;
 			}
 
-			iterator& operator++() noexcept {
+			iterator& operator++() {
 				_ptr = _ptr->_next;
 				return *this;
 			}
 
-			iterator operator++(int) noexcept {
-				iterator temp{*this};
+			iterator operator++(int) {
+				iterator temp{ *this };
 				++*this;
 				return temp;
 			}
 		};
 
-		explicit forward_list(::std::size_t count = 0, const T& value = {}) noexcept {
+		explicit forward_list(size_t count = 0, const T& value = {}) {
 			_sentinel = new _node;
 			_sentinel->_next = _sentinel;
 			resize(count, value);
 		}
 
-		template<::std::input_iterator iter>
-		explicit forward_list(iter first, iter last) noexcept {
+		template<std::input_iterator iter>
+		explicit forward_list(iter first, iter last) {
 			_sentinel = new _node;
 			_sentinel->_next = _sentinel;
 			while (first != last) {
@@ -69,85 +69,85 @@ namespace plastic {
 			}
 		}
 
-		~forward_list() noexcept {
+		~forward_list() {
 			clear();
 			delete _sentinel;
 		}
 
-		bool empty() const noexcept {
+		bool empty() const {
 			return _sentinel->_next == _sentinel;
 		}
 
-		void clear() const noexcept {
-			_node* i{_sentinel->_next};
+		void clear() const {
+			_node* i{ _sentinel->_next };
 			while (i != _sentinel) {
-				_node* next{i->_next};
+				_node* next{ i->_next };
 				delete i;
 				i = next;
 			}
 		}
 
-		void resize(::std::size_t count, const T& value = {}) const noexcept {
-			for (::std::size_t i{0}; i < count; ++i) {
+		void resize(size_t count, const T& value = {}) const {
+			for (size_t i{ 0 }; i < count; ++i) {
 				push_front(value);
 			}
 		}
 
-		iterator begin() const noexcept {
-			return iterator{_sentinel->_next};
+		iterator begin() const {
+			return iterator{ _sentinel->_next };
 		}
 
-		iterator end() const noexcept {
-			return iterator{_sentinel};
+		iterator end() const {
+			return iterator{ _sentinel };
 		}
 
-		T& front() const noexcept {
+		T& front() const {
 #ifdef PLASTIC_VERIFY
 			if (empty()) {
-				::std::abort();
+				std::abort();
 			}
 #endif
 			return _sentinel->_next->_value;
 		}
 
-		void push_front(const T& value) const noexcept {
-			_sentinel->_next = new _node{value, _sentinel->_next};
+		void push_front(const T& value) const {
+			_sentinel->_next = new _node{ value, _sentinel->_next };
 		}
 
-		void pop_front() const noexcept {
+		void pop_front() const {
 #ifdef PLASTIC_VERIFY
 			if (empty()) {
-				::std::abort();
+				std::abort();
 			}
 #endif
-			_node* temp{_sentinel->_next};
+			_node* temp{ _sentinel->_next };
 			_sentinel->_next = temp->_next;
 			delete temp;
 		}
 
-		iterator insert_after(iterator pos, const T& value, std::size_t count = 1) const noexcept {
-			_node* i{pos._ptr};
-			for (::std::size_t j{0}; j < count; ++j) {
-				i = i->_next = new _node{value, i->_next};
+		iterator insert_after(iterator pos, const T& value, size_t count = 1) const {
+			_node* i{ pos._ptr };
+			for (size_t j{ 0 }; j < count; ++j) {
+				i = i->_next = new _node{ value, i->_next };
 			}
-			return iterator{i};
+			return iterator{ i };
 		}
 
-		template<::std::input_iterator iter>
-		iterator insert_after(iterator pos, iter first, iter last) const noexcept {
-			_node* i{pos._ptr};
+		template<std::input_iterator iter>
+		iterator insert_after(iterator pos, iter first, iter last) const {
+			_node* i{ pos._ptr };
 			while (first != last) {
-				i = i->_next = new _node{*first++, i->_next};
+				i = i->_next = new _node{ *first++, i->_next };
 			}
-			return iterator{i};
+			return iterator{ i };
 		}
 
-		iterator erase_after(iterator pos) const noexcept {
-			_node* i{pos._ptr};
-			_node* next{i->_next};
+		iterator erase_after(iterator pos) const {
+			_node* i{ pos._ptr };
+			_node* next{ i->_next };
 #ifdef PLASTIC_VERIFY
 			if (next == _sentinel) {
-				::std::abort();
+				std::abort();
 			}
 #endif
 			i->_next = next->_next;
@@ -155,15 +155,15 @@ namespace plastic {
 			return ++pos;
 		}
 
-		iterator erase_after(iterator first, iterator last) const noexcept {
+		iterator erase_after(iterator first, iterator last) const {
 			if (first == last) {
 				return last;
 			}
-			_node* i{first._ptr}, * j{last._ptr};
-			_node* next{i->_next};
+			_node* i{ first._ptr }, * j{ last._ptr };
+			_node* next{ i->_next };
 #ifdef PLASTIC_VERIFY
 			if (next == _sentinel) {
-				::std::abort();
+				std::abort();
 			}
 #endif
 			i->_next = j;
@@ -176,17 +176,17 @@ namespace plastic {
 			return last;
 		}
 
-		::std::compare_three_way_result<T> operator<=>(const forward_list& container) const noexcept {
-			iterator i{_sentinel->_next}, j{container._sentinel->_next};
+		std::compare_three_way_result<T> operator<=>(const forward_list& container) const {
+			iterator i{ _sentinel->_next }, j{ container._sentinel->_next };
 			while (i != _sentinel && j != container._sentinel) {
-				::std::compare_three_way_result<T> cmp{*i++ <=> *j++};
+				std::compare_three_way_result<T> cmp{ *i++ <=> *j++ };
 				if (cmp != 0) {
 					return cmp;
 				}
 			}
-			return i == _sentinel && j != container._sentinel ? ::std::strong_ordering::less
-				: i != _sentinel && j == container._sentinel ? ::std::strong_ordering::greater
-				: ::std::strong_ordering::equal;
+			return i == _sentinel && j != container._sentinel ? std::strong_ordering::less
+				: i != _sentinel && j == container._sentinel ? std::strong_ordering::greater
+				: std::strong_ordering::equal;
 		}
 	};
 

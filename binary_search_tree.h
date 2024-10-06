@@ -4,17 +4,17 @@
 
 namespace plastic {
 
-	template<class T, ::std::strict_weak_order<T, T> auto _compare = ::std::less<>{} >
+	template<class T, std::strict_weak_order<T, T> auto _compare = std::less<>{} >
 	class binary_search_tree {
 		struct node {
 			T _value;
-			::std::size_t _count;
+			size_t _count;
 			node* _left;
 			node* _right;
 		};
 
 		node* _root;
-		::std::size_t _size;
+		size_t _size;
 
 		void _freeNode(node* nd) {
 			if (nd == nullptr) {
@@ -26,9 +26,9 @@ namespace plastic {
 		}
 
 		node*& _findNode(const T& value) {
-			node** p{&_root};
+			node** p{ &_root };
 			while (true) {
-				node*& current{*p};
+				node*& current{ *p };
 				if (current == nullptr || current->_value == value) {
 					return current;
 				}
@@ -38,11 +38,11 @@ namespace plastic {
 
 		node*& _minChild(node*& nd) {
 			if (nd == nullptr) {
-				::std::abort();
+				std::abort();
 			}
-			node** p{&nd};
+			node** p{ &nd };
 			while (true) {
-				node*& current{*p};
+				node*& current{ *p };
 				if (current->_left == nullptr) {
 					return current;
 				}
@@ -52,11 +52,11 @@ namespace plastic {
 
 		node*& _maxChild(node*& nd) {
 			if (nd == nullptr) {
-				::std::abort();
+				std::abort();
 			}
-			node** p{&nd};
+			node** p{ &nd };
 			while (true) {
-				node*& current{*p};
+				node*& current{ *p };
 				if (current->_right == nullptr) {
 					return current;
 				}
@@ -78,12 +78,12 @@ namespace plastic {
 			return _size == 0;
 		}
 
-		::std::size_t size() const {
+		size_t size() const {
 			return _size;
 		}
 
-		::std::size_t count(const T& value) const {
-			node* nd{_findNode(value)};
+		size_t count(const T& value) const {
+			node* nd{ _findNode(value) };
 			return nd == nullptr ? 0 : nd->_count;
 		}
 
@@ -99,19 +99,19 @@ namespace plastic {
 			return _maxChild(_root)->_value;
 		}
 
-		void insert(const T& value, ::std::size_t count = 1) {
+		void insert(const T& value, size_t count = 1) {
 			_size += count;
-			node*& nd{_findNode(value)};
+			node*& nd{ _findNode(value) };
 			if (nd == nullptr) {
-				nd = new node{value, count, nullptr, nullptr};
+				nd = new node{ value, count, nullptr, nullptr };
 			}
 			else {
 				nd->_count += count;
 			}
 		}
 
-		void erase(const T& value, ::std::size_t count = 1) {
-			node*& nd{_findNode(value)};
+		void erase(const T& value, size_t count = 1) {
+			node*& nd{ _findNode(value) };
 			if (nd == nullptr) {
 				return;
 			}
@@ -122,20 +122,20 @@ namespace plastic {
 			}
 			_size -= nd->_count;
 			if (nd->_left == nullptr) {
-				node* temp{nd};
+				node* temp{ nd };
 				nd = nd->_right;
 				delete temp;
 			}
 			else if (nd->_right == nullptr) {
-				node* temp{nd};
+				node* temp{ nd };
 				nd = nd->_left;
 				delete temp;
 			}
 			else {
-				node*& successor{_minChild(nd->_right)};
+				node*& successor{ _minChild(nd->_right) };
 				nd->_value = successor->_value;
 				nd->_count = successor->_count;
-				node* temp{successor};
+				node* temp{ successor };
 				successor = successor->_right;
 				delete temp;
 			}
