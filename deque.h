@@ -11,8 +11,8 @@ namespace plastic {
 		T* _first;
 		T* _last;
 
-	public:
-		class iterator {
+		template<bool is_const>
+		class iterator_impl {
 			friend deque;
 
 			T* _ptr;
@@ -21,11 +21,11 @@ namespace plastic {
 		public:
 			using difference_type = ptrdiff_t;
 			using value_type = T;
-			using pointer = T*;
-			using reference = T&;
+			using pointer = std::conditional_t<is_const, const T*, T*>;
+			using reference = std::conditional_t<is_const, const T&, T&>;
 			using iterator_category = std::random_access_iterator_tag;
 
-			explicit iterator(T* ptr = {}, const deque* cont = {}) {
+			explicit iterator_impl(T* ptr = {}, const deque* cont = {}) {
 				_ptr = ptr;
 				_cont = cont;
 			}
@@ -42,15 +42,15 @@ namespace plastic {
 				return *(*this + index);
 			}
 
-			bool operator==(iterator iter) const {
+			bool operator==(iterator_impl iter) const {
 				return _ptr == iter._ptr;
 			}
 
-			std::strong_ordering operator<=>(iterator iter) const {
+			std::strong_ordering operator<=>(iterator_impl iter) const {
 				return *this - iter <=> 0;
 			}
 
-			iterator& operator+=(difference_type diff) {
+			iterator_impl& operator+=(difference_type diff) {
 				if (_cont->_end - _ptr <= diff) {
 					_ptr += diff - _cont->size();
 				}
@@ -63,7 +63,7 @@ namespace plastic {
 				return *this;
 			}
 
-			iterator& operator-=(difference_type diff) {
+			iterator_impl& operator-=(difference_type diff) {
 				if (_ptr - _cont->_end >= diff) {
 					_ptr -= diff + _cont->size();
 				}
@@ -76,24 +76,24 @@ namespace plastic {
 				return *this;
 			}
 
-			iterator operator+(difference_type diff) const {
-				return iterator{ *this } += diff;
+			iterator_impl operator+(difference_type diff) const {
+				return iterator_impl{ *this } += diff;
 			}
 
-			friend iterator operator+(difference_type diff, iterator it) {
+			friend iterator_impl operator+(difference_type diff, iterator_impl it) {
 				return it += diff;
 			}
 
-			iterator operator-(difference_type diff) const {
-				return iterator{ *this } -= diff;
+			iterator_impl operator-(difference_type diff) const {
+				return iterator_impl{ *this } -= diff;
 			}
 
-			difference_type operator-(iterator it) const {
+			difference_type operator-(iterator_impl it) const {
 				ptrdiff_t index1{ _ptr - _cont->_first }, index2{ it._ptr - _cont->_first };
 				return (index1 >= 0 ? index1 : index1 + _cont->size()) - (index2 >= 0 ? index2 : index2 + _cont->size());
 			}
 
-			iterator& operator++() {
+			iterator_impl& operator++() {
 				++_ptr;
 				if (_ptr == _cont->_end) {
 					_ptr = _cont->_begin;
@@ -101,13 +101,13 @@ namespace plastic {
 				return *this;
 			}
 
-			iterator operator++(int) {
-				iterator temp{ *this };
+			iterator_impl operator++(int) {
+				iterator_impl temp{ *this };
 				++*this;
 				return temp;
 			}
 
-			iterator& operator--() {
+			iterator_impl& operator--() {
 				if (_ptr == _cont->_begin) {
 					_ptr = _cont->_end;
 				}
@@ -115,12 +115,16 @@ namespace plastic {
 				return *this;
 			}
 
-			iterator operator--(int) {
-				iterator temp{ *this };
+			iterator_impl operator--(int) {
+				iterator_impl temp{ *this };
 				--*this;
 				return temp;
 			}
 		};
+
+	public:
+		using iterator = iterator_impl<false>;
+		using const_iterator = iterator_impl<true>;
 
 		explicit deque(size_t count = {}, const T& value = {}) {
 			_begin = _first = new T[count + 1];
@@ -221,16 +225,24 @@ namespace plastic {
 			return iterator{ _first, this };
 		}
 
-		iterator cbegin() const {
-			return iterator{ _first, this };
+		const_iterator begin() const {
+			return const_iterator{ _first, this };
+		}
+
+		const_iterator cbegin() const {
+			return const_iterator{ _first, this };
 		}
 
 		iterator end() {
 			return iterator{ _last, this };
 		}
 
-		iterator cend() const {
-			return iterator{ _last, this };
+		const_iterator end() const {
+			return const_iterator{ _last, this };
+		}
+
+		const_iterator cend() const {
+			return const_iterator{ _last, this };
 		}
 
 		T& operator[](size_t index) {
