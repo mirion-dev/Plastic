@@ -25,7 +25,7 @@ namespace plastic {
 			using reference = T&;
 			using iterator_category = std::random_access_iterator_tag;
 
-			explicit iterator(T* ptr = nullptr, const deque* cont = nullptr) {
+			explicit iterator(T* ptr = {}, const deque* cont = {}) {
 				_ptr = ptr;
 				_cont = cont;
 			}
@@ -122,7 +122,7 @@ namespace plastic {
 			}
 		};
 
-		explicit deque(size_t count = 0, const T& value = {}) {
+		explicit deque(size_t count = {}, const T& value = {}) {
 			_begin = _first = new T[count + 1];
 			_end = _begin + count + 1;
 			_last = _end - 1;
@@ -381,6 +381,9 @@ namespace plastic {
 		}
 
 		iterator erase(iterator first, iterator last) {
+			if (first == last) {
+				return first;
+			}
 			T* newLast{ std::move(last, end(), first)._ptr };
 			std::destroy(newLast, _last);
 			_last = newLast;
@@ -388,6 +391,9 @@ namespace plastic {
 		}
 
 	};
+
+	template<class It>
+	explicit deque(It, It)->deque<std::iter_value_t<It>>;
 
 	template<class T>
 	explicit deque(std::initializer_list<T>)->deque<T>;

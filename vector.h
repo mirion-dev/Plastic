@@ -11,7 +11,7 @@ namespace plastic {
 		T* _end;
 
 	public:
-		explicit vector(size_t count = 0, const T& value = {}) {
+		explicit vector(size_t count = {}, const T& value = {}) {
 			_begin = new T[count];
 			_last = _end = _begin + count;
 			std::uninitialized_fill(_begin, _end, value);
@@ -238,6 +238,9 @@ namespace plastic {
 		}
 
 		T* erase(T* first, T* last) {
+			if (first == last) {
+				return first;
+			}
 			T* newLast{ std::move(last, _last, first) };
 			std::destroy(newLast, _last);
 			_last = newLast;
@@ -245,6 +248,9 @@ namespace plastic {
 		}
 
 	};
+
+	template<class It>
+	explicit vector(It, It)->vector<std::iter_value_t<It>>;
 
 	template<class T>
 	explicit vector(std::initializer_list<T>)->vector<T>;
