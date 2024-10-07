@@ -16,7 +16,7 @@ namespace plastic {
 			friend deque;
 
 			T* _ptr;
-			const deque* _container;
+			const deque* _cont;
 
 		public:
 			using difference_type = ptrdiff_t;
@@ -25,9 +25,9 @@ namespace plastic {
 			using reference = T&;
 			using iterator_category = std::random_access_iterator_tag;
 
-			explicit iterator(T* node = nullptr, const deque* container = nullptr) {
-				_ptr = node;
-				_container = container;
+			explicit iterator(T* ptr = nullptr, const deque* cont = nullptr) {
+				_ptr = ptr;
+				_cont = cont;
 			}
 
 			reference operator*() const {
@@ -42,21 +42,20 @@ namespace plastic {
 				return *(*this + index);
 			}
 
-			bool operator==(iterator it) const {
-				return _ptr == it._ptr;
+			bool operator==(iterator iter) const {
+				return _ptr == iter._ptr;
 			}
 
-			std::strong_ordering operator<=>(iterator it) const {
-				return *this - it <=> 0;
+			std::strong_ordering operator<=>(iterator iter) const {
+				return *this - iter <=> 0;
 			}
 
 			iterator& operator+=(difference_type diff) {
-				ptrdiff_t d{ _container->_end - _container->_begin };
-				if (_container->_end - _ptr <= diff) {
-					_ptr += diff - d;
+				if (_cont->_end - _ptr <= diff) {
+					_ptr += diff - _cont->size();
 				}
-				else if (_container->_begin - _ptr > diff) {
-					_ptr += diff + d;
+				else if (_cont->_begin - _ptr > diff) {
+					_ptr += diff + _cont->size();
 				}
 				else {
 					_ptr += diff;
@@ -65,12 +64,11 @@ namespace plastic {
 			}
 
 			iterator& operator-=(difference_type diff) {
-				ptrdiff_t d{ _container->_end - _container->_begin };
-				if (_ptr - _container->_end >= diff) {
-					_ptr -= diff + d;
+				if (_ptr - _cont->_end >= diff) {
+					_ptr -= diff + _cont->size();
 				}
-				else if (_ptr - _container->_begin < diff) {
-					_ptr -= diff - d;
+				else if (_ptr - _cont->_begin < diff) {
+					_ptr -= diff - _cont->size();
 				}
 				else {
 					_ptr -= diff;
@@ -91,16 +89,14 @@ namespace plastic {
 			}
 
 			difference_type operator-(iterator it) const {
-				ptrdiff_t d{ _container->_end - _container->_begin };
-				ptrdiff_t index1{ _ptr - _container->_first };
-				ptrdiff_t index2{ it._ptr - _container->_first };
-				return (index1 >= 0 ? index1 : index1 + d) - (index2 >= 0 ? index2 : index2 + d);
+				ptrdiff_t index1{ _ptr - _cont->_first }, index2{ it._ptr - _cont->_first };
+				return (index1 >= 0 ? index1 : index1 + _cont->size()) - (index2 >= 0 ? index2 : index2 + _cont->size());
 			}
 
 			iterator& operator++() {
 				++_ptr;
-				if (_ptr == _container->_end) {
-					_ptr = _container->_begin;
+				if (_ptr == _cont->_end) {
+					_ptr = _cont->_begin;
 				}
 				return *this;
 			}
@@ -112,8 +108,8 @@ namespace plastic {
 			}
 
 			iterator& operator--() {
-				if (_ptr == _container->_begin) {
-					_ptr = _container->_end;
+				if (_ptr == _cont->_begin) {
+					_ptr = _cont->_end;
 				}
 				--_ptr;
 				return *this;
@@ -133,14 +129,16 @@ namespace plastic {
 			std::uninitialized_fill(_first, _last, value);
 		}
 
-		template<std::input_iterator iter>
-		explicit deque(iter first, iter last) {
-			size_t d{ std::distance(first, last) };
-			_begin = _first = new T[d + 1];
-			_end = _begin + d + 1;
+		template<std::input_iterator It>
+		explicit deque(It first, It last) {
+			size_t n{ (size_t)std::distance(first, last) };
+			_begin = _first = new T[n + 1];
+			_end = _begin + n + 1;
 			_last = _end - 1;
 			std::uninitialized_copy(first, last, _first);
 		}
+
+		explicit deque(std::initializer_list<T> list) : deque(list.begin(), list.end()) {}
 
 		~deque() {
 			delete[] _begin;
@@ -159,13 +157,11 @@ namespace plastic {
 		}
 
 		void resize(size_t size, const T& value = {}) {
-			size_t oldSize{ this->size() };
-
-			if (size == oldSize) {
+			if (size == this->size()) {
 				return;
 			}
 
-			if (size < oldSize) {
+			if (size < this->size()) {
 				T* newLast{ (begin() + size)._ptr };
 				if (newLast < _last) {
 					std::destroy(newLast, _last);
@@ -192,9 +188,8 @@ namespace plastic {
 			}
 
 			reserve(size);
-			T* newLast{ _end - 1 };
-			std::uninitialized_fill(_last, newLast, value);
-			_last = newLast;
+			std::uninitialized_fill(_last, _end - 1, value);
+			_last = _end - 1;
 		}
 
 		size_t capacity() const {
@@ -222,15 +217,23 @@ namespace plastic {
 			_last = newLast;
 		}
 
-		iterator begin() const {
+		iterator begin() {
 			return iterator{ _first, this };
 		}
 
-		iterator end() const {
+		iterator cbegin() const {
+			return iterator{ _first, this };
+		}
+
+		iterator end() {
 			return iterator{ _last, this };
 		}
 
-		T& operator[](size_t index) const {
+		iterator cend() const {
+			return iterator{ _last, this };
+		}
+
+		T& operator[](size_t index) {
 #ifdef PLASTIC_VERIFY
 			if (index >= size()) {
 				std::abort();
@@ -239,7 +242,16 @@ namespace plastic {
 			return begin()[index];
 		}
 
-		T& front() const {
+		const T& operator[](size_t index) const {
+#ifdef PLASTIC_VERIFY
+			if (index >= size()) {
+				std::abort();
+			}
+#endif
+			return begin()[index];
+		}
+
+		T& front() {
 #ifdef PLASTIC_VERIFY
 			if (empty()) {
 				std::abort();
@@ -248,19 +260,36 @@ namespace plastic {
 			return *_first;
 		}
 
-		T& back() const {
+		const T& front() const {
 #ifdef PLASTIC_VERIFY
 			if (empty()) {
 				std::abort();
 			}
 #endif
-			return (_last == _begin ? _end : _last)[-1];
+			return *_first;
+		}
+
+		T& back() {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				std::abort();
+			}
+#endif
+			return *--end();
+		}
+
+		const T& back() const {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				std::abort();
+			}
+#endif
+			return *--end();
 		}
 
 		void push_front(const T& value) {
-			if ((_first == _begin ? _end : _first) - 1 == _last) {
-				size_t capacity{ this->capacity() };
-				reserve(capacity + (capacity <= 1 ? 1 : capacity >> 1));
+			if (++end() == begin()) {
+				reserve(capacity() + (capacity() <= 1 ? 1 : capacity() >> 1));
 			}
 			if (_first == _begin) {
 				_first = _end;
@@ -281,9 +310,8 @@ namespace plastic {
 		}
 
 		void push_back(const T& value) {
-			if ((_first == _begin ? _end : _first) - 1 == _last) {
-				size_t capacity{ this->capacity() };
-				reserve(capacity + (capacity <= 1 ? 1 : capacity >> 1));
+			if (++end() == begin()) {
+				reserve(capacity() + (capacity() <= 1 ? 1 : capacity() >> 1));
 			}
 			*_last++ = value;
 			if (_last == _end) {
@@ -303,48 +331,42 @@ namespace plastic {
 			std::destroy_at(--_last);
 		}
 
-		iterator insert(iterator pos, const T& value, size_t count = 1) {
+		iterator insert(iterator pos, const T& value) {
+			return insert(pos, 1, value);
+		}
+
+		iterator insert(iterator pos, size_t count, const T& value) {
 			if (count == 0) {
 				return pos;
 			}
-			size_t capacity{ this->capacity() };
-			if (capacity - size() < count) {
-				ptrdiff_t offset{ pos - begin() };
-				reserve(capacity + ((capacity >> 1) < count ? count : capacity >> 1));
+			if (capacity() - size() < count) {
+				size_t offset{ size_t(pos - begin()) };
+				reserve(capacity() + (capacity() >> 1 < count ? count : capacity() >> 1));
 				pos = begin() + offset;
 			}
-			iterator i{ end() + count }, j{ end() };
-			while (j != pos) {
-				*--i = std::move(*--j);
-			}
-			while (i != pos) {
-				*--i = value;
-			}
+			std::fill(pos, std::move_backward(pos, end(), end() + count), value);
 			_last = (end() + count)._ptr;
 			return pos;
 		}
 
-		template<std::input_iterator iter>
-		iterator insert(iterator pos, iter first, iter last) {
+		template<std::input_iterator It>
+		iterator insert(iterator pos, It first, It last) {
 			if (first == last) {
 				return pos;
 			}
-			ptrdiff_t d{ std::distance(first, last) };
-			size_t capacity{ this->capacity() };
-			if (capacity - size() < d) {
-				ptrdiff_t offset{ pos - begin() };
-				reserve(capacity + ((capacity >> 1) < d ? d : capacity >> 1));
+			size_t n{ (size_t)std::distance(first, last) };
+			if (capacity() - size() < n) {
+				size_t offset{ size_t(pos - begin()) };
+				reserve(capacity() + (capacity() >> 1 < n ? n : capacity() >> 1));
 				pos = begin() + offset;
 			}
-			iterator i{ end() + d }, j{ end() };
-			while (j != pos) {
-				*--i = std::move(*--j);
-			}
-			while (i != pos) {
-				*--i = static_cast<T>(*--last);
-			}
-			_last = (end() + d)._ptr;
+			std::copy_backward(first, last, std::move_backward(pos, end(), end() + n));
+			_last = (end() + n)._ptr;
 			return pos;
+		}
+
+		iterator insert(iterator pos, std::initializer_list<T> list) {
+			return insert(pos, list.begin(), list.end());
 		}
 
 		iterator erase(iterator pos) {
@@ -353,40 +375,21 @@ namespace plastic {
 				std::abort();
 			}
 #endif
-			iterator i{ pos }, j{ pos + 1 }, e{ end() };
-			while (j != e) {
-				*i++ = std::move(*j++);
-			}
-			std::destroy_at(i._ptr);
-			_last = i._ptr;
+			_last = std::move(std::next(pos), end(), pos)._ptr;
+			std::destroy_at(_last);
 			return pos;
 		}
 
 		iterator erase(iterator first, iterator last) {
-			if (first == last) {
-				return first;
-			}
-			iterator i{ first }, j{ last }, e{ end() };
-			while (j != e) {
-				*i++ = std::move(*j++);
-			}
-			std::destroy(i, e);
-			_last = i._ptr;
+			T* newLast{ std::move(last, end(), first)._ptr };
+			std::destroy(newLast, _last);
+			_last = newLast;
 			return first;
 		}
 
-		std::compare_three_way_result<T> operator<=>(const deque& container) const {
-			iterator i{ begin() }, j{ container.begin() }, ie{ end() }, je{ container.end() };
-			while (i != ie && j != je) {
-				std::compare_three_way_result<T> cmp{ *i++ <=> *j++ };
-				if (cmp != 0) {
-					return cmp;
-				}
-			}
-			return i == ie && j != je ? std::strong_ordering::less
-				: i != ie && j == je ? std::strong_ordering::greater
-				: std::strong_ordering::equal;
-		}
 	};
+
+	template<class T>
+	explicit deque(std::initializer_list<T>)->deque<T>;
 
 }
