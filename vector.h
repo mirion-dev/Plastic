@@ -25,6 +25,13 @@ namespace plastic {
 			std::uninitialized_copy(first, last, _begin);
 		}
 
+		explicit vector(std::initializer_list<T> list) {
+			size_t n{ list.size() };
+			_begin = new T[n];
+			_last = _end = _begin + n;
+			std::uninitialized_copy(list.begin(), list.end(), _begin);
+		}
+
 		~vector() {
 			delete[] _begin;
 		}
@@ -223,5 +230,8 @@ namespace plastic {
 				: std::strong_ordering::equal;
 		}
 	};
+
+	template<class T>
+	explicit vector(std::initializer_list<T>)->vector<T>;
 
 }
