@@ -268,18 +268,6 @@ namespace plastic {
 			return first;
 		}
 
-		std::compare_three_way_result<T> operator<=>(const vector& container) const {
-			T* i{ _begin }, j{ container._begin };
-			while (i != _last && j != container._last) {
-				std::compare_three_way_result<T> cmp{ *i++ <=> *j++ };
-				if (cmp != 0) {
-					return cmp;
-				}
-			}
-			return i == _last && j != container._last ? std::strong_ordering::less
-				: i != _last && j == container._last ? std::strong_ordering::greater
-				: std::strong_ordering::equal;
-		}
 	};
 
 	template<class T>
