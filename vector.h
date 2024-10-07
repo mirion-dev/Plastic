@@ -93,39 +93,60 @@ namespace plastic {
 			_end = newEnd;
 		}
 
-		T* begin() const {
+		T* begin() {
 			return _begin;
 		}
 
-		T* end() const {
+		const T* begin() const {
+			return _begin;
+		}
+
+		const T* cbegin() const {
+			return _begin;
+		}
+
+		T* end() {
 			return _last;
 		}
 
-		T& operator[](size_t index) const {
-#ifdef PLASTIC_VERIFY
-			if (index >= size()) {
-				std::abort();
+		const T* end() const {
+			return _last;
 			}
-#endif
+
+		const T* cend() const {
+			return _last;
+		}
+
+		T& operator[](size_t index) {
 			return _begin[index];
 		}
 
-		T& front() const {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
+		const T& operator[](size_t index) const {
+			return _begin[index];
+		}
+
+		T& front() {
+			return *_begin;
 			}
-#endif
+
+		const T& front() const {
 			return *_begin;
 		}
 
-		T& back() const {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+		T& back() {
 			return _last[-1];
+			}
+
+		const T& back() const {
+			return _last[-1];
+		}
+
+		T* data() {
+			return _begin;
+		}
+
+		const T* data() const {
+			return _begin;
 		}
 
 		void push_back(const T& value) {
