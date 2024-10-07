@@ -17,20 +17,15 @@ namespace plastic {
 			std::uninitialized_fill(_begin, _end, value);
 		}
 
-		template<std::input_iterator iter>
-		explicit vector(iter first, iter last) {
-			ptrdiff_t d{ std::distance(first, last) };
-			_begin = new T[d];
-			_last = _end = _begin + d;
+		template<std::input_iterator It>
+		explicit vector(It first, It last) {
+			size_t n{ (size_t)std::distance(first, last) };
+			_begin = new T[n];
+			_last = _end = _begin + n;
 			std::uninitialized_copy(first, last, _begin);
 		}
 
-		explicit vector(std::initializer_list<T> list) {
-			size_t n{ list.size() };
-			_begin = new T[n];
-			_last = _end = _begin + n;
-			std::uninitialized_copy(list.begin(), list.end(), _begin);
-		}
+		explicit vector(std::initializer_list<T> list) : vector(list.begin(), list.end()) {}
 
 		~vector() {
 			delete[] _begin;
@@ -49,13 +44,11 @@ namespace plastic {
 		}
 
 		void resize(size_t size, const T& value = {}) {
-			size_t oldSize{ this->size() };
-
-			if (size == oldSize) {
+			if (size == this->size()) {
 				return;
 			}
 
-			if (size < oldSize) {
+			if (size < this->size()) {
 				T* newLast{ _begin + size };
 				std::destroy(newLast, _last);
 				_last = newLast;
@@ -111,7 +104,7 @@ namespace plastic {
 
 		const T* end() const {
 			return _last;
-			}
+		}
 
 		const T* cend() const {
 			return _last;
@@ -142,7 +135,7 @@ namespace plastic {
 			}
 #endif
 			return *_begin;
-			}
+		}
 
 		const T& front() const {
 #ifdef PLASTIC_VERIFY
@@ -160,7 +153,7 @@ namespace plastic {
 			}
 #endif
 			return _last[-1];
-			}
+		}
 
 		const T& back() const {
 #ifdef PLASTIC_VERIFY
@@ -181,8 +174,7 @@ namespace plastic {
 
 		void push_back(const T& value) {
 			if (_last == _end) {
-				size_t capacity{ this->capacity() };
-				reserve(capacity + (capacity <= 1 ? 1 : capacity >> 1));
+				reserve(capacity() + (capacity() <= 1 ? 1 : capacity() >> 1));
 			}
 			*_last++ = value;
 		}
@@ -196,48 +188,42 @@ namespace plastic {
 			std::destroy_at(--_last);
 		}
 
-		T* insert(T* pos, const T& value, size_t count = 1) {
+		T* insert(T* pos, const T& value) {
+			return insert(pos, 1, value);
+		}
+
+		T* insert(T* pos, size_t count, const T& value) {
 			if (count == 0) {
 				return pos;
 			}
-			if (static_cast<size_t>(_end - _last) < count) {
-				size_t capacity{ this->capacity() };
-				ptrdiff_t offset{ pos - _begin };
-				reserve(capacity + ((capacity >> 1) < count ? count : capacity >> 1));
+			if (size_t(_end - _last) < count) {
+				size_t offset{ size_t(pos - _begin) };
+				reserve(capacity() + (capacity() >> 1 < count ? count : capacity() >> 1));
 				pos = _begin + offset;
 			}
-			T* i{ _last + count }, * j{ _last };
-			while (j != pos) {
-				*--i = std::move(*--j);
-			}
-			while (i != pos) {
-				*--i = value;
-			}
+			std::fill(pos, std::move_backward(pos, _last, _last + count), value);
 			_last += count;
 			return pos;
 		}
 
-		template<std::input_iterator iter>
-		T* insert(T* pos, iter first, iter last) {
+		template<std::input_iterator It>
+		T* insert(T* pos, It first, It last) {
 			if (first == last) {
 				return pos;
 			}
-			ptrdiff_t d{ std::distance(first, last) };
-			if (_end - _last < d) {
-				size_t capacity{ this->capacity() };
-				ptrdiff_t offset{ pos - _begin };
-				reserve(capacity + ((capacity >> 1) < d ? d : capacity >> 1));
+			size_t n{ (size_t)std::distance(first, last) };
+			if (size_t(_end - _last) < n) {
+				size_t offset{ size_t(pos - _begin) };
+				reserve(capacity() + (capacity() >> 1 < n ? n : capacity() >> 1));
 				pos = _begin + offset;
 			}
-			T* i{ _last + d }, * j{ _last };
-			while (j != pos) {
-				*--i = std::move(*--j);
-			}
-			while (i != pos) {
-				*--i = static_cast<T>(*--last);
-			}
-			_last += d;
+			std::copy_backward(first, last, std::move_backward(pos, _last, _last + n));
+			_last += n;
 			return pos;
+		}
+
+		T* insert(T* pos, std::initializer_list<T> list) {
+			return insert(pos, list.begin(), list.end());
 		}
 
 		T* erase(T* pos) {
@@ -246,25 +232,15 @@ namespace plastic {
 				std::abort();
 			}
 #endif
-			T* i{ pos }, * j{ pos + 1 };
-			while (j != _last) {
-				*i++ = std::move(*j++);
-			}
-			std::destroy_at(i);
-			_last = i;
+			_last = std::move(pos + 1, _last, pos);
+			std::destroy_at(_last);
 			return pos;
 		}
 
 		T* erase(T* first, T* last) {
-			if (first == last) {
-				return first;
-			}
-			T* i{ first }, * j{ last };
-			while (j != _last) {
-				*i++ = std::move(*j++);
-			}
-			std::destroy(i, _last);
-			_last = i;
+			T* newLast{ std::move(last, _last, first) };
+			std::destroy(newLast, _last);
+			_last = newLast;
 			return first;
 		}
 
