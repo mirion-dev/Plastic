@@ -1,34 +1,26 @@
 # Plastic
 
-My implementation of common data structures and algorithms for studying.
+My implementation of common data structures for studying.
 
-## Data Structure (waiting for refactoring)
-
-| | **`vector`** | **`deque`** | **`forward_list`** | **`list`** | **`priority_queue`** | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | |
-| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
-| **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` | | | | **`empty`** |
-| **`clear`** | `clear` | `clear` | `clear` | `clear` | `clear` | | | | **`clear`** |
-| **`size`** | `size` | `size` | | | `size` | | | | **`size`** |
-| **`resize`** | `resize` | `resize` | `resize` | `resize` | | | | | **`resize`** |
-| **`capacity`** | `capacity` | `capacity` | | | `capacity` | | | | **`capacity`** |
-| **`reserve`** | `reserve` | `reserve` | | | `reserve` | | | | **`reserve`** |
-| **`begin`** | `begin` | `begin` | `begin` | `begin` | | | | | **`begin`** |
-| **`end`** | `end` | `end` | `end` | `end` | | | | | **`end`** |
-| **`front`** | `front` | `front` | `front` | `front` | `top` | | | | **`front`** |
-| **`back`** | `back` | `back` | | `back` | | | | | **`back`** |
-| **`operator[]`** | `operator[]` | `operator[]` | | | | | | | **`operator[]`** |
-| **`push_front`** | | `push_front` | `push_front` | `push_front` | | | | | **`push_front`** |
-| **`pop_front`** | | `pop_front` | `pop_front` | `pop_front` | `pop` | | | | **`pop_front`** |
-| **`push_back`** | `push_back` | `push_back` | | `push_back` | `push` | | | | **`push_back`** |
-| **`pop_back`** | `pop_back` | `pop_back` | | `pop_back` | | | | | **`pop_back`** |
-| **`insert`** | `insert` | `insert` | `insert_after` | `insert` | | | | | **`insert`** |
-| **`erase`** | `erase` | `erase` | `erase_after` | `erase` | | | | | **`erase`** |
-| **`merge`** | | | | | | | | | **`merge`** |
-| **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | | | | | **`operator<=>`** |
-| | **`vector`** | **`deque`** | **`forward_list`** | **`list`** | **`priority_queue`** | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | |
-
-## Algorithm
-
-| **Header** | **Description** |
-| :--: | -- |
-| `algorithm.h` | same as `<algorithm>` |
+| | **`vector`** | **`deque`** | **`forward_list`** | **`list`** | **`priority_queue`** |
+| :--: | :--: | :--: | :--: | :--: | :--: |
+| **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` |
+| **`clear`** | `clear` | `clear` | `clear` | `clear` | `clear` |
+| **`size`** | `size` | `size` | | | `size` |
+| **`resize`** | `resize` | `resize` | `resize` | `resize` | |
+| **`capacity`** | `capacity` | `capacity` | | | `capacity` |
+| **`reserve`** | `reserve` | `reserve` | | | `reserve` |
+| **`data`** | `data` | | | | |
+| **`begin`** | `begin` | `begin` | `begin` | `begin` | |
+| **`end`** | `end` | `end` | `end` | `end` | |
+| **`cbegin`** | `cbegin` | `cbegin` | `cbegin` | `cbegin` | |
+| **`cend`** | `cend` | `cend` | `cend` | `cend` | |
+| **`front`** | `front` | `front` | `front` | `front` | `top` |
+| **`back`** | `back` | `back` | | `back` | |
+| **`operator[]`** | `operator[]` | `operator[]` | | | |
+| **`push_front`** | | `push_front` | `push_front` | `push_front` | |
+| **`pop_front`** | | `pop_front` | `pop_front` | `pop_front` | `pop` |
+| **`push_back`** | `push_back` | `push_back` | | `push_back` | `push` |
+| **`pop_back`** | `pop_back` | `pop_back` | | `pop_back` | |
+| **`insert`** | `insert` | `insert` | `insert_after` | `insert` | |
+| **`erase`** | `erase` | `erase` | `erase_after` | `erase` | |
