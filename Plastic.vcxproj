@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="binary_search_tree.h" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vector.h" />
@@ -119,7 +120,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>PLASTIC_VERIFY;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>

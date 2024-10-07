@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils.h"
+
 #include <memory>
 
 namespace plastic {
@@ -111,56 +113,32 @@ namespace plastic {
 		}
 
 		T& operator[](size_t index) {
-#ifdef PLASTIC_VERIFY
-			if (index >= size()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(index < size());
 			return _begin[index];
 		}
 
 		const T& operator[](size_t index) const {
-#ifdef PLASTIC_VERIFY
-			if (index >= size()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(index < size());
 			return _begin[index];
 		}
 
 		T& front() {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(!empty());
 			return *_begin;
 		}
 
 		const T& front() const {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(!empty());
 			return *_begin;
 		}
 
 		T& back() {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(!empty());
 			return _last[-1];
 		}
 
 		const T& back() const {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(!empty());
 			return _last[-1];
 		}
 
@@ -180,11 +158,7 @@ namespace plastic {
 		}
 
 		void pop_back() {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(!empty());
 			std::destroy_at(--_last);
 		}
 
@@ -227,11 +201,7 @@ namespace plastic {
 		}
 
 		T* erase(T* pos) {
-#ifdef PLASTIC_VERIFY
-			if (pos == _last) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(pos != _last);
 			_last = std::move(pos + 1, _last, pos);
 			std::destroy_at(_last);
 			return pos;
