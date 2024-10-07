@@ -118,26 +118,56 @@ namespace plastic {
 		}
 
 		T& operator[](size_t index) {
+#ifdef PLASTIC_VERIFY
+			if (index >= size()) {
+				std::abort();
+			}
+#endif
 			return _begin[index];
 		}
 
 		const T& operator[](size_t index) const {
+#ifdef PLASTIC_VERIFY
+			if (index >= size()) {
+				std::abort();
+			}
+#endif
 			return _begin[index];
 		}
 
 		T& front() {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				std::abort();
+			}
+#endif
 			return *_begin;
 			}
 
 		const T& front() const {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				std::abort();
+			}
+#endif
 			return *_begin;
 		}
 
 		T& back() {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				std::abort();
+			}
+#endif
 			return _last[-1];
 			}
 
 		const T& back() const {
+#ifdef PLASTIC_VERIFY
+			if (empty()) {
+				std::abort();
+			}
+#endif
 			return _last[-1];
 		}
 
