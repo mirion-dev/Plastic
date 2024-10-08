@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils.h"
+
 #include <memory>
 
 namespace plastic {
@@ -11,9 +13,9 @@ namespace plastic {
 		T* _first;
 		T* _last;
 
-		template<bool is_const>
-		class iterator_impl {
-			friend deque;
+	public:
+		class iterator {
+			friend class deque;
 
 			T* _ptr;
 			const deque* _cont;
@@ -21,11 +23,11 @@ namespace plastic {
 		public:
 			using difference_type = ptrdiff_t;
 			using value_type = T;
-			using pointer = std::conditional_t<is_const, const T*, T*>;
-			using reference = std::conditional_t<is_const, const T&, T&>;
+			using pointer = T*;
+			using reference = T&;
 			using iterator_category = std::random_access_iterator_tag;
 
-			explicit iterator_impl(T* ptr = {}, const deque* cont = {}) {
+			iterator(T* ptr = {}, const deque* cont = {}) {
 				_ptr = ptr;
 				_cont = cont;
 			}
@@ -42,58 +44,50 @@ namespace plastic {
 				return *(*this + index);
 			}
 
-			bool operator==(iterator_impl iter) const {
+			bool operator==(iterator iter) const {
 				return _ptr == iter._ptr;
 			}
 
-			std::strong_ordering operator<=>(iterator_impl iter) const {
+			std::strong_ordering operator<=>(iterator iter) const {
 				return *this - iter <=> 0;
 			}
 
-			iterator_impl& operator+=(difference_type diff) {
-				if (_cont->_end - _ptr <= diff) {
-					_ptr += diff - _cont->size();
+			iterator& operator+=(difference_type diff) {
+				if (_cont->_end - _ptr < diff) {
+					diff -= _cont->_end - _cont->_begin;
 				}
-				else if (_cont->_begin - _ptr > diff) {
-					_ptr += diff + _cont->size();
+				else if (_ptr - _cont->_begin < -diff) {
+					diff += _cont->_end - _cont->_begin;
 				}
-				else {
-					_ptr += diff;
-				}
+				_ptr += diff;
 				return *this;
 			}
 
-			iterator_impl& operator-=(difference_type diff) {
-				if (_ptr - _cont->_end >= diff) {
-					_ptr -= diff + _cont->size();
+			iterator& operator-=(difference_type diff) {
+				return *this += -diff;
+			}
+
+			iterator operator+(difference_type diff) const {
+				return iterator{ *this } += diff;
+			}
+
+			friend iterator operator+(difference_type diff, iterator iter) {
+				return iter += diff;
+			}
+
+			iterator operator-(difference_type diff) const {
+				return iterator{ *this } -= diff;
+			}
+
+			difference_type operator-(iterator it) const {
+				ptrdiff_t diff{ _ptr - it._ptr };
+				if (_cont->_first > _cont->_last) {
+					diff += _cont->_end - _cont->_begin;
 				}
-				else if (_ptr - _cont->_begin < diff) {
-					_ptr -= diff - _cont->size();
-				}
-				else {
-					_ptr -= diff;
-				}
-				return *this;
+				return diff;
 			}
 
-			iterator_impl operator+(difference_type diff) const {
-				return iterator_impl{ *this } += diff;
-			}
-
-			friend iterator_impl operator+(difference_type diff, iterator_impl it) {
-				return it += diff;
-			}
-
-			iterator_impl operator-(difference_type diff) const {
-				return iterator_impl{ *this } -= diff;
-			}
-
-			difference_type operator-(iterator_impl it) const {
-				ptrdiff_t index1{ _ptr - _cont->_first }, index2{ it._ptr - _cont->_first };
-				return (index1 >= 0 ? index1 : index1 + _cont->size()) - (index2 >= 0 ? index2 : index2 + _cont->size());
-			}
-
-			iterator_impl& operator++() {
+			iterator& operator++() {
 				++_ptr;
 				if (_ptr == _cont->_end) {
 					_ptr = _cont->_begin;
@@ -101,13 +95,13 @@ namespace plastic {
 				return *this;
 			}
 
-			iterator_impl operator++(int) {
-				iterator_impl temp{ *this };
+			iterator operator++(int) {
+				iterator temp{ *this };
 				++*this;
 				return temp;
 			}
 
-			iterator_impl& operator--() {
+			iterator& operator--() {
 				if (_ptr == _cont->_begin) {
 					_ptr = _cont->_end;
 				}
@@ -115,16 +109,16 @@ namespace plastic {
 				return *this;
 			}
 
-			iterator_impl operator--(int) {
-				iterator_impl temp{ *this };
+			iterator operator--(int) {
+				iterator temp{ *this };
 				--*this;
 				return temp;
 			}
 		};
 
-	public:
-		using iterator = iterator_impl<false>;
-		using const_iterator = iterator_impl<true>;
+		using const_iterator = std::const_iterator<iterator>;
+		using reverse_iterator = std::reverse_iterator<iterator>;
+		using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
 		explicit deque(size_t count = {}, const T& value = {}) {
 			_begin = _first = new T[count + 1];
@@ -222,80 +216,80 @@ namespace plastic {
 		}
 
 		iterator begin() {
-			return iterator{ _first, this };
+			return { _first, this };
 		}
 
 		const_iterator begin() const {
-			return const_iterator{ _first, this };
+			return iterator{ _first, this };
 		}
 
 		const_iterator cbegin() const {
-			return const_iterator{ _first, this };
+			return iterator{ _first, this };
 		}
 
 		iterator end() {
-			return iterator{ _last, this };
+			return { _last, this };
 		}
 
 		const_iterator end() const {
-			return const_iterator{ _last, this };
+			return iterator{ _last, this };
 		}
 
 		const_iterator cend() const {
-			return const_iterator{ _last, this };
+			return iterator{ _last, this };
+		}
+
+		reverse_iterator rbegin() {
+			return reverse_iterator{ { _last, this } };
+		}
+
+		const_reverse_iterator rbegin() const {
+			return reverse_iterator{ { _last, this } };
+		}
+
+		const_reverse_iterator crbegin() const {
+			return reverse_iterator{ { _last, this } };
+		}
+
+		reverse_iterator rend() {
+			return reverse_iterator{ { _first, this } };
+		}
+
+		const_reverse_iterator rend() const {
+			return reverse_iterator{ { _first, this } };
+		}
+
+		const_reverse_iterator crend() const {
+			return reverse_iterator{ { _first, this } };
 		}
 
 		T& operator[](size_t index) {
-#ifdef PLASTIC_VERIFY
-			if (index >= size()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(index < size());
 			return begin()[index];
 		}
 
 		const T& operator[](size_t index) const {
-#ifdef PLASTIC_VERIFY
-			if (index >= size()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(index < size());
 			return begin()[index];
 		}
 
 		T& front() {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(!empty());
 			return *_first;
 		}
 
 		const T& front() const {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(!empty());
 			return *_first;
 		}
 
 		T& back() {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(!empty());
 			return *--end();
 		}
 
 		const T& back() const {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(!empty());
 			return *--end();
 		}
 
@@ -310,11 +304,7 @@ namespace plastic {
 		}
 
 		void pop_front() {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(!empty());
 			std::destroy_at(_first++);
 			if (_first == _end) {
 				_first = _begin;
@@ -332,11 +322,7 @@ namespace plastic {
 		}
 
 		void pop_back() {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(!empty());
 			if (_last == _begin) {
 				_last = _end;
 			}
@@ -382,11 +368,7 @@ namespace plastic {
 		}
 
 		iterator erase(iterator pos) {
-#ifdef PLASTIC_VERIFY
-			if (pos == end()) {
-				std::abort();
-			}
-#endif
+			PLASTIC_VERIFY(pos != end());
 			_last = std::move(std::next(pos), end(), pos)._ptr;
 			std::destroy_at(_last);
 			return pos;
