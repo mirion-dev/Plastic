@@ -13,6 +13,11 @@ namespace plastic {
 		T* _end;
 
 	public:
+		using iterator = T*;
+		using const_iterator = std::const_iterator<iterator>;
+		using reverse_iterator = std::reverse_iterator<iterator>;
+		using const_reverse_iterator = std::const_iterator<reverse_iterator>;
+
 		explicit vector(size_t count = {}, const T& value = {}) {
 			_begin = new T[count];
 			_last = _end = _begin + count;
@@ -88,28 +93,52 @@ namespace plastic {
 			_end = newEnd;
 		}
 
-		T* begin() {
+		iterator begin() {
 			return _begin;
 		}
 
-		const T* begin() const {
+		const_iterator begin() const {
 			return _begin;
 		}
 
-		const T* cbegin() const {
+		const_iterator cbegin() const {
 			return _begin;
 		}
 
-		T* end() {
+		iterator end() {
 			return _last;
 		}
 
-		const T* end() const {
+		const_iterator end() const {
 			return _last;
 		}
 
-		const T* cend() const {
+		const_iterator cend() const {
 			return _last;
+		}
+
+		reverse_iterator rbegin() {
+			return _last;
+		}
+
+		const_reverse_iterator rbegin() const {
+			return _last;
+		}
+
+		const_reverse_iterator crbegin() const {
+			return _last;
+		}
+
+		reverse_iterator rend() {
+			return _begin;
+		}
+
+		const_reverse_iterator rend() const {
+			return _begin;
+		}
+
+		const_reverse_iterator crend() const {
+			return _begin;
 		}
 
 		T& operator[](size_t index) {
@@ -162,11 +191,11 @@ namespace plastic {
 			std::destroy_at(--_last);
 		}
 
-		T* insert(T* pos, const T& value) {
+		iterator insert(iterator pos, const T& value) {
 			return insert(pos, 1, value);
 		}
 
-		T* insert(T* pos, size_t count, const T& value) {
+		iterator insert(iterator pos, size_t count, const T& value) {
 			if (count == 0) {
 				return pos;
 			}
@@ -181,7 +210,7 @@ namespace plastic {
 		}
 
 		template<std::input_iterator It>
-		T* insert(T* pos, It first, It last) {
+		iterator insert(iterator pos, It first, It last) {
 			if (first == last) {
 				return pos;
 			}
@@ -196,18 +225,18 @@ namespace plastic {
 			return pos;
 		}
 
-		T* insert(T* pos, std::initializer_list<T> list) {
+		iterator insert(iterator pos, std::initializer_list<T> list) {
 			return insert(pos, list.begin(), list.end());
 		}
 
-		T* erase(T* pos) {
+		iterator erase(iterator pos) {
 			PLASTIC_VERIFY(pos != _last);
 			_last = std::move(pos + 1, _last, pos);
 			std::destroy_at(_last);
 			return pos;
 		}
 
-		T* erase(T* first, T* last) {
+		iterator erase(iterator first, iterator last) {
 			if (first == last) {
 				return first;
 			}

@@ -15,6 +15,10 @@ My implementation of common data structures for studying.
 | **`end`** | `end` | `end` | `end` | `end` | |
 | **`cbegin`** | `cbegin` | `cbegin` | `cbegin` | `cbegin` | |
 | **`cend`** | `cend` | `cend` | `cend` | `cend` | |
+| **`rbegin`** | `rbegin` | `rbegin` | | `rbegin` | |
+| **`rend`** | `rend` | `rend` | | `rend` | |
+| **`crbegin`** | `crbegin` | `crbegin` | | `crbegin` | |
+| **`crend`** | `crend` | `crend` | | `crend` | |
 | **`front`** | `front` | `front` | `front` | `front` | `top` |
 | **`back`** | `back` | `back` | | `back` | |
 | **`operator[]`** | `operator[]` | `operator[]` | | | |
