@@ -246,6 +246,14 @@ namespace plastic {
 			return first;
 		}
 
+		bool operator==(const vector& cont) const {
+			return std::equal(begin(), end(), cont.begin(), cont.end());
+		}
+
+		auto operator<=>(const vector& cont) const {
+			return std::lexicographical_compare_three_way(begin(), end(), cont.begin(), cont.end());
+		}
+
 	};
 
 	template<class It>

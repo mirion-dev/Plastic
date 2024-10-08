@@ -28,3 +28,5 @@ My implementation of common data structures for studying.
 | **`pop_back`** | `pop_back` | `pop_back` | | `pop_back` | |
 | **`insert`** | `insert` | `insert` | `insert_after` | `insert` | |
 | **`erase`** | `erase` | `erase` | `erase_after` | `erase` | |
+| **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` | |
+| **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | |
