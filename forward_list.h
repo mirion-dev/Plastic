@@ -1,41 +1,44 @@
 #pragma once
 
+#include "utils.h"
+
 #include <iterator>
 
 namespace plastic {
 
 	template<class T>
 	class forward_list {
-		struct _node {
-			T _value;
-			_node* _next;
+		struct node {
+			T value;
+			node* next;
 		};
 
-		_node* _sentinel;
+		node* _sentinel;
+		size_t _size;
 
 	public:
 		class iterator {
-			friend forward_list;
+			friend class forward_list;
 
-			_node* _ptr;
+			node* _ptr;
 
 		public:
 			using difference_type = ptrdiff_t;
 			using value_type = T;
 			using pointer = T*;
 			using reference = T&;
-			using iterator_category = std::input_iterator_tag;
+			using iterator_category = std::forward_iterator_tag;
 
-			explicit iterator(_node* node = nullptr) {
+			iterator(node* node = {}) {
 				_ptr = node;
 			}
 
 			reference operator*() const {
-				return _ptr->_value;
+				return _ptr->value;
 			}
 
 			pointer operator->() const {
-				return &_ptr->_value;
+				return &_ptr->value;
 			}
 
 			bool operator==(iterator it) const {
@@ -43,7 +46,7 @@ namespace plastic {
 			}
 
 			iterator& operator++() {
-				_ptr = _ptr->_next;
+				_ptr = _ptr->next;
 				return *this;
 			}
 
@@ -54,20 +57,22 @@ namespace plastic {
 			}
 		};
 
-		explicit forward_list(size_t count = 0, const T& value = {}) {
-			_sentinel = new _node;
-			_sentinel->_next = _sentinel;
-			resize(count, value);
+		using const_iterator = std::const_iterator<iterator>;
+
+		explicit forward_list(size_t count = {}, const T& value = {}) {
+			_sentinel->next = _sentinel = new node;
+			_size = 0;
+			insert_after(end(), count, value);
 		}
 
-		template<std::input_iterator iter>
-		explicit forward_list(iter first, iter last) {
-			_sentinel = new _node;
-			_sentinel->_next = _sentinel;
-			while (first != last) {
-				push_front(*--last);
-			}
+		template<std::input_iterator It>
+		explicit forward_list(It first, It last) {
+			_sentinel->next = _sentinel = new node;
+			_size = 0;
+			insert_after(end(), first, last);
 		}
+
+		explicit forward_list(std::initializer_list<T> list) : forward_list(list.begin(), list.end()) {}
 
 		~forward_list() {
 			clear();
@@ -75,119 +80,125 @@ namespace plastic {
 		}
 
 		bool empty() const {
-			return _sentinel->_next == _sentinel;
+			return _size == 0;
 		}
 
-		void clear() const {
-			_node* i{ _sentinel->_next };
-			while (i != _sentinel) {
-				_node* next{ i->_next };
-				delete i;
-				i = next;
+		void clear() {
+			resize(0);
+		}
+
+		size_t size() const {
+			return _size;
+		}
+
+		void resize(size_t size, const T& value = {}) {
+			if (size == _size) {
+				return;
 			}
-		}
-
-		void resize(size_t count, const T& value = {}) const {
-			for (size_t i{ 0 }; i < count; ++i) {
-				push_front(value);
+			if (size < _size) {
+				erase_after(std::next(end(), size), end());
+				return;
 			}
+			insert_after(std::next(end(), _size), size - _size, value);
 		}
 
-		iterator begin() const {
-			return iterator{ _sentinel->_next };
+		iterator begin() {
+			return _sentinel->next;
 		}
 
-		iterator end() const {
+		const_iterator begin() const {
+			return iterator{ _sentinel->next };
+		}
+
+		const_iterator cbegin() const {
+			return iterator{ _sentinel->next };
+		}
+
+		iterator end() {
+			return _sentinel;
+		}
+
+		const_iterator end() const {
 			return iterator{ _sentinel };
 		}
 
-		T& front() const {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
+		const_iterator cend() const {
+			return iterator{ _sentinel };
+		}
+
+		T& front() {
+			PLASTIC_VERIFY(!empty());
+			return _sentinel->next->value;
+		}
+
+		const T& front() const {
+			PLASTIC_VERIFY(!empty());
+			return _sentinel->next->value;
+		}
+
+		void push_front(const T& value) {
+			_sentinel->next = new node{ value, _sentinel->next };
+			++_size;
+		}
+
+		void pop_front() {
+			erase_after(end());
+		}
+
+		iterator insert_after(iterator pos, const T& value) {
+			return insert_after(pos, 1, value);
+		}
+
+		iterator insert_after(iterator pos, size_t count, const T& value) {
+			node* i{ pos._ptr };
+			for (size_t j{}; j != count; ++j) {
+				i = i->next = new node{ value, i->next };
 			}
-#endif
-			return _sentinel->_next->_value;
+			_size += count;
+			return i;
 		}
 
-		void push_front(const T& value) const {
-			_sentinel->_next = new _node{ value, _sentinel->_next };
-		}
-
-		void pop_front() const {
-#ifdef PLASTIC_VERIFY
-			if (empty()) {
-				std::abort();
-			}
-#endif
-			_node* temp{ _sentinel->_next };
-			_sentinel->_next = temp->_next;
-			delete temp;
-		}
-
-		iterator insert_after(iterator pos, const T& value, size_t count = 1) const {
-			_node* i{ pos._ptr };
-			for (size_t j{ 0 }; j < count; ++j) {
-				i = i->_next = new _node{ value, i->_next };
-			}
-			return iterator{ i };
-		}
-
-		template<std::input_iterator iter>
-		iterator insert_after(iterator pos, iter first, iter last) const {
-			_node* i{ pos._ptr };
+		template<std::input_iterator It>
+		iterator insert_after(iterator pos, It first, It last) {
+			node* i{ pos._ptr };
 			while (first != last) {
-				i = i->_next = new _node{ *first++, i->_next };
+				i = i->next = new node{ *first++, i->next };
+				++_size;
 			}
-			return iterator{ i };
+			return i;
 		}
 
-		iterator erase_after(iterator pos) const {
-			_node* i{ pos._ptr };
-			_node* next{ i->_next };
-#ifdef PLASTIC_VERIFY
-			if (next == _sentinel) {
-				std::abort();
-			}
-#endif
-			i->_next = next->_next;
-			delete next;
+		iterator insert_after(iterator pos, std::initializer_list<T> list) {
+			return insert_after(pos, list.begin(), list.end());
+		}
+
+		iterator erase_after(iterator pos) {
+			node* i{ pos._ptr };
+			PLASTIC_VERIFY(i->next != _sentinel);
+			delete std::exchange(i->next, i->next->next);
+			--_size;
 			return ++pos;
 		}
 
-		iterator erase_after(iterator first, iterator last) const {
-			if (first == last) {
-				return last;
-			}
-			_node* i{ first._ptr }, * j{ last._ptr };
-			_node* next{ i->_next };
-#ifdef PLASTIC_VERIFY
-			if (next == _sentinel) {
-				std::abort();
-			}
-#endif
-			i->_next = j;
-			i = next;
+		iterator erase_after(iterator first, iterator last) {
+			PLASTIC_VERIFY(first != last || first == end());
+			node* i{ first._ptr }, * j{ last._ptr };
+			i = std::exchange(i->next, j);
 			while (i != j) {
-				next = i->_next;
-				delete i;
-				i = next;
+				delete std::exchange(i, i->next);
+				--_size;
 			}
 			return last;
 		}
 
-		std::compare_three_way_result<T> operator<=>(const forward_list& container) const {
-			iterator i{ _sentinel->_next }, j{ container._sentinel->_next };
-			while (i != _sentinel && j != container._sentinel) {
-				std::compare_three_way_result<T> cmp{ *i++ <=> *j++ };
-				if (cmp != 0) {
-					return cmp;
-				}
-			}
-			return i == _sentinel && j != container._sentinel ? std::strong_ordering::less
-				: i != _sentinel && j == container._sentinel ? std::strong_ordering::greater
-				: std::strong_ordering::equal;
+		bool operator==(const forward_list& cont) const {
+			return std::equal(begin(), end(), cont.begin(), cont.end());
 		}
+
+		auto operator<=>(const forward_list& cont) const {
+			return std::lexicographical_compare_three_way(begin(), end(), cont.begin(), cont.end());
+		}
+
 	};
 
 }
