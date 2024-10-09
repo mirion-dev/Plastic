@@ -73,10 +73,10 @@ namespace plastic {
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
-		explicit list(size_t count = {}, const T& value = {}) {
+		explicit list(size_t size = {}, const T& value = {}) {
 			_sentinel->next = _sentinel->prev = _sentinel = new node;
 			_size = 0;
-			insert(end(), count, value);
+			insert(end(), size, value);
 		}
 
 		template<std::input_iterator It>

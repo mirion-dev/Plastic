@@ -120,9 +120,9 @@ namespace plastic {
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
-		explicit deque(size_t count = {}, const T& value = {}) {
-			_begin = _first = new T[count + 1];
-			_end = _begin + count + 1;
+		explicit deque(size_t size = {}, const T& value = {}) {
+			_begin = _first = new T[size + 1];
+			_end = _begin + size + 1;
 			_last = _end - 1;
 			std::uninitialized_fill(_first, _last, value);
 		}

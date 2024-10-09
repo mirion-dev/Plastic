@@ -59,10 +59,10 @@ namespace plastic {
 
 		using const_iterator = std::const_iterator<iterator>;
 
-		explicit forward_list(size_t count = {}, const T& value = {}) {
+		explicit forward_list(size_t size = {}, const T& value = {}) {
 			_sentinel->next = _sentinel = new node;
 			_size = 0;
-			insert_after(end(), count, value);
+			insert_after(end(), size, value);
 		}
 
 		template<std::input_iterator It>

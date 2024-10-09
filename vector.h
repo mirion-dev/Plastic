@@ -18,9 +18,9 @@ namespace plastic {
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
-		explicit vector(size_t count = {}, const T& value = {}) {
-			_begin = new T[count];
-			_last = _end = _begin + count;
+		explicit vector(size_t size = {}, const T& value = {}) {
+			_begin = new T[size];
+			_last = _end = _begin + size;
 			std::uninitialized_fill(_begin, _end, value);
 		}
 
