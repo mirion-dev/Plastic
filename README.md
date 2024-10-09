@@ -2,7 +2,7 @@
 
 My implementation of common data structures for studying.
 
-## Sequence
+## Linear Structure
 
 | | **`vector`** | **`deque`** | **`forward_list`** | **`list`** |
 | :--: | :--: | :--: | :--: | :--: |
@@ -45,5 +45,6 @@ My implementation of common data structures for studying.
 | **`pop`** | `pop` |
 | **`merge`** | `merge` |
 | **`assign`** | `assign` |
+| **`erase`** | `erase` |
 
-## Binary Search Tree
+## Search Tree
