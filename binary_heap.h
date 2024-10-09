@@ -11,32 +11,32 @@ namespace plastic {
 		static constexpr Cmp _cmp{};
 
 		void _siftUp(size_t index) {
+			T value{ std::move((*this)[index]) };
 			while (index != 0) {
-				size_t parent{ (index - 1) >> 1 };
-				if (!_cmp((*this)[parent], (*this)[index])) {
-					return;
+				size_t parent{ (index - 1) / 2 };
+				if (!_cmp((*this)[parent], value)) {
+					break;
 				}
-				std::swap((*this)[index], (*this)[parent]);
+				(*this)[index] = std::move((*this)[parent]);
 				index = parent;
 			}
+			(*this)[index] = std::move(value);
 		}
 
 		void _siftDown(size_t index) {
-			while (true) {
-				size_t left{ (index << 1) + 1 };
-				if (left >= base::size()) {
-					return;
+			T value{ std::move((*this)[index]) };
+			while (index < size() / 2) {
+				size_t child{ index * 2 + 1 };
+				if (child + 1 < size() && _cmp((*this)[child], (*this)[child + 1])) {
+					++child;
 				}
-				size_t right{ left + 1 }, swapped{ left };
-				if (right < base::size() && _cmp((*this)[left], (*this)[right])) {
-					swapped = right;
+				if (!_cmp(value, (*this)[child])) {
+					break;
 				}
-				if (!_cmp((*this)[index], (*this)[swapped])) {
-					return;
-				}
-				std::swap((*this)[index], (*this)[swapped]);
-				index = swapped;
+				(*this)[index] = std::move((*this)[child]);
+				index = child;
 			}
+			(*this)[index] = std::move(value);
 		}
 
 	public:
@@ -68,13 +68,15 @@ namespace plastic {
 
 		void push(const T& value) {
 			base::push_back(value);
-			_siftUp(base::size() - 1);
+			_siftUp(size() - 1);
 		}
 
 		void pop() {
 			base::front() = std::move(base::back());
 			base::pop_back();
-			_siftDown(0);
+			if (!empty()) {
+				_siftDown(0);
+			}
 		}
 	};
 
