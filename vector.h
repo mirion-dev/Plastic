@@ -118,27 +118,27 @@ namespace plastic {
 		}
 
 		reverse_iterator rbegin() {
-			return _last;
+			return reverse_iterator{ _last };
 		}
 
 		const_reverse_iterator rbegin() const {
-			return _last;
+			return reverse_iterator{ _last };
 		}
 
 		const_reverse_iterator crbegin() const {
-			return _last;
+			return reverse_iterator{ _last };
 		}
 
 		reverse_iterator rend() {
-			return _begin;
+			return reverse_iterator{ _begin };
 		}
 
 		const_reverse_iterator rend() const {
-			return _begin;
+			return reverse_iterator{ _begin };
 		}
 
 		const_reverse_iterator crend() const {
-			return _begin;
+			return reverse_iterator{ _begin };
 		}
 
 		T& operator[](size_t index) {
