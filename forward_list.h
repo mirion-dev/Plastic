@@ -83,12 +83,12 @@ namespace plastic {
 			return _size == 0;
 		}
 
-		void clear() {
-			resize(0);
-		}
-
 		size_t size() const {
 			return _size;
+		}
+
+		void clear() {
+			resize(0);
 		}
 
 		void resize(size_t size, const T& value = {}) {

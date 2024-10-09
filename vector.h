@@ -42,12 +42,12 @@ namespace plastic {
 			return _begin == _last;
 		}
 
-		void clear() {
-			resize(0);
-		}
-
 		size_t size() const {
 			return _last - _begin;
+		}
+
+		void clear() {
+			resize(0);
 		}
 
 		void resize(size_t size, const T& value = {}) {

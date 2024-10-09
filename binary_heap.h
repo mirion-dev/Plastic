@@ -41,10 +41,8 @@ namespace plastic {
 
 	public:
 		using base::empty;
-		using base::clear;
 		using base::size;
-		using base::capacity;
-		using base::reserve;
+		using base::clear;
 
 		explicit binary_heap() : base() {}
 
@@ -78,6 +76,19 @@ namespace plastic {
 				_siftDown(0);
 			}
 		}
+
+		void merge(const binary_heap& heap) {
+
+		}
+
+		void assign(size_t index, const T& value) {
+
+		}
+
+		void erase(size_t index) {
+
+		}
+
 	};
 
 }

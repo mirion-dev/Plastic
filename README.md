@@ -7,8 +7,8 @@ My implementation of common data structures for studying.
 | | **`vector`** | **`deque`** | **`forward_list`** | **`list`** |
 | :--: | :--: | :--: | :--: | :--: |
 | **`empty`** | `empty` | `empty` | `empty` | `empty` |
-| **`clear`** | `clear` | `clear` | `clear` | `clear` |
 | **`size`** | `size` | `size` | `size` | `size` |
+| **`clear`** | `clear` | `clear` | `clear` | `clear` |
 | **`resize`** | `resize` | `resize` | `resize` | `resize` |
 | **`capacity`** | `capacity` | `capacity` | | |
 | **`reserve`** | `reserve` | `reserve` | | |
@@ -33,6 +33,18 @@ My implementation of common data structures for studying.
 | **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` |
 | **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` |
 
-## Binary Search Tree
-
 ## Heap
+
+| | **`binary_heap`** |
+| :--: | :--: |
+| **`empty`** | `empty` |
+| **`size`** | `size` |
+| **`clear`** | `clear` |
+| **`top`** | `top` |
+| **`push`** | `push` |
+| **`pop`** | `pop` |
+| **`merge`** | `merge` |
+| **`assign`** | `assign` |
+| **`erase`** | `erase` |
+
+## Binary Search Tree
