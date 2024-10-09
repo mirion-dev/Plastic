@@ -265,4 +265,10 @@ namespace plastic {
 
 	};
 
+	template<class It>
+	explicit list(It, It)->list<std::iter_value_t<It>>;
+
+	template<class T>
+	explicit list(std::initializer_list<T>)->list<T>;
+
 }
