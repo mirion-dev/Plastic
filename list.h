@@ -86,6 +86,8 @@ namespace plastic {
 			insert(end(), first, last);
 		}
 
+		explicit list(std::initializer_list<T> list) : list(list.begin(), list.end()) {}
+
 		~list() {
 			clear();
 			delete _sentinel;
@@ -108,7 +110,9 @@ namespace plastic {
 				return;
 			}
 			if (size < _size) {
-				erase(std::next(begin(), size), end());
+				while (_size != size) {
+					pop_back();
+				}
 				return;
 			}
 			insert(end(), size - _size, value);
@@ -184,49 +188,45 @@ namespace plastic {
 
 		void push_front(const T& value) {
 			_sentinel->next->next->prev = _sentinel->next = new node{ value, _sentinel, _sentinel->next };
+			++_size;
 		}
 
 		void pop_front() {
-			PLASTIC_VERIFY(!empty());
-			node* temp{ _sentinel->next };
-			_sentinel->next = temp->next;
-			temp->next->prev = _sentinel;
-			delete temp;
+			erase(begin());
 		}
 
 		void push_back(const T& value) {
 			_sentinel->prev->prev->next = _sentinel->prev = new node{ value, _sentinel->prev, _sentinel };
+			++_size;
 		}
 
 		void pop_back() {
-			PLASTIC_VERIFY(!empty());
-			node* temp{ _sentinel->prev };
-			_sentinel->prev = temp->prev;
-			temp->prev->next = _sentinel;
-			delete temp;
+			erase(--end());
 		}
 
 		iterator insert(iterator pos, const T& value) {
 			return insert(pos, 1, value);
 		}
 
-		iterator insert(iterator pos, const T& value, size_t count = 1) {
-			node* i{ pos._ptr };
+		iterator insert(iterator pos, size_t count, const T& value) {
+			node* i{ (--pos)._ptr };
 			for (size_t j{}; j != count; ++j) {
-				i = i->prev = new node{ value, i->prev, i };
+				i = i->next = new node{ value, i, i->next };
 			}
-			i->prev->next = i;
-			return iterator{ i };
+			i->next->prev = i;
+			_size += count;
+			return ++pos;
 		}
 
 		template<std::input_iterator It>
 		iterator insert(iterator pos, It first, It last) {
-			node* i{ pos._ptr };
+			node* i{ (--pos)._ptr };
 			while (first != last) {
-				i = i->prev = new node{ *first++, i->prev, i };
+				i = i->next = new node{ *first++, i, i->next };
+				++_size;
 			}
-			i->prev->next = i;
-			return iterator{ i };
+			i->next->prev = i;
+			return ++pos;
 		}
 
 		iterator insert(iterator pos, std::initializer_list<T> list) {
@@ -235,11 +235,10 @@ namespace plastic {
 
 		iterator erase(iterator pos) {
 			node* i{ (++pos)._ptr };
-			node* prev{ i->prev };
-			PLASTIC_VERIFY(prev != _sentinel);
-			i->prev = prev->prev;
+			PLASTIC_VERIFY(i->prev != _sentinel);
+			delete std::exchange(i->prev, i->prev->prev);
+			--_size;
 			i->prev->next = i;
-			delete prev;
 			return pos;
 		}
 
@@ -248,9 +247,8 @@ namespace plastic {
 			i->prev->next = j;
 			j->prev = i->prev;
 			while (i != j) {
-				node* next = i->next;
-				delete i;
-				i = next;
+				delete std::exchange(i, i->next);
+				--_size;
 			}
 			return last;
 		}
