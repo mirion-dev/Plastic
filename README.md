@@ -45,6 +45,5 @@ My implementation of common data structures for studying.
 | **`pop`** | `pop` |
 | **`merge`** | `merge` |
 | **`assign`** | `assign` |
-| **`erase`** | `erase` |
 
 ## Binary Search Tree

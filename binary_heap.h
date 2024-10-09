@@ -5,88 +5,102 @@
 namespace plastic {
 
 	template<class T, class Cmp = std::less<T>>
-	class binary_heap : private vector<T> {
-		using base = vector<T>;
-
+	class binary_heap {
 		static constexpr Cmp _cmp{};
 
+		vector<T> _data;
+
 		void _siftUp(size_t index) {
-			T value{ std::move((*this)[index]) };
+			T value{ std::move(_data[index]) };
 			while (index != 0) {
 				size_t parent{ (index - 1) / 2 };
-				if (!_cmp((*this)[parent], value)) {
+				if (!_cmp(_data[parent], value)) {
 					break;
 				}
-				(*this)[index] = std::move((*this)[parent]);
+				_data[index] = std::move(_data[parent]);
 				index = parent;
 			}
-			(*this)[index] = std::move(value);
+			_data[index] = std::move(value);
 		}
 
 		void _siftDown(size_t index) {
-			T value{ std::move((*this)[index]) };
-			while (index < size() / 2) {
+			T value{ std::move(_data[index]) };
+			while (true) {
 				size_t child{ index * 2 + 1 };
-				if (child + 1 < size() && _cmp((*this)[child], (*this)[child + 1])) {
-					++child;
-				}
-				if (!_cmp(value, (*this)[child])) {
+				if (child >= _data.size()) {
 					break;
 				}
-				(*this)[index] = std::move((*this)[child]);
+				if (child + 1 < _data.size() && _cmp(_data[child], _data[child + 1])) {
+					++child;
+				}
+				if (!_cmp(value, _data[child])) {
+					break;
+				}
+				_data[index] = std::move(_data[child]);
 				index = child;
 			}
-			(*this)[index] = std::move(value);
+			_data[index] = std::move(value);
 		}
 
-	public:
-		using base::empty;
-		using base::size;
-		using base::clear;
-
-		explicit binary_heap() : base() {}
-
-		template<std::input_iterator It>
-		explicit binary_heap(It first, It last) : base(first, last) {
-			size_t i{ (size_t)std::distance(first, last) >> 1 };
+		void _makeHeap() {
+			size_t i{ _data.size() >> 1 };
 			while (i != 0) {
 				_siftDown(--i);
 			}
 		}
 
+	public:
+		explicit binary_heap() : _data() {}
+
+		template<std::input_iterator It>
+		explicit binary_heap(It first, It last) : _data(first, last) {
+			_makeHeap();
+		}
+
 		explicit binary_heap(std::initializer_list<T> list) : binary_heap(list.begin(), list.end()) {}
 
+		bool empty() const {
+			return _data.empty();
+		}
+
+		size_t size() const {
+			return _data.size();
+		}
+
+		void clear() {
+			return _data.clear();
+		}
+
 		T& top() {
-			return base::front();
+			return _data.front();
 		}
 
 		const T& top() const {
-			return base::front();
+			return _data.front();
 		}
 
 		void push(const T& value) {
-			base::push_back(value);
-			_siftUp(size() - 1);
+			_data.push_back(value);
+			_siftUp(_data.size() - 1);
 		}
 
 		void pop() {
-			base::front() = std::move(base::back());
-			base::pop_back();
-			if (!empty()) {
+			_data.front() = std::move(_data.back());
+			_data.pop_back();
+			if (!_data.empty()) {
 				_siftDown(0);
 			}
 		}
 
 		void merge(const binary_heap& heap) {
-
+			_data.insert(_data.end(), heap._data.begin(), heap._data.end());
+			_makeHeap();
 		}
 
 		void assign(size_t index, const T& value) {
-
-		}
-
-		void erase(size_t index) {
-
+			PLASTIC_VERIFY(index < _data.size() && !_cmp(value, _data[index]));
+			_data[index] = value;
+			_siftUp(index);
 		}
 
 	};
