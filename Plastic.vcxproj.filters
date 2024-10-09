@@ -47,7 +47,7 @@
     <ClInclude Include="vector.h">
       <Filter>Header Files\sequence</Filter>
     </ClInclude>
-    <ClInclude Include="priority_queue.h">
+    <ClInclude Include="binary_heap.h">
       <Filter>Header Files\heap</Filter>
     </ClInclude>
     <ClInclude Include="avl_tree.h">
