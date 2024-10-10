@@ -142,6 +142,7 @@ namespace plastic {
 		}
 
 		void pop_front() {
+			PLASTIC_VERIFY(!empty());
 			erase_after(end());
 		}
 
