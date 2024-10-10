@@ -1,66 +1,70 @@
 #pragma once
 
+#include "utils.h"
+
 #include <functional>
 
 namespace plastic {
 
-	template<class T, std::strict_weak_order<T, T> auto _compare = std::less<>{} >
+	template<class T, class Cmp = std::less<T>>
 	class binary_search_tree {
 		struct node {
-			T _value;
-			size_t _count;
-			node* _left;
-			node* _right;
+			T value;
+			size_t count;
+			node* left;
+			node* right;
 		};
+
+		static constexpr Cmp _cmp{};
 
 		node* _root;
 		size_t _size;
 
-		void _freeNode(node* nd) {
+		void _free(node* nd) {
 			if (nd == nullptr) {
 				return;
 			}
-			_freeNode(nd->_left);
-			_freeNode(nd->_right);
+			_free(nd->left);
+			_free(nd->right);
 			delete nd;
 		}
 
-		node*& _findNode(const T& value) {
+		node*& _find(const T& value) {
 			node** p{ &_root };
 			while (true) {
 				node*& current{ *p };
-				if (current == nullptr || current->_value == value) {
+				if (current == nullptr || current->value == value) {
 					return current;
 				}
-				p = _compare(value, current->_value) ? &current->_left : &current->_right;
+				p = _cmp(value, current->value) ? &current->left : &current->right;
 			}
 		}
 
-		node*& _minChild(node*& nd) {
+		node*& _min(node*& nd) {
 			if (nd == nullptr) {
 				std::abort();
 			}
 			node** p{ &nd };
 			while (true) {
 				node*& current{ *p };
-				if (current->_left == nullptr) {
+				if (current->left == nullptr) {
 					return current;
 				}
-				p = &current->_left;
+				p = &current->left;
 			}
 		}
 
-		node*& _maxChild(node*& nd) {
+		node*& _max(node*& nd) {
 			if (nd == nullptr) {
 				std::abort();
 			}
 			node** p{ &nd };
 			while (true) {
 				node*& current{ *p };
-				if (current->_right == nullptr) {
+				if (current->right == nullptr) {
 					return current;
 				}
-				p = &current->_right;
+				p = &current->right;
 			}
 		}
 
@@ -71,7 +75,7 @@ namespace plastic {
 		}
 
 		~binary_search_tree() {
-			_freeNode(_root);
+			_free(_root);
 		}
 
 		bool empty() const {
@@ -83,60 +87,60 @@ namespace plastic {
 		}
 
 		size_t count(const T& value) const {
-			node* nd{ _findNode(value) };
-			return nd == nullptr ? 0 : nd->_count;
+			node* nd{ _find(value) };
+			return nd == nullptr ? 0 : nd->count;
 		}
 
 		bool contains(const T& value) const {
-			return _findNode(value) != nullptr;
+			return _find(value) != nullptr;
 		}
 
 		T min() const {
-			return _minChild(_root)->_value;
+			return _min(_root)->value;
 		}
 
 		T max() const {
-			return _maxChild(_root)->_value;
+			return _max(_root)->value;
 		}
 
 		void insert(const T& value, size_t count = 1) {
 			_size += count;
-			node*& nd{ _findNode(value) };
+			node*& nd{ _find(value) };
 			if (nd == nullptr) {
 				nd = new node{ value, count, nullptr, nullptr };
 			}
 			else {
-				nd->_count += count;
+				nd->count += count;
 			}
 		}
 
 		void erase(const T& value, size_t count = 1) {
-			node*& nd{ _findNode(value) };
+			node*& nd{ _find(value) };
 			if (nd == nullptr) {
 				return;
 			}
-			if (nd->_count > count) {
+			if (nd->count > count) {
 				_size -= count;
-				nd->_count -= count;
+				nd->count -= count;
 				return;
 			}
-			_size -= nd->_count;
-			if (nd->_left == nullptr) {
+			_size -= nd->count;
+			if (nd->left == nullptr) {
 				node* temp{ nd };
-				nd = nd->_right;
+				nd = nd->right;
 				delete temp;
 			}
-			else if (nd->_right == nullptr) {
+			else if (nd->right == nullptr) {
 				node* temp{ nd };
-				nd = nd->_left;
+				nd = nd->left;
 				delete temp;
 			}
 			else {
-				node*& successor{ _minChild(nd->_right) };
-				nd->_value = successor->_value;
-				nd->_count = successor->_count;
+				node*& successor{ _min(nd->right) };
+				nd->value = successor->value;
+				nd->count = successor->count;
 				node* temp{ successor };
-				successor = successor->_right;
+				successor = successor->right;
 				delete temp;
 			}
 		}
