@@ -16,11 +16,11 @@
     <Filter Include="Header Files\sequence">
       <UniqueIdentifier>{cb31360d-b9b3-458f-ac2e-4fbdb7fd9b25}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\binary search tree">
-      <UniqueIdentifier>{69b893b8-7d5c-4ca3-8eb1-e630f110b189}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\heap">
       <UniqueIdentifier>{555dd929-81c4-4c52-a594-3e6938e23037}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\search tree">
+      <UniqueIdentifier>{69b893b8-7d5c-4ca3-8eb1-e630f110b189}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -31,7 +31,7 @@
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="binary_search_tree.h">
-      <Filter>Header Files\binary search tree</Filter>
+      <Filter>Header Files\search tree</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -51,13 +51,13 @@
       <Filter>Header Files\heap</Filter>
     </ClInclude>
     <ClInclude Include="avl_tree.h">
-      <Filter>Header Files\binary search tree</Filter>
+      <Filter>Header Files\search tree</Filter>
     </ClInclude>
     <ClInclude Include="b_tree.h">
-      <Filter>Header Files\binary search tree</Filter>
+      <Filter>Header Files\search tree</Filter>
     </ClInclude>
     <ClInclude Include="red_black_tree.h">
-      <Filter>Header Files\binary search tree</Filter>
+      <Filter>Header Files\search tree</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
