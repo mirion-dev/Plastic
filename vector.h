@@ -259,7 +259,4 @@ namespace plastic {
 	template<class It>
 	explicit vector(It, It)->vector<std::iter_value_t<It>>;
 
-	template<class T>
-	explicit vector(std::initializer_list<T>)->vector<T>;
-
 }

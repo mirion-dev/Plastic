@@ -204,7 +204,4 @@ namespace plastic {
 	template<class It>
 	explicit forward_list(It, It)->forward_list<std::iter_value_t<It>>;
 
-	template<class T>
-	explicit forward_list(std::initializer_list<T>)->forward_list<T>;
-
 }

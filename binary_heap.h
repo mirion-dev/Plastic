@@ -105,4 +105,7 @@ namespace plastic {
 
 	};
 
+	template<class It>
+	explicit binary_heap(It, It)->binary_heap<std::iter_value_t<It>>;
+
 }

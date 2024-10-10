@@ -397,7 +397,4 @@ namespace plastic {
 	template<class It>
 	explicit deque(It, It)->deque<std::iter_value_t<It>>;
 
-	template<class T>
-	explicit deque(std::initializer_list<T>)->deque<T>;
-
 }
