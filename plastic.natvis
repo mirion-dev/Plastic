@@ -52,9 +52,13 @@
 	</Type>
 
 	<Type Name="plastic::binary_heap&lt;*&gt;">
-		<DisplayString>{_data}</DisplayString>
+		<Intrinsic Name="size" Expression="size_t(_data._last - _data._begin)"/>
+		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
-			<ExpandedItem>_data</ExpandedItem>
+			<ArrayItems>
+				<Size>size()</Size>
+				<ValuePointer>_data._begin</ValuePointer>
+			</ArrayItems>
 		</Expand>
 	</Type>
 

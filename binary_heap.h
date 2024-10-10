@@ -42,6 +42,11 @@ namespace plastic {
 			_data[index] = std::move(value);
 		}
 
+		void _siftUpDown(size_t index) {
+			_siftUp(index);
+			_siftDown(index);
+		}
+
 		void _makeHeap() {
 			size_t i{ _data.size() >> 1 };
 			while (i != 0) {
@@ -72,24 +77,23 @@ namespace plastic {
 		}
 
 		T& top() {
+			PLASTIC_VERIFY(!empty());
 			return _data.front();
 		}
 
 		const T& top() const {
+			PLASTIC_VERIFY(!empty());
 			return _data.front();
 		}
 
 		void push(const T& value) {
 			_data.push_back(value);
-			_siftUp(_data.size() - 1);
+			_siftUp(size() - 1);
 		}
 
 		void pop() {
-			_data.front() = std::move(_data.back());
-			_data.pop_back();
-			if (!_data.empty()) {
-				_siftDown(0);
-			}
+			PLASTIC_VERIFY(!empty());
+			erase(0);
 		}
 
 		void merge(const binary_heap& heap) {
@@ -98,9 +102,18 @@ namespace plastic {
 		}
 
 		void assign(size_t index, const T& value) {
-			PLASTIC_VERIFY(index < _data.size() && !_cmp(value, _data[index]));
+			PLASTIC_VERIFY(index < size());
 			_data[index] = value;
-			_siftUp(index);
+			_siftUpDown(index);
+		}
+
+		void erase(size_t index) {
+			PLASTIC_VERIFY(index < size());
+			_data[index] = std::move(_data.back());
+			_data.pop_back();
+			if (!empty()) {
+				_siftUpDown(index);
+			}
 		}
 
 	};
