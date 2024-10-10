@@ -63,4 +63,7 @@
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="Plastic.natvis" />
+  </ItemGroup>
 </Project>
