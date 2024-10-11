@@ -1,91 +1,91 @@
 #pragma once
 
+#include "utils.h"
+
 #include <functional>
 
 namespace plastic {
 
-	template<class T, std::strict_weak_order<T, T> auto _compare = std::less<>{} >
+	template<class T, class Cmp = std::less<T>>
 	class avl_tree {
 		struct node {
-			T _value;
-			size_t _count;
-			int _balanceFactor;
-			node* _parent;
-			node* _left;
-			node* _right;
+			T value;
+			size_t count;
+			int factor;
+			node* parent;
+			node* left;
+			node* right;
 		};
+
+		static constexpr Cmp _cmp{};
 
 		node* _root;
 		size_t _size;
 
-		void _freeNode(node* nd) {
+		void _free(node* nd) {
 			if (nd == nullptr) {
 				return;
 			}
-			_freeNode(nd->_left);
-			_freeNode(nd->_right);
+			_free(nd->left);
+			_free(nd->right);
 			delete nd;
 		}
 
-		std::pair<node*&, node*&> _findNodeWithParent(const T& value) {
+		std::pair<node*&, node*&> _findWithParent(const T& value) {
 			node** pLast{ &_root };
 			node** p{ &_root };
 			while (true) {
 				node*& parent{ *pLast };
 				node*& current{ *p };
-				if (current == nullptr || current->_value == value) {
+				if (current == nullptr || current->value == value) {
 					return { current, parent };
 				}
 				pLast = p;
-				p = _compare(value, current->_value) ? &current->_left : &current->_right;
+				p = _cmp(value, current->value) ? &current->left : &current->right;
 			}
 		}
 
-		node*& _findNode(const T& node) {
-			return _findNodeWithParent(node).first;
+		node*& _find(const T& value) {
+			return _findWithParent(value).first;
 		}
 
-		node*& _minChild(node*& nd) {
-			if (nd == nullptr) {
-				std::abort();
-			}
+		node*& _min(node*& nd) {
+			PLASTIC_VERIFY(nd != nullptr);
 			node** p{ &nd };
 			while (true) {
 				node*& current{ *p };
-				if (current->_left == nullptr) {
+				if (current->left == nullptr) {
 					return current;
 				}
-				p = &current->_left;
+				p = &current->left;
 			}
 		}
 
-		node*& _maxChild(node*& nd) {
-			if (nd == nullptr) {
-				std::abort();
-			}
+		node*& _max(node*& nd) {
+			PLASTIC_VERIFY(nd != nullptr);
 			node** p{ &nd };
 			while (true) {
 				node*& current{ *p };
-				if (current->_right == nullptr) {
+				if (current->right == nullptr) {
 					return current;
 				}
-				p = &current->_right;
+				p = &current->right;
 			}
 		}
 
 		void _leftRotate(node* nd) {
-			node* left{ nd->_left };
-			node* parent{ nd->_parent };
-			node* grandparent{ parent->_parent };
-			nd->_left = parent;
-			nd->_parent = grandparent;
-			parent->_right = left;
-			parent->_parent = nd;
+			node* left{ nd->left };
+			node* parent{ nd->parent };
+			node* grandparent{ parent->parent };
+			nd->left = parent;
+			nd->parent = grandparent;
+			parent->right = left;
+			parent->parent = nd;
 			if (left != nullptr) {
-				left->_parent = parent;
+				left->parent = parent;
 			}
 			if (grandparent != nullptr) {
-				(parent == grandparent->_left ? grandparent->_left : grandparent->_right) = nd;
+				(parent == grandparent->left ? grandparent->left : grandparent->right) = nd;
 			}
 			else {
 				_root = nd;
@@ -93,18 +93,18 @@ namespace plastic {
 		}
 
 		void _rightRotate(node* nd) {
-			node* right{ nd->_right };
-			node* parent{ nd->_parent };
-			node* grandparent{ parent->_parent };
-			nd->_right = parent;
-			nd->_parent = grandparent;
-			parent->_left = right;
-			parent->_parent = nd;
+			node* right{ nd->right };
+			node* parent{ nd->parent };
+			node* grandparent{ parent->parent };
+			nd->right = parent;
+			nd->parent = grandparent;
+			parent->left = right;
+			parent->parent = nd;
 			if (right != nullptr) {
-				right->_parent = parent;
+				right->parent = parent;
 			}
 			if (grandparent != nullptr) {
-				(parent == grandparent->_left ? grandparent->_left : grandparent->_right) = nd;
+				(parent == grandparent->left ? grandparent->left : grandparent->right) = nd;
 			}
 			else {
 				_root = nd;
@@ -118,7 +118,7 @@ namespace plastic {
 		}
 
 		~avl_tree() {
-			_freeNode(_root);
+			_free(_root);
 		}
 
 		bool empty() const {
@@ -130,20 +130,20 @@ namespace plastic {
 		}
 
 		size_t count(const T& value) const {
-			node* nd{ _findNode(value) };
-			return nd == nullptr ? 0 : nd->_count;
+			node* nd{ _find(value) };
+			return nd == nullptr ? 0 : nd->count;
 		}
 
 		bool contains(const T& value) const {
-			return _findNode(value) != nullptr;
+			return _find(value) != nullptr;
 		}
 
 		T min() const {
-			return _minChild(_root)->_value;
+			return _min(_root)->value;
 		}
 
 		T max() const {
-			return _maxChild(_root)->_value;
+			return _max(_root)->value;
 		}
 
 		void insert(const T& value, size_t count = 1) {
@@ -152,9 +152,9 @@ namespace plastic {
 				_root = new node{ value, count, 0, nullptr, nullptr, nullptr };
 				return;
 			}
-			auto [nd, pr] {_findNodeWithParent(value)};
+			auto [nd, pr] {_findWithParent(value)};
 			if (nd != nullptr) {
-				nd->_count += count;
+				nd->count += count;
 				return;
 			}
 			nd = new node{ value, count, 0, pr, nullptr, nullptr };
@@ -163,46 +163,46 @@ namespace plastic {
 				if (current == _root) {
 					break;
 				}
-				node* parent{ current->_parent };
-				if (current == parent->_left) {
-					++parent->_balanceFactor;
+				node* parent{ current->parent };
+				if (current == parent->left) {
+					++parent->factor;
 				}
 				else {
-					--parent->_balanceFactor;
+					--parent->factor;
 				}
-				if (parent->_balanceFactor == 0) {
+				if (parent->factor == 0) {
 					break;
 				}
-				bool isLX{ parent->_balanceFactor == 2 };
-				bool isRX{ parent->_balanceFactor == -2 };
-				bool isXL{ current->_balanceFactor == 1 };
+				bool isLX{ parent->factor == 2 };
+				bool isRX{ parent->factor == -2 };
+				bool isXL{ current->factor == 1 };
 				if (isLX || isRX) {
 					if (isLX && isXL) {
 						_rightRotate(current);
-						current->_balanceFactor = 0;
-						parent->_balanceFactor = 0;
+						current->factor = 0;
+						parent->factor = 0;
 					}
 					else if (isLX) {
-						node* right{ current->_right };
+						node* right{ current->right };
 						_leftRotate(right);
 						_rightRotate(right);
-						current->_balanceFactor = right->_balanceFactor == -1 ? 1 : 0;
-						parent->_balanceFactor = right->_balanceFactor == 1 ? -1 : 0;
-						right->_balanceFactor = 0;
+						current->factor = right->factor == -1 ? 1 : 0;
+						parent->factor = right->factor == 1 ? -1 : 0;
+						right->factor = 0;
 
 					}
 					else if (isXL) {
-						node* left{ current->_left };
+						node* left{ current->left };
 						_rightRotate(left);
 						_leftRotate(left);
-						current->_balanceFactor = left->_balanceFactor == -1 ? 1 : 0;
-						parent->_balanceFactor = left->_balanceFactor == 1 ? -1 : 0;
-						left->_balanceFactor = 0;
+						current->factor = left->factor == -1 ? 1 : 0;
+						parent->factor = left->factor == 1 ? -1 : 0;
+						left->factor = 0;
 					}
 					else {
 						_leftRotate(current);
-						current->_balanceFactor = 0;
-						parent->_balanceFactor = 0;
+						current->factor = 0;
+						parent->factor = 0;
 					}
 					break;
 				}
@@ -211,34 +211,34 @@ namespace plastic {
 		}
 
 		void erase(const T& value, size_t count = 1) {
-			node*& nd{ _findNode(value) };
+			node*& nd{ _find(value) };
 			if (nd == nullptr) {
 				return;
 			}
-			if (nd->_count > count) {
+			if (nd->count > count) {
 				_size -= count;
-				nd->_count -= count;
+				nd->count -= count;
 				return;
 			}
-			_size -= nd->_count;
+			_size -= nd->count;
 			node** pErased{ &nd };
-			if (nd->_left != nullptr && nd->_right != nullptr) {
-				node*& successor{ _minChild(nd->_right) };
-				nd->_value = successor->_value;
-				nd->_count = successor->_count;
+			if (nd->left != nullptr && nd->right != nullptr) {
+				node*& successor{ _min(nd->right) };
+				nd->value = successor->value;
+				nd->count = successor->count;
 				pErased = &successor;
 			}
-			if (node*& erased{ *pErased }, *& left{ erased->_left }, *& right{ erased->_right };
+			if (node*& erased{ *pErased }, *& left{ erased->left }, *& right{ erased->right };
 				left != nullptr) {
-				erased->_value = left->_value;
-				erased->_count = left->_count;
-				erased->_balanceFactor = 0;
+				erased->value = left->value;
+				erased->count = left->count;
+				erased->factor = 0;
 				pErased = &left;
 			}
 			else if (right != nullptr) {
-				erased->_value = right->_value;
-				erased->_count = right->_count;
-				erased->_balanceFactor = 0;
+				erased->value = right->value;
+				erased->count = right->count;
+				erased->factor = 0;
 				pErased = &right;
 			}
 			node*& erased{ *pErased };
@@ -247,56 +247,56 @@ namespace plastic {
 				if (current == _root) {
 					break;
 				}
-				node* parent{ current->_parent };
-				if (current == parent->_left) {
-					--parent->_balanceFactor;
+				node* parent{ current->parent };
+				if (current == parent->left) {
+					--parent->factor;
 				}
 				else {
-					++parent->_balanceFactor;
+					++parent->factor;
 				}
-				if (parent->_balanceFactor == 1 || parent->_balanceFactor == -1) {
+				if (parent->factor == 1 || parent->factor == -1) {
 					break;
 				}
-				bool isLX{ parent->_balanceFactor == 2 };
-				bool isRX{ parent->_balanceFactor == -2 };
+				bool isLX{ parent->factor == 2 };
+				bool isRX{ parent->factor == -2 };
 				if (isLX || isRX) {
-					node* sibling{ isLX ? parent->_left : parent->_right };
-					bool isXL{ isLX && sibling->_balanceFactor != -1 || isRX && sibling->_balanceFactor == 1 };
+					node* sibling{ isLX ? parent->left : parent->right };
+					bool isXL{ isLX && sibling->factor != -1 || isRX && sibling->factor == 1 };
 					if (isLX && isXL) {
 						_rightRotate(sibling);
-						if (sibling->_balanceFactor == 0) {
-							sibling->_balanceFactor = -1;
-							parent->_balanceFactor = 1;
+						if (sibling->factor == 0) {
+							sibling->factor = -1;
+							parent->factor = 1;
 							break;
 						}
-						sibling->_balanceFactor = 0;
-						parent->_balanceFactor = 0;
+						sibling->factor = 0;
+						parent->factor = 0;
 					}
 					else if (isLX) {
-						node* right{ sibling->_right };
+						node* right{ sibling->right };
 						_leftRotate(right);
 						_rightRotate(right);
-						sibling->_balanceFactor = right->_balanceFactor == -1 ? 1 : 0;
-						parent->_balanceFactor = right->_balanceFactor == 1 ? -1 : 0;
-						right->_balanceFactor = 0;
+						sibling->factor = right->factor == -1 ? 1 : 0;
+						parent->factor = right->factor == 1 ? -1 : 0;
+						right->factor = 0;
 					}
 					else if (isXL) {
-						node* left{ sibling->_left };
+						node* left{ sibling->left };
 						_rightRotate(left);
 						_leftRotate(left);
-						sibling->_balanceFactor = left->_balanceFactor == -1 ? 1 : 0;
-						parent->_balanceFactor = left->_balanceFactor == 1 ? -1 : 0;
-						left->_balanceFactor = 0;
+						sibling->factor = left->factor == -1 ? 1 : 0;
+						parent->factor = left->factor == 1 ? -1 : 0;
+						left->factor = 0;
 					}
 					else {
 						_leftRotate(sibling);
-						if (sibling->_balanceFactor == 0) {
-							sibling->_balanceFactor = 1;
-							parent->_balanceFactor = -1;
+						if (sibling->factor == 0) {
+							sibling->factor = 1;
+							parent->factor = -1;
 							break;
 						}
-						sibling->_balanceFactor = 0;
-						parent->_balanceFactor = 0;
+						sibling->factor = 0;
+						parent->factor = 0;
 					}
 				}
 				current = parent;

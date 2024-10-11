@@ -1,18 +1,20 @@
 #pragma once
 
+#include "utils.h"
+
 #include <functional>
 
 namespace plastic {
 
-	template<class T, size_t order, std::strict_weak_order<T, T> auto _compare = std::less<>{} >
+	template<class T, size_t order, class Cmp = std::less<T>>
 	class b_tree {
-		constexpr size_t _minSize{ order - 1 };
-		constexpr size_t _maxSize{ 2 * order - 1 };
+		static constexpr size_t _minSize{ order - 1 };
+		static constexpr size_t _maxSize{ 2 * order - 1 };
 
 		struct node {
-			T _values[_maxSize];
-			node* _children[_maxSize + 1];
-			size_t _size;
+			T value[_maxSize];
+			node* children[_maxSize + 1];
+			size_t size;
 		};
 
 		node* _root;

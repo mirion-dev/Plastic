@@ -41,9 +41,7 @@ namespace plastic {
 		}
 
 		node*& _min(node*& nd) {
-			if (nd == nullptr) {
-				std::abort();
-			}
+			PLASTIC_VERIFY(nd != nullptr);
 			node** p{ &nd };
 			while (true) {
 				node*& current{ *p };
@@ -55,9 +53,7 @@ namespace plastic {
 		}
 
 		node*& _max(node*& nd) {
-			if (nd == nullptr) {
-				std::abort();
-			}
+			PLASTIC_VERIFY(nd != nullptr);
 			node** p{ &nd };
 			while (true) {
 				node*& current{ *p };
