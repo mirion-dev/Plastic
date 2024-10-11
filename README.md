@@ -33,6 +33,30 @@ My implementation of common data structures for studying.
 | **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` |
 | **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` |
 
+## Search Tree
+
+| | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | **`b_tree`** |
+| :--: | :--: | :--: | :--: | :--: |
+| **`empty`** | | | | |
+| **`size`** | | | | |
+| **`clear`** | | | | |
+| **`begin`** | | | | |
+| **`end`** | | | | |
+| **`rbegin`** | | | | |
+| **`rend`** | | | | |
+| **`front`** | | | | |
+| **`back`** | | | | |
+| **`contains`** | | | | |
+| **`find`** | | | | |
+| **`count`** | | | | |
+| **`lower_bound`** | | | | |
+| **`upper_bound`** | | | | |
+| **`equal_range`** | | | | |
+| **`insert`** | | | | |
+| **`erase`** | | | | |
+| **`merge`** | | | | |
+
+
 ## Heap
 
 | | **`binary_heap`** |
@@ -46,5 +70,3 @@ My implementation of common data structures for studying.
 | **`merge`** | `merge` |
 | **`assign`** | `assign` |
 | **`erase`** | `erase` |
-
-## Search Tree
