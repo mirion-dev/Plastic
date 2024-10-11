@@ -55,7 +55,7 @@ namespace plastic {
 		}
 
 	public:
-		explicit binary_heap() : _data() {}
+		explicit binary_heap(size_t size = {}, const T& value = {}) : _data(size, value) {}
 
 		template<std::input_iterator It>
 		explicit binary_heap(It first, It last) : _data(first, last) {
