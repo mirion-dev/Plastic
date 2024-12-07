@@ -27,7 +27,7 @@ namespace plastic {
 			using value_type = T;
 			using pointer = T*;
 			using reference = T&;
-			using iterator_category = std::random_access_iterator_tag;
+			using iterator_category = std::contiguous_iterator_tag;
 
 			iterator(T* ptr = {}) {
 				_ptr = ptr;
@@ -288,11 +288,11 @@ namespace plastic {
 				return pos;
 			}
 			if (size_t(_end - _last) < count) {
-				ptrdiff_t offset{ pos - _begin };
+				ptrdiff_t offset{ pos - begin() };
 				_extend(count);
-				pos = _begin + offset;
+				pos = begin() + offset;
 			}
-			std::fill(pos, std::move_backward(pos, _last, _last + count), value);
+			std::fill(pos, std::move_backward(pos, end(), end() + count), value);
 			_last += count;
 			return pos;
 		}
@@ -304,11 +304,11 @@ namespace plastic {
 			}
 			size_t size{ (size_t)std::distance(first, last) };
 			if (size_t(_end - _last) < size) {
-				ptrdiff_t offset{ pos - _begin };
+				ptrdiff_t offset{ pos - begin() };
 				_extend(size);
-				pos = _begin + offset;
+				pos = begin() + offset;
 			}
-			std::copy_backward(first, last, std::move_backward(pos, _last, _last + size));
+			std::copy_backward(first, last, std::move_backward(pos, end(), end() + size));
 			_last += size;
 			return pos;
 		}
@@ -318,8 +318,8 @@ namespace plastic {
 		}
 
 		iterator erase(iterator pos) {
-			PLASTIC_VERIFY(pos != _last);
-			_last = std::move(pos + 1, _last, pos);
+			PLASTIC_VERIFY(pos != end());
+			_last = std::move(std::next(pos), end(), pos)._ptr;
 			std::destroy_at(_last);
 			return pos;
 		}
@@ -328,7 +328,7 @@ namespace plastic {
 			if (first == last) {
 				return first;
 			}
-			T* newLast{ std::move(last, _last, first) };
+			T* newLast{ std::move(last, end(), first)._ptr };
 			std::destroy(newLast, _last);
 			_last = newLast;
 			return first;

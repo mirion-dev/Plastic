@@ -13,6 +13,14 @@ namespace plastic {
 		T* _first;
 		T* _last;
 
+		size_t _trueCapacity() const {
+			return _end - _begin;
+		}
+
+		void _extend(size_t size) {
+			reserve(capacity() + std::max(capacity() >> 1, size));
+		}
+
 	public:
 		class iterator {
 			friend class deque;
@@ -54,10 +62,10 @@ namespace plastic {
 
 			iterator& operator+=(difference_type diff) {
 				if (_cont->_end - _ptr < diff) {
-					diff -= _cont->_end - _cont->_begin;
+					diff -= _cont->_trueCapacity();
 				}
 				else if (_ptr - _cont->_begin < -diff) {
-					diff += _cont->_end - _cont->_begin;
+					diff += _cont->_trueCapacity();
 				}
 				_ptr += diff;
 				return *this;
@@ -82,7 +90,7 @@ namespace plastic {
 			difference_type operator-(iterator it) const {
 				ptrdiff_t diff{ _ptr - it._ptr };
 				if (_cont->_first > _cont->_last) {
-					diff += _cont->_end - _cont->_begin;
+					diff += _cont->_trueCapacity();
 				}
 				return diff;
 			}
@@ -129,9 +137,9 @@ namespace plastic {
 
 		template<std::input_iterator It>
 		explicit deque(It first, It last) {
-			size_t n{ (size_t)std::distance(first, last) };
-			_begin = _first = new T[n + 1];
-			_end = _begin + n + 1;
+			size_t size{ (size_t)std::distance(first, last) };
+			_begin = _first = new T[size + 1];
+			_end = _begin + size + 1;
 			_last = _end - 1;
 			std::uninitialized_copy(first, last, _first);
 		}
@@ -191,7 +199,7 @@ namespace plastic {
 		}
 
 		size_t capacity() const {
-			return _end - _begin - 1;
+			return _trueCapacity() - 1;
 		}
 
 		void reserve(size_t capacity) {
@@ -295,7 +303,7 @@ namespace plastic {
 
 		void push_front(const T& value) {
 			if (++end() == begin()) {
-				reserve(capacity() + (capacity() <= 1 ? 1 : capacity() >> 1));
+				_extend(1);
 			}
 			if (_first == _begin) {
 				_first = _end;
@@ -313,7 +321,7 @@ namespace plastic {
 
 		void push_back(const T& value) {
 			if (++end() == begin()) {
-				reserve(capacity() + (capacity() <= 1 ? 1 : capacity() >> 1));
+				_extend(1);
 			}
 			*_last++ = value;
 			if (_last == _end) {
@@ -338,8 +346,8 @@ namespace plastic {
 				return pos;
 			}
 			if (capacity() - size() < count) {
-				size_t offset{ size_t(pos - begin()) };
-				reserve(capacity() + (capacity() >> 1 < count ? count : capacity() >> 1));
+				ptrdiff_t offset{ pos - begin() };
+				_extend(count);
 				pos = begin() + offset;
 			}
 			std::fill(pos, std::move_backward(pos, end(), end() + count), value);
@@ -352,14 +360,14 @@ namespace plastic {
 			if (first == last) {
 				return pos;
 			}
-			size_t n{ (size_t)std::distance(first, last) };
-			if (capacity() - size() < n) {
-				size_t offset{ size_t(pos - begin()) };
-				reserve(capacity() + (capacity() >> 1 < n ? n : capacity() >> 1));
+			size_t size{ (size_t)std::distance(first, last) };
+			if (capacity() - this->size() < size) {
+				ptrdiff_t offset{ pos - begin() };
+				_extend(size);
 				pos = begin() + offset;
 			}
-			std::copy_backward(first, last, std::move_backward(pos, end(), end() + n));
-			_last = (end() + n)._ptr;
+			std::copy_backward(first, last, std::move_backward(pos, end(), end() + size));
+			_last = (end() + size)._ptr;
 			return pos;
 		}
 
