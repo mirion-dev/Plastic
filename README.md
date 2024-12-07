@@ -37,25 +37,24 @@ My implementation of common data structures for studying.
 
 | | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | **`b_tree`** |
 | :--: | :--: | :--: | :--: | :--: |
-| **`empty`** | | | | |
-| **`size`** | | | | |
-| **`clear`** | | | | |
-| **`begin`** | | | | |
-| **`end`** | | | | |
-| **`rbegin`** | | | | |
-| **`rend`** | | | | |
-| **`front`** | | | | |
-| **`back`** | | | | |
-| **`contains`** | | | | |
-| **`find`** | | | | |
-| **`count`** | | | | |
-| **`lower_bound`** | | | | |
-| **`upper_bound`** | | | | |
-| **`equal_range`** | | | | |
-| **`insert`** | | | | |
-| **`erase`** | | | | |
+| **`empty`** | `empty` | | | |
+| **`size`** | `size` | | | |
+| **`clear`** | `clear` | | | |
+| **`begin`** | `begin` | | | |
+| **`end`** | `end` | | | |
+| **`rbegin`** | `rbegin` | | | |
+| **`rend`** | `rend` | | | |
+| **`front`** | `front` | | | |
+| **`back`** | `back` | | | |
+| **`lower_bound`** | `lower_bound` | | | |
+| **`upper_bound`** | `upper_bound` | | | |
+| **`equal_range`** | `equal_range` | | | |
+| **`find`** | `find` | | | |
+| **`contains`** | `contains` | | | |
+| **`count`** | `count` | | | |
+| **`insert`** | `insert` | | | |
+| **`erase`** | `erase` | | | |
 | **`merge`** | | | | |
-
 
 ## Heap
 

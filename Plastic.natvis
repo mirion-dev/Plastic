@@ -55,10 +55,8 @@
 		<Intrinsic Name="size" Expression="size_t(_data._last - _data._begin)"/>
 		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
-			<ArrayItems>
-				<Size>size()</Size>
-				<ValuePointer>_data._begin</ValuePointer>
-			</ArrayItems>
+			<Item Name="[compare]" ExcludeView="simple">_cmp</Item>
+			<ExpandedItem>_data</ExpandedItem>
 		</Expand>
 	</Type>
 
