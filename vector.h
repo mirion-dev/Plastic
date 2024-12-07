@@ -12,8 +12,96 @@ namespace plastic {
 		T* _last;
 		T* _end;
 
+		void _extend(size_t size) {
+			reserve(capacity() + std::max(capacity() >> 1, size));
+		}
+
 	public:
-		using iterator = T*;
+		class iterator {
+			friend class vector;
+
+			T* _ptr;
+
+		public:
+			using difference_type = ptrdiff_t;
+			using value_type = T;
+			using pointer = T*;
+			using reference = T&;
+			using iterator_category = std::random_access_iterator_tag;
+
+			iterator(T* ptr = {}) {
+				_ptr = ptr;
+			}
+
+			reference operator*() const {
+				return *_ptr;
+			}
+
+			pointer operator->() const {
+				return _ptr;
+			}
+
+			reference operator[](size_t index) const {
+				return _ptr[index];
+			}
+
+			bool operator==(iterator iter) const {
+				return _ptr == iter._ptr;
+			}
+
+			std::strong_ordering operator<=>(iterator iter) const {
+				return _ptr <=> iter._ptr;
+			}
+
+			iterator& operator+=(difference_type diff) {
+				_ptr += diff;
+				return *this;
+			}
+
+			iterator& operator-=(difference_type diff) {
+				_ptr -= diff;
+				return *this;
+			}
+
+			iterator operator+(difference_type diff) const {
+				return iterator{ *this } += diff;
+			}
+
+			friend iterator operator+(difference_type diff, iterator iter) {
+				return iter += diff;
+			}
+
+			iterator operator-(difference_type diff) const {
+				return iterator{ *this } -= diff;
+			}
+
+			difference_type operator-(iterator it) const {
+				return _ptr - it._ptr;
+			}
+
+			iterator& operator++() {
+				++_ptr;
+				return *this;
+			}
+
+			iterator operator++(int) {
+				iterator temp{ *this };
+				++*this;
+				return temp;
+			}
+
+			iterator& operator--() {
+				--_ptr;
+				return *this;
+			}
+
+			iterator operator--(int) {
+				iterator temp{ *this };
+				--*this;
+				return temp;
+			}
+		};
+
 		using const_iterator = std::const_iterator<iterator>;
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::const_iterator<reverse_iterator>;
@@ -26,9 +114,9 @@ namespace plastic {
 
 		template<std::input_iterator It>
 		explicit vector(It first, It last) {
-			size_t n{ (size_t)std::distance(first, last) };
-			_begin = new T[n];
-			_last = _end = _begin + n;
+			size_t size{ (size_t)std::distance(first, last) };
+			_begin = new T[size];
+			_last = _end = _begin + size;
 			std::uninitialized_copy(first, last, _begin);
 		}
 
@@ -181,7 +269,7 @@ namespace plastic {
 
 		void push_back(const T& value) {
 			if (_last == _end) {
-				reserve(capacity() + (capacity() <= 1 ? 1 : capacity() >> 1));
+				_extend(1);
 			}
 			*_last++ = value;
 		}
@@ -200,8 +288,8 @@ namespace plastic {
 				return pos;
 			}
 			if (size_t(_end - _last) < count) {
-				size_t offset{ size_t(pos - _begin) };
-				reserve(capacity() + (capacity() >> 1 < count ? count : capacity() >> 1));
+				ptrdiff_t offset{ pos - _begin };
+				_extend(count);
 				pos = _begin + offset;
 			}
 			std::fill(pos, std::move_backward(pos, _last, _last + count), value);
@@ -214,14 +302,14 @@ namespace plastic {
 			if (first == last) {
 				return pos;
 			}
-			size_t n{ (size_t)std::distance(first, last) };
-			if (size_t(_end - _last) < n) {
-				size_t offset{ size_t(pos - _begin) };
-				reserve(capacity() + (capacity() >> 1 < n ? n : capacity() >> 1));
+			size_t size{ (size_t)std::distance(first, last) };
+			if (size_t(_end - _last) < size) {
+				ptrdiff_t offset{ pos - _begin };
+				_extend(size);
 				pos = _begin + offset;
 			}
-			std::copy_backward(first, last, std::move_backward(pos, _last, _last + n));
-			_last += n;
+			std::copy_backward(first, last, std::move_backward(pos, _last, _last + size));
+			_last += size;
 			return pos;
 		}
 
