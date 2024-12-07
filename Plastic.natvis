@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-	<Type Name="plastic::vector&lt;*&gt;">
+	<Type Name="plastic::vector&lt;*>">
 		<Intrinsic Name="capacity" Expression="size_t(_end - _begin)"/>
 		<Intrinsic Name="size" Expression="size_t(_last - _begin)"/>
 		<DisplayString>{{ size={size()} }}</DisplayString>
@@ -14,7 +14,7 @@
 		</Expand>
 	</Type>
 
-	<Type Name="plastic::deque&lt;*&gt;">
+	<Type Name="plastic::deque&lt;*>">
 		<Intrinsic Name="true_capacity" Expression="size_t(_end - _begin)"/>
 		<Intrinsic Name="size" Expression="size_t(_first &lt;= _last ? _last - _first : true_capacity() - (_first - _last))"/>
 		<DisplayString>{{ size={size()} }}</DisplayString>
@@ -27,7 +27,7 @@
 		</Expand>
 	</Type>
 
-	<Type Name="plastic::forward_list&lt;*&gt;">
+	<Type Name="plastic::forward_list&lt;*>">
 		<DisplayString>{{ size={_size} }}</DisplayString>
 		<Expand>
 			<LinkedListItems>
@@ -39,7 +39,7 @@
 		</Expand>
 	</Type>
 
-	<Type Name="plastic::list&lt;*&gt;">
+	<Type Name="plastic::list&lt;*>">
 		<DisplayString>{{ size={_size} }}</DisplayString>
 		<Expand>
 			<LinkedListItems>
@@ -51,12 +51,24 @@
 		</Expand>
 	</Type>
 
-	<Type Name="plastic::binary_heap&lt;*&gt;">
+	<Type Name="plastic::binary_heap&lt;*>">
 		<Intrinsic Name="size" Expression="size_t(_data._last - _data._begin)"/>
 		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
-			<Item Name="[compare]" ExcludeView="simple">_cmp</Item>
 			<ExpandedItem>_data</ExpandedItem>
+		</Expand>
+	</Type>
+
+	<Type Name="plastic::binary_search_tree&lt;*>">
+		<DisplayString>{{ size={_size} }}</DisplayString>
+		<Expand>
+			<TreeItems>
+				<Size>_size</Size>
+				<HeadPointer>_head->parent</HeadPointer>
+				<LeftPointer>left</LeftPointer>
+				<RightPointer>right</RightPointer>
+				<ValueNode Condition="!nil">value</ValueNode>
+			</TreeItems>
 		</Expand>
 	</Type>
 
