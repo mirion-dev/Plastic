@@ -56,7 +56,7 @@
     <ClInclude Include="binary_search_tree.h">
       <Filter>Header Files\search tree</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
+    <ClInclude Include="macro.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
