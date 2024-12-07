@@ -1,6 +1,6 @@
 # Plastic
 
-My implementation of common data structures for studying.
+My implementation of common data structures for study.
 
 ## Linear Structure
 
