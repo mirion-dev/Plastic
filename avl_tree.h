@@ -9,7 +9,7 @@ namespace plastic {
     class avl_tree {
         struct node {
             T value;
-            size_t count;
+            std::size_t count;
             int factor;
             node* parent;
             node* left;
@@ -19,7 +19,7 @@ namespace plastic {
         static constexpr Cmp _cmp{};
 
         node* _root;
-        size_t _size;
+        std::size_t _size;
 
         void _free(node* nd) {
             if (nd == nullptr) {
@@ -124,11 +124,11 @@ namespace plastic {
             return _size == 0;
         }
 
-        size_t size() const {
+        std::size_t size() const {
             return _size;
         }
 
-        size_t count(const T& value) const {
+        std::size_t count(const T& value) const {
             node* nd{ _find(value) };
             return nd == nullptr ? 0 : nd->count;
         }
@@ -145,7 +145,7 @@ namespace plastic {
             return _max(_root)->value;
         }
 
-        void insert(const T& value, size_t count = 1) {
+        void insert(const T& value, std::size_t count = 1) {
             _size += count;
             if (_root == nullptr) {
                 _root = new node{ value, count, 0, nullptr, nullptr, nullptr };
@@ -209,7 +209,7 @@ namespace plastic {
             }
         }
 
-        void erase(const T& value, size_t count = 1) {
+        void erase(const T& value, std::size_t count = 1) {
             node*& nd{ _find(value) };
             if (nd == nullptr) {
                 return;

@@ -13,7 +13,7 @@ namespace plastic {
         };
 
         node* _sentinel;
-        size_t _size;
+        std::size_t _size;
 
     public:
         class iterator {
@@ -22,7 +22,7 @@ namespace plastic {
             node* _ptr;
 
         public:
-            using difference_type = ptrdiff_t;
+            using difference_type = std::ptrdiff_t;
             using value_type = T;
             using pointer = T*;
             using reference = T&;
@@ -58,7 +58,7 @@ namespace plastic {
 
         using const_iterator = std::const_iterator<iterator>;
 
-        explicit forward_list(size_t size = {}, const T& value = {}) {
+        explicit forward_list(std::size_t size = {}, const T& value = {}) {
             _sentinel->next = _sentinel = new node;
             _size = 0;
             insert_after(end(), size, value);
@@ -82,7 +82,7 @@ namespace plastic {
             return _size == 0;
         }
 
-        size_t size() const {
+        std::size_t size() const {
             return _size;
         }
 
@@ -90,7 +90,7 @@ namespace plastic {
             resize(0);
         }
 
-        void resize(size_t size, const T& value = {}) {
+        void resize(std::size_t size, const T& value = {}) {
             if (size == _size) {
                 return;
             }
@@ -149,9 +149,9 @@ namespace plastic {
             return insert_after(pos, 1, value);
         }
 
-        iterator insert_after(iterator pos, size_t count, const T& value) {
+        iterator insert_after(iterator pos, std::size_t count, const T& value) {
             node* i{ pos._ptr };
-            for (size_t j{}; j != count; ++j) {
+            for (std::size_t j{}; j != count; ++j) {
                 i = i->next = new node{ value, i->next };
             }
             _size += count;

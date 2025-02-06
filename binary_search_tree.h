@@ -24,7 +24,7 @@ namespace plastic {
         };
 
         _node* _head;
-        size_t _size;
+        std::size_t _size;
 
         void _free(_node* node) {
             if (node->nil) {
@@ -90,7 +90,7 @@ namespace plastic {
             _node* _ptr;
 
         public:
-            using difference_type = ptrdiff_t;
+            using difference_type = std::ptrdiff_t;
             using value_type = T;
             using pointer = const T*;
             using reference = const T&;
@@ -172,7 +172,7 @@ namespace plastic {
             return _size == 0;
         }
 
-        size_t size() const {
+        std::size_t size() const {
             return _size;
         }
 
@@ -225,7 +225,7 @@ namespace plastic {
             return find(value) != end();
         }
 
-        size_t count(const T& value) const {
+        std::size_t count(const T& value) const {
             return std::distance(lower_bound(value), upper_bound(value));
         }
 
@@ -287,7 +287,7 @@ namespace plastic {
             return last;
         }
 
-        size_t erase(const T& value) {
+        std::size_t erase(const T& value) {
             auto [first, last] {equal_range()};
             erase(first, last);
         }

@@ -12,11 +12,11 @@ namespace plastic {
         T* _first;
         T* _last;
 
-        size_t _trueCapacity() const {
+        std::size_t _trueCapacity() const {
             return _end - _begin;
         }
 
-        void _extend(size_t size) {
+        void _extend(std::size_t size) {
             reserve(capacity() + std::max(capacity() >> 1, size));
         }
 
@@ -28,7 +28,7 @@ namespace plastic {
             const deque* _cont;
 
         public:
-            using difference_type = ptrdiff_t;
+            using difference_type = std::ptrdiff_t;
             using value_type = T;
             using pointer = T*;
             using reference = T&;
@@ -47,7 +47,7 @@ namespace plastic {
                 return _ptr;
             }
 
-            reference operator[](size_t index) const {
+            reference operator[](std::size_t index) const {
                 return *(*this + index);
             }
 
@@ -87,7 +87,7 @@ namespace plastic {
             }
 
             difference_type operator-(iterator it) const {
-                ptrdiff_t diff{ _ptr - it._ptr };
+                std::ptrdiff_t diff{ _ptr - it._ptr };
                 if (_cont->_first > _cont->_last) {
                     diff += _cont->_trueCapacity();
                 }
@@ -127,7 +127,7 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
-        explicit deque(size_t size = {}, const T& value = {}) {
+        explicit deque(std::size_t size = {}, const T& value = {}) {
             _begin = _first = new T[size + 1];
             _end = _begin + size + 1;
             _last = _end - 1;
@@ -136,7 +136,7 @@ namespace plastic {
 
         template<std::input_iterator It>
         explicit deque(It first, It last) {
-            size_t size{ (size_t)std::distance(first, last) };
+            std::size_t size{ (std::size_t)std::distance(first, last) };
             _begin = _first = new T[size + 1];
             _end = _begin + size + 1;
             _last = _end - 1;
@@ -153,7 +153,7 @@ namespace plastic {
             return _first == _last;
         }
 
-        size_t size() const {
+        std::size_t size() const {
             return end() - begin();
         }
 
@@ -161,7 +161,7 @@ namespace plastic {
             resize(0);
         }
 
-        void resize(size_t size, const T& value = {}) {
+        void resize(std::size_t size, const T& value = {}) {
             if (size == this->size()) {
                 return;
             }
@@ -197,11 +197,11 @@ namespace plastic {
             _last = _end - 1;
         }
 
-        size_t capacity() const {
+        std::size_t capacity() const {
             return _trueCapacity() - 1;
         }
 
-        void reserve(size_t capacity) {
+        void reserve(std::size_t capacity) {
             if (capacity <= this->capacity()) {
                 return;
             }
@@ -270,12 +270,12 @@ namespace plastic {
             return reverse_iterator{ { _first, this } };
         }
 
-        T& operator[](size_t index) {
+        T& operator[](std::size_t index) {
             assert(index < size());
             return begin()[index];
         }
 
-        const T& operator[](size_t index) const {
+        const T& operator[](std::size_t index) const {
             assert(index < size());
             return begin()[index];
         }
@@ -340,12 +340,12 @@ namespace plastic {
             return insert(pos, 1, value);
         }
 
-        iterator insert(iterator pos, size_t count, const T& value) {
+        iterator insert(iterator pos, std::size_t count, const T& value) {
             if (count == 0) {
                 return pos;
             }
             if (capacity() - size() < count) {
-                ptrdiff_t offset{ pos - begin() };
+                std::ptrdiff_t offset{ pos - begin() };
                 _extend(count);
                 pos = begin() + offset;
             }
@@ -359,9 +359,9 @@ namespace plastic {
             if (first == last) {
                 return pos;
             }
-            size_t size{ (size_t)std::distance(first, last) };
+            std::size_t size{ (std::size_t)std::distance(first, last) };
             if (capacity() - this->size() < size) {
-                ptrdiff_t offset{ pos - begin() };
+                std::ptrdiff_t offset{ pos - begin() };
                 _extend(size);
                 pos = begin() + offset;
             }

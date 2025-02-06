@@ -11,7 +11,7 @@ namespace plastic {
         T* _last;
         T* _end;
 
-        void _extend(size_t size) {
+        void _extend(std::size_t size) {
             reserve(capacity() + std::max(capacity() >> 1, size));
         }
 
@@ -22,7 +22,7 @@ namespace plastic {
             T* _ptr;
 
         public:
-            using difference_type = ptrdiff_t;
+            using difference_type = std::ptrdiff_t;
             using value_type = T;
             using pointer = T*;
             using reference = T&;
@@ -40,7 +40,7 @@ namespace plastic {
                 return _ptr;
             }
 
-            reference operator[](size_t index) const {
+            reference operator[](std::size_t index) const {
                 return _ptr[index];
             }
 
@@ -105,7 +105,7 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
-        explicit vector(size_t size = {}, const T& value = {}) {
+        explicit vector(std::size_t size = {}, const T& value = {}) {
             _begin = new T[size];
             _last = _end = _begin + size;
             std::uninitialized_fill(_begin, _end, value);
@@ -113,7 +113,7 @@ namespace plastic {
 
         template<std::input_iterator It>
         explicit vector(It first, It last) {
-            size_t size{ (size_t)std::distance(first, last) };
+            std::size_t size{ (std::size_t)std::distance(first, last) };
             _begin = new T[size];
             _last = _end = _begin + size;
             std::uninitialized_copy(first, last, _begin);
@@ -129,7 +129,7 @@ namespace plastic {
             return _begin == _last;
         }
 
-        size_t size() const {
+        std::size_t size() const {
             return _last - _begin;
         }
 
@@ -137,7 +137,7 @@ namespace plastic {
             resize(0);
         }
 
-        void resize(size_t size, const T& value = {}) {
+        void resize(std::size_t size, const T& value = {}) {
             if (size == this->size()) {
                 return;
             }
@@ -161,11 +161,11 @@ namespace plastic {
             _last = _end;
         }
 
-        size_t capacity() const {
+        std::size_t capacity() const {
             return _end - _begin;
         }
 
-        void reserve(size_t capacity) {
+        void reserve(std::size_t capacity) {
             if (capacity <= this->capacity()) {
                 return;
             }
@@ -228,12 +228,12 @@ namespace plastic {
             return reverse_iterator{ _begin };
         }
 
-        T& operator[](size_t index) {
+        T& operator[](std::size_t index) {
             assert(index < size());
             return _begin[index];
         }
 
-        const T& operator[](size_t index) const {
+        const T& operator[](std::size_t index) const {
             assert(index < size());
             return _begin[index];
         }
@@ -282,12 +282,12 @@ namespace plastic {
             return insert(pos, 1, value);
         }
 
-        iterator insert(iterator pos, size_t count, const T& value) {
+        iterator insert(iterator pos, std::size_t count, const T& value) {
             if (count == 0) {
                 return pos;
             }
-            if (size_t(_end - _last) < count) {
-                ptrdiff_t offset{ pos - begin() };
+            if (std::size_t(_end - _last) < count) {
+                std::ptrdiff_t offset{ pos - begin() };
                 _extend(count);
                 pos = begin() + offset;
             }
@@ -301,9 +301,9 @@ namespace plastic {
             if (first == last) {
                 return pos;
             }
-            size_t size{ (size_t)std::distance(first, last) };
-            if (size_t(_end - _last) < size) {
-                ptrdiff_t offset{ pos - begin() };
+            std::size_t size{ (std::size_t)std::distance(first, last) };
+            if (std::size_t(_end - _last) < size) {
+                std::ptrdiff_t offset{ pos - begin() };
                 _extend(size);
                 pos = begin() + offset;
             }
@@ -344,6 +344,6 @@ namespace plastic {
     };
 
     template<class It>
-    explicit vector(It, It)->vector<std::iter_value_t<It>>;
+    explicit plastic::vector(It, It)->plastic::vector<std::iter_value_t<It>>;
 
 }
