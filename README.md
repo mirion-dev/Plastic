@@ -54,7 +54,7 @@ My implementation of common data structures for study.
 | **`count`** | `count` | | | |
 | **`insert`** | `insert` | | | |
 | **`erase`** | `erase` | | | |
-| **`merge`** | | | | |
+| **`merge`** | `merge` | | | |
 
 ## Heap
 

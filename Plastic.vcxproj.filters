@@ -56,9 +56,6 @@
     <ClInclude Include="binary_search_tree.h">
       <Filter>Header Files\search tree</Filter>
     </ClInclude>
-    <ClInclude Include="macro.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="Plastic.natvis">

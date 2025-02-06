@@ -23,7 +23,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="binary_search_tree.h" />
-    <ClInclude Include="macro.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="avl_tree.h" />
     <ClInclude Include="b_tree.h" />
