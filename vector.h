@@ -10,7 +10,6 @@ namespace plastic {
         T* _begin;
         T* _last;
         T* _end;
-
         void _extend(std::size_t size) noexcept {
             reserve(capacity() + std::max(capacity() >> 1, size));
         }
@@ -43,12 +42,12 @@ namespace plastic {
                 return _ptr[index];
             }
 
-            bool operator==(iterator iter) const noexcept {
-                return _ptr == iter._ptr;
+            friend bool operator==(iterator iter1, iterator iter2) noexcept {
+                return iter1._ptr == iter2._ptr;
             }
 
-            std::strong_ordering operator<=>(iterator iter) const noexcept {
-                return _ptr <=> iter._ptr;
+            friend auto operator<=>(iterator iter1, iterator iter2) noexcept {
+                return iter1._ptr <=> iter2._ptr;
             }
 
             iterator& operator+=(difference_type diff) noexcept {
@@ -61,20 +60,20 @@ namespace plastic {
                 return *this;
             }
 
-            iterator operator+(difference_type diff) const noexcept {
-                return iterator{ *this } += diff;
+            friend iterator operator+(iterator iter, difference_type diff) noexcept {
+                return iter += diff;
             }
 
             friend iterator operator+(difference_type diff, iterator iter) noexcept {
                 return iter += diff;
             }
 
-            iterator operator-(difference_type diff) const noexcept {
-                return iterator{ *this } -= diff;
+            friend iterator operator-(iterator iter, difference_type diff) noexcept {
+                return iter -= diff;
             }
 
-            difference_type operator-(iterator it) const noexcept {
-                return _ptr - it._ptr;
+            friend difference_type operator-(iterator iter1, iterator iter2) noexcept {
+                return iter1._ptr - iter2._ptr;
             }
 
             iterator& operator++() noexcept {
@@ -114,9 +113,9 @@ namespace plastic {
 
         template<std::input_iterator It>
         explicit vector(It first, It last) noexcept {
-            std::ptrdiff_t size{ std::distance(first, last) };
-            _begin = new T[size];
-            _last = _begin + size;
+            std::ptrdiff_t count{ std::distance(first, last) };
+            _begin = new T[count];
+            _last = _begin + count;
             _end = _last;
             std::uninitialized_copy(first, last, _begin);
         }
@@ -135,10 +134,12 @@ namespace plastic {
             if (this == &other) {
                 return *this;
             }
+
             vector temp{ other };
             std::swap(_begin, temp._begin);
             std::swap(_last, temp._last);
             std::swap(_end, temp._end);
+
             return *this;
         }
 
@@ -155,26 +156,26 @@ namespace plastic {
             _last = _begin;
         }
 
-        void resize(std::size_t size, const T& value = {}) noexcept {
-            if (size == this->size()) {
+        void resize(std::size_t new_size, const T& value = {}) noexcept {
+            if (new_size == size()) {
                 return;
             }
 
-            if (size < this->size()) {
-                T* newLast{ _begin + size };
-                std::destroy(newLast, _last);
-                _last = newLast;
+            if (new_size < size()) {
+                T* new_last{ _begin + new_size };
+                std::destroy(new_last, _last);
+                _last = new_last;
                 return;
             }
 
-            if (size <= capacity()) {
-                T* newLast{ _begin + size };
-                std::uninitialized_fill(_last, newLast, value);
-                _last = newLast;
+            if (new_size <= capacity()) {
+                T* new_last{ _begin + new_size };
+                std::uninitialized_fill(_last, new_last, value);
+                _last = new_last;
                 return;
             }
 
-            reserve(size);
+            reserve(new_size);
             std::uninitialized_fill(_last, _end, value);
             _last = _end;
         }
@@ -183,19 +184,19 @@ namespace plastic {
             return _end - _begin;
         }
 
-        void reserve(std::size_t capacity) noexcept {
-            if (capacity <= this->capacity()) {
+        void reserve(std::size_t new_capacity) noexcept {
+            if (new_capacity <= capacity()) {
                 return;
             }
 
-            T* newBegin{ new T[capacity] };
-            T* newLast{ std::uninitialized_move(_begin, _last, newBegin) };
-            T* newEnd{ newBegin + capacity };
+            T* new_begin{ new T[new_capacity] };
+            T* new_last{ std::uninitialized_move(_begin, _last, new_begin) };
+            T* new_end{ new_begin + new_capacity };
             delete[] _begin;
 
-            _begin = newBegin;
-            _last = newLast;
-            _end = newEnd;
+            _begin = new_begin;
+            _last = new_last;
+            _end = new_end;
         }
 
         iterator begin() noexcept {
@@ -304,15 +305,15 @@ namespace plastic {
                 return pos;
             }
 
-            std::ptrdiff_t size{ std::distance(first, last) };
-            if (_end - _last < size) {
+            std::ptrdiff_t count{ std::distance(first, last) };
+            if (_end - _last < count) {
                 std::ptrdiff_t offset{ pos - begin() };
-                _extend(size);
+                _extend(count);
                 pos = begin() + offset;
             }
 
-            std::copy_backward(first, last, std::move_backward(pos, end(), end() + size));
-            _last += size;
+            std::copy_backward(first, last, std::move_backward(pos, end(), end() + count));
+            _last += count;
 
             return pos;
         }
@@ -322,7 +323,7 @@ namespace plastic {
         }
 
         iterator erase(iterator pos) noexcept {
-            _last = std::move(std::next(pos), end(), pos)._ptr;
+            _last = std::move(pos + 1, end(), pos)._ptr;
             std::destroy_at(_last);
             return pos;
         }
@@ -332,9 +333,9 @@ namespace plastic {
                 return first;
             }
 
-            T* newLast{ std::move(last, end(), first)._ptr };
-            std::destroy(newLast, _last);
-            _last = newLast;
+            T* new_last{ std::move(last, end(), first)._ptr };
+            std::destroy(new_last, _last);
+            _last = new_last;
 
             return first;
         }
