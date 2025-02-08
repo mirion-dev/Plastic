@@ -5,17 +5,26 @@
 
 using namespace plastic;
 
-std::string format(auto&& cont) {
-    auto i{ cont.begin() }, end{ cont.end() };
-    if (i == end) {
+template<std::input_iterator It>
+std::string format(It first, It last) {
+    if (first == last) {
         return "[]";
     }
 
-    std::string res{ std::format("[{}", *i++) };
-    while (i != end) {
-        res += std::format(", {}", *i++);
+    std::string res{ std::format("[{}", *first++) };
+    while (first != last) {
+        res += std::format(", {}", *first++);
     }
+
     return res += ']';
+}
+
+std::string format(std::random_access_iterator auto first, std::size_t size) {
+    return format(first, first + size);
+}
+
+std::string format(std::ranges::input_range auto&& range) {
+    return format(range.begin(), range.end());
 }
 
 int main() {
@@ -25,10 +34,10 @@ int main() {
         assert(format(b) == "[4, 4, 4, 4]");
         assert(format(c) == "[3, 2, 1]");
 
-        assert(format(std::ranges::subrange{ c.data(), c.data() + c.size() }) == "[3, 2, 1]");
-        assert(format(std::ranges::subrange{ c.cbegin(), c.cend() }) == "[3, 2, 1]");
-        assert(format(std::ranges::subrange{ c.rbegin(), c.rend() }) == "[1, 2, 3]");
-        assert(format(std::ranges::subrange{ c.crbegin(), c.crend() }) == "[1, 2, 3]");
+        assert(format(c.data(), c.size()) == "[3, 2, 1]");
+        assert(format(c.cbegin(), c.cend()) == "[3, 2, 1]");
+        assert(format(c.rbegin(), c.rend()) == "[1, 2, 3]");
+        assert(format(c.crbegin(), c.crend()) == "[1, 2, 3]");
 
         c = c;
         assert(format(c) == "[3, 2, 1]");
@@ -95,9 +104,9 @@ int main() {
         assert(format(b) == "[4, 4, 4, 4]");
         assert(format(c) == "[3, 2, 1]");
 
-        assert(format(std::ranges::subrange{ c.cbegin(), c.cend() }) == "[3, 2, 1]");
-        assert(format(std::ranges::subrange{ c.rbegin(), c.rend() }) == "[1, 2, 3]");
-        assert(format(std::ranges::subrange{ c.crbegin(), c.crend() }) == "[1, 2, 3]");
+        assert(format(c.cbegin(), c.cend()) == "[3, 2, 1]");
+        assert(format(c.rbegin(), c.rend()) == "[1, 2, 3]");
+        assert(format(c.crbegin(), c.crend()) == "[1, 2, 3]");
 
         c = c;
         assert(format(c) == "[3, 2, 1]");
