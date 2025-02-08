@@ -11,7 +11,7 @@ namespace plastic {
         T* _last;
         T* _end;
 
-        void _extend(std::size_t size) {
+        void _extend(std::size_t size) noexcept {
             reserve(capacity() + std::max(capacity() >> 1, size));
         }
 
@@ -28,73 +28,72 @@ namespace plastic {
             using reference = T&;
             using iterator_category = std::contiguous_iterator_tag;
 
-            iterator(T* ptr = {}) {
-                _ptr = ptr;
-            }
+            iterator(T* ptr = {}) noexcept :
+                _ptr{ ptr } {}
 
-            reference operator*() const {
+            reference operator*() const noexcept {
                 return *_ptr;
             }
 
-            pointer operator->() const {
+            pointer operator->() const noexcept {
                 return _ptr;
             }
 
-            reference operator[](std::size_t index) const {
+            reference operator[](std::size_t index) const noexcept {
                 return _ptr[index];
             }
 
-            bool operator==(iterator iter) const {
+            bool operator==(iterator iter) const noexcept {
                 return _ptr == iter._ptr;
             }
 
-            std::strong_ordering operator<=>(iterator iter) const {
+            std::strong_ordering operator<=>(iterator iter) const noexcept {
                 return _ptr <=> iter._ptr;
             }
 
-            iterator& operator+=(difference_type diff) {
+            iterator& operator+=(difference_type diff) noexcept {
                 _ptr += diff;
                 return *this;
             }
 
-            iterator& operator-=(difference_type diff) {
+            iterator& operator-=(difference_type diff) noexcept {
                 _ptr -= diff;
                 return *this;
             }
 
-            iterator operator+(difference_type diff) const {
+            iterator operator+(difference_type diff) const noexcept {
                 return iterator{ *this } += diff;
             }
 
-            friend iterator operator+(difference_type diff, iterator iter) {
+            friend iterator operator+(difference_type diff, iterator iter) noexcept {
                 return iter += diff;
             }
 
-            iterator operator-(difference_type diff) const {
+            iterator operator-(difference_type diff) const noexcept {
                 return iterator{ *this } -= diff;
             }
 
-            difference_type operator-(iterator it) const {
+            difference_type operator-(iterator it) const noexcept {
                 return _ptr - it._ptr;
             }
 
-            iterator& operator++() {
+            iterator& operator++() noexcept {
                 ++_ptr;
                 return *this;
             }
 
-            iterator operator++(int) {
+            iterator operator++(int) noexcept {
                 iterator temp{ *this };
                 ++*this;
                 return temp;
             }
 
-            iterator& operator--() {
+            iterator& operator--() noexcept {
                 --_ptr;
                 return *this;
             }
 
-            iterator operator--(int) {
+            iterator operator--(int) noexcept {
                 iterator temp{ *this };
                 --*this;
                 return temp;
@@ -105,39 +104,58 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
-        explicit vector(std::size_t size = {}, const T& value = {}) {
-            _begin = new T[size];
-            _last = _end = _begin + size;
+        explicit vector(std::size_t size = {}, const T& value = {}) noexcept :
+            _begin{ new T[size] },
+            _last{ _begin + size },
+            _end{ _last } {
+
             std::uninitialized_fill(_begin, _end, value);
         }
 
         template<std::input_iterator It>
-        explicit vector(It first, It last) {
-            std::size_t size{ (std::size_t)std::distance(first, last) };
+        explicit vector(It first, It last) noexcept {
+            std::ptrdiff_t size{ std::distance(first, last) };
             _begin = new T[size];
-            _last = _end = _begin + size;
+            _last = _begin + size;
+            _end = _last;
             std::uninitialized_copy(first, last, _begin);
         }
 
-        explicit vector(std::initializer_list<T> list) : vector(list.begin(), list.end()) {}
+        explicit vector(std::initializer_list<T> list) noexcept :
+            vector(list.begin(), list.end()) {}
 
-        ~vector() {
+        explicit vector(const vector& other) noexcept :
+            vector(other._begin, other._end) {}
+
+        ~vector() noexcept {
             delete[] _begin;
         }
 
-        bool empty() const {
+        vector& operator=(const vector& other) noexcept {
+            if (this == &other) {
+                return *this;
+            }
+            vector temp{ other };
+            std::swap(_begin, temp._begin);
+            std::swap(_last, temp._last);
+            std::swap(_end, temp._end);
+            return *this;
+        }
+
+        bool empty() const noexcept {
             return _begin == _last;
         }
 
-        std::size_t size() const {
+        std::size_t size() const noexcept {
             return _last - _begin;
         }
 
-        void clear() {
-            resize(0);
+        void clear() noexcept {
+            std::destroy(_begin, _last);
+            _last = _begin;
         }
 
-        void resize(std::size_t size, const T& value = {}) {
+        void resize(std::size_t size, const T& value = {}) noexcept {
             if (size == this->size()) {
                 return;
             }
@@ -161,11 +179,11 @@ namespace plastic {
             _last = _end;
         }
 
-        std::size_t capacity() const {
+        std::size_t capacity() const noexcept {
             return _end - _begin;
         }
 
-        void reserve(std::size_t capacity) {
+        void reserve(std::size_t capacity) noexcept {
             if (capacity <= this->capacity()) {
                 return;
             }
@@ -180,167 +198,154 @@ namespace plastic {
             _end = newEnd;
         }
 
-        iterator begin() {
+        iterator begin() noexcept {
             return _begin;
         }
 
-        const_iterator begin() const {
+        const_iterator begin() const noexcept {
             return _begin;
         }
 
-        const_iterator cbegin() const {
+        const_iterator cbegin() const noexcept {
             return _begin;
         }
 
-        iterator end() {
+        iterator end() noexcept {
             return _last;
         }
 
-        const_iterator end() const {
+        const_iterator end() const noexcept {
             return _last;
         }
 
-        const_iterator cend() const {
+        const_iterator cend() const noexcept {
             return _last;
         }
 
-        reverse_iterator rbegin() {
+        reverse_iterator rbegin() noexcept {
             return reverse_iterator{ _last };
         }
 
-        const_reverse_iterator rbegin() const {
+        const_reverse_iterator rbegin() const noexcept {
             return reverse_iterator{ _last };
         }
 
-        const_reverse_iterator crbegin() const {
+        const_reverse_iterator crbegin() const noexcept {
             return reverse_iterator{ _last };
         }
 
-        reverse_iterator rend() {
+        reverse_iterator rend() noexcept {
             return reverse_iterator{ _begin };
         }
 
-        const_reverse_iterator rend() const {
+        const_reverse_iterator rend() const noexcept {
             return reverse_iterator{ _begin };
         }
 
-        const_reverse_iterator crend() const {
+        const_reverse_iterator crend() const noexcept {
             return reverse_iterator{ _begin };
         }
 
-        T& operator[](std::size_t index) {
-            assert(index < size());
-            return _begin[index];
+        auto&& operator[](this auto&& self, std::size_t index) noexcept {
+            assert(index < self.size());
+            return std::forward_like<decltype(self)>(self._begin[index]);
         }
 
-        const T& operator[](std::size_t index) const {
-            assert(index < size());
-            return _begin[index];
+        auto&& front(this auto&& self) noexcept {
+            assert(!self.empty());
+            return std::forward_like<decltype(self)>(*self._begin);
         }
 
-        T& front() {
-            assert(!empty());
-            return *_begin;
+        auto&& back(this auto&& self) noexcept {
+            assert(!self.empty());
+            return std::forward_like<decltype(self)>(self._last[-1]);
         }
 
-        const T& front() const {
-            assert(!empty());
-            return *_begin;
+        auto data(this auto&& self) noexcept {
+            return std::forward_like<decltype(self)>(self._begin);
         }
 
-        T& back() {
-            assert(!empty());
-            return _last[-1];
-        }
-
-        const T& back() const {
-            assert(!empty());
-            return _last[-1];
-        }
-
-        T* data() {
-            return _begin;
-        }
-
-        const T* data() const {
-            return _begin;
-        }
-
-        void push_back(const T& value) {
+        void push_back(const T& value) noexcept {
             if (_last == _end) {
                 _extend(1);
             }
             *_last++ = value;
         }
 
-        void pop_back() {
+        void pop_back() noexcept {
             assert(!empty());
             std::destroy_at(--_last);
         }
 
-        iterator insert(iterator pos, const T& value) {
+        iterator insert(iterator pos, const T& value) noexcept {
             return insert(pos, 1, value);
         }
 
-        iterator insert(iterator pos, std::size_t count, const T& value) {
+        iterator insert(iterator pos, std::size_t count, const T& value) noexcept {
             if (count == 0) {
                 return pos;
             }
-            if (std::size_t(_end - _last) < count) {
+
+            if (_end - _last < static_cast<std::ptrdiff_t>(count)) {
                 std::ptrdiff_t offset{ pos - begin() };
                 _extend(count);
                 pos = begin() + offset;
             }
+
             std::fill(pos, std::move_backward(pos, end(), end() + count), value);
             _last += count;
+
             return pos;
         }
 
         template<std::input_iterator It>
-        iterator insert(iterator pos, It first, It last) {
+        iterator insert(iterator pos, It first, It last) noexcept {
             if (first == last) {
                 return pos;
             }
-            std::size_t size{ (std::size_t)std::distance(first, last) };
-            if (std::size_t(_end - _last) < size) {
+
+            std::ptrdiff_t size{ std::distance(first, last) };
+            if (_end - _last < size) {
                 std::ptrdiff_t offset{ pos - begin() };
                 _extend(size);
                 pos = begin() + offset;
             }
+
             std::copy_backward(first, last, std::move_backward(pos, end(), end() + size));
             _last += size;
+
             return pos;
         }
 
-        iterator insert(iterator pos, std::initializer_list<T> list) {
+        iterator insert(iterator pos, std::initializer_list<T> list) noexcept {
             return insert(pos, list.begin(), list.end());
         }
 
-        iterator erase(iterator pos) {
-            assert(pos != end());
+        iterator erase(iterator pos) noexcept {
             _last = std::move(std::next(pos), end(), pos)._ptr;
             std::destroy_at(_last);
             return pos;
         }
 
-        iterator erase(iterator first, iterator last) {
+        iterator erase(iterator first, iterator last) noexcept {
             if (first == last) {
                 return first;
             }
+
             T* newLast{ std::move(last, end(), first)._ptr };
             std::destroy(newLast, _last);
             _last = newLast;
+
             return first;
         }
 
-        bool operator==(const vector& cont) const {
-            return std::equal(begin(), end(), cont.begin(), cont.end());
+        friend bool operator==(const vector& cont1, const vector& cont2) noexcept {
+            return std::equal(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
         }
 
-        auto operator<=>(const vector& cont) const {
-            return std::lexicographical_compare_three_way(begin(), end(), cont.begin(), cont.end());
+        friend auto operator<=>(const vector& cont1, const vector& cont2) noexcept {
+            return std::lexicographical_compare_three_way(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
         }
-
     };
 
     template<class It>
