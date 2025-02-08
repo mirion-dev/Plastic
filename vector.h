@@ -325,7 +325,7 @@ namespace plastic {
         }
 
         iterator erase(iterator pos) noexcept {
-            _last = std::move(pos + 1, end(), pos)._ptr;
+            _last = std::move(++iterator{ pos }, end(), pos)._ptr;
             std::destroy_at(_last);
             return pos;
         }
