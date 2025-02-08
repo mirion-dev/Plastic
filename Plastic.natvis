@@ -31,10 +31,12 @@
 	</Type>
 
 	<Type Name="plastic::forward_list&lt;*&gt;">
-		<DisplayString>{{ size={_size} }}</DisplayString>
+		<Intrinsic Name="size" Expression="_size"/>
+		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
+			<Item Name="[size]">size()</Item>
 			<LinkedListItems>
-				<Size>_size</Size>
+				<Size>size()</Size>
 				<HeadPointer>_sentinel->next</HeadPointer>
 				<NextPointer>next</NextPointer>
 				<ValueNode>value</ValueNode>
@@ -43,10 +45,12 @@
 	</Type>
 
 	<Type Name="plastic::list&lt;*&gt;">
-		<DisplayString>{{ size={_size} }}</DisplayString>
+		<Intrinsic Name="size" Expression="_size"/>
+		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
+			<Item Name="[size]">size()</Item>
 			<LinkedListItems>
-				<Size>_size</Size>
+				<Size>size()</Size>
 				<HeadPointer>_sentinel->next</HeadPointer>
 				<NextPointer>next</NextPointer>
 				<ValueNode>value</ValueNode>

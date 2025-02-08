@@ -1,4 +1,5 @@
 #include "deque.h"
+#include "forward_list.h"
 #include "vector.h"
 
 #include <format>
@@ -174,5 +175,62 @@ int main() {
         assert(d <= f);
     }
 
+    {
+        forward_list<int> a, b(4, 4), c{ 3, 2, 1 };
+        assert(format(a) == "[]");
+        assert(format(b) == "[4, 4, 4, 4]");
+        assert(format(c) == "[3, 2, 1]");
 
+        assert(format(c.cbegin(), c.cend()) == "[3, 2, 1]");
+
+        c = c;
+        assert(format(c) == "[3, 2, 1]");
+        c = b;
+        assert(format(c) == "[4, 4, 4, 4]");
+
+        assert(a.empty() == true);
+        assert(b.empty() == false);
+
+        assert(a.size() == 0);
+        assert(b.size() == 4);
+
+        c.clear();
+        assert(format(c) == "[]");
+
+        c.resize(2);
+        assert(format(c) == "[0, 0]");
+        c.resize(1);
+        assert(format(c) == "[0]");
+        c.resize(5, 1);
+        assert(format(c) == "[0, 1, 1, 1, 1]");
+
+        assert(*std::next(b.begin()) == 4);
+        assert(*std::next(c.begin()) == 1);
+
+        assert(b.front() == 4);
+        assert(c.front() == 0);
+
+        c.push_front(-1);
+        c.push_front(-1);
+        assert(format(c) == "[-1, -1, 0, 1, 1, 1, 1]");
+
+        c.pop_front();
+        assert(format(c) == "[-1, 0, 1, 1, 1, 1]");
+
+        c.insert_after(std::next(c.begin(), 2), 2, 2);
+        assert(format(c) == "[-1, 0, 1, 2, 2, 1, 1, 1]");
+        c.insert_after(std::next(c.begin(), 3), { 3, 4, 5 });
+        assert(format(c) == "[-1, 0, 1, 2, 3, 4, 5, 2, 1, 1, 1]");
+
+        c.erase_after(c.end());
+        assert(format(c) == "[0, 1, 2, 3, 4, 5, 2, 1, 1, 1]");
+        c.erase_after(std::next(c.begin(), 4), c.end());
+        assert(format(c) == "[0, 1, 2, 3, 4]");
+
+        forward_list d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
+        assert(d == d);
+        assert(d != e);
+        assert(d < e);
+        assert(d <= f);
+    }
 }
