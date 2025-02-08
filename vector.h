@@ -124,7 +124,7 @@ namespace plastic {
             vector(list.begin(), list.end()) {}
 
         explicit vector(const vector& other) noexcept :
-            vector(other._begin, other._end) {}
+            vector(other._begin, other._last) {}
 
         ~vector() noexcept {
             delete[] _begin;
