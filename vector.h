@@ -10,6 +10,7 @@ namespace plastic {
         T* _begin;
         T* _last;
         T* _end;
+
         void _extend(std::size_t size) noexcept {
             reserve(capacity() + std::max(capacity() >> 1, size));
         }
@@ -117,6 +118,7 @@ namespace plastic {
             _begin = new T[count];
             _last = _begin + count;
             _end = _last;
+
             std::uninitialized_copy(first, last, _begin);
         }
 
