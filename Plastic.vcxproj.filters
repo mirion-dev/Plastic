@@ -40,7 +40,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="Plastic.natvis">
+    <Natvis Include="plastic.natvis">
       <Filter>Resource Files</Filter>
     </Natvis>
   </ItemGroup>
