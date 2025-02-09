@@ -80,7 +80,7 @@ namespace plastic {
         }
 
         const T& top() const noexcept {
-            assert(!empty());
+            assert(!_data.empty());
             return _data.front();
         }
 
@@ -91,12 +91,12 @@ namespace plastic {
 
         void push(const T& value) noexcept {
             _data.push_back(value);
-            _sift_up(size() - 1);
+            _sift_up(_data.size() - 1);
         }
 
         void pop() noexcept {
-            assert(!empty());
-            _data[0] = std::move(_data.back());
+            assert(!_data.empty());
+            _data.front() = std::move(_data.back());
             _data.pop_back();
             _sift_down(0);
         }
@@ -114,7 +114,7 @@ namespace plastic {
         void erase(T* ptr) noexcept {
             *ptr = std::move(_data.back());
             _data.pop_back();
-            if (!empty()) {
+            if (!_data.empty()) {
                 _sift_up_down(ptr - _data.data());
             }
         }
