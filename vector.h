@@ -265,7 +265,7 @@ namespace plastic {
         }
 
         auto data(this auto&& self) noexcept {
-            return std::forward_like<decltype(self)>(self._begin);
+            return self._begin;
         }
 
         void push_back(const T& value) noexcept {

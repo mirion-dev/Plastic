@@ -8,9 +8,9 @@ namespace plastic {
     class binary_heap {
         static constexpr Cmp _cmp{};
 
-        vector<T> _data;
+        plastic::vector<T> _data;
 
-        void _siftUp(std::size_t index) {
+        void _sift_up(std::size_t index) noexcept {
             T value{ std::move(_data[index]) };
             while (index != 0) {
                 std::size_t parent{ (index - 1) / 2 };
@@ -23,7 +23,7 @@ namespace plastic {
             _data[index] = std::move(value);
         }
 
-        void _siftDown(std::size_t index) {
+        void _sift_down(std::size_t index) noexcept {
             T value{ std::move(_data[index]) };
             while (true) {
                 std::size_t child{ index * 2 + 1 };
@@ -42,83 +42,86 @@ namespace plastic {
             _data[index] = std::move(value);
         }
 
-        void _siftUpDown(std::size_t index) {
-            _siftUp(index);
-            _siftDown(index);
+        void _sift_up_down(std::size_t index) noexcept {
+            _sift_up(index);
+            _sift_down(index);
         }
 
-        void _makeHeap() {
-            std::size_t i{ _data.size() >> 1 };
-            while (i != 0) {
-                _siftDown(--i);
+        void _make_heap() noexcept {
+            std::size_t i{ _data.size() / 2 };
+            while (i-- != 0) {
+                _sift_down(i);
             }
         }
 
     public:
-        explicit binary_heap(std::size_t size = {}, const T& value = {}) : _data(size, value) {}
+        explicit binary_heap(std::size_t size = {}, const T& value = {}) noexcept :
+            _data(size, value) {}
 
         template<std::input_iterator It>
-        explicit binary_heap(It first, It last) : _data(first, last) {
-            _makeHeap();
+        explicit binary_heap(It first, It last) noexcept :
+            _data(first, last) {
+
+            _make_heap();
         }
 
-        explicit binary_heap(std::initializer_list<T> list) : binary_heap(list.begin(), list.end()) {}
+        explicit binary_heap(std::initializer_list<T> list) noexcept :
+            binary_heap(list.begin(), list.end()) {}
 
-        bool empty() const {
+        bool empty() const noexcept {
             return _data.empty();
         }
 
-        std::size_t size() const {
+        std::size_t size() const noexcept {
             return _data.size();
         }
 
-        void clear() {
+        void clear() noexcept {
             return _data.clear();
         }
 
-        T& top() {
+        const T& top() const noexcept {
             assert(!empty());
             return _data.front();
         }
 
-        const T& top() const {
-            assert(!empty());
-            return _data.front();
+        // only for test purposes
+        T* data() noexcept {
+            return _data.data();
         }
 
-        void push(const T& value) {
+        void push(const T& value) noexcept {
             _data.push_back(value);
-            _siftUp(size() - 1);
+            _sift_up(size() - 1);
         }
 
-        void pop() {
+        void pop() noexcept {
             assert(!empty());
-            erase(0);
+            _data[0] = std::move(_data.back());
+            _data.pop_back();
+            _sift_down(0);
         }
 
-        void merge(const binary_heap& heap) {
-            _data.insert(_data.end(), heap._data.begin(), heap._data.end());
-            _makeHeap();
+        void merge(const binary_heap& other) noexcept {
+            _data.insert(_data.end(), other._data.begin(), other._data.end());
+            _make_heap();
         }
 
-        void assign(std::size_t index, const T& value) {
-            assert(index < size());
-            _data[index] = value;
-            _siftUpDown(index);
+        void assign(T* ptr, const T& value) noexcept {
+            *ptr = value;
+            _sift_up_down(ptr - _data.data());
         }
 
-        void erase(std::size_t index) {
-            assert(index < size());
-            _data[index] = std::move(_data.back());
+        void erase(T* ptr) noexcept {
+            *ptr = std::move(_data.back());
             _data.pop_back();
             if (!empty()) {
-                _siftUpDown(index);
+                _sift_up_down(ptr - _data.data());
             }
         }
-
     };
 
     template<class It>
-    explicit binary_heap(It, It)->binary_heap<std::iter_value_t<It>>;
+    explicit plastic::binary_heap(It, It)->plastic::binary_heap<std::iter_value_t<It>>;
 
 }

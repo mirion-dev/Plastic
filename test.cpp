@@ -1,8 +1,15 @@
+// linear structure
 #include "deque.h"
 #include "forward_list.h"
 #include "list.h"
 #include "vector.h"
 
+// search tree
+
+// heap
+#include "binary_heap.h"
+
+#include <algorithm>
 #include <format>
 
 using namespace plastic;
@@ -29,7 +36,14 @@ std::string format(std::ranges::input_range auto&& range) {
     return format(range.begin(), range.end());
 }
 
+template<class T, class Cmp>
+std::string format(binary_heap<T, Cmp> heap) {
+    std::sort_heap(heap.data(), heap.data() + heap.size(), Cmp{});
+    return format(heap.data(), heap.size());
+}
+
 int main() {
+    // linear structure
     {
         vector<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
@@ -99,7 +113,6 @@ int main() {
         assert(d < e);
         assert(d <= f);
     }
-
     {
         deque<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
@@ -175,7 +188,6 @@ int main() {
         assert(d < e);
         assert(d <= f);
     }
-
     {
         forward_list<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
@@ -234,7 +246,6 @@ int main() {
         assert(d < e);
         assert(d <= f);
     }
-
     {
         list<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
@@ -297,5 +308,50 @@ int main() {
         assert(d != e);
         assert(d < e);
         assert(d <= f);
+    }
+
+    // search tree
+
+    // heap
+    {
+        binary_heap<int> a, b(4, 4), c{ 3, 2, 1 };
+
+        assert(format(a) == "[]");
+        assert(format(b) == "[4, 4, 4, 4]");
+        assert(format(c) == "[1, 2, 3]");
+
+        c = c;
+        assert(format(c) == "[1, 2, 3]");
+        c = b;
+        assert(format(c) == "[4, 4, 4, 4]");
+
+        assert(a.empty() == true);
+        assert(b.empty() == false);
+
+        assert(a.size() == 0);
+        assert(b.size() == 4);
+
+        c.clear();
+        assert(format(c) == "[]");
+
+        assert(b.top() == 4);
+
+        c.push(4);
+        c.push(6);
+        c.push(2);
+        c.push(8);
+        assert(format(c) == "[2, 4, 6, 8]");
+
+        c.pop();
+        assert(format(c) == "[2, 4, 6]");
+
+        c.merge(binary_heap{ 3, 1, 7 });
+        assert(format(c) == "[1, 2, 3, 4, 6, 7]");
+
+        c.assign(c.data(), 5);
+        assert(format(c) == "[1, 2, 3, 4, 5, 6]");
+
+        c.erase(c.data());
+        assert(format(c) == "[1, 2, 3, 4, 5]");
     }
 }
