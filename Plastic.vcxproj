@@ -19,17 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test.cpp" />
+    <ClCompile Include="plastic.ixx" />
+    <ClCompile Include="test.ixx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="binary_search_tree.h" />
-    <ClInclude Include="vector.h" />
     <ClInclude Include="avl_tree.h" />
     <ClInclude Include="b_tree.h" />
-    <ClInclude Include="deque.h" />
-    <ClInclude Include="forward_list.h" />
-    <ClInclude Include="list.h" />
-    <ClInclude Include="binary_heap.h" />
     <ClInclude Include="red_black_tree.h" />
   </ItemGroup>
   <ItemGroup>

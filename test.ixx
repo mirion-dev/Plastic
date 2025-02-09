@@ -1,17 +1,7 @@
-// linear structure
-#include "deque.h"
-#include "forward_list.h"
-#include "list.h"
-#include "vector.h"
+#include <assert.h>
 
-// search tree
-#include "binary_search_tree.h"
-
-// heap
-#include "binary_heap.h"
-
-#include <algorithm>
-#include <format>
+import std;
+import plastic;
 
 using namespace plastic;
 
@@ -313,7 +303,6 @@ int main() {
 
     // search tree
     {
-        binary_search_tree<int> a;
     }
 
     // heap
