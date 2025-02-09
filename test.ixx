@@ -3,8 +3,6 @@
 import std;
 import plastic;
 
-using namespace plastic;
-
 template<std::input_iterator It>
 std::string str(It first, It last) {
     if (first == last) {
@@ -28,15 +26,15 @@ std::string str(std::ranges::input_range auto&& range) {
 }
 
 template<class T, class Cmp>
-std::string str(binary_heap<T, Cmp> heap) {
-    std::sort_heap(heap.data(), heap.data() + heap.size(), Cmp{});
+std::string str(plastic::binary_heap<T, Cmp> heap) {
+    std::ranges::sort_heap(heap.data(), heap.data() + heap.size(), Cmp{});
     return str(heap.data(), heap.size());
 }
 
 int main() {
     // linear structure
     {
-        vector<int> a, b(4, 4), c{ 3, 2, 1 };
+        plastic::vector<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(str(a) == "[]");
         assert(str(b) == "[4, 4, 4, 4]");
         assert(str(c) == "[3, 2, 1]");
@@ -98,14 +96,14 @@ int main() {
         c.erase(c.begin() + 5, c.end() - 1);
         assert(str(c) == "[0, 1, 2, 3, 4, 1]");
 
-        vector d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
+        plastic::vector d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
         assert(d == d);
         assert(d != e);
         assert(d < e);
         assert(d <= f);
     }
     {
-        deque<int> a, b(4, 4), c{ 3, 2, 1 };
+        plastic::deque<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(str(a) == "[]");
         assert(str(b) == "[4, 4, 4, 4]");
         assert(str(c) == "[3, 2, 1]");
@@ -173,14 +171,14 @@ int main() {
         c.erase(c.begin() + 5, c.end() - 1);
         assert(str(c) == "[0, 1, 2, 3, 4, 1]");
 
-        deque d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
+        plastic::deque d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
         assert(d == d);
         assert(d != e);
         assert(d < e);
         assert(d <= f);
     }
     {
-        forward_list<int> a, b(4, 4), c{ 3, 2, 1 };
+        plastic::forward_list<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(str(a) == "[]");
         assert(str(b) == "[4, 4, 4, 4]");
         assert(str(c) == "[3, 2, 1]");
@@ -231,14 +229,14 @@ int main() {
         c.erase_after(std::next(c.begin(), 4), c.end());
         assert(str(c) == "[0, 1, 2, 3, 4]");
 
-        forward_list d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
+        plastic::forward_list d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
         assert(d == d);
         assert(d != e);
         assert(d < e);
         assert(d <= f);
     }
     {
-        list<int> a, b(4, 4), c{ 3, 2, 1 };
+        plastic::list<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(str(a) == "[]");
         assert(str(b) == "[4, 4, 4, 4]");
         assert(str(c) == "[3, 2, 1]");
@@ -294,7 +292,7 @@ int main() {
         c.erase(std::next(c.begin(), 5), std::prev(c.end()));
         assert(str(c) == "[0, 1, 2, 3, 4, 1]");
 
-        list d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
+        plastic::list d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
         assert(d == d);
         assert(d != e);
         assert(d < e);
@@ -307,7 +305,7 @@ int main() {
 
     // heap
     {
-        binary_heap<int> a, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 };
+        plastic::binary_heap<int> a, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 };
 
         assert(str(a) == "[]");
         assert(str(b) == "[4, 4, 4, 4]");
@@ -338,7 +336,7 @@ int main() {
         c.pop();
         assert(str(c) == "[2, 4, 6]");
 
-        c.merge(binary_heap{ 3, 1, 7 });
+        c.merge(plastic::binary_heap{ 3, 1, 7 });
         assert(str(c) == "[1, 2, 3, 4, 6, 7]");
 
         c.assign(c.data(), 5);
