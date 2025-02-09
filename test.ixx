@@ -32,7 +32,6 @@ std::string str(plastic::binary_heap<T, Cmp> heap) {
 }
 
 int main() {
-    // linear structure
     {
         plastic::vector<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(str(a) == "[]");
@@ -298,12 +297,6 @@ int main() {
         assert(d < e);
         assert(d <= f);
     }
-
-    // search tree
-    {
-    }
-
-    // heap
     {
         plastic::binary_heap<int> a, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 };
 

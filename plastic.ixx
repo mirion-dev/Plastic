@@ -8,7 +8,6 @@ import std;
 
 export namespace plastic {
 
-    // linear structure
     template<class T>
     class vector {
         T* _begin;
@@ -1276,9 +1275,6 @@ export namespace plastic {
     template<class It>
     explicit plastic::list(It, It)->plastic::list<std::iter_value_t<It>>;
 
-    // search tree
-
-    // heap
     template<class T, class Cmp = std::less<T>>
     class binary_heap {
         static constexpr Cmp _cmp{};
