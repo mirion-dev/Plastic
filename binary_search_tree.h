@@ -9,24 +9,24 @@ namespace plastic {
     class binary_search_tree {
         static constexpr Cmp _cmp{};
 
-        struct _node {
-            _node* parent;
-            _node* left;
-            _node* right;
+        struct node {
+            node* parent;
+            node* left;
+            node* right;
             T value;
             bool nil;
         };
 
-        struct _findResult {
-            _node* parent;
-            bool left;
-            _node* bound;
+        struct find_result {
+            node* parent;
+            bool is_left;
+            node* bound;
         };
 
-        _node* _head;
+        node* _head;
         std::size_t _size;
 
-        void _free(_node* node) {
+        void _free(node* node) noexcept {
             if (node->nil) {
                 return;
             }
@@ -35,22 +35,22 @@ namespace plastic {
             delete node;
         }
 
-        _node* _leftmost(_node* node) {
+        node* _leftmost(node* node) noexcept {
             while (!node->left->nil) {
                 node = node->left;
             }
             return node;
         }
 
-        _node* _rightmost(_node* node) {
+        node* _rightmost(node* node) noexcept {
             while (!node->right->nil) {
                 node = node->right;
             }
             return node;
         }
 
-        _findResult _upperBound(const T& value) {
-            _node* current{ _head->parent }, * parent{ current }, * bound{ _head };
+        find_result _upper_bound(const T& value) noexcept {
+            node* current{ _head->parent }, * parent{ current }, * bound{ _head };
             bool left{};
             while (!current->nil) {
                 parent = current;
@@ -66,8 +66,8 @@ namespace plastic {
             return { parent, left, bound };
         }
 
-        _findResult _lowerBound(const T& value) {
-            _node* current{ _head->parent }, * parent{ current }, * bound{ _head };
+        find_result _lower_bound(const T& value) noexcept {
+            node* current{ _head->parent }, * parent{ current }, * bound{ _head };
             bool left{};
             while (!current->nil) {
                 parent = current;
@@ -87,7 +87,7 @@ namespace plastic {
         class iterator {
             friend class binary_search_tree;
 
-            _node* _ptr;
+            node* _ptr;
 
         public:
             using difference_type = std::ptrdiff_t;
@@ -96,25 +96,24 @@ namespace plastic {
             using reference = const T&;
             using iterator_category = std::bidirectional_iterator_tag;
 
-            iterator(_node* node = {}) {
-                _ptr = node;
-            }
+            iterator(node* node = {}) noexcept :
+                _ptr{ node } {}
 
-            reference operator*() const {
+            reference operator*() const noexcept {
                 return _ptr->value;
             }
 
-            pointer operator->() const {
+            pointer operator->() const noexcept {
                 return &_ptr->value;
             }
 
-            bool operator==(iterator it) const {
-                return _ptr == it._ptr;
+            friend bool operator==(iterator iter1, iterator iter2) noexcept {
+                return iter1._ptr == iter2._ptr;
             }
 
-            iterator& operator++() {
+            iterator& operator++() noexcept {
                 if (_ptr->right->nil) {
-                    _node* temp;
+                    node* temp;
                     do {
                         temp = _ptr;
                         _ptr = _ptr->parent;
@@ -126,15 +125,15 @@ namespace plastic {
                 return *this;
             }
 
-            iterator operator++(int) {
+            iterator operator++(int) noexcept {
                 iterator temp{ *this };
                 ++*this;
                 return temp;
             }
 
-            iterator& operator--() {
+            iterator& operator--() noexcept {
                 if (_ptr->left->nil) {
-                    _node* temp;
+                    node* temp;
                     do {
                         temp = _ptr;
                         _ptr = _ptr->parent;
@@ -146,7 +145,7 @@ namespace plastic {
                 return *this;
             }
 
-            iterator operator--(int) {
+            iterator operator--(int) noexcept {
                 iterator temp{ *this };
                 --*this;
                 return temp;
@@ -157,157 +156,178 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = reverse_iterator;
 
-        explicit binary_search_tree() {
-            _head->parent = _head->left = _head->right = _head = new _node;
+        explicit binary_search_tree(std::size_t size = {}, const T& value = {}) noexcept :
+            _head{ new node },
+            _size{} {
+
+            _head->parent = _head->left = _head->right = _head;
             _head->nil = true;
-            _size = 0;
+            // TODO
         }
 
-        ~binary_search_tree() {
+        template<std::input_iterator It>
+        explicit binary_search_tree(It first, It last) noexcept {
+
+        }
+
+        explicit binary_search_tree(const binary_search_tree& other) noexcept {
+
+        }
+
+        ~binary_search_tree() noexcept {
             clear();
             delete _head;
         }
 
-        bool empty() const {
+        binary_search_tree& operator=(const binary_search_tree& other) noexcept {
+            if (this == &other) {
+                return *this;
+            }
+
+            binary_search_tree temp{ other };
+            std::swap(_head, other._head);
+            std::swap(_size, other._size);
+
+            return *this;
+        }
+
+        bool empty() const noexcept {
             return _size == 0;
         }
 
-        std::size_t size() const {
+        std::size_t size() const noexcept {
             return _size;
         }
 
-        void clear() {
+        void clear() noexcept {
             _free(_head->parent);
         }
 
-        const_iterator begin() const {
+        const_iterator begin() const noexcept {
             return _head->right;
         }
 
-        const_iterator end() const {
+        const_iterator end() const noexcept {
             return _head;
         }
 
-        const_reverse_iterator rbegin() const {
+        const_reverse_iterator rbegin() const noexcept {
             return _head;
         }
 
-        const_reverse_iterator rend() const {
+        const_reverse_iterator rend() const noexcept {
             return _head->right;
         }
 
-        const T& front() const {
+        const T& front() const noexcept {
             return _head->right->value;
         }
 
-        const T& back() const {
+        const T& back() const noexcept {
             return _head->left->value;
         }
 
-        const_iterator lower_bound(const T& value) const {
-            return _lowerBound(value).bound;
+        const_iterator lower_bound(const T& value) const noexcept {
+            return _lower_bound(value).bound;
         }
 
-        const_iterator upper_bound(const T& value) const {
-            return _upperBound(value).bound;
+        const_iterator upper_bound(const T& value) const noexcept {
+            return _upper_bound(value).bound;
         }
 
-        std::pair<const_iterator, const_iterator> equal_range(const T& value) const {
+        std::pair<const_iterator, const_iterator> equal_range(const T& value) const noexcept {
             return { lower_bound(value), upper_bound(value) };
         }
 
-        const_iterator find(const T& value) const {
+        const_iterator find(const T& value) const noexcept {
             auto it{ lower_bound(value) };
             return *it == value ? it : end();
         }
 
-        bool contains(const T& value) const {
+        bool contains(const T& value) const noexcept {
             return find(value) != end();
         }
 
-        std::size_t count(const T& value) const {
+        std::size_t count(const T& value) const noexcept {
             return std::distance(lower_bound(value), upper_bound(value));
         }
 
-        iterator insert(const T& value) {
-            auto result{ _lowerBound(value) };
-            _node* node{ new _node{ result.parent, _head, _head, value, false } };
+        iterator insert(const T& value) noexcept {
+            auto result{ _lower_bound(value) };
+            node* new_node{ new node{ result.parent, _head, _head, value, false } };
             if (result.left) {
-                result.parent->left = node;
+                result.parent->left = new_node;
             }
             else {
-                result.parent->right = node;
+                result.parent->right = new_node;
             }
             ++_size;
-            return node;
+            return new_node;
         }
 
         template<std::input_iterator It>
-        void insert(It first, It last) {
+        void insert(It first, It last) noexcept {
             while (first != last) {
                 insert(*first++);
             }
         }
 
-        void insert(std::initializer_list<T> list) {
+        void insert(std::initializer_list<T> list) noexcept {
             insert(list.begin(), list.end());
         }
 
-        iterator erase(iterator pos) {
-            _node* node{ pos._ptr };
-            if (node->left->nil || node->right->nil) {
-                _node* parent{ node->parent };
-                _node* erased{ node->left->nil ? node->right : node->left };
+        iterator erase(iterator pos) noexcept {
+            node* new_node{ pos._ptr };
+            if (new_node->left->nil || new_node->right->nil) {
+                node* parent{ new_node->parent };
+                node* erased{ new_node->left->nil ? new_node->right : new_node->left };
                 erased->parent = parent;
                 if (parent->nil) {
                     _head->parent = erased;
                 }
-                else if (parent->left == node) {
+                else if (parent->left == new_node) {
                     parent->left = erased;
                 }
                 else {
                     parent->right = erased;
                 }
-                if (_head->left == node) {
+                if (_head->left == new_node) {
                     _head->left = erased->nil ? parent : _leftmost(erased);
                 }
-                if (_head->right == node) {
+                if (_head->right == new_node) {
                     _head->right = erased->nil ? parent : _rightmost(erased);
                 }
                 --_size;
                 return ++pos;
             }
-
         }
 
-        iterator erase(iterator first, iterator last) {
+        iterator erase(iterator first, iterator last) noexcept {
             while (first != last) {
                 erase(first++);
             }
             return last;
         }
 
-        std::size_t erase(const T& value) {
+        std::size_t erase(const T& value) noexcept {
             auto [first, last] {equal_range()};
             erase(first, last);
         }
 
-        template<class Cmp2>
-        void merge(const binary_search_tree<T, Cmp2>& cont) {
+        void merge(const binary_search_tree& other) noexcept {
 
         }
 
-        bool operator==(const binary_search_tree& cont) const {
-            return std::equal(begin(), end(), cont.begin(), cont.end());
+        friend bool operator==(const binary_search_tree& cont1, const binary_search_tree& cont2) noexcept {
+            return std::equal(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
         }
 
-        auto operator<=>(const binary_search_tree& cont) const {
-            return std::lexicographical_compare_three_way(begin(), end(), cont.begin(), cont.end());
+        friend auto operator<=>(const binary_search_tree& cont1, const binary_search_tree& cont2) noexcept {
+            return std::lexicographical_compare_three_way(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
         }
-
     };
 
     template<class It>
-    explicit binary_search_tree(It, It)->binary_search_tree<std::iter_value_t<It>>;
+    explicit plastic::binary_search_tree(It, It)->plastic::binary_search_tree<std::iter_value_t<It>>;
 
 }

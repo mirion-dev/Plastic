@@ -7,6 +7,8 @@ namespace plastic {
 
     template<class T, class Cmp = std::less<T>>
     class avl_tree {
+        static constexpr Cmp _cmp{};
+
         struct node {
             T value;
             std::size_t count;
@@ -16,12 +18,10 @@ namespace plastic {
             node* right;
         };
 
-        static constexpr Cmp _cmp{};
-
         node* _root;
         std::size_t _size;
 
-        void _free(node* nd) {
+        void _free(node* nd) noexcept {
             if (nd == nullptr) {
                 return;
             }
@@ -30,7 +30,7 @@ namespace plastic {
             delete nd;
         }
 
-        std::pair<node*&, node*&> _findWithParent(const T& value) {
+        std::pair<node*&, node*&> _find_with_parent(const T& value) noexcept {
             node** pLast{ &_root };
             node** p{ &_root };
             while (true) {
@@ -44,11 +44,11 @@ namespace plastic {
             }
         }
 
-        node*& _find(const T& value) {
-            return _findWithParent(value).first;
+        node*& _find(const T& value) noexcept {
+            return _find_with_parent(value).first;
         }
 
-        node*& _min(node*& nd) {
+        node*& _min(node*& nd) noexcept {
             assert(nd != nullptr);
             node** p{ &nd };
             while (true) {
@@ -60,7 +60,7 @@ namespace plastic {
             }
         }
 
-        node*& _max(node*& nd) {
+        node*& _max(node*& nd) noexcept {
             assert(nd != nullptr);
             node** p{ &nd };
             while (true) {
@@ -72,7 +72,7 @@ namespace plastic {
             }
         }
 
-        void _leftRotate(node* nd) {
+        void _left_rotate(node* nd) noexcept {
             node* left{ nd->left };
             node* parent{ nd->parent };
             node* grandparent{ parent->parent };
@@ -91,7 +91,7 @@ namespace plastic {
             }
         }
 
-        void _rightRotate(node* nd) {
+        void _right_rotate(node* nd) noexcept {
             node* right{ nd->right };
             node* parent{ nd->parent };
             node* grandparent{ parent->parent };
@@ -111,47 +111,46 @@ namespace plastic {
         }
 
     public:
-        explicit avl_tree() {
-            _root = nullptr;
-            _size = 0;
-        }
+        explicit avl_tree() noexcept :
+            _root{},
+            _size{} {}
 
-        ~avl_tree() {
+        ~avl_tree() noexcept {
             _free(_root);
         }
 
-        bool empty() const {
+        bool empty() const noexcept {
             return _size == 0;
         }
 
-        std::size_t size() const {
+        std::size_t size() const noexcept {
             return _size;
         }
 
-        std::size_t count(const T& value) const {
+        std::size_t count(const T& value) const noexcept {
             node* nd{ _find(value) };
             return nd == nullptr ? 0 : nd->count;
         }
 
-        bool contains(const T& value) const {
+        bool contains(const T& value) const noexcept {
             return _find(value) != nullptr;
         }
 
-        T min() const {
+        T min() const noexcept {
             return _min(_root)->value;
         }
 
-        T max() const {
+        T max() const noexcept {
             return _max(_root)->value;
         }
 
-        void insert(const T& value, std::size_t count = 1) {
+        void insert(const T& value, std::size_t count = 1) noexcept {
             _size += count;
             if (_root == nullptr) {
                 _root = new node{ value, count, 0, nullptr, nullptr, nullptr };
                 return;
             }
-            auto [nd, pr] {_findWithParent(value)};
+            auto [nd, pr] {_find_with_parent(value)};
             if (nd != nullptr) {
                 nd->count += count;
                 return;
@@ -177,14 +176,14 @@ namespace plastic {
                 bool isXL{ current->factor == 1 };
                 if (isLX || isRX) {
                     if (isLX && isXL) {
-                        _rightRotate(current);
+                        _right_rotate(current);
                         current->factor = 0;
                         parent->factor = 0;
                     }
                     else if (isLX) {
                         node* right{ current->right };
-                        _leftRotate(right);
-                        _rightRotate(right);
+                        _left_rotate(right);
+                        _right_rotate(right);
                         current->factor = right->factor == -1 ? 1 : 0;
                         parent->factor = right->factor == 1 ? -1 : 0;
                         right->factor = 0;
@@ -192,14 +191,14 @@ namespace plastic {
                     }
                     else if (isXL) {
                         node* left{ current->left };
-                        _rightRotate(left);
-                        _leftRotate(left);
+                        _right_rotate(left);
+                        _left_rotate(left);
                         current->factor = left->factor == -1 ? 1 : 0;
                         parent->factor = left->factor == 1 ? -1 : 0;
                         left->factor = 0;
                     }
                     else {
-                        _leftRotate(current);
+                        _left_rotate(current);
                         current->factor = 0;
                         parent->factor = 0;
                     }
@@ -209,7 +208,7 @@ namespace plastic {
             }
         }
 
-        void erase(const T& value, std::size_t count = 1) {
+        void erase(const T& value, std::size_t count = 1) noexcept {
             node*& nd{ _find(value) };
             if (nd == nullptr) {
                 return;
@@ -262,7 +261,7 @@ namespace plastic {
                     node* sibling{ isLX ? parent->left : parent->right };
                     bool isXL{ isLX && sibling->factor != -1 || isRX && sibling->factor == 1 };
                     if (isLX && isXL) {
-                        _rightRotate(sibling);
+                        _right_rotate(sibling);
                         if (sibling->factor == 0) {
                             sibling->factor = -1;
                             parent->factor = 1;
@@ -273,22 +272,22 @@ namespace plastic {
                     }
                     else if (isLX) {
                         node* right{ sibling->right };
-                        _leftRotate(right);
-                        _rightRotate(right);
+                        _left_rotate(right);
+                        _right_rotate(right);
                         sibling->factor = right->factor == -1 ? 1 : 0;
                         parent->factor = right->factor == 1 ? -1 : 0;
                         right->factor = 0;
                     }
                     else if (isXL) {
                         node* left{ sibling->left };
-                        _rightRotate(left);
-                        _leftRotate(left);
+                        _right_rotate(left);
+                        _left_rotate(left);
                         sibling->factor = left->factor == -1 ? 1 : 0;
                         parent->factor = left->factor == 1 ? -1 : 0;
                         left->factor = 0;
                     }
                     else {
-                        _leftRotate(sibling);
+                        _left_rotate(sibling);
                         if (sibling->factor == 0) {
                             sibling->factor = 1;
                             parent->factor = -1;

@@ -5,6 +5,7 @@
 #include "vector.h"
 
 // search tree
+#include "binary_search_tree.h"
 
 // heap
 #include "binary_heap.h"
@@ -311,6 +312,9 @@ int main() {
     }
 
     // search tree
+    {
+        binary_search_tree<int> a;
+    }
 
     // heap
     {

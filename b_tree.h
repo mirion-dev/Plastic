@@ -5,14 +5,15 @@
 
 namespace plastic {
 
-    template<class T, std::size_t order, class Cmp = std::less<T>>
+    template<class T, class Cmp = std::less<T>, std::size_t order = 5>
     class b_tree {
-        static constexpr std::size_t _minSize{ order - 1 };
-        static constexpr std::size_t _maxSize{ 2 * order - 1 };
+        static constexpr Cmp _cmp{};
+        static constexpr std::size_t _min_size{ order - 1 };
+        static constexpr std::size_t _max_size{ 2 * order - 1 };
 
         struct node {
-            T value[_maxSize];
-            node* children[_maxSize + 1];
+            T value[_max_size];
+            node* children[_max_size + 1];
             std::size_t size;
         };
 
@@ -20,10 +21,9 @@ namespace plastic {
         std::size_t _size;
 
     public:
-        b_tree() {
-            _root = nullptr;
-            _size = 0;
-        }
+        b_tree() noexcept :
+            _root{},
+            _size{} {}
     };
 
 }
