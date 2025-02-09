@@ -165,13 +165,17 @@ namespace plastic {
         }
 
         template<std::input_iterator It>
-        explicit binary_search_tree(It first, It last) noexcept {
+        explicit binary_search_tree(It first, It last) noexcept :
+            binary_search_tree() {
 
+            insert(first, last);
         }
 
-        explicit binary_search_tree(const binary_search_tree& other) noexcept {
+        explicit binary_search_tree(std::initializer_list<T> list) noexcept :
+            binary_search_tree(list.begin(), list.end()) {}
 
-        }
+        explicit binary_search_tree(const binary_search_tree& other) noexcept :
+            binary_search_tree(other.begin(), other.end()) {}
 
         ~binary_search_tree() noexcept {
             clear();
