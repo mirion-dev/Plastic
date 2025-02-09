@@ -14,7 +14,7 @@ namespace plastic {
             node* left;
             node* right;
             T value;
-            bool nil;
+            bool is_nil;
         };
 
         struct find_result {
@@ -27,7 +27,7 @@ namespace plastic {
         std::size_t _size;
 
         void _free(node* node) noexcept {
-            if (node->nil) {
+            if (node->is_nil) {
                 return;
             }
             _free(node->left);
@@ -36,14 +36,14 @@ namespace plastic {
         }
 
         node* _leftmost(node* node) noexcept {
-            while (!node->left->nil) {
+            while (!node->left->is_nil) {
                 node = node->left;
             }
             return node;
         }
 
         node* _rightmost(node* node) noexcept {
-            while (!node->right->nil) {
+            while (!node->right->is_nil) {
                 node = node->right;
             }
             return node;
@@ -52,7 +52,7 @@ namespace plastic {
         find_result _upper_bound(const T& value) noexcept {
             node* current{ _head->parent }, * parent{ current }, * bound{ _head };
             bool left{};
-            while (!current->nil) {
+            while (!current->is_nil) {
                 parent = current;
                 left = _cmp(value, current->value);
                 if (left) {
@@ -69,7 +69,7 @@ namespace plastic {
         find_result _lower_bound(const T& value) noexcept {
             node* current{ _head->parent }, * parent{ current }, * bound{ _head };
             bool left{};
-            while (!current->nil) {
+            while (!current->is_nil) {
                 parent = current;
                 left = !_cmp(current->value, value);
                 if (left) {
@@ -112,12 +112,12 @@ namespace plastic {
             }
 
             iterator& operator++() noexcept {
-                if (_ptr->right->nil) {
+                if (_ptr->right->is_nil) {
                     node* temp;
                     do {
                         temp = _ptr;
                         _ptr = _ptr->parent;
-                    } while (!_ptr->nil && _ptr->right == temp);
+                    } while (!_ptr->is_nil && _ptr->right == temp);
                 }
                 else {
                     _ptr = _leftmost(_ptr->right);
@@ -132,12 +132,12 @@ namespace plastic {
             }
 
             iterator& operator--() noexcept {
-                if (_ptr->left->nil) {
+                if (_ptr->left->is_nil) {
                     node* temp;
                     do {
                         temp = _ptr;
                         _ptr = _ptr->parent;
-                    } while (!_ptr->nil && _ptr->left == temp);
+                    } while (!_ptr->is_nil && _ptr->left == temp);
                 }
                 else {
                     _ptr = _rightmost(_ptr->left);
@@ -156,13 +156,12 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = reverse_iterator;
 
-        explicit binary_search_tree(std::size_t size = {}, const T& value = {}) noexcept :
+        explicit binary_search_tree() noexcept :
             _head{ new node },
             _size{} {
 
             _head->parent = _head->left = _head->right = _head;
-            _head->nil = true;
-            // TODO
+            _head->is_nil = true;
         }
 
         template<std::input_iterator It>
@@ -278,11 +277,11 @@ namespace plastic {
 
         iterator erase(iterator pos) noexcept {
             node* new_node{ pos._ptr };
-            if (new_node->left->nil || new_node->right->nil) {
+            if (new_node->left->is_nil || new_node->right->is_nil) {
                 node* parent{ new_node->parent };
-                node* erased{ new_node->left->nil ? new_node->right : new_node->left };
+                node* erased{ new_node->left->is_nil ? new_node->right : new_node->left };
                 erased->parent = parent;
-                if (parent->nil) {
+                if (parent->is_nil) {
                     _head->parent = erased;
                 }
                 else if (parent->left == new_node) {
@@ -292,10 +291,10 @@ namespace plastic {
                     parent->right = erased;
                 }
                 if (_head->left == new_node) {
-                    _head->left = erased->nil ? parent : _leftmost(erased);
+                    _head->left = erased->is_nil ? parent : _leftmost(erased);
                 }
                 if (_head->right == new_node) {
-                    _head->right = erased->nil ? parent : _rightmost(erased);
+                    _head->right = erased->is_nil ? parent : _rightmost(erased);
                 }
                 --_size;
                 return ++pos;

@@ -318,7 +318,7 @@ int main() {
 
     // heap
     {
-        binary_heap<int> a, b(4, 4), c{ 3, 2, 1 };
+        binary_heap<int> a, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 };
 
         assert(format(a) == "[]");
         assert(format(b) == "[4, 4, 4, 4]");

@@ -55,8 +55,7 @@ namespace plastic {
         }
 
     public:
-        explicit binary_heap(std::size_t size = {}, const T& value = {}) noexcept :
-            _data(size, value) {}
+        explicit binary_heap() noexcept = default;
 
         template<std::input_iterator It>
         explicit binary_heap(It first, It last) noexcept :
