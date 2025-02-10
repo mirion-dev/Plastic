@@ -37,13 +37,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="plastic.natvis">
-      <Filter>Resource Files</Filter>
-    </Natvis>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="README.md">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="plastic_.natvis">
+      <Filter>Resource Files</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>
