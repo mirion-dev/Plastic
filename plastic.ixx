@@ -1533,10 +1533,12 @@ export namespace plastic {
         }
 
         const T& front() const noexcept {
+            assert(!empty());
             return _head->right->value;
         }
 
         const T& back() const noexcept {
+            assert(!empty());
             return _head->left->value;
         }
 
