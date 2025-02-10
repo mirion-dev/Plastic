@@ -8,11 +8,17 @@ import std;
 
 export namespace plastic {
 
+    struct uninitialized_t {
+        explicit uninitialized_t() noexcept = default;
+    };
+
+    plastic::uninitialized_t uninitialized{};
+
     template<class T>
     class vector {
-        T* _begin;
-        T* _last;
-        T* _end;
+        T* _begin{};
+        T* _last{};
+        T* _end{};
 
         void _extend(std::size_t size) noexcept {
             reserve(capacity() + std::max(capacity() >> 1, size));
@@ -22,7 +28,7 @@ export namespace plastic {
         class iterator {
             friend class vector;
 
-            T* _ptr;
+            T* _ptr{};
 
         public:
             using difference_type = std::ptrdiff_t;
@@ -31,7 +37,9 @@ export namespace plastic {
             using reference = T&;
             using iterator_category = std::contiguous_iterator_tag;
 
-            iterator(T* ptr = {}) noexcept :
+            iterator() noexcept = default;
+
+            iterator(T* ptr) noexcept :
                 _ptr{ ptr } {}
 
             reference operator*() const noexcept {
@@ -107,20 +115,22 @@ export namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
-        explicit vector(std::size_t size = {}, const T& value = {}) noexcept :
+        explicit vector() noexcept = default;
+
+        explicit vector(plastic::uninitialized_t, std::size_t size) noexcept :
             _begin{ new T[size] },
             _last{ _begin + size },
-            _end{ _last } {
+            _end{ _last } {}
+
+        explicit vector(std::size_t size, const T& value = {}) noexcept :
+            vector(plastic::uninitialized, size) {
 
             std::uninitialized_fill(_begin, _end, value);
         }
 
         template<std::input_iterator It>
-        explicit vector(It first, It last) noexcept {
-            std::ptrdiff_t count{ std::distance(first, last) };
-            _begin = new T[count];
-            _last = _begin + count;
-            _end = _last;
+        explicit vector(It first, It last) noexcept :
+            vector(plastic::uninitialized, std::distance(first, last)) {
 
             std::uninitialized_copy(first, last, _begin);
         }
@@ -380,8 +390,8 @@ export namespace plastic {
         class iterator {
             friend class deque;
 
-            T* _ptr;
-            const deque* _cont;
+            T* _ptr{};
+            const deque* _cont{};
 
             std::ptrdiff_t _offset() const noexcept {
                 std::ptrdiff_t offset{ _ptr - _cont->_first };
@@ -398,7 +408,9 @@ export namespace plastic {
             using reference = T&;
             using iterator_category = std::random_access_iterator_tag;
 
-            iterator(T* ptr = {}, const deque* cont = {}) noexcept :
+            iterator() noexcept = default;
+
+            iterator(T* ptr, const deque* cont) noexcept :
                 _ptr{ ptr },
                 _cont{ cont } {}
 
@@ -486,22 +498,21 @@ export namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
-        explicit deque(std::size_t size = {}, const T& value = {}) noexcept :
+        explicit deque(plastic::uninitialized_t, std::size_t size) noexcept :
             _begin{ new T[size + 1] },
             _end{ _begin + size + 1 },
             _first{ _begin },
-            _last{ _end - 1 } {
+            _last{ _begin + size } {}
+
+        explicit deque(std::size_t size = {}, const T& value = {}) noexcept :
+            deque(plastic::uninitialized, size) {
 
             std::uninitialized_fill(_first, _last, value);
         }
 
         template<std::input_iterator It>
-        explicit deque(It first, It last) noexcept {
-            std::ptrdiff_t count{ std::distance(first, last) };
-            _begin = new T[count + 1];
-            _end = _begin + count + 1;
-            _first = _begin;
-            _last = _end - 1;
+        explicit deque(It first, It last) noexcept :
+            deque(plastic::uninitialized, std::distance(first, last)) {
 
             std::uninitialized_copy(first, last, _first);
         }
@@ -509,12 +520,8 @@ export namespace plastic {
         explicit deque(std::initializer_list<T> list) noexcept :
             deque(list.begin(), list.end()) {}
 
-        explicit deque(const deque& other) noexcept {
-            std::size_t size{ other.size() };
-            _begin = new T[size + 1];
-            _end = _begin + size + 1;
-            _first = _begin;
-            _last = _end - 1;
+        explicit deque(const deque& other) noexcept :
+            deque(plastic::uninitialized, other.size()) {
 
             if (other._is_contiguous()) {
                 std::uninitialized_copy(other._first, other._last, _first);
@@ -810,7 +817,7 @@ export namespace plastic {
         class iterator {
             friend class forward_list;
 
-            node* _ptr;
+            node* _ptr{};
 
         public:
             using difference_type = std::ptrdiff_t;
@@ -819,7 +826,9 @@ export namespace plastic {
             using reference = T&;
             using iterator_category = std::forward_iterator_tag;
 
-            iterator(node* ptr = {}) noexcept :
+            iterator() noexcept = default;
+
+            iterator(node* ptr) noexcept :
                 _ptr{ ptr } {}
 
             reference operator*() const noexcept {
@@ -848,20 +857,23 @@ export namespace plastic {
 
         using const_iterator = std::const_iterator<iterator>;
 
-        explicit forward_list(std::size_t size = {}, const T& value = {}) noexcept :
+        explicit forward_list() noexcept :
             _sentinel{ new node },
             _size{} {
 
             _sentinel->next = _sentinel;
+        }
+
+        explicit forward_list(std::size_t size, const T& value = {}) noexcept :
+            forward_list() {
+
             insert_after(end(), size, value);
         }
 
         template<std::input_iterator It>
         explicit forward_list(It first, It last) noexcept :
-            _sentinel{ new node },
-            _size{} {
+            forward_list() {
 
-            _sentinel->next = _sentinel;
             insert_after(end(), first, last);
         }
 
@@ -1021,7 +1033,7 @@ export namespace plastic {
         class iterator {
             friend class list;
 
-            node* _ptr;
+            node* _ptr{};
 
         public:
             using difference_type = std::ptrdiff_t;
@@ -1030,7 +1042,9 @@ export namespace plastic {
             using reference = T&;
             using iterator_category = std::bidirectional_iterator_tag;
 
-            iterator(node* ptr = {}) noexcept :
+            iterator() noexcept = default;
+
+            iterator(node* ptr) noexcept :
                 _ptr{ ptr } {}
 
             reference operator*() const noexcept {
@@ -1072,20 +1086,23 @@ export namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
-        explicit list(std::size_t size = {}, const T& value = {}) noexcept :
+        explicit list() noexcept :
             _sentinel{ new node },
             _size{} {
 
             _sentinel->next = _sentinel->prev = _sentinel;
+        }
+
+        explicit list(std::size_t size, const T& value = {}) noexcept :
+            list() {
+
             insert(end(), size, value);
         }
 
         template<std::input_iterator It>
         explicit list(It first, It last) noexcept :
-            _sentinel{ new node },
-            _size{} {
+            list() {
 
-            _sentinel->next = _sentinel->prev = _sentinel;
             insert(end(), first, last);
         }
 
