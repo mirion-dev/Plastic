@@ -1323,8 +1323,8 @@ export namespace plastic {
                 if (is_head) {
                     return;
                 }
-                free(left);
-                free(right);
+                left->free();
+                right->free();
                 delete this;
             }
 
@@ -1351,8 +1351,8 @@ export namespace plastic {
         std::size_t _size;
 
         find_result _upper_bound(const T& value) noexcept {
-            find_result result{ _head->parent, node_location::right, _head };
-            node* i{ result.parent };
+            find_result result{ _head, node_location::right, _head };
+            node* i{ _head->parent };
             while (!i->is_head) {
                 result.parent = i;
                 if (!_cmp(i->value, value)) {
@@ -1369,8 +1369,8 @@ export namespace plastic {
         }
 
         find_result _lower_bound(const T& value) noexcept {
-            find_result result{ _head->parent, node_location::right, _head };
-            node* i{ result.parent };
+            find_result result{ _head, node_location::right, _head };
+            node* i{ _head->parent };
             while (!i->is_head) {
                 result.parent = i;
                 if (_cmp(value, i->value)) {
@@ -1542,6 +1542,11 @@ export namespace plastic {
             return _head->left->value;
         }
 
+        // only for test purposes
+        node* data() noexcept {
+            return _head;
+        }
+
         const_iterator lower_bound(const T& value) const noexcept {
             return _lower_bound(value).bound;
         }
@@ -1569,15 +1574,26 @@ export namespace plastic {
         }
 
         iterator insert(const T& value) noexcept {
-            auto [parent, location, _] { _head->lower_bound(value) };
+            auto [parent, location, _] { _lower_bound(value) };
             node* new_node{ new node{ parent, _head, _head, value, false } };
+            if (parent == _head) {
+                _head->parent = new_node;
+            }
+
             if (location == node_location::left) {
                 parent->left = new_node;
+                if (parent == _head->right) {
+                    _head->right = new_node;
+                }
             }
             else {
                 parent->right = new_node;
+                if (parent == _head->left) {
+                    _head->left = new_node;
+                }
             }
             ++_size;
+
             return new_node;
         }
 
@@ -1593,26 +1609,29 @@ export namespace plastic {
         }
 
         iterator erase(iterator pos) noexcept {
-            node* new_node{ pos._ptr };
-            if (new_node->left->is_head || new_node->right->is_head) {
-                node* parent{ new_node->parent };
-                node* erased{ new_node->left->is_head ? new_node->right : new_node->left };
+            node* ptr{ pos._ptr };
+            if (ptr->left->is_head || ptr->right->is_head) {
+                node* parent{ ptr->parent };
+                node* erased{ ptr->left->is_head ? ptr->right : ptr->left };
+
                 erased->parent = parent;
                 if (parent->is_head) {
                     _head->parent = erased;
                 }
-                else if (parent->left == new_node) {
+                else if (parent->left == ptr) {
                     parent->left = erased;
                 }
                 else {
                     parent->right = erased;
                 }
-                if (_head->left == new_node) {
+
+                if (_head->left == ptr) {
                     _head->left = erased->is_head ? parent : erased->leftmost();
                 }
-                if (_head->right == new_node) {
+                if (_head->right == ptr) {
                     _head->right = erased->is_head ? parent : erased->rightmost();
                 }
+
                 --_size;
                 return ++pos;
             }
