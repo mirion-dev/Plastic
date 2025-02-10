@@ -42,7 +42,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="plastic_.natvis">
+    <Natvis Include="plastic.natvis">
       <Filter>Resource Files</Filter>
     </Natvis>
   </ItemGroup>

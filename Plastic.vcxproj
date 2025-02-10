@@ -31,7 +31,7 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="plastic_.natvis" />
+    <Natvis Include="plastic.natvis" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
