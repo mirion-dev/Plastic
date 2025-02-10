@@ -819,8 +819,8 @@ export namespace plastic {
             using reference = T&;
             using iterator_category = std::forward_iterator_tag;
 
-            iterator(node* node = {}) noexcept :
-                _ptr{ node } {}
+            iterator(node* ptr = {}) noexcept :
+                _ptr{ ptr } {}
 
             reference operator*() const noexcept {
                 return _ptr->value;
@@ -1030,8 +1030,8 @@ export namespace plastic {
             using reference = T&;
             using iterator_category = std::bidirectional_iterator_tag;
 
-            iterator(node* node = {}) noexcept :
-                _ptr{ node } {}
+            iterator(node* ptr = {}) noexcept :
+                _ptr{ ptr } {}
 
             reference operator*() const noexcept {
                 return _ptr->value;
@@ -1284,73 +1284,89 @@ export namespace plastic {
             node* left;
             node* right;
             T value;
-            bool is_nil;
+            bool is_head;
+
+            node* leftmost() noexcept {
+                node* i{ this };
+                while (!i->left->is_head) {
+                    i = i->left;
+                }
+                return i;
+            }
+
+            node* rightmost() noexcept {
+                node* i{ this };
+                while (!i->right->is_head) {
+                    i = i->right;
+                }
+                return i;
+            }
+
+            void free() noexcept {
+                if (is_head) {
+                    return;
+                }
+                free(left);
+                free(right);
+                delete this;
+            }
+
+            node* clone(node* head) noexcept {
+                if (is_head) {
+                    return head;
+                }
+                return new node{ this, left->clone(), right->clone(), value, false };
+            }
+        };
+
+        enum class node_location : unsigned char {
+            left,
+            right
         };
 
         struct find_result {
             node* parent;
-            bool is_left;
+            node_location location;
             node* bound;
         };
 
         node* _head;
         std::size_t _size;
 
-        void _free(node* node) noexcept {
-            if (node->is_nil) {
-                return;
-            }
-            _free(node->left);
-            _free(node->right);
-            delete node;
-        }
-
-        node* _leftmost(node* node) noexcept {
-            while (!node->left->is_nil) {
-                node = node->left;
-            }
-            return node;
-        }
-
-        node* _rightmost(node* node) noexcept {
-            while (!node->right->is_nil) {
-                node = node->right;
-            }
-            return node;
-        }
-
         find_result _upper_bound(const T& value) noexcept {
-            node* current{ _head->parent }, * parent{ current }, * bound{ _head };
-            bool left{};
-            while (!current->is_nil) {
-                parent = current;
-                left = _cmp(value, current->value);
-                if (left) {
-                    bound = current;
-                    current = current->left;
+            find_result result{ _head->parent, node_location::right, _head };
+            node* i{ result.parent };
+            while (!i->is_head) {
+                result.parent = i;
+                if (!_cmp(i->value, value)) {
+                    result.location = node_location::left;
+                    result.bound = i;
+                    i = i->left;
                 }
                 else {
-                    current = current->right;
+                    result.location = node_location::right;
+                    i = i->right;
                 }
             }
-            return { parent, left, bound };
+            return result;
         }
 
         find_result _lower_bound(const T& value) noexcept {
-            node* current{ _head->parent }, * parent{ current }, * bound{ _head };
-            bool left{};
-            while (!current->is_nil) {
-                parent = current;
-                left = !_cmp(current->value, value);
-                if (left) {
-                    bound = current;
-                    current = current->left;
+            find_result result{ _head->parent, node_location::right, _head };
+            node* i{ result.parent };
+            while (!i->is_head) {
+                result.parent = i;
+                if (_cmp(value, i->value)) {
+                    result.bound = i;
+                    result.location = node_location::left;
+                    i = i->left;
                 }
                 else {
-                    current = current->right;
+                    result.location = node_location::right;
+                    i = i->right;
                 }
             }
-            return { parent, left, bound };
+            return result;
         }
 
     public:
@@ -1366,8 +1382,8 @@ export namespace plastic {
             using reference = const T&;
             using iterator_category = std::bidirectional_iterator_tag;
 
-            iterator(node* node = {}) noexcept :
-                _ptr{ node } {}
+            iterator(node* ptr = {}) noexcept :
+                _ptr{ ptr } {}
 
             reference operator*() const noexcept {
                 return _ptr->value;
@@ -1382,15 +1398,15 @@ export namespace plastic {
             }
 
             iterator& operator++() noexcept {
-                if (_ptr->right->is_nil) {
-                    node* temp;
+                if (_ptr->right->is_head) {
+                    node* old_ptr;
                     do {
-                        temp = _ptr;
+                        old_ptr = _ptr;
                         _ptr = _ptr->parent;
-                    } while (!_ptr->is_nil && _ptr->right == temp);
+                    } while (!_ptr->is_head && _ptr->right == old_ptr);
                 }
                 else {
-                    _ptr = _leftmost(_ptr->right);
+                    _ptr = _ptr->right->leftmost();
                 }
                 return *this;
             }
@@ -1402,15 +1418,15 @@ export namespace plastic {
             }
 
             iterator& operator--() noexcept {
-                if (_ptr->left->is_nil) {
-                    node* temp;
+                if (_ptr->left->is_head) {
+                    node* old_ptr;
                     do {
-                        temp = _ptr;
+                        old_ptr = _ptr;
                         _ptr = _ptr->parent;
-                    } while (!_ptr->is_nil && _ptr->left == temp);
+                    } while (!_ptr->is_head && _ptr->left == old_ptr);
                 }
                 else {
-                    _ptr = _rightmost(_ptr->left);
+                    _ptr = _ptr->left->rightmost();
                 }
                 return *this;
             }
@@ -1431,7 +1447,7 @@ export namespace plastic {
             _size{} {
 
             _head->parent = _head->left = _head->right = _head;
-            _head->is_nil = true;
+            _head->is_head = true;
         }
 
         template<std::input_iterator It>
@@ -1445,7 +1461,14 @@ export namespace plastic {
             binary_search_tree(list.begin(), list.end()) {}
 
         explicit binary_search_tree(const binary_search_tree& other) noexcept :
-            binary_search_tree(other.begin(), other.end()) {}
+            binary_search_tree() {
+
+            if (other._size != 0) {
+                _head->parent = other._head->clone(_head);
+                _head->left = _head->parent->leftmost();
+                _head->right = _head->parent->rightmost();
+            }
+        }
 
         ~binary_search_tree() noexcept {
             clear();
@@ -1473,7 +1496,7 @@ export namespace plastic {
         }
 
         void clear() noexcept {
-            _free(_head->parent);
+            _head->parent->free();
         }
 
         const_iterator begin() const noexcept {
@@ -1513,12 +1536,13 @@ export namespace plastic {
         }
 
         const_iterator find(const T& value) const noexcept {
-            auto it{ lower_bound(value) };
-            return *it == value ? it : end();
+            node* ptr{ lower_bound(value) };
+            return !ptr->is_head && !_cmp(*ptr, value) ? ptr : _head;
         }
 
         bool contains(const T& value) const noexcept {
-            return find(value) != end();
+            node* ptr{ lower_bound(value) };
+            return !ptr->is_head && !_cmp(*ptr, value);
         }
 
         std::size_t count(const T& value) const noexcept {
@@ -1526,13 +1550,13 @@ export namespace plastic {
         }
 
         iterator insert(const T& value) noexcept {
-            auto result{ _lower_bound(value) };
-            node* new_node{ new node{ result.parent, _head, _head, value, false } };
-            if (result.left) {
-                result.parent->left = new_node;
+            auto [parent, location, _] { _head->lower_bound(value) };
+            node* new_node{ new node{ parent, _head, _head, value, false } };
+            if (location == node_location::left) {
+                parent->left = new_node;
             }
             else {
-                result.parent->right = new_node;
+                parent->right = new_node;
             }
             ++_size;
             return new_node;
@@ -1551,11 +1575,11 @@ export namespace plastic {
 
         iterator erase(iterator pos) noexcept {
             node* new_node{ pos._ptr };
-            if (new_node->left->is_nil || new_node->right->is_nil) {
+            if (new_node->left->is_head || new_node->right->is_head) {
                 node* parent{ new_node->parent };
-                node* erased{ new_node->left->is_nil ? new_node->right : new_node->left };
+                node* erased{ new_node->left->is_head ? new_node->right : new_node->left };
                 erased->parent = parent;
-                if (parent->is_nil) {
+                if (parent->is_head) {
                     _head->parent = erased;
                 }
                 else if (parent->left == new_node) {
@@ -1565,10 +1589,10 @@ export namespace plastic {
                     parent->right = erased;
                 }
                 if (_head->left == new_node) {
-                    _head->left = erased->is_nil ? parent : _leftmost(erased);
+                    _head->left = erased->is_head ? parent : erased->leftmost();
                 }
                 if (_head->right == new_node) {
-                    _head->right = erased->is_nil ? parent : _rightmost(erased);
+                    _head->right = erased->is_head ? parent : erased->rightmost();
                 }
                 --_size;
                 return ++pos;
@@ -1583,20 +1607,11 @@ export namespace plastic {
         }
 
         std::size_t erase(const T& value) noexcept {
-            auto [first, last] {equal_range()};
-            erase(first, last);
+            erase(lower_bound(value), upper_bound(value));
         }
 
         void merge(const binary_search_tree& other) noexcept {
 
-        }
-
-        friend bool operator==(const binary_search_tree& cont1, const binary_search_tree& cont2) noexcept {
-            return std::equal(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
-        }
-
-        friend auto operator<=>(const binary_search_tree& cont1, const binary_search_tree& cont2) noexcept {
-            return std::lexicographical_compare_three_way(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
         }
     };
 

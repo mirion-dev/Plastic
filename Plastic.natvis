@@ -72,11 +72,11 @@
 		<Expand>
 			<Item Name="[size]">size()</Item>
 			<TreeItems>
-				<Size>_size</Size>
+				<Size>size()</Size>
 				<HeadPointer>_head->parent</HeadPointer>
 				<LeftPointer>left</LeftPointer>
 				<RightPointer>right</RightPointer>
-				<ValueNode Condition="!nil">value</ValueNode>
+				<ValueNode Condition="!is_head">value</ValueNode>
 			</TreeItems>
 		</Expand>
 	</Type>

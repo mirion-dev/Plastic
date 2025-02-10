@@ -298,6 +298,9 @@ int main() {
         assert(d <= f);
     }
     {
+
+    }
+    {
         plastic::binary_heap<int> a, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 };
 
         assert(to_string(a) == "[]");
