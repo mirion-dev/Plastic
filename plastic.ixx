@@ -277,8 +277,12 @@ export namespace plastic {
             return std::forward_like<decltype(self)>(self._last[-1]);
         }
 
-        auto data(this auto&& self) noexcept {
-            return self._begin;
+        T* data() noexcept {
+            return _begin;
+        }
+
+        const T* data() const noexcept {
+            return _begin;
         }
 
         void push_back(const T& value) noexcept {
@@ -1543,7 +1547,7 @@ export namespace plastic {
         }
 
         // only for test purposes
-        node* data() noexcept {
+        node* data() const noexcept {
             return _head;
         }
 
@@ -1660,7 +1664,7 @@ export namespace plastic {
     class binary_heap {
         static constexpr Cmp _cmp{};
 
-        plastic::vector<T> _data;
+        plastic::vector<T> _data{};
 
         void _sift_up(std::size_t index) noexcept {
             T value{ std::move(_data[index]) };
@@ -1737,8 +1741,8 @@ export namespace plastic {
         }
 
         // only for test purposes
-        T* data() noexcept {
-            return _data.data();
+        auto data(this auto&& self) noexcept {
+            return self._data.data();
         }
 
         void push(const T& value) noexcept {
