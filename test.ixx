@@ -31,6 +31,59 @@ std::string to_string(plastic::binary_heap<T, Cmp> heap) {
     return to_string(heap.data(), heap.size());
 }
 
+template<class P>
+concept binary_tree_node_ptr = requires(P ptr) {
+    ptr->left;
+    ptr->right;
+    ptr->value;
+    ptr->is_head;
+};
+
+template<binary_tree_node_ptr P>
+struct std::formatter<P> {
+    constexpr auto parse(std::format_parse_context& ctx) {
+        return ctx.begin();
+    }
+
+    template<class Ctx>
+    auto format(P ptr, Ctx& ctx) const {
+        if (ptr->is_head) {
+            return std::format_to(ctx.out(), "*");
+        }
+        return std::format_to(ctx.out(), "{}", ptr->value);
+    }
+};
+
+template<binary_tree_node_ptr P>
+class level_order_traversal {
+    P _head;
+    std::vector<std::vector<P>> _result;
+
+    void _dfs(P ptr, std::size_t depth) {
+        if (depth >= _result.size()) {
+            _result.push_back({ ptr });
+        }
+        else {
+            _result[depth].push_back(ptr);
+        }
+        if (!ptr->is_head) {
+            _dfs(ptr->left, depth + 1);
+            _dfs(ptr->right, depth + 1);
+        }
+    }
+
+public:
+    level_order_traversal(P head) :
+        _head{ head } {
+
+        _dfs(head->parent, 0);
+    }
+
+    const auto& operator()() {
+        return _result;
+    }
+};
+
 int main() {
     {
         plastic::vector<int> a, b(4, 4), c{ 3, 2, 1 };
