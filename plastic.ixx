@@ -1655,6 +1655,14 @@ export namespace plastic {
         void merge(const binary_search_tree& other) noexcept {
 
         }
+
+        friend bool operator==(const binary_search_tree& cont1, const binary_search_tree& cont2) noexcept {
+            return std::equal(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        }
+
+        friend auto operator<=>(const binary_search_tree& cont1, const binary_search_tree& cont2) noexcept {
+            return std::lexicographical_compare_three_way(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        }
     };
 
     template<class It>
