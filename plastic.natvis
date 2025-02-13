@@ -6,7 +6,6 @@
 		<Intrinsic Name="capacity" Expression="size_t(_end - _begin)"/>
 		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
-			<Item Name="[size]">size()</Item>
 			<Item Name="[capacity]">capacity()</Item>
 			<ArrayItems>
 				<Size>size()</Size>
@@ -21,7 +20,6 @@
 		<Intrinsic Name="capacity" Expression="allocated_capacity() - 1"/>
 		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
-			<Item Name="[size]">size()</Item>
 			<Item Name="[capacity]">capacity()</Item>
 			<IndexListItems>
 				<Size>size()</Size>
@@ -34,7 +32,6 @@
 		<Intrinsic Name="size" Expression="_size"/>
 		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
-			<Item Name="[size]">size()</Item>
 			<LinkedListItems>
 				<Size>size()</Size>
 				<HeadPointer>_sentinel->next</HeadPointer>
@@ -48,7 +45,6 @@
 		<Intrinsic Name="size" Expression="_size"/>
 		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
-			<Item Name="[size]">size()</Item>
 			<LinkedListItems>
 				<Size>size()</Size>
 				<HeadPointer>_sentinel->next</HeadPointer>
@@ -59,7 +55,7 @@
 	</Type>
 
 	<Type Name="plastic::binary_heap&lt;*&gt;">
-		<Intrinsic Name="size" Expression="size_t(_data._last - _data._begin)"/>
+		<Intrinsic Name="size" Expression="_data.size()"/>
 		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
 			<ExpandedItem>_data</ExpandedItem>
@@ -70,7 +66,6 @@
 		<Intrinsic Name="size" Expression="_size"/>
 		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
-			<Item Name="[size]">size()</Item>
 			<TreeItems>
 				<Size>size()</Size>
 				<HeadPointer>_head->parent</HeadPointer>
