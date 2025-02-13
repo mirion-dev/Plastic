@@ -12,22 +12,7 @@ concept binary_tree_node_ptr = requires(P ptr) {
 };
 
 template<binary_tree_node_ptr P>
-struct std::formatter<P> {
-    constexpr auto parse(std::format_parse_context& ctx) {
-        return ctx.begin();
-    }
-
-    template<class Ctx>
-    auto format(P ptr, Ctx& ctx) const {
-        if (ptr->is_head) {
-            return std::format_to(ctx.out(), "*");
-        }
-        return std::format_to(ctx.out(), "{}", ptr->value);
-    }
-};
-
-template<binary_tree_node_ptr P>
-class level_order_traversal {
+class binary_tree_traversal {
     P _head;
     std::vector<std::vector<P>> _result;
 
@@ -45,7 +30,7 @@ class level_order_traversal {
     }
 
 public:
-    level_order_traversal(P head) :
+    binary_tree_traversal(P head) :
         _head{ head } {
 
         _dfs(head->parent, 0);
@@ -53,6 +38,21 @@ public:
 
     const auto& operator()() const {
         return _result;
+    }
+};
+
+template<binary_tree_node_ptr P>
+struct std::formatter<P> {
+    constexpr auto parse(std::format_parse_context& ctx) {
+        return ctx.begin();
+    }
+
+    template<class Ctx>
+    auto format(P ptr, Ctx& ctx) const {
+        if (ptr->is_head) {
+            return std::format_to(ctx.out(), "*");
+        }
+        return std::format_to(ctx.out(), "{}", ptr->value);
     }
 };
 
@@ -70,7 +70,7 @@ std::string format(It first, It last) {
 }
 
 std::string format(const auto& tree) requires binary_tree_node_ptr<decltype(tree.data())> {
-    return format(level_order_traversal{ tree.data() }());
+    return format(binary_tree_traversal{ tree.data() }());
 }
 
 template<class T, class Cmp>

@@ -55,6 +55,8 @@ My implementation of common data structures for study.
 | **`insert`** | `insert` | | | |
 | **`erase`** | `erase` | | | |
 | **`merge`** | `merge` | | | |
+| **`operator==`** | `operator==` | | | |
+| **`operator<=>`** | `operator<=>` | | | |
 
 ## Heap
 
