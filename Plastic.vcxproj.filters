@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\search tree">
-      <UniqueIdentifier>{69b893b8-7d5c-4ca3-8eb1-e630f110b189}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.ixx">
@@ -24,17 +21,6 @@
     <ClCompile Include="plastic.ixx">
       <Filter>Header Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="avl_tree.h">
-      <Filter>Header Files\search tree</Filter>
-    </ClInclude>
-    <ClInclude Include="b_tree.h">
-      <Filter>Header Files\search tree</Filter>
-    </ClInclude>
-    <ClInclude Include="red_black_tree.h">
-      <Filter>Header Files\search tree</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md">
