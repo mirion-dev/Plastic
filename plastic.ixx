@@ -360,11 +360,11 @@ export namespace plastic {
         }
 
         friend bool operator==(const vector& cont1, const vector& cont2) noexcept {
-            return std::equal(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+            return std::equal(cont1._begin, cont1._end, cont2._begin, cont2._end);
         }
 
         friend auto operator<=>(const vector& cont1, const vector& cont2) noexcept {
-            return std::lexicographical_compare_three_way(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+            return std::lexicographical_compare_three_way(cont1._begin, cont1._end, cont2._begin, cont2._end);
         }
     };
 
@@ -382,8 +382,19 @@ export namespace plastic {
             return _first <= _last;
         }
 
-        std::size_t _true_capacity() const noexcept {
+        bool _is_full() const noexcept {
+            return _last + 1 == _first || _last + 1 == _end && _first == _begin;
+        }
+
+        std::size_t _allocated_capacity() const noexcept {
             return _end - _begin;
+        }
+
+        std::size_t _residual_capacity() const noexcept {
+            if (_is_contiguous()) {
+                return _allocated_capacity() - (_last - _first);
+            }
+            return _first - _last;
         }
 
         void _extend(std::size_t size) noexcept {
@@ -400,7 +411,7 @@ export namespace plastic {
             std::ptrdiff_t _offset() const noexcept {
                 std::ptrdiff_t offset{ _ptr - _cont->_first };
                 if (offset < 0) {
-                    offset += _cont->_true_capacity();
+                    offset += _cont->_allocated_capacity();
                 }
                 return offset;
             }
@@ -440,10 +451,10 @@ export namespace plastic {
 
             iterator& operator+=(difference_type diff) noexcept {
                 if (_cont->_end - _ptr <= diff) {
-                    diff -= _cont->_true_capacity();
+                    diff -= _cont->_allocated_capacity();
                 }
                 else if (_ptr - _cont->_begin <= -diff) {
-                    diff += _cont->_true_capacity();
+                    diff += _cont->_allocated_capacity();
                 }
                 _ptr += diff;
                 return *this;
@@ -502,13 +513,16 @@ export namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
+        explicit deque() noexcept :
+            deque(plastic::uninitialized, 0) {}
+
         explicit deque(plastic::uninitialized_t, std::size_t size) noexcept :
             _begin{ new T[size + 1] },
             _end{ _begin + size + 1 },
             _first{ _begin },
             _last{ _begin + size } {}
 
-        explicit deque(std::size_t size = {}, const T& value = {}) noexcept :
+        explicit deque(std::size_t size, const T& value = {}) noexcept :
             deque(plastic::uninitialized, size) {
 
             std::uninitialized_fill(_first, _last, value);
@@ -518,7 +532,7 @@ export namespace plastic {
         explicit deque(It first, It last) noexcept :
             deque(plastic::uninitialized, std::distance(first, last)) {
 
-            std::uninitialized_copy(first, last, _first);
+            std::uninitialized_copy(first, last, _begin);
         }
 
         explicit deque(std::initializer_list<T> list) noexcept :
@@ -558,7 +572,10 @@ export namespace plastic {
         }
 
         std::size_t size() const noexcept {
-            return end() - begin();
+            if (_is_contiguous()) {
+                return _last - _first;
+        }
+            return _allocated_capacity() - (_first - _last);
         }
 
         void clear() noexcept {
@@ -609,7 +626,7 @@ export namespace plastic {
         }
 
         std::size_t capacity() const noexcept {
-            return _true_capacity() - 1;
+            return _allocated_capacity() - 1;
         }
 
         void reserve(std::size_t new_capacity) noexcept {
@@ -698,7 +715,7 @@ export namespace plastic {
         }
 
         void push_front(const T& value) noexcept {
-            if (++end() == begin()) {
+            if (_is_full()) {
                 _extend(1);
             }
             if (_first == _begin) {
@@ -716,7 +733,7 @@ export namespace plastic {
         }
 
         void push_back(const T& value) noexcept {
-            if (++end() == begin()) {
+            if (_is_full()) {
                 _extend(1);
             }
             *_last++ = value;
@@ -742,7 +759,7 @@ export namespace plastic {
                 return pos;
             }
 
-            if (capacity() - size() < count) {
+            if (_residual_capacity() < count) {
                 std::ptrdiff_t offset{ pos - begin() };
                 _extend(count);
                 pos = begin() + offset;
@@ -761,7 +778,7 @@ export namespace plastic {
             }
 
             std::ptrdiff_t count{ std::distance(first, last) };
-            if (static_cast<std::ptrdiff_t>(capacity() - size()) < count) {
+            if (_residual_capacity() < static_cast<std::size_t>(count)) {
                 std::ptrdiff_t offset{ pos - begin() };
                 _extend(count);
                 pos = begin() + offset;

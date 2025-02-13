@@ -16,16 +16,16 @@
 	</Type>
 
 	<Type Name="plastic::deque&lt;*&gt;">
-		<Intrinsic Name="size" Expression="size_t(_first &lt;= _last ? _last - _first : true_capacity() - (_first - _last))"/>
-		<Intrinsic Name="capacity" Expression="size_t(_end - _begin - 1)"/>
-		<Intrinsic Name="true_capacity" Expression="size_t(_end - _begin)"/>
+		<Intrinsic Name="allocated_capacity" Expression="size_t(_end - _begin)"/>
+		<Intrinsic Name="size" Expression="_first &lt;= _last ? _last - _first : allocated_capacity() - (_first - _last)"/>
+		<Intrinsic Name="capacity" Expression="allocated_capacity() - 1"/>
 		<DisplayString>{{ size={size()} }}</DisplayString>
 		<Expand>
 			<Item Name="[size]">size()</Item>
 			<Item Name="[capacity]">capacity()</Item>
 			<IndexListItems>
 				<Size>size()</Size>
-				<ValueNode>($i &lt; _end - _first ? _first : _first - true_capacity())[$i]</ValueNode>
+				<ValueNode>_first[$i &lt; _end - _first ? $i : $i - allocated_capacity()]</ValueNode>
 			</IndexListItems>
 		</Expand>
 	</Type>
