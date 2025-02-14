@@ -574,7 +574,7 @@ export namespace plastic {
         std::size_t size() const noexcept {
             if (_is_contiguous()) {
                 return _last - _first;
-        }
+            }
             return _allocated_capacity() - (_first - _last);
         }
 
@@ -1527,12 +1527,13 @@ export namespace plastic {
         }
 
         const_iterator lower_bound(const T& value) const noexcept {
-            node* bound{ _head }, * i{ _head->parent };
+            node* bound{ _head };
+            node* i{ _head->parent };
             while (!i->is_head) {
                 if (!_cmp(i->value, value)) {
                     bound = i;
                     i = i->left;
-        }
+                }
                 else {
                     i = i->right;
                 }
@@ -1541,12 +1542,13 @@ export namespace plastic {
         }
 
         const_iterator upper_bound(const T& value) const noexcept {
-            node* bound{ _head }, * i{ _head->parent };
+            node* bound{ _head };
+            node* i{ _head->parent };
             while (!i->is_head) {
                 if (_cmp(value, i->value)) {
                     bound = i;
                     i = i->left;
-        }
+                }
                 else {
                     i = i->right;
                 }
@@ -1556,7 +1558,7 @@ export namespace plastic {
 
         std::pair<const_iterator, const_iterator> equal_range(const T& value) const noexcept {
             return { lower_bound(value), upper_bound(value) };
-            }
+        }
 
         const_iterator find(const T& value) const noexcept {
             node* bound{ lower_bound(value)._ptr };
@@ -1574,8 +1576,9 @@ export namespace plastic {
         }
 
         iterator insert(const T& value) noexcept {
-            node* parent{ _head }, * i{ _head->parent };
+            node* parent{ _head };
             bool is_left{};
+            node* i{ _head->parent };
             while (!i->is_head) {
                 parent = i;
                 is_left = _cmp(value, i->value);
@@ -1617,51 +1620,65 @@ export namespace plastic {
         }
 
         iterator erase(iterator pos) noexcept {
-            node* ptr{ (pos++)._ptr };
+            node* erased{ (pos++)._ptr };
 
-            if (ptr->left->is_head || ptr->right->is_head) {
-                node* parent{ ptr->parent };
-                node* replaced{ ptr->left->is_head ? ptr->right : ptr->left };
+            if (erased->left->is_head || erased->right->is_head) {
+                node* parent{ erased->parent };
+                node* replaced{ erased->left->is_head ? erased->right : erased->left };
 
-                replaced->parent = parent;
-                if (ptr == parent->left) {
+                if (!replaced->is_head) {
+                    replaced->parent = parent;
+                }
+
+                if (erased == _head->parent) {
+                    _head->parent = replaced;
+                }
+                else if (erased == parent->left) {
                     parent->left = replaced;
                 }
                 else {
                     parent->right = replaced;
                 }
 
-                if (ptr == _head->right) {
+                if (erased == _head->right) {
                     _head->right = replaced->is_head ? parent : replaced->rightmost();
                 }
-                if (ptr == _head->left) {
+                if (erased == _head->left) {
                     _head->left = replaced->is_head ? parent : replaced->leftmost();
                 }
-
-                delete ptr;
-                --_size;
             }
             else {
+                node* replaced{ pos._ptr };
+                node* replaced_parent{ replaced->parent };
+                node* replaced_child{ replaced->right };
 
-            }
+                erased->left->parent = replaced;
+                replaced->left = erased->left;
+
+                if (replaced != erased->right) {
+                    if (!replaced_child->is_head) {
+                        replaced_child->parent = replaced_parent;
+                    }
+                    replaced_parent->left = replaced_child;
+                    replaced->right = erased->right;
+                    erased->right->parent = replaced;
                 }
-                else if (parent->left == ptr) {
-                    parent->left = erased;
+
+                if (erased == _head->parent) {
+                    _head->parent = replaced;
+                }
+                else if (erased == erased->parent->left) {
+                    erased->parent->left = replaced;
                 }
                 else {
-                    parent->right = erased;
+                    erased->parent->right = replaced;
                 }
 
-                if (_head->left == ptr) {
-                    _head->left = erased->is_head ? parent : erased->leftmost();
-                }
-                if (_head->right == ptr) {
-                    _head->right = erased->is_head ? parent : erased->rightmost();
-                }
-
-                --_size;
-                return ++pos;
+                replaced->parent = erased->parent;
             }
+
+            delete erased;
+            --_size;
 
             return pos;
         }
@@ -1681,10 +1698,6 @@ export namespace plastic {
                 ++count;
             }
             return count;
-        }
-
-        void merge(const binary_search_tree& other) noexcept {
-
         }
 
         friend bool operator==(const binary_search_tree& cont1, const binary_search_tree& cont2) noexcept {

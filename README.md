@@ -56,7 +56,6 @@ The class designs are primarily referenced from the [MSVC STL](https://github.co
 | **`count`** | `count` | | | |
 | **`insert`** | `insert` | | | |
 | **`erase`** | `erase` | | | |
-| **`merge`** | `merge` | | | |
 | **`operator==`** | `operator==` | | | |
 | **`operator<=>`** | `operator<=>` | | | |
 
