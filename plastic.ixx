@@ -1555,34 +1555,8 @@ export namespace plastic {
         }
 
         std::pair<const_iterator, const_iterator> equal_range(const T& value) const noexcept {
-            node* first{ _head }, * last{ _head }, * i{ _head->parent };
-
-            while (!i->is_head) {
-                if (!_cmp(i->value, value)) {
-                    if (last->is_head && _cmp(value, i->value)) {
-                        last = i;
-                    }
-                    first = i;
-                    i = i->left;
-                }
-                else {
-                    i = i->right;
-                }
+            return { lower_bound(value), upper_bound(value) };
             }
-
-            i = last->is_head ? _head->parent : last->left;
-            while (!i->is_head) {
-                if (_cmp(value, i->value)) {
-                    last = i;
-                    i = i->left;
-                }
-                else {
-                    i = i->right;
-                }
-            }
-
-            return { first, last };
-        }
 
         const_iterator find(const T& value) const noexcept {
             node* bound{ lower_bound(value)._ptr };
@@ -1610,7 +1584,7 @@ export namespace plastic {
 
             node* new_node{ new node{ parent, _head, _head, value, false } };
 
-            if (parent == _head) {
+            if (parent->is_head) {
                 _head->parent = new_node;
             }
 
