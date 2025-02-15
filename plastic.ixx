@@ -1498,12 +1498,28 @@ export namespace plastic {
             return _head;
         }
 
-        const_reverse_iterator rbegin() const noexcept {
+        const_iterator cbegin() const noexcept {
+            return _head->right;
+        }
+
+        const_iterator cend() const noexcept {
             return _head;
         }
 
+        const_reverse_iterator rbegin() const noexcept {
+            return reverse_iterator{ _head };
+        }
+
         const_reverse_iterator rend() const noexcept {
-            return _head->right;
+            return reverse_iterator{ _head->right };
+        }
+
+        const_reverse_iterator crbegin() const noexcept {
+            return reverse_iterator{ _head };
+        }
+
+        const_reverse_iterator crend() const noexcept {
+            return reverse_iterator{ _head->right };
         }
 
         const T& front() const noexcept {
@@ -1562,12 +1578,12 @@ export namespace plastic {
 
         const_iterator find(const T& value) const noexcept {
             node* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !_cmp(*bound, value) ? bound : _head;
+            return !bound->is_head && !_cmp(bound->value, value) ? bound : _head;
         }
 
         bool contains(const T& value) const noexcept {
             node* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !_cmp(*bound, value);
+            return !bound->is_head && !_cmp(bound->value, value);
         }
 
         std::size_t count(const T& value) const noexcept {

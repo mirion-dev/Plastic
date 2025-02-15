@@ -3,59 +3,6 @@
 import std;
 import plastic;
 
-template<class P>
-concept binary_tree_node_ptr = requires(P ptr) {
-    ptr->left;
-    ptr->right;
-    ptr->value;
-    ptr->is_head;
-};
-
-template<binary_tree_node_ptr P>
-class binary_tree_traversal {
-    P _head;
-    std::vector<std::vector<P>> _result;
-
-    void _dfs(P ptr, std::size_t depth) {
-        if (depth >= _result.size()) {
-            _result.push_back({ ptr });
-        }
-        else {
-            _result[depth].push_back(ptr);
-        }
-        if (!ptr->is_head) {
-            _dfs(ptr->left, depth + 1);
-            _dfs(ptr->right, depth + 1);
-        }
-    }
-
-public:
-    binary_tree_traversal(P head) :
-        _head{ head } {
-
-        _dfs(head->parent, 0);
-    }
-
-    const auto& operator()() const {
-        return _result;
-    }
-};
-
-template<binary_tree_node_ptr P>
-struct std::formatter<P> {
-    constexpr auto parse(std::format_parse_context& ctx) {
-        return ctx.begin();
-    }
-
-    template<class Ctx>
-    auto format(P ptr, Ctx& ctx) const {
-        if (ptr->is_head) {
-            return std::format_to(ctx.out(), "*");
-        }
-        return std::format_to(ctx.out(), "{}", ptr->value);
-    }
-};
-
 std::string format(const auto& arg) {
     return std::format("{}", arg);
 }
@@ -67,10 +14,6 @@ std::string format(std::random_access_iterator auto first, std::size_t size) {
 template<std::input_iterator It>
 std::string format(It first, It last) {
     return format(std::ranges::subrange{ first, last });
-}
-
-std::string format(const auto& tree) requires binary_tree_node_ptr<decltype(tree.data())> {
-    return format(binary_tree_traversal{ tree.data() }());
 }
 
 template<class T, class Cmp>
@@ -254,9 +197,6 @@ int main() {
         c.resize(5, 1);
         assert(format(c) == "[0, 1, 1, 1, 1]");
 
-        assert(*std::next(b.begin()) == 4);
-        assert(*std::next(c.begin()) == 1);
-
         assert(b.front() == 4);
         assert(c.front() == 0);
 
@@ -314,9 +254,6 @@ int main() {
         c.resize(5, 1);
         assert(format(c) == "[0, 1, 1, 1, 1]");
 
-        assert(*std::next(b.begin()) == 4);
-        assert(*std::next(c.begin()) == 1);
-
         assert(b.front() == 4);
         assert(c.front() == 0);
 
@@ -347,7 +284,73 @@ int main() {
         assert(d <= f);
     }
     {
+        plastic::binary_search_tree<int> a, b{ 1, 2, 2, 2, 3 }, c{ 6, 4, 8, 2 };
+        assert(format(a) == "[]");
+        assert(format(b) == "[1, 2, 2, 2, 3]");
+        assert(format(c) == "[2, 4, 6, 8]");
 
+        assert(format(c.cbegin(), c.cend()) == "[2, 4, 6, 8]");
+        assert(format(c.rbegin(), c.rend()) == "[8, 6, 4, 2]");
+        assert(format(c.crbegin(), c.crend()) == "[8, 6, 4, 2]");
+
+        c = c;
+        assert(format(c) == "[2, 4, 6, 8]");
+        c = b;
+        assert(format(c) == "[1, 2, 2, 2, 3]");
+
+        assert(a.empty() == true);
+        assert(b.empty() == false);
+
+        assert(a.size() == 0);
+        assert(b.size() == 5);
+
+        c.clear();
+        assert(format(c) == "[]");
+
+        assert(c.front() == 1);
+
+        assert(c.back() == 3);
+
+        assert(std::distance(c.begin(), c.lower_bound(1)) == 0);
+        assert(std::distance(c.begin(), c.lower_bound(2)) == 1);
+        assert(std::distance(c.begin(), c.lower_bound(3)) == 4);
+        assert(std::distance(c.begin(), c.lower_bound(4)) == 5);
+
+        assert(std::distance(c.begin(), c.upper_bound(1)) == 1);
+        assert(std::distance(c.begin(), c.upper_bound(2)) == 4);
+        assert(std::distance(c.begin(), c.upper_bound(3)) == 5);
+        assert(std::distance(c.begin(), c.upper_bound(4)) == 5);
+
+        assert(std::distance(c.begin(), c.find(1)) == 0);
+        assert(std::distance(c.begin(), c.find(2)) == 1);
+        assert(std::distance(c.begin(), c.find(3)) == 4);
+        assert(std::distance(c.begin(), c.find(4)) == 5);
+
+        assert(c.count(1) == 1);
+        assert(c.count(2) == 3);
+        assert(c.count(3) == 1);
+        assert(c.count(4) == 0);
+
+        assert(c.contains(1) == true);
+        assert(c.contains(2) == true);
+        assert(c.contains(3) == true);
+        assert(c.contains(4) == false);
+
+        c.insert(2);
+        assert(format(c) == "[1, 2, 2, 2, 2, 3]");
+        c.insert({ 3, 0, 4 });
+        assert(format(c) == "[0, 1, 2, 2, 2, 2, 3, 3, 4]");
+
+        c.erase(std::next(c.begin(), 5));
+        assert(format(c) == "[0, 1, 2, 2, 2, 3, 3, 4]");
+        c.erase(std::next(c.begin(), 5), std::prev(c.end()));
+        assert(format(c) == "[0, 1, 2, 2, 2, 4]");
+
+        plastic::binary_search_tree d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
+        assert(d == d);
+        assert(d != e);
+        assert(d < e);
+        assert(d <= f);
     }
     {
         plastic::binary_heap<int> a, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 };
