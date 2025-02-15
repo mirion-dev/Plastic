@@ -1353,7 +1353,7 @@ export namespace plastic {
                 if (is_head) {
                     return head;
                 }
-                return new node{ this, left->clone(), right->clone(), value, false };
+                return new node{ this, left->clone(head), right->clone(head), value, false };
             }
         };
 
@@ -1472,8 +1472,8 @@ export namespace plastic {
             }
 
             binary_search_tree temp{ other };
-            std::swap(_head, other._head);
-            std::swap(_size, other._size);
+            std::swap(_head, temp._head);
+            std::swap(_size, temp._size);
 
             return *this;
         }
