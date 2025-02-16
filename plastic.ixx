@@ -12,7 +12,7 @@ export namespace plastic {
         explicit uninitialized_t() noexcept = default;
     };
 
-    plastic::uninitialized_t uninitialized{};
+    uninitialized_t uninitialized{};
 
     template<class T>
     class vector {
@@ -117,20 +117,20 @@ export namespace plastic {
 
         explicit vector() noexcept = default;
 
-        explicit vector(plastic::uninitialized_t, std::size_t size) noexcept :
+        explicit vector(uninitialized_t, std::size_t size) noexcept :
             _begin{ new T[size] },
             _last{ _begin + size },
             _end{ _last } {}
 
         explicit vector(std::size_t size, const T& value = {}) noexcept :
-            vector(plastic::uninitialized, size) {
+            vector(uninitialized, size) {
 
             std::uninitialized_fill(_begin, _end, value);
         }
 
         template<std::input_iterator It>
         explicit vector(It first, It last) noexcept :
-            vector(plastic::uninitialized, std::distance(first, last)) {
+            vector(uninitialized, std::distance(first, last)) {
 
             std::uninitialized_copy(first, last, _begin);
         }
@@ -369,7 +369,7 @@ export namespace plastic {
     };
 
     template<class It>
-    explicit plastic::vector(It, It)->plastic::vector<std::iter_value_t<It>>;
+    explicit vector(It, It)->vector<std::iter_value_t<It>>;
 
     template<class T>
     class deque {
@@ -514,23 +514,23 @@ export namespace plastic {
         using const_reverse_iterator = std::const_iterator<reverse_iterator>;
 
         explicit deque() noexcept :
-            deque(plastic::uninitialized, 0) {}
+            deque(uninitialized, 0) {}
 
-        explicit deque(plastic::uninitialized_t, std::size_t size) noexcept :
+        explicit deque(uninitialized_t, std::size_t size) noexcept :
             _begin{ new T[size + 1] },
             _end{ _begin + size + 1 },
             _first{ _begin },
             _last{ _begin + size } {}
 
         explicit deque(std::size_t size, const T& value = {}) noexcept :
-            deque(plastic::uninitialized, size) {
+            deque(uninitialized, size) {
 
             std::uninitialized_fill(_first, _last, value);
         }
 
         template<std::input_iterator It>
         explicit deque(It first, It last) noexcept :
-            deque(plastic::uninitialized, std::distance(first, last)) {
+            deque(uninitialized, std::distance(first, last)) {
 
             std::uninitialized_copy(first, last, _begin);
         }
@@ -539,7 +539,7 @@ export namespace plastic {
             deque(list.begin(), list.end()) {}
 
         explicit deque(const deque& other) noexcept :
-            deque(plastic::uninitialized, other.size()) {
+            deque(uninitialized, other.size()) {
 
             if (other._is_contiguous()) {
                 std::uninitialized_copy(other._first, other._last, _first);
@@ -822,7 +822,7 @@ export namespace plastic {
     };
 
     template<class It>
-    explicit plastic::deque(It, It)->plastic::deque<std::iter_value_t<It>>;
+    explicit deque(It, It)->deque<std::iter_value_t<It>>;
 
     template<class T>
     class forward_list {
@@ -1037,7 +1037,7 @@ export namespace plastic {
     };
 
     template<class It>
-    explicit plastic::forward_list(It, It)->plastic::forward_list<std::iter_value_t<It>>;
+    explicit forward_list(It, It)->forward_list<std::iter_value_t<It>>;
 
     template<class T>
     class list {
@@ -1311,7 +1311,7 @@ export namespace plastic {
     };
 
     template<class It>
-    explicit plastic::list(It, It)->plastic::list<std::iter_value_t<It>>;
+    explicit list(It, It)->list<std::iter_value_t<It>>;
 
     // incompleted
     template<class T, class Cmp = std::less<T>>
@@ -2349,13 +2349,13 @@ export namespace plastic {
     };
 
     template<class It>
-    explicit plastic::binary_search_tree(It, It)->plastic::binary_search_tree<std::iter_value_t<It>>;
+    explicit binary_search_tree(It, It)->binary_search_tree<std::iter_value_t<It>>;
 
     template<class T, class Cmp = std::less<T>>
     class binary_heap {
         static constexpr Cmp _cmp{};
 
-        plastic::vector<T> _data{};
+        vector<T> _data{};
 
         void _sift_up(std::size_t index) noexcept {
             T value{ std::move(_data[index]) };
@@ -2468,6 +2468,6 @@ export namespace plastic {
     };
 
     template<class It>
-    explicit plastic::binary_heap(It, It)->plastic::binary_heap<std::iter_value_t<It>>;
+    explicit binary_heap(It, It)->binary_heap<std::iter_value_t<It>>;
 
 }
