@@ -1,79 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-	<Type Name="plastic::vector&lt;*&gt;">
-		<Intrinsic Name="size" Expression="size_t(_last - _begin)"/>
-		<Intrinsic Name="capacity" Expression="size_t(_end - _begin)"/>
-		<DisplayString>{{ size={size()} }}</DisplayString>
-		<Expand>
-			<Item Name="[capacity]">capacity()</Item>
-			<ArrayItems>
-				<Size>size()</Size>
-				<ValuePointer>_begin</ValuePointer>
-			</ArrayItems>
-		</Expand>
-	</Type>
+    <Type Name="plastic::vector&lt;*&gt;">
+        <Intrinsic Name="size" Expression="size_t(_last - _begin)"/>
+        <Intrinsic Name="capacity" Expression="size_t(_end - _begin)"/>
+        <DisplayString>{{ size={size()} }}</DisplayString>
+        <Expand>
+            <Item Name="[capacity]">capacity()</Item>
+            <ArrayItems>
+                <Size>size()</Size>
+                <ValuePointer>_begin</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
 
-	<Type Name="plastic::deque&lt;*&gt;">
-		<Intrinsic Name="allocated_capacity" Expression="size_t(_end - _begin)"/>
-		<Intrinsic Name="size" Expression="_first &lt;= _last ? _last - _first : allocated_capacity() - (_first - _last)"/>
-		<Intrinsic Name="capacity" Expression="allocated_capacity() - 1"/>
-		<DisplayString>{{ size={size()} }}</DisplayString>
-		<Expand>
-			<Item Name="[capacity]">capacity()</Item>
-			<IndexListItems>
-				<Size>size()</Size>
-				<ValueNode>_first[$i &lt; _end - _first ? $i : $i - allocated_capacity()]</ValueNode>
-			</IndexListItems>
-		</Expand>
-	</Type>
+    <Type Name="plastic::deque&lt;*&gt;">
+        <Intrinsic Name="allocated_capacity" Expression="size_t(_end - _begin)"/>
+        <Intrinsic Name="size" Expression="_first &lt;= _last ? _last - _first : allocated_capacity() - (_first - _last)"/>
+        <Intrinsic Name="capacity" Expression="allocated_capacity() - 1"/>
+        <DisplayString>{{ size={size()} }}</DisplayString>
+        <Expand>
+            <Item Name="[capacity]">capacity()</Item>
+            <IndexListItems>
+                <Size>size()</Size>
+                <ValueNode>_first[$i &lt; _end - _first ? $i : $i - allocated_capacity()]</ValueNode>
+            </IndexListItems>
+        </Expand>
+    </Type>
 
-	<Type Name="plastic::forward_list&lt;*&gt;">
-		<Intrinsic Name="size" Expression="_size"/>
-		<DisplayString>{{ size={size()} }}</DisplayString>
-		<Expand>
-			<LinkedListItems>
-				<Size>size()</Size>
-				<HeadPointer>_sentinel->next</HeadPointer>
-				<NextPointer>next</NextPointer>
-				<ValueNode>value</ValueNode>
-			</LinkedListItems>
-		</Expand>
-	</Type>
+    <Type Name="plastic::forward_list&lt;*&gt;">
+        <Intrinsic Name="size" Expression="_size"/>
+        <DisplayString>{{ size={size()} }}</DisplayString>
+        <Expand>
+            <LinkedListItems>
+                <Size>size()</Size>
+                <HeadPointer>_sentinel->next</HeadPointer>
+                <NextPointer>next</NextPointer>
+                <ValueNode>value</ValueNode>
+            </LinkedListItems>
+        </Expand>
+    </Type>
 
-	<Type Name="plastic::list&lt;*&gt;">
-		<Intrinsic Name="size" Expression="_size"/>
-		<DisplayString>{{ size={size()} }}</DisplayString>
-		<Expand>
-			<LinkedListItems>
-				<Size>size()</Size>
-				<HeadPointer>_sentinel->next</HeadPointer>
-				<NextPointer>next</NextPointer>
-				<ValueNode>value</ValueNode>
-			</LinkedListItems>
-		</Expand>
-	</Type>
+    <Type Name="plastic::list&lt;*&gt;">
+        <Intrinsic Name="size" Expression="_size"/>
+        <DisplayString>{{ size={size()} }}</DisplayString>
+        <Expand>
+            <LinkedListItems>
+                <Size>size()</Size>
+                <HeadPointer>_sentinel->next</HeadPointer>
+                <NextPointer>next</NextPointer>
+                <ValueNode>value</ValueNode>
+            </LinkedListItems>
+        </Expand>
+    </Type>
 
-	<Type Name="plastic::binary_heap&lt;*&gt;">
-		<Intrinsic Name="size" Expression="_data.size()"/>
-		<DisplayString>{{ size={size()} }}</DisplayString>
-		<Expand>
-			<ExpandedItem>_data</ExpandedItem>
-		</Expand>
-	</Type>
+    <Type Name="plastic::binary_heap&lt;*&gt;">
+        <Intrinsic Name="size" Expression="_data.size()"/>
+        <DisplayString>{{ size={size()} }}</DisplayString>
+        <Expand>
+            <ExpandedItem>_data</ExpandedItem>
+        </Expand>
+    </Type>
 
-	<Type Name="plastic::binary_search_tree&lt;*&gt;">
-		<Intrinsic Name="size" Expression="_size"/>
-		<DisplayString>{{ size={size()} }}</DisplayString>
-		<Expand>
-			<TreeItems>
-				<Size>size()</Size>
-				<HeadPointer>_head->parent</HeadPointer>
-				<LeftPointer>left</LeftPointer>
-				<RightPointer>right</RightPointer>
-				<ValueNode Condition="!is_head">value</ValueNode>
-			</TreeItems>
-		</Expand>
-	</Type>
+    <Type Name="plastic::binary_search_tree&lt;*&gt;">
+        <Intrinsic Name="size" Expression="_size"/>
+        <DisplayString>{{ size={size()} }}</DisplayString>
+        <Expand>
+            <TreeItems>
+                <Size>size()</Size>
+                <HeadPointer>_head->parent</HeadPointer>
+                <LeftPointer>left</LeftPointer>
+                <RightPointer>right</RightPointer>
+                <ValueNode Condition="!is_head">value</ValueNode>
+            </TreeItems>
+        </Expand>
+    </Type>
 
 </AutoVisualizer>
