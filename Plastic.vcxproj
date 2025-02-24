@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="algorithm.ixx" />
+    <ClCompile Include="data_structure.ixx" />
     <ClCompile Include="plastic.ixx" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>

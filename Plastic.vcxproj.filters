@@ -18,6 +18,12 @@
     <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="data_structure.ixx">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="algorithm.ixx">
+      <Filter>Header Files</Filter>
+    </ClCompile>
     <ClCompile Include="plastic.ixx">
       <Filter>Header Files</Filter>
     </ClCompile>
