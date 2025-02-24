@@ -2,9 +2,11 @@
 
 My implementations of common data structures and algorithms for study.
 
+## Data Structures
+
 The class designs are primarily referenced from the [MSVC STL](https://github.com/microsoft/STL), but not strictly adhered to. For instance, the underlying structure of `deque` is implemented as a circular queue rather than multiple blocks. I've noticed that the time complexity requirements specified in the standard for certain container operations aren't optimal, which might be due to considerations like avoiding extra memory allocation or preserving iterator validity. My implementations will maintain consistency with these specifications.
 
-## Linear Structures
+### Linear Structures
 
 | | **`vector`** | **`deque`** | **`forward_list`** | **`list`** |
 | :--: | :--: | :--: | :--: | :--: |
@@ -35,7 +37,7 @@ The class designs are primarily referenced from the [MSVC STL](https://github.co
 | **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` |
 | **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` |
 
-## Search Trees
+### Search Trees
 
 | | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | **`b_tree`** |
 | :--: | :--: | :--: | :--: | :--: |
@@ -59,7 +61,7 @@ The class designs are primarily referenced from the [MSVC STL](https://github.co
 | **`operator==`** | `operator==` | | | |
 | **`operator<=>`** | `operator<=>` | | | |
 
-## Addressable Heaps
+### Addressable Heaps
 
 | | **`binary_heap`** |
 | :--: | :--: |
@@ -72,3 +74,7 @@ The class designs are primarily referenced from the [MSVC STL](https://github.co
 | **`merge`** | `merge` |
 | **`assign`** | `assign` |
 | **`erase`** | `erase` |
+
+## Algorithms
+
+Same as `<algorithm>` except constrained algorithms.
