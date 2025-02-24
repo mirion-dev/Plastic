@@ -2,7 +2,7 @@
 
 My implementations of common data structures and algorithms for study.
 
-The class designs are primarily referenced from the [MSVC STL](https://github.com/microsoft/STL), but not strictly adhered to. For instance, the underlying structure of `deque` is implemented as a circular queue rather than multiple blocks. I've noticed that the time complexity requirements specified in the standard for certain container operations aren't optimal, which might be due to considerations like avoiding extra memory allocation or preserving iterator validity. My implementations will maintain consistency with these specifications. Additionally, all heap implementations satisfy the requirements of [addressable heaps](https://en.wikipedia.org/wiki/Addressable_heap).
+The class designs are primarily referenced from the [MSVC STL](https://github.com/microsoft/STL), but not strictly adhered to. For instance, the underlying structure of `deque` is implemented as a circular queue rather than multiple blocks. I've noticed that the time complexity requirements specified in the standard for certain container operations aren't optimal, which might be due to considerations like avoiding extra memory allocation or preserving iterator validity. My implementations will maintain consistency with these specifications.
 
 ## Linear Structures
 
@@ -59,7 +59,7 @@ The class designs are primarily referenced from the [MSVC STL](https://github.co
 | **`operator==`** | `operator==` | | | |
 | **`operator<=>`** | `operator<=>` | | | |
 
-## Heaps
+## Addressable Heaps
 
 | | **`binary_heap`** |
 | :--: | :--: |

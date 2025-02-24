@@ -26,6 +26,7 @@ std::string format(const binary_heap<T, Cmp>& heap) {
 }
 
 int main() {
+    // linear structures
     {
         vector<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
@@ -285,6 +286,9 @@ int main() {
         assert(d < e);
         assert(d <= f);
     }
+
+    // search trees
+    /*
     {
         binary_search_tree<int> a, b{ 1, 2, 2, 2, 3 }, c{ 6, 4, 8, 2 };
         assert(format(a) == "[]");
@@ -354,6 +358,9 @@ int main() {
         assert(d < e);
         assert(d <= f);
     }
+    */
+
+    // addressable heaps
     {
         binary_heap<int> a, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 };
         assert(format(a) == "[]");

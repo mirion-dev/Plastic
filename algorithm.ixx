@@ -2,6 +2,7 @@ export module plastic:algorithm;
 
 import std;
 
+// non-modifying sequence operations
 export namespace plastic {
 
     template<std::input_iterator iter, class unary_function>
@@ -20,6 +21,48 @@ export namespace plastic {
             ++first;
         }
         return first;
+    }
+
+    template<std::input_iterator iter, class T = std::iter_value_t<iter>>
+    std::iter_difference_t<iter> count(iter first, iter last, const T& value) {
+        using diff_t = std::iter_difference_t<iter>;
+        diff_t res{ 0 };
+        while (first != last) {
+            if (*first == value) {
+                ++res;
+            }
+            ++first;
+        }
+        return res;
+    }
+
+    template<std::input_iterator iter, class unary_predicate>
+    std::iter_difference_t<iter> count_if(iter first, iter last, unary_predicate pred) {
+        using diff_t = std::iter_difference_t<iter>;
+        diff_t res{ 0 };
+        while (first != last) {
+            if (pred(*first)) {
+                ++res;
+            }
+            ++first;
+        }
+        return res;
+    }
+
+    template<std::input_iterator iter1, std::input_iterator iter2, class binary_predicate = std::equal_to<>>
+    std::pair<iter1, iter2> mismatch(iter1 first1, iter1 last1, iter2 first2, binary_predicate pred = {}) {
+        while (first1 != last1 && pred(*first1, *first2)) {
+            ++first1, ++first2;
+        }
+        return { first1, first2 };
+    }
+
+    template<std::input_iterator iter1, std::input_iterator iter2, class binary_predicate = std::equal_to<>>
+    std::pair<iter1, iter2> mismatch(iter1 first1, iter1 last1, iter2 first2, iter2 last2, binary_predicate pred = {}) {
+        while (first1 != last1 && first2 != last2 && pred(*first1, *first2)) {
+            ++first1, ++first2;
+        }
+        return { first1, first2 };
     }
 
     template<std::input_iterator iter, class T = std::iter_value_t<iter>>
@@ -139,69 +182,10 @@ export namespace plastic {
         return first;
     }
 
-    template<std::input_iterator iter, class T = std::iter_value_t<iter>>
-    std::iter_difference_t<iter> count(iter first, iter last, const T& value) {
-        using diff_t = std::iter_difference_t<iter>;
-        diff_t res{ 0 };
-        while (first != last) {
-            if (*first == value) {
-                ++res;
-            }
-            ++first;
-        }
-        return res;
-    }
+}
 
-    template<std::input_iterator iter, class unary_predicate>
-    std::iter_difference_t<iter> count_if(iter first, iter last, unary_predicate pred) {
-        using diff_t = std::iter_difference_t<iter>;
-        diff_t res{ 0 };
-        while (first != last) {
-            if (pred(*first)) {
-                ++res;
-            }
-            ++first;
-        }
-        return res;
-    }
-
-    template<std::input_iterator iter1, std::input_iterator iter2, class binary_predicate = std::equal_to<>>
-    std::pair<iter1, iter2> mismatch(iter1 first1, iter1 last1, iter2 first2, binary_predicate pred = {}) {
-        while (first1 != last1 && pred(*first1, *first2)) {
-            ++first1, ++first2;
-        }
-        return { first1, first2 };
-    }
-
-    template<std::input_iterator iter1, std::input_iterator iter2, class binary_predicate = std::equal_to<>>
-    std::pair<iter1, iter2> mismatch(iter1 first1, iter1 last1, iter2 first2, iter2 last2, binary_predicate pred = {}) {
-        while (first1 != last1 && first2 != last2 && pred(*first1, *first2)) {
-            ++first1, ++first2;
-        }
-        return { first1, first2 };
-    }
-
-    template<std::input_iterator iter1, std::input_iterator iter2, class binary_predicate = std::equal_to<>>
-    bool equal(iter1 first1, iter1 last1, iter2 first2, binary_predicate pred = {}) {
-        while (first1 != last1) {
-            if (!pred(*first1, *first2)) {
-                return false;
-            }
-            ++first1, ++first2;
-        }
-        return true;
-    }
-
-    template<std::input_iterator iter1, std::input_iterator iter2, class binary_predicate = std::equal_to<>>
-    bool equal(iter1 first1, iter1 last1, iter2 first2, iter2 last2, binary_predicate pred = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (!pred(*first1, *first2)) {
-                return false;
-            }
-            ++first1, ++first2;
-        }
-        return first1 == last1 && first2 == last2;
-    }
+// modifying sequence operations
+export namespace plastic {
 
     template<std::input_iterator iter, std::output_iterator<std::iter_value_t<iter>> d_iter>
     d_iter copy(iter first, iter last, d_iter d_first) {
@@ -257,17 +241,19 @@ export namespace plastic {
         return d_last;
     }
 
-    template<std::forward_iterator iter1, std::forward_iterator iter2>
-    iter2 swap_ranges(iter1 first1, iter1 last1, iter2 first2) {
-        while (first1 != last1) {
-            std::swap(*first1++, *first2++);
+    template<std::forward_iterator iter, class T = std::iter_value_t<iter>>
+    void fill(iter first, iter last, const T& value) {
+        while (first != last) {
+            *first++ = value;
         }
-        return first2;
     }
 
-    template<std::forward_iterator iter1, std::forward_iterator iter2>
-    void iter_swap(iter1 i1, iter2 i2) {
-        std::swap(*i1, *i2);
+    template<class iter, std::integral size_t, class T> requires std::output_iterator<iter, T>
+    iter fill_n(iter first, size_t count, const T& value) {
+        while (count-- != 0) {
+            *first++ = value;
+        }
+        return first;
     }
 
     template<std::input_iterator iter, std::output_iterator<std::iter_value_t<iter>> d_iter, class unary_function>
@@ -286,59 +272,6 @@ export namespace plastic {
             ++d_first, ++first1, ++first2;
         }
         return d_first;
-    }
-
-    template<std::forward_iterator iter, class T = std::iter_value_t<iter>>
-    void replace(iter first, iter last, const T& old_value, const T& value) {
-        while (first != last) {
-            if (*first == old_value) {
-                *first = value;
-            }
-            ++first;
-        }
-    }
-
-    template<std::forward_iterator iter, class unary_predicate, class T = std::iter_value_t<iter>>
-    void replace_if(iter first, iter last, unary_predicate pred, const T& value) {
-        while (first != last) {
-            if (pred(*first)) {
-                *first = value;
-            }
-            ++first;
-        }
-    }
-
-    template<std::input_iterator iter, class d_iter, class T = std::iter_value_t<iter>> requires std::output_iterator<d_iter, T>
-    d_iter replace_copy(iter first, iter last, d_iter d_first, const T& old_value, const T& value) {
-        while (first != last) {
-            *d_first = *first == old_value ? value : *first;
-            ++first, ++d_first;
-        }
-        return d_first;
-    }
-
-    template<std::input_iterator iter, class d_iter, class unary_predicate, class T = std::iter_value_t<iter>> requires std::output_iterator<d_iter, T>
-    d_iter replace_copy_if(iter first, iter last, d_iter d_first, unary_predicate pred, const T& value) {
-        while (first != last) {
-            *d_first = pred(*first) ? value : *first;
-            ++first, ++d_first;
-        }
-        return d_first;
-    }
-
-    template<std::forward_iterator iter, class T = std::iter_value_t<iter>>
-    void fill(iter first, iter last, const T& value) {
-        while (first != last) {
-            *first++ = value;
-        }
-    }
-
-    template<class iter, std::integral size_t, class T> requires std::output_iterator<iter, T>
-    iter fill_n(iter first, size_t count, const T& value) {
-        while (count-- != 0) {
-            *first++ = value;
-        }
-        return first;
     }
 
     template<std::forward_iterator iter, class nullary_function>
@@ -406,33 +339,57 @@ export namespace plastic {
         return d_first;
     }
 
-    template<std::forward_iterator iter, class binary_predicate = std::equal_to<>>
-    iter unique(iter first, iter last, binary_predicate pred = {}) {
-        if (first != last) {
-            iter i{ first };
-            while (++i != last) {
-                if (!pred(*first, *i)) {
-                    *++first = std::move(*i);
-                }
+    template<std::forward_iterator iter, class T = std::iter_value_t<iter>>
+    void replace(iter first, iter last, const T& old_value, const T& value) {
+        while (first != last) {
+            if (*first == old_value) {
+                *first = value;
             }
             ++first;
         }
-        return first;
     }
 
-    template<std::input_iterator iter, std::output_iterator<std::iter_value_t<iter>> d_iter, class binary_predicate = std::equal_to<>>
-    d_iter unique_copy(iter first, iter last, d_iter d_first, binary_predicate pred = {}) {
-        using value_t = std::iter_value_t<iter>;
-        if (first != last) {
-            value_t value;
-            *d_first++ = value = *first;
-            while (++first != last) {
-                if (!pred(value, *first)) {
-                    *d_first++ = value = *first;
-                }
+    template<std::forward_iterator iter, class unary_predicate, class T = std::iter_value_t<iter>>
+    void replace_if(iter first, iter last, unary_predicate pred, const T& value) {
+        while (first != last) {
+            if (pred(*first)) {
+                *first = value;
             }
+            ++first;
+        }
+    }
+
+    template<std::input_iterator iter, class d_iter, class T = std::iter_value_t<iter>> requires std::output_iterator<d_iter, T>
+    d_iter replace_copy(iter first, iter last, d_iter d_first, const T& old_value, const T& value) {
+        while (first != last) {
+            *d_first = *first == old_value ? value : *first;
+            ++first, ++d_first;
         }
         return d_first;
+    }
+
+    template<std::input_iterator iter, class d_iter, class unary_predicate, class T = std::iter_value_t<iter>> requires std::output_iterator<d_iter, T>
+    d_iter replace_copy_if(iter first, iter last, d_iter d_first, unary_predicate pred, const T& value) {
+        while (first != last) {
+            *d_first = pred(*first) ? value : *first;
+            ++first, ++d_first;
+        }
+        return d_first;
+    }
+
+    // swap
+
+    template<std::forward_iterator iter1, std::forward_iterator iter2>
+    iter2 swap_ranges(iter1 first1, iter1 last1, iter2 first2) {
+        while (first1 != last1) {
+            std::swap(*first1++, *first2++);
+        }
+        return first2;
+    }
+
+    template<std::forward_iterator iter1, std::forward_iterator iter2>
+    void iter_swap(iter1 i1, iter2 i2) {
+        std::swap(*i1, *i2);
     }
 
     template<std::bidirectional_iterator iter>
@@ -574,6 +531,40 @@ export namespace plastic {
         }
     }
 
+    template<std::forward_iterator iter, class binary_predicate = std::equal_to<>>
+    iter unique(iter first, iter last, binary_predicate pred = {}) {
+        if (first != last) {
+            iter i{ first };
+            while (++i != last) {
+                if (!pred(*first, *i)) {
+                    *++first = std::move(*i);
+                }
+            }
+            ++first;
+        }
+        return first;
+    }
+
+    template<std::input_iterator iter, std::output_iterator<std::iter_value_t<iter>> d_iter, class binary_predicate = std::equal_to<>>
+    d_iter unique_copy(iter first, iter last, d_iter d_first, binary_predicate pred = {}) {
+        using value_t = std::iter_value_t<iter>;
+        if (first != last) {
+            value_t value;
+            *d_first++ = value = *first;
+            while (++first != last) {
+                if (!pred(value, *first)) {
+                    *d_first++ = value = *first;
+                }
+            }
+        }
+        return d_first;
+    }
+
+}
+
+// partitioning operations
+export namespace plastic {
+
     template<std::input_iterator iter, class unary_predicate>
     bool is_partitioned(iter first, iter last, unary_predicate pred) {
         while (first != last && pred(*first)) {
@@ -647,151 +638,28 @@ export namespace plastic {
         return first;
     }
 
-    template<std::forward_iterator iter, class compare = std::less<>>
-    iter is_sorted_until(iter first, iter last, compare comp = {}) {
+}
+
+// heap operations
+export namespace plastic {
+
+    template<std::random_access_iterator iter, class compare = std::less<>>
+    iter is_heap_until(iter first, iter last, compare comp = {}) {
+        using diff_t = std::iter_difference_t<iter>;
         if (first != last) {
-            iter i{ first };
-            while (++i != last) {
-                if (comp(*i, *first++)) {
-                    return i;
+            diff_t i{ 0 }, size{ last - first };
+            while (++i != size) {
+                if (comp(first[(i - 1) >> 1], first[i])) {
+                    return first + i;
                 }
             }
         }
         return last;
     }
 
-    template<std::forward_iterator iter, class compare = std::less<>>
-    bool is_sorted(iter first, iter last, compare comp = {}) {
-        return is_sorted_until(first, last, comp) == last;
-    }
-
-    template<std::forward_iterator iter, class T = std::iter_value_t<iter>, class compare = std::less<>>
-    iter lower_bound(iter first, iter last, const T& value, compare comp = {}) {
-        return partition_point(first, last, [&](auto&& param) { return comp(param, value); });
-    }
-
-    template<std::forward_iterator iter, class T = std::iter_value_t<iter>, class compare = std::less<>>
-    iter upper_bound(iter first, iter last, const T& value, compare comp = {}) {
-        return partition_point(first, last, [&](auto&& param) { return !comp(value, param); });
-    }
-
-    template<std::forward_iterator iter, class T = std::iter_value_t<iter>, class compare = std::less<>>
-    std::pair<iter, iter> equal_range(iter first, iter last, const T& value, compare comp = {}) {
-        return { lower_bound(first, last, value, comp), upper_bound(first, last, value, comp) };
-    }
-
-    template<std::forward_iterator iter, class T = std::iter_value_t<iter>, class compare = std::less<>>
-    bool binary_search(iter first, iter last, const T& value, compare comp = {}) {
-        first = lower_bound(first, last, value, comp);
-        return first != last && !comp(value, *first);
-    }
-
-    template<std::input_iterator iter1, std::input_iterator iter2, class compare = std::less<>>
-    bool includes(iter1 first1, iter1 last1, iter2 first2, iter2 last2, compare comp = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (comp(*first2, *first1)) {
-                return false;
-            }
-            if (!comp(*first1, *first2)) {
-                ++first2;
-            }
-            ++first1;
-        }
-        return first2 == last2;
-    }
-
-    template<std::input_iterator iter1, std::input_iterator iter2, std::output_iterator<std::iter_value_t<iter1>> d_iter, class compare = std::less<>>
-    d_iter set_union(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (comp(*first1, *first2)) {
-                *d_first++ = *first1;
-                ++first1;
-            }
-            else if (comp(*first2, *first1)) {
-                *d_first++ = *first2;
-                ++first2;
-            }
-            else {
-                *d_first++ = *first1;
-                ++first1, ++first2;
-            }
-        }
-        return copy(first2, last2, copy(first1, last1, d_first));
-    }
-
-    template<std::input_iterator iter1, std::input_iterator iter2, std::output_iterator<std::iter_value_t<iter1>> d_iter, class compare = std::less<>>
-    d_iter set_intersection(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (comp(*first1, *first2)) {
-                ++first1;
-            }
-            else if (comp(*first2, *first1)) {
-                ++first2;
-            }
-            else {
-                *d_first++ = *first1;
-                ++first1, ++first2;
-            }
-        }
-        return d_first;
-    }
-
-    template<std::input_iterator iter1, std::input_iterator iter2, std::output_iterator<std::iter_value_t<iter1>> d_iter, class compare = std::less<>>
-    d_iter set_difference(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (comp(*first1, *first2)) {
-                *d_first++ = *first1;
-                ++first1;
-            }
-            else {
-                if (!comp(*first2, *first1)) {
-                    ++first1;
-                }
-                ++first2;
-            }
-        }
-        return copy(first1, last1, d_first);
-    }
-
-    template<std::input_iterator iter1, std::input_iterator iter2, std::output_iterator<std::iter_value_t<iter1>> d_iter, class compare = std::less<>>
-    d_iter set_symmetric_difference(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (comp(*first1, *first2)) {
-                *d_first++ = *first1;
-                ++first1;
-            }
-            else if (comp(*first2, *first1)) {
-                *d_first++ = *first2;
-                ++first2;
-            }
-            else {
-                ++first1, ++first2;
-            }
-        }
-        return copy(first2, last2, copy(first1, last1, d_first));
-    }
-
-    template<std::input_iterator iter1, std::input_iterator iter2, std::output_iterator<std::iter_value_t<iter1>> d_iter, class compare = std::less<>>
-    d_iter merge(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (comp(*first2, *first1)) {
-                *d_first++ = *first2;
-                ++first2;
-            }
-            else {
-                *d_first++ = *first1;
-                ++first1;
-            }
-        }
-        return copy(first2, last2, copy(first1, last1, d_first));
-    }
-
-    template<std::bidirectional_iterator iter, class compare = std::less<>>
-    void inplace_merge(iter first, iter middle, iter last, compare comp = {}) {
-        using value_t = std::iter_value_t<iter>;
-        value_t* buffer{ new value_t[std::distance(first, last)] };
-        move(buffer, merge(first, middle, middle, last, buffer, comp), first);
-        delete[] buffer;
+    template<std::random_access_iterator iter, class compare = std::less<>>
+    bool is_heap(iter first, iter last, compare comp = {}) {
+        return is_heap_until(first, last, comp) == last;
     }
 
     namespace detail {
@@ -839,6 +707,14 @@ export namespace plastic {
     }
 
     template<std::random_access_iterator iter, class compare = std::less<>>
+    void make_heap(iter first, iter last, compare comp = {}) {
+        iter i{ first + (last - first) / 2 };
+        while (i != first) {
+            detail::sift_down(first, --i, last, comp);
+        }
+    }
+
+    template<std::random_access_iterator iter, class compare = std::less<>>
     void push_heap(iter first, iter last, compare comp = {}) {
         detail::sift_up(first, last - 1, last, comp);
     }
@@ -850,37 +726,33 @@ export namespace plastic {
     }
 
     template<std::random_access_iterator iter, class compare = std::less<>>
-    void make_heap(iter first, iter last, compare comp = {}) {
-        iter i{ first + (last - first) / 2 };
-        while (i != first) {
-            detail::sift_down(first, --i, last, comp);
-        }
-    }
-
-    template<std::random_access_iterator iter, class compare = std::less<>>
     void sort_heap(iter first, iter last, compare comp = {}) {
         while (first != last) {
             pop_heap(first, last--, comp);
         }
     }
 
-    template<std::random_access_iterator iter, class compare = std::less<>>
-    iter is_heap_until(iter first, iter last, compare comp = {}) {
-        using diff_t = std::iter_difference_t<iter>;
+}
+
+// sorting operations
+export namespace plastic {
+
+    template<std::forward_iterator iter, class compare = std::less<>>
+    iter is_sorted_until(iter first, iter last, compare comp = {}) {
         if (first != last) {
-            diff_t i{ 0 }, size{ last - first };
-            while (++i != size) {
-                if (comp(first[(i - 1) >> 1], first[i])) {
-                    return first + i;
+            iter i{ first };
+            while (++i != last) {
+                if (comp(*i, *first++)) {
+                    return i;
                 }
             }
         }
         return last;
     }
 
-    template<std::random_access_iterator iter, class compare = std::less<>>
-    bool is_heap(iter first, iter last, compare comp = {}) {
-        return is_heap_until(first, last, comp) == last;
+    template<std::forward_iterator iter, class compare = std::less<>>
+    bool is_sorted(iter first, iter last, compare comp = {}) {
+        return is_sorted_until(first, last, comp) == last;
     }
 
     namespace detail {
@@ -944,22 +816,6 @@ export namespace plastic {
     }
 
     template<std::random_access_iterator iter, class compare = std::less<>>
-    void stable_sort(iter first, iter last, compare comp = {}) {
-        using diff_t = std::iter_difference_t<iter>;
-        if (last - first <= detail::insertion_sort_threshold) {
-            detail::insertion_sort(first, last, comp);
-        }
-        else {
-            iter middle{ first + (last - first) / 2 };
-            stable_sort(first, middle, comp);
-            stable_sort(middle, last, comp);
-            if (comp(*middle, *std::prev(middle))) {
-                inplace_merge(first, middle, last, comp);
-            }
-        }
-    }
-
-    template<std::random_access_iterator iter, class compare = std::less<>>
     void partial_sort(iter first, iter middle, iter last, compare comp = {}) {
         make_heap(first, middle, comp);
         iter i{ middle };
@@ -993,6 +849,22 @@ export namespace plastic {
     }
 
     template<std::random_access_iterator iter, class compare = std::less<>>
+    void stable_sort(iter first, iter last, compare comp = {}) {
+        using diff_t = std::iter_difference_t<iter>;
+        if (last - first <= detail::insertion_sort_threshold) {
+            detail::insertion_sort(first, last, comp);
+        }
+        else {
+            iter middle{ first + (last - first) / 2 };
+            stable_sort(first, middle, comp);
+            stable_sort(middle, last, comp);
+            if (comp(*middle, *std::prev(middle))) {
+                inplace_merge(first, middle, last, comp);
+            }
+        }
+    }
+
+    template<std::random_access_iterator iter, class compare = std::less<>>
     void nth_element(iter first, iter middle, iter last, compare comp = {}) {
         using diff_t = std::iter_difference_t<iter>;
         while (last - first > detail::insertion_sort_threshold) {
@@ -1006,6 +878,155 @@ export namespace plastic {
         }
         detail::insertion_sort(first, last, comp);
     }
+
+}
+
+// binary search operations
+export namespace plastic {
+
+    template<std::forward_iterator iter, class T = std::iter_value_t<iter>, class compare = std::less<>>
+    iter lower_bound(iter first, iter last, const T& value, compare comp = {}) {
+        return partition_point(first, last, [&](auto&& param) { return comp(param, value); });
+    }
+
+    template<std::forward_iterator iter, class T = std::iter_value_t<iter>, class compare = std::less<>>
+    iter upper_bound(iter first, iter last, const T& value, compare comp = {}) {
+        return partition_point(first, last, [&](auto&& param) { return !comp(value, param); });
+    }
+
+    template<std::forward_iterator iter, class T = std::iter_value_t<iter>, class compare = std::less<>>
+    bool binary_search(iter first, iter last, const T& value, compare comp = {}) {
+        first = lower_bound(first, last, value, comp);
+        return first != last && !comp(value, *first);
+    }
+
+    template<std::forward_iterator iter, class T = std::iter_value_t<iter>, class compare = std::less<>>
+    std::pair<iter, iter> equal_range(iter first, iter last, const T& value, compare comp = {}) {
+        return { lower_bound(first, last, value, comp), upper_bound(first, last, value, comp) };
+    }
+
+}
+
+// merge operations
+export namespace plastic {
+
+    template<std::input_iterator iter1, std::input_iterator iter2, std::output_iterator<std::iter_value_t<iter1>> d_iter, class compare = std::less<>>
+    d_iter merge(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
+        while (first1 != last1 && first2 != last2) {
+            if (comp(*first2, *first1)) {
+                *d_first++ = *first2;
+                ++first2;
+            }
+            else {
+                *d_first++ = *first1;
+                ++first1;
+            }
+        }
+        return copy(first2, last2, copy(first1, last1, d_first));
+    }
+
+    template<std::bidirectional_iterator iter, class compare = std::less<>>
+    void inplace_merge(iter first, iter middle, iter last, compare comp = {}) {
+        using value_t = std::iter_value_t<iter>;
+        value_t* buffer{ new value_t[std::distance(first, last)] };
+        move(buffer, merge(first, middle, middle, last, buffer, comp), first);
+        delete[] buffer;
+    }
+
+}
+
+// set operations
+export namespace plastic {
+
+    template<std::input_iterator iter1, std::input_iterator iter2, class compare = std::less<>>
+    bool includes(iter1 first1, iter1 last1, iter2 first2, iter2 last2, compare comp = {}) {
+        while (first1 != last1 && first2 != last2) {
+            if (comp(*first2, *first1)) {
+                return false;
+            }
+            if (!comp(*first1, *first2)) {
+                ++first2;
+            }
+            ++first1;
+        }
+        return first2 == last2;
+    }
+
+    template<std::input_iterator iter1, std::input_iterator iter2, std::output_iterator<std::iter_value_t<iter1>> d_iter, class compare = std::less<>>
+    d_iter set_difference(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
+        while (first1 != last1 && first2 != last2) {
+            if (comp(*first1, *first2)) {
+                *d_first++ = *first1;
+                ++first1;
+            }
+            else {
+                if (!comp(*first2, *first1)) {
+                    ++first1;
+                }
+                ++first2;
+            }
+        }
+        return copy(first1, last1, d_first);
+    }
+
+    template<std::input_iterator iter1, std::input_iterator iter2, std::output_iterator<std::iter_value_t<iter1>> d_iter, class compare = std::less<>>
+    d_iter set_intersection(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
+        while (first1 != last1 && first2 != last2) {
+            if (comp(*first1, *first2)) {
+                ++first1;
+            }
+            else if (comp(*first2, *first1)) {
+                ++first2;
+            }
+            else {
+                *d_first++ = *first1;
+                ++first1, ++first2;
+            }
+        }
+        return d_first;
+    }
+
+    template<std::input_iterator iter1, std::input_iterator iter2, std::output_iterator<std::iter_value_t<iter1>> d_iter, class compare = std::less<>>
+    d_iter set_symmetric_difference(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
+        while (first1 != last1 && first2 != last2) {
+            if (comp(*first1, *first2)) {
+                *d_first++ = *first1;
+                ++first1;
+            }
+            else if (comp(*first2, *first1)) {
+                *d_first++ = *first2;
+                ++first2;
+            }
+            else {
+                ++first1, ++first2;
+            }
+        }
+        return copy(first2, last2, copy(first1, last1, d_first));
+    }
+
+    template<std::input_iterator iter1, std::input_iterator iter2, std::output_iterator<std::iter_value_t<iter1>> d_iter, class compare = std::less<>>
+    d_iter set_union(iter1 first1, iter1 last1, iter2 first2, iter2 last2, d_iter d_first, compare comp = {}) {
+        while (first1 != last1 && first2 != last2) {
+            if (comp(*first1, *first2)) {
+                *d_first++ = *first1;
+                ++first1;
+            }
+            else if (comp(*first2, *first1)) {
+                *d_first++ = *first2;
+                ++first2;
+            }
+            else {
+                *d_first++ = *first1;
+                ++first1, ++first2;
+            }
+        }
+        return copy(first2, last2, copy(first1, last1, d_first));
+    }
+
+}
+
+// minimum/maximum operations
+export namespace plastic {
 
     template<std::forward_iterator iter, class compare = std::less<>>
     iter max_element(iter first, iter last, compare comp = {}) {
@@ -1073,6 +1094,33 @@ export namespace plastic {
         return comp(value, lowest) ? lowest : comp(highest, value) ? highest : value;
     }
 
+}
+
+// comparison operations
+export namespace plastic {
+
+    template<std::input_iterator iter1, std::input_iterator iter2, class binary_predicate = std::equal_to<>>
+    bool equal(iter1 first1, iter1 last1, iter2 first2, binary_predicate pred = {}) {
+        while (first1 != last1) {
+            if (!pred(*first1, *first2)) {
+                return false;
+            }
+            ++first1, ++first2;
+        }
+        return true;
+    }
+
+    template<std::input_iterator iter1, std::input_iterator iter2, class binary_predicate = std::equal_to<>>
+    bool equal(iter1 first1, iter1 last1, iter2 first2, iter2 last2, binary_predicate pred = {}) {
+        while (first1 != last1 && first2 != last2) {
+            if (!pred(*first1, *first2)) {
+                return false;
+            }
+            ++first1, ++first2;
+        }
+        return first1 == last1 && first2 == last2;
+    }
+
     template<std::forward_iterator iter1, std::forward_iterator iter2, class compare = std::less<>>
     bool lexicographical_compare(iter1 first1, iter1 last1, iter2 first2, iter2 last2, compare comp = {}) {
         while (first1 != last1 && first2 != last2) {
@@ -1098,29 +1146,10 @@ export namespace plastic {
         return first1 != last1 ? std::strong_ordering::greater : first2 != last2 ? std::strong_ordering::less : std::strong_ordering::equal;
     }
 
-    template<std::bidirectional_iterator iter, class compare = std::less<>>
-    bool next_permutation(iter first, iter last, compare comp = {}) {
-        iter i{ last }, j{ last };
-        if (first != last && first != --i) {
-            while (!comp(*--i, *--j)) {
-                if (i == first) {
-                    reverse(first, last);
-                    return false;
-                }
-            }
-            j = last;
-            while (!comp(*i, *--j));
-            std::swap(*i, *j);
-            reverse(++i, last);
-            return true;
-        }
-        return false;
-    }
+}
 
-    template<std::bidirectional_iterator iter, class compare = std::less<>>
-    bool prev_permutation(iter first, iter last, compare comp = {}) {
-        return next_permutation(first, last, [&](auto&& param1, auto&& param2) { return comp(param2, param1); });
-    }
+// permutation operations
+export namespace plastic {
 
     template<std::forward_iterator iter1, std::forward_iterator iter2, class binary_predicate = std::equal_to<>>
     bool is_permutation(iter1 first1, iter1 last1, iter2 first2, iter2 last2, binary_predicate comp = {}) {
@@ -1144,6 +1173,30 @@ export namespace plastic {
     bool is_permutation(iter1 first1, iter1 last1, iter2 first2, binary_predicate comp = {}) {
         std::tie(first1, first2) = mismatch(first1, last1, first2, comp);
         return first1 == last1 || is_permutation(first1, last1, first2, std::next(first2, std::distance(first1, last1)), comp);
+    }
+
+    template<std::bidirectional_iterator iter, class compare = std::less<>>
+    bool next_permutation(iter first, iter last, compare comp = {}) {
+        iter i{ last }, j{ last };
+        if (first != last && first != --i) {
+            while (!comp(*--i, *--j)) {
+                if (i == first) {
+                    reverse(first, last);
+                    return false;
+                }
+            }
+            j = last;
+            while (!comp(*i, *--j));
+            std::swap(*i, *j);
+            reverse(++i, last);
+            return true;
+        }
+        return false;
+    }
+
+    template<std::bidirectional_iterator iter, class compare = std::less<>>
+    bool prev_permutation(iter first, iter last, compare comp = {}) {
+        return next_permutation(first, last, [&](auto&& param1, auto&& param2) { return comp(param2, param1); });
     }
 
 }

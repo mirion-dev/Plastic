@@ -6,6 +6,7 @@ export module plastic:data_structure;
 
 import std; 
 
+// construction options
 export namespace plastic {
 
     struct uninitialized_t {
@@ -13,6 +14,11 @@ export namespace plastic {
     };
 
     uninitialized_t uninitialized{};
+
+}
+
+// linear structures
+export namespace plastic {
 
     template<class T>
     class vector {
@@ -1313,6 +1319,11 @@ export namespace plastic {
     template<class It>
     explicit list(It, It)->list<std::iter_value_t<It>>;
 
+}
+
+// search trees (incompleted)
+export namespace plastic {
+
     // incompleted
     template<class T, class Cmp = std::less<T>>
     class binary_search_tree {
@@ -1725,6 +1736,9 @@ export namespace plastic {
             return std::lexicographical_compare_three_way(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
         }
     };
+
+    template<class It>
+    explicit binary_search_tree(It, It)->binary_search_tree<std::iter_value_t<It>>;
 
     // incompleted
     template<class T, class Cmp = std::less<T>>
@@ -2348,8 +2362,10 @@ export namespace plastic {
             _size{} {}
     };
 
-    template<class It>
-    explicit binary_search_tree(It, It)->binary_search_tree<std::iter_value_t<It>>;
+}
+
+// addressable heaps
+export namespace plastic {
 
     template<class T, class Cmp = std::less<T>>
     class binary_heap {
