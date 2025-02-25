@@ -14,22 +14,22 @@ namespace plastic {
 
 }
 
-// for internal use only
+// for internal implementation use
 namespace plastic {
 
-    struct sat_value {};
-    struct sat_pred {};
-    struct sat_pred_neg {};
+    struct satisfy_value {};
+    struct satisfy_predicate {};
+    struct satisfy_negated_predicate {};
 
     template<class Sat, class T, class UPr>
-    constexpr bool is_satisfied(const T& given, const UPr& value_or_pred) {
-        if constexpr (std::same_as<Sat, sat_value>) {
+    constexpr bool satisfy(const T& given, const UPr& value_or_pred) {
+        if constexpr (std::same_as<Sat, satisfy_value>) {
             return given == value_or_pred;
         }
-        else if constexpr (std::same_as<Sat, sat_pred>) {
+        else if constexpr (std::same_as<Sat, satisfy_predicate>) {
             return value_or_pred(given);
         }
-        else if constexpr (std::same_as<Sat, sat_pred_neg>) {
+        else if constexpr (std::same_as<Sat, satisfy_negated_predicate>) {
             return !value_or_pred(given);
         }
         else {
@@ -67,7 +67,7 @@ namespace plastic {
     constexpr auto count_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
         std::iter_difference_t<It> count{};
         while (first != last) {
-            if (is_satisfied<Sat>(proj(*first), value_or_pred)) {
+            if (satisfy<Sat>(proj(*first), value_or_pred)) {
                 ++count;
             }
             ++first;
@@ -79,13 +79,13 @@ namespace plastic {
         template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = projected_value_t<It, Pj>>
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     constexpr std::iter_difference_t<It> count(It first, Se last, const T& value, Pj proj = {}) {
-        return count_impl<sat_value>(first, last, value, proj);
+        return count_impl<satisfy_value>(first, last, value, proj);
     }
 
     export
         template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
     constexpr std::iter_difference_t<It> count_if(It first, Se last, Pr pred, Pj proj = {}) {
-        return count_impl<sat_pred>(first, last, pred, proj);
+        return count_impl<satisfy_predicate>(first, last, pred, proj);
     }
 
     export
@@ -100,7 +100,7 @@ namespace plastic {
 
     template<class Sat, class It, class Se, class TPr, class Pj>
     constexpr It find_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
-        while (first != last && !is_satisfied<Sat>(proj(*first), value_or_pred)) {
+        while (first != last && !satisfy<Sat>(proj(*first), value_or_pred)) {
             ++first;
         }
         return first;
@@ -110,19 +110,19 @@ namespace plastic {
         template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = projected_value_t<It, Pj>>
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     constexpr It find(It first, Se last, const T& value, Pj proj = {}) {
-        return find_impl<sat_value>(first, last, value, proj);
+        return find_impl<satisfy_value>(first, last, value, proj);
     }
 
     export
         template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
     constexpr It find_if(It first, Se last, Pr pred, Pj proj = {}) {
-        return find_impl<sat_pred>(first, last, pred, proj);
+        return find_impl<satisfy_predicate>(first, last, pred, proj);
     }
 
     export
         template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
     constexpr It find_if_not(It first, Se last, Pr pred, Pj proj = {}) {
-        return find_impl<sat_pred_neg>(first, last, pred, proj);
+        return find_impl<satisfy_negated_predicate>(first, last, pred, proj);
     }
 
     export
@@ -148,7 +148,7 @@ namespace plastic {
         It i;
         bool found{};
         while (first != last) {
-            if (is_satisfied<Sat>(proj(*first), value_or_pred)) {
+            if (satisfy<Sat>(proj(*first), value_or_pred)) {
                 i = first;
                 found = true;
             }
@@ -164,19 +164,19 @@ namespace plastic {
         template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = projected_value_t<It, Pj>>
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     constexpr std::ranges::subrange<It> find_last(It first, Se last, const T& value, Pj proj = {}) {
-        return find_last_impl<sat_value>(first, last, value, proj);
+        return find_last_impl<satisfy_value>(first, last, value, proj);
     }
 
     export
         template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
     constexpr std::ranges::subrange<It> find_last_if(It first, Se last, Pr pred, Pj proj = {}) {
-        return find_last_impl<sat_pred>(first, last, pred, proj);
+        return find_last_impl<satisfy_predicate>(first, last, pred, proj);
     }
 
     export
         template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
     constexpr std::ranges::subrange<It> find_last_if_not(It first, Se last, Pr pred, Pj proj = {}) {
-        return find_last_impl<sat_pred_neg>(first, last, pred, proj);
+        return find_last_impl<satisfy_negated_predicate>(first, last, pred, proj);
     }
 
     export
