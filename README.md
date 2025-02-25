@@ -77,4 +77,4 @@ The class designs are primarily referenced from the [MSVC STL](https://github.co
 
 ## Algorithms
 
-Same as `<algorithm>` except constrained algorithms.
+Same as `<algorithm>` constrained algorithms.
