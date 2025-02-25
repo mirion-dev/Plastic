@@ -163,40 +163,19 @@ namespace plastic {
 
     template<class Sat, class It, class Se, class TPr, class Pj>
     constexpr std::ranges::subrange<It> find_last_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
-        if constexpr (std::bidirectional_iterator<It> && std::same_as<It, Se>) {
-            It i{ last };
-            while (i != first) {
-                if (is_satisfied<Sat>(proj(*--i), value_or_pred)) {
-                    return { i, last };
-                }
+        It i;
+        bool found{};
+        while (first != last) {
+            if (is_satisfied<Sat>(proj(*first), value_or_pred)) {
+                i = first;
+                found = true;
             }
+            ++first;
+        }
+        if (!found) {
             return { last, last };
         }
-        else if constexpr (std::same_as<It, Se>) {
-            It i{ last };
-            while (first != last) {
-                if (is_satisfied<Sat>(proj(*first), value_or_pred)) {
-                    i = first;
-                }
-                ++first;
-            }
-            return { i, last };
-        }
-        else {
-            It i;
-            bool found{};
-            while (first != last) {
-                if (is_satisfied<Sat>(proj(*first), value_or_pred)) {
-                    i = first;
-                    found = true;
-                }
-                ++first;
-            }
-            if (!found) {
-                return { last, last };
-            }
-            return { i, last };
-        }
+        return { i, last };
     }
 
     export
@@ -222,50 +201,7 @@ namespace plastic {
         template<std::forward_iterator It1, std::sentinel_for<It1> Se1, std::forward_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr std::ranges::subrange<It1> find_end(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-        if constexpr (std::random_access_iterator<It1> && std::random_access_iterator<It2> && std::sized_sentinel_for<Se1, It1> && std::sized_sentinel_for<Se2, It2>) {
-            auto size1{ last1 - first1 };
-            auto size2{ last2 - first2 };
-            if (size1 >= size2) {
-                It1 r_first{ first1 + (size1 - size2) };
-                while (true) {
-                    It1 r_last{ r_first };
-                    It2 i{ first2 };
-                    auto n{ size2 };
-                    while (n-- != 0 && pred(proj1(*r_last), proj2(*i))) {
-                        ++r_last, ++i;
-                    }
-                    if (n == 0) {
-                        return { r_first, r_last };
-                    }
-                    if (r_first == first1) {
-                        break;
-                    }
-                    --r_first;
-                }
-            }
-            first1 += size1;
-            return { first1, first1 };
 
-        }
-        else if constexpr (std::bidirectional_iterator<It1> && std::bidirectional_iterator<It2> && std::same_as<It1, Se1> && std::same_as<It2, Se2>) {
-            It1 r_last{ last1 };
-            while (true) {
-                It1 r_first{ r_last };
-                It2 i{ last2 };
-                do {
-                    if (i == first2) {
-                        return { r_first, r_last };
-                    }
-                    if (r_first == first1) {
-                        return { last1, last1 };
-                    }
-                } while (pred(proj1(*--r_first), proj2(*--i)));
-                --r_last;
-            }
-        }
-        else {
-
-        }
     }
 
     export
