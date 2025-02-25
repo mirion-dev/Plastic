@@ -43,42 +43,6 @@ namespace plastic {
 namespace plastic {
 
     export
-        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
-    constexpr bool all_of(It first, Se last, Pr pred, Pj proj = {}) {
-        while (first != last) {
-            if (!pred(proj(*first))) {
-                return false;
-            }
-            ++first;
-        }
-        return true;
-    }
-
-    export
-        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
-    constexpr bool any_of(It first, Se last, Pr pred, Pj proj = {}) {
-        while (first != last) {
-            if (pred(proj(*first))) {
-                return true;
-            }
-            ++first;
-        }
-        return false;
-    }
-
-    export
-        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
-    constexpr bool none_of(It first, Se last, Pr pred, Pj proj = {}) {
-        while (first != last) {
-            if (pred(proj(*first))) {
-                return false;
-            }
-            ++first;
-        }
-        return true;
-    }
-
-    export
         template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirectly_unary_invocable<std::projected<It, Pj>> Fn>
     constexpr std::ranges::in_fun_result<It, Fn> for_each(It first, Se last, Fn func, Pj proj = {}) {
         while (first != last) {
@@ -159,6 +123,24 @@ namespace plastic {
         template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
     constexpr It find_if_not(It first, Se last, Pr pred, Pj proj = {}) {
         return find_impl<sat_pred_neg>(first, last, pred, proj);
+    }
+
+    export
+        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
+    constexpr bool all_of(It first, Se last, Pr pred, Pj proj = {}) {
+        return find_if_not(first, last, pred, proj) == last;
+    }
+
+    export
+        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
+    constexpr bool any_of(It first, Se last, Pr pred, Pj proj = {}) {
+        return find_if(first, last, pred, proj) != last;
+    }
+
+    export
+        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
+    constexpr bool none_of(It first, Se last, Pr pred, Pj proj = {}) {
+        return find_if(first, last, pred, proj) == last;
     }
 
     template<class Sat, class It, class Se, class TPr, class Pj>
@@ -302,28 +284,45 @@ namespace plastic {
         template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = projected_value_t<It, Pj>>
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     constexpr bool contains(It first, Se last, const T& value, Pj proj = {}) {
-        // TODO
+        return find(first, last, value, proj) != last;
     }
 
     export
         template<std::forward_iterator It1, std::sentinel_for<It1> Se1, std::forward_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr bool contains_subrange(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-        // TODO
+        return first2 == last2 || !search(first1, last1, first2, last2, pred, proj1, proj2).empty();
     }
 
     export
         template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr bool starts_with(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-        // TODO
+        return mismatch(first1, last1, first2, last2, pred, proj1, proj2).in2 == last2;
     }
 
     export
         template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires (std::forward_iterator<It1> || std::sized_sentinel_for<Se1, It1>) && (std::forward_iterator<It2> || std::sized_sentinel_for<Se2, It2>) && std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr bool ends_with(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-        // TODO
+        It1 i{ first1 };
+        It2 j{ first2 };
+        while (j != last2) {
+            if (i == last1) {
+                return false;
+            }
+            ++i, ++j;
+        }
+        while (i != last1) {
+            ++i, ++first1;
+        }
+        while (first1 != last1) {
+            if (!pred(proj1(*first1), proj2(*first2))) {
+                return false;
+            }
+            ++first1, ++first2;
+        }
+        return true;
     }
 
 }
