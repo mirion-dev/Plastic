@@ -278,16 +278,18 @@ namespace plastic {
         }
         while (first != last) {
             if (pred(proj(*first), value)) {
-                It t{ first++ };
+                It i{ first };
                 auto n{ count };
+                ++i, --n;
                 do {
-                    if (--n == 0) {
-                        return { t, first };
+                    if (n-- == 0) {
+                        return { first, i };
                     }
-                    if (first == last) {
-                        return { first, first };
+                    if (i == last) {
+                        return { i, i };
                     }
-                } while (pred(proj(*first++), value));
+                } while (pred(proj(*i++), value));
+                first = i;
             }
             else {
                 ++first;
