@@ -173,9 +173,9 @@ namespace plastic {
             ++first;
         }
         if (!found) {
-            return { last, last };
+            return { first, first };
         }
-        return { i, last };
+        return { i, first };
     }
 
     export
@@ -201,7 +201,25 @@ namespace plastic {
         template<std::forward_iterator It1, std::sentinel_for<It1> Se1, std::forward_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr std::ranges::subrange<It1> find_end(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-
+        std::ranges::subrange<It1> range;
+        bool found{};
+        while (true) {
+            It1 i{ first1 };
+            It2 j{ first2 };
+            do {
+                if (j == last2) {
+                    range = { first1, i };
+                    found = true;
+                }
+                if (i == last1) {
+                    if (!found) {
+                        return { i, i };
+                    }
+                    return range;
+                }
+            } while (j != last2 && pred(proj1(*i++), proj2(*j++)));
+            ++first1;
+        }
     }
 
     export
@@ -237,16 +255,16 @@ namespace plastic {
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr std::ranges::subrange<It1> search(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (true) {
-            It1 r_last{ first1 };
-            It2 i{ first2 };
+            It1 i{ first1 };
+            It2 j{ first2 };
             do {
-                if (i == last2) {
-                    return { first1, r_last };
+                if (j == last2) {
+                    return { first1, i };
                 }
-                if (r_last == last1) {
-                    return { r_last, r_last };
+                if (i == last1) {
+                    return { i, i };
                 }
-            } while (pred(proj1(*r_last++), proj2(*i++)));
+            } while (pred(proj1(*i++), proj2(*j++)));
             ++first1;
         }
     }
@@ -260,11 +278,11 @@ namespace plastic {
         }
         while (first != last) {
             if (pred(proj(*first), value)) {
-                It r_first{ first++ };
+                It t{ first++ };
                 auto n{ count };
                 do {
                     if (--n == 0) {
-                        return { r_first, first };
+                        return { t, first };
                     }
                     if (first == last) {
                         return { first, first };
@@ -282,28 +300,28 @@ namespace plastic {
         template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = projected_value_t<It, Pj>>
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     constexpr bool contains(It first, Se last, const T& value, Pj proj = {}) {
-
+        // TODO
     }
 
     export
         template<std::forward_iterator It1, std::sentinel_for<It1> Se1, std::forward_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr bool contains_subrange(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-
+        // TODO
     }
 
     export
         template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr bool starts_with(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-
+        // TODO
     }
 
     export
         template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires (std::forward_iterator<It1> || std::sized_sentinel_for<Se1, It1>) && (std::forward_iterator<It2> || std::sized_sentinel_for<Se2, It2>) && std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr bool ends_with(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-
+        // TODO
     }
 
 }
