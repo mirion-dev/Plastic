@@ -37,6 +37,40 @@ namespace plastic {
         }
     }
 
+    template<class Fn>
+    class flipped {
+        Fn _func;
+    public:
+        template<class T, class R>
+            requires std::invocable<Fn&, R, T>
+        std::invoke_result_t<Fn&, R, T> operator()(T&&, R&&);
+    };
+
+    template<class Fn, class T, class It, class R>
+    concept indirectly_binary_left_foldable_impl =
+        std::movable<T>
+        && std::movable<R>
+        && std::convertible_to<T, R>
+        && std::invocable<Fn&, R, std::iter_reference_t<It>>
+        && std::assignable_from<R&, std::invoke_result_t<Fn&, R, std::iter_reference_t<It>>>;
+
+    template<class Fn, class T, class It>
+    concept indirectly_binary_left_foldable =
+        std::copy_constructible<Fn>
+        && std::indirectly_readable<It>
+        && std::invocable<Fn&, T, std::iter_reference_t<It>>
+        && std::convertible_to<std::invoke_result_t<Fn&, T, std::iter_reference_t<It>>, std::decay_t<std::invoke_result_t<Fn&, T, std::iter_reference_t<It>>>>
+        && indirectly_binary_left_foldable_impl<Fn, T, It, std::decay_t<std::invoke_result_t<Fn&, T, std::iter_reference_t<It>>>>;
+
+    template <class Fn, class T, class It>
+    concept indirectly_binary_right_foldable = indirectly_binary_left_foldable<flipped<Fn>, T, It>;
+
+    template<class Fn, class T, class It>
+    using fold_left_result_t = std::decay_t<std::invoke_result_t<Fn&, T, std::iter_reference_t<It>>>;
+
+    template<class Fn, class T, class It>
+    using fold_right_result_t = std::decay_t<std::invoke_result_t<flipped<Fn>&, T, std::iter_reference_t<It>>>;
+
 }
 
 // non-modifying sequence operations
@@ -323,6 +357,86 @@ namespace plastic {
             ++first1, ++first2;
         }
         return true;
+    }
+
+}
+
+// fold operations 
+namespace plastic {
+
+    template<std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
+    constexpr std::ranges::in_value_result<It, fold_left_result_t<Fn, T, It>>
+        fold_left_with_iter(It first, Se last, T init, Fn func) {
+        using R = fold_left_result_t<Fn, T, It>;
+        if (first == last) {
+            return { first, static_cast<R>(init) };
+        }
+        R value{ func(init, *first) };
+        ++first;
+        while (first != last) {
+            value = func(value, *first);
+            ++first;
+        }
+        return { first, value };
+    }
+
+    template<std::input_iterator It, std::sentinel_for<It> Se, indirectly_binary_left_foldable<std::iter_value_t<It>, It> Fn>
+        requires std::constructible_from<std::iter_value_t<It>, std::iter_reference_t<It>>
+    constexpr std::ranges::in_value_result<It, std::optional<fold_left_result_t<Fn, std::iter_value_t<It>, It>>>
+        fold_left_first_with_iter(It first, Se last, Fn func) {
+        using R = fold_left_result_t<Fn, std::iter_value_t<It>, It>;
+        if (first == last) {
+            return { first, {} };
+        }
+        std::optional<R> opt{ std::in_place, *first };
+        R& value{ *opt };
+        ++first;
+        while (first != last) {
+            value = func(value, *first);
+            ++first;
+        }
+        return { first, opt };
+    }
+
+    template<std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
+    constexpr fold_left_result_t<Fn, T, It> fold_left(It first, Se last, T init, Fn func) {
+        return fold_left_with_iter(first, last, init, func).value;
+    }
+
+    template<std::input_iterator It, std::sentinel_for<It> Se, indirectly_binary_left_foldable<std::iter_value_t<It>, It> Fn>
+        requires std::constructible_from<std::iter_value_t<It>, std::iter_reference_t<It>>
+    constexpr std::optional<fold_left_result_t<Fn, std::iter_value_t<It>, It>> fold_left_first(It first, Se last, Fn func) {
+        return fold_left_first_with_iter(first, last, func).value;
+    }
+
+    template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_right_foldable<T, It> Fn>
+    constexpr fold_right_result_t<Fn, T, It> fold_right(It first, Se last, T init, Fn func) {
+        using R = fold_right_result_t<Fn, T, It>;
+        if (first == last) {
+            return static_cast<R>(init);
+        }
+        It i{ std::ranges::next(first, last) };
+        R value{ func(*--i, init) };
+        while (first != i) {
+            value = func(*--i, value);
+        }
+        return value;
+    }
+
+    template<std::bidirectional_iterator It, std::sentinel_for<It> Se, indirectly_binary_right_foldable<std::iter_value_t<It>, It> Fn>
+        requires std::constructible_from<std::iter_value_t<It>, std::iter_reference_t<It>>
+    constexpr std::optional<fold_right_result_t<Fn, std::iter_value_t<It>, It>> fold_right_last(It first, Se last, Fn func) {
+        using R = fold_right_result_t<Fn, std::iter_value_t<It>, It>;
+        if (first == last) {
+            return {};
+        }
+        It i{ std::ranges::next(first, last) };
+        std::optional<R> opt{ std::in_place, *--i };
+        R& value{ *opt };
+        while (first != i) {
+            value = func(*--i, value);
+        }
+        return opt;
     }
 
 }
