@@ -289,9 +289,7 @@ namespace plastic {
         template<std::forward_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::equal_to, class Pj = std::identity, class T = projected_value_t<It, Pj>>
         requires std::indirectly_comparable<It, const T*, Pr, Pj>
     constexpr std::ranges::subrange<It> search_n(It first, Se last, std::iter_difference_t<It> count, const T& value, Pr pred = {}, Pj proj = {}) {
-        if (count <= 0) {
-            return { first, first };
-        }
+        if (count > 0) {
         while (first != last) {
             if (pred(proj(*first), value)) {
                 It i{ first };
@@ -310,6 +308,7 @@ namespace plastic {
             else {
                 ++first;
             }
+        }
         }
         return { first, first };
     }
@@ -442,82 +441,99 @@ namespace plastic {
 // modifying sequence operations
 export namespace plastic {
 
-    template<class It, class ItD>
-    ItD copy(It first, It last, ItD d_first) {
+    template<std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out>
+        requires std::indirectly_copyable<It, Out>
+    constexpr std::ranges::in_out_result<It, Out> copy(It first, Se last, Out output) {
         while (first != last) {
-            *d_first = *first;
-            ++d_first, ++first;
+            *output = *first;
+            ++first, ++output;
         }
-        return d_first;
+        return { std::move(first), std::move(output) };
     }
 
-    template<class It, class ItD, class Pr>
-    ItD copy_if(It first, It last, ItD d_first, Pr pred) {
+    template<std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
+        requires std::indirectly_copyable<It, Out>
+    constexpr std::ranges::in_out_result<It, Out> copy_if(It first, Se last, Out output, Pr pred, Pj proj = {}) {
         while (first != last) {
-            if (pred(*first)) {
-                *d_first = *first;
+            if (pred(proj(*first))) {
+                *output = *first;
+                ++output;
             }
-            ++d_first, ++first;
+            ++first;
         }
-        return d_first;
+        return { std::move(first), std::move(output) };
     }
 
-    template<class It, class size_t, class ItD>
-    ItD copy_n(It first, size_t count, ItD d_first) {
+    template<std::input_iterator It, std::weakly_incrementable Out>
+        requires std::indirectly_copyable<It, Out>
+    constexpr std::ranges::in_out_result<It, Out> copy_n(It first, std::iter_difference_t<It> count, Out output) {
+        if (count > 0) {
         while (count-- != 0) {
-            *d_first = *first;
-            ++d_first, ++first;
+                *output = *first;
+                ++first, ++output;
+            }
         }
-        return d_first;
+        return { std::move(first), std::move(output) };
     }
 
-    template<class It, class ItD>
-    ItD copy_backward(It first, It last, ItD d_last) {
+    template<std::bidirectional_iterator It1, std::sentinel_for<It1> Se1, std::bidirectional_iterator It2>
+        requires std::indirectly_copyable<It1, It2>
+    constexpr std::ranges::in_out_result<It1, It2> copy_backward(It1 first, Se1 last, It2 output) {
+        It1 it_last{ std::ranges::next(first, last) }, i{ it_last };
+        while (first != i) {
+            *--output = *--i;
+        }
+        return { std::move(it_last), std::move(output) };
+    }
+
+    template<std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out>
+        requires std::indirectly_movable<It, Out>
+    constexpr std::ranges::in_out_result<It, Out> move(It first, Se last, Out output) {
         while (first != last) {
-            *--d_last = *--last;
+            *output = std::move(*first);
+            ++first, ++output;
         }
-        return d_last;
+        return { std::move(first), std::move(output) };
     }
 
-    template<class It, class ItD>
-    ItD move(It first, It last, ItD d_first) {
+    template<std::bidirectional_iterator It1, std::sentinel_for<It1> Se1, std::bidirectional_iterator It2>
+        requires std::indirectly_movable<It1, It2>
+    constexpr std::ranges::in_out_result<It1, It2> move_backward(It1 first, Se1 last, It2 output) {
+        It1 it_last{ std::ranges::next(first, last) }, i{ it_last };
+        while (first != i) {
+            *--output = std::move(*--i);
+        }
+        return { std::move(it_last), std::move(output) };
+    }
+
+    template<class Out, std::sentinel_for<Out> Se, class T = std::iter_value_t<Out>>
+        requires std::output_iterator<Out, const T&>
+    constexpr Out fill(Out first, Se last, const T& value) {
         while (first != last) {
-            *d_first = std::move(*first);
-            ++d_first, ++first;
-        }
-        return d_first;
-    }
-
-    template<class It, class ItD>
-    ItD move_backward(It first, It last, ItD d_last) {
-        while (first != last) {
-            *--d_last = std::move(*--last);
-        }
-        return d_last;
-    }
-
-    template<class It, class T = std::iter_value_t<It>>
-    void fill(It first, It last, const T& value) {
-        while (first != last) {
-            *first++ = value;
-        }
-    }
-
-    template<class It, class size_t, class T>
-    It fill_n(It first, size_t count, const T& value) {
-        while (count-- != 0) {
             *first++ = value;
         }
         return first;
     }
 
-    template<class It, class ItD, class Fn>
-    ItD transform(It first, It last, ItD d_first, Fn func) {
-        while (first != last) {
-            *d_first = func(*first);
-            ++d_first, ++first;
+    template<class Out, class T = std::iter_value_t<Out>>
+        requires std::output_iterator<Out, const T&>
+    constexpr Out fill_n(Out first, std::iter_difference_t<Out> count, const T& value) {
+        if (count > 0) {
+        while (count-- != 0) {
+            *first++ = value;
         }
-        return d_first;
+        }
+        return first;
+    }
+
+    template<std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out, std::copy_constructible Fn, class Pj = std::identity>
+        requires std::indirectly_writable<Out, std::indirect_result_t<Fn&, std::projected<It, Pj>>>
+    constexpr std::ranges::in_out_result<It, Out> transform(It first, Se last, Out output, Fn func, Pj proj = {}) {
+        while (first != last) {
+            *output = func(*first);
+            ++first, ++output;
+        }
+        return { std::move(first), std::move(output) };
     }
 
     template<class It1, class It2, std::output_iterator<std::iter_value_t<It1>> ItD, class Fn>
