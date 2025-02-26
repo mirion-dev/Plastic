@@ -22,45 +22,25 @@ namespace std {
 
 }
 
-// for internal implementation use
+// exposition-only concepts
 namespace plastic {
-
-    struct satisfy_value {};
-    struct satisfy_predicate {};
-    struct satisfy_negated_predicate {};
-
-    template<class Sat, class T, class UPr>
-    constexpr bool satisfy(const T& given, const UPr& value_or_pred) {
-        if constexpr (std::same_as<Sat, satisfy_value>) {
-            return given == value_or_pred;
-        }
-        else if constexpr (std::same_as<Sat, satisfy_predicate>) {
-            return value_or_pred(given);
-        }
-        else if constexpr (std::same_as<Sat, satisfy_negated_predicate>) {
-            return !value_or_pred(given);
-        }
-        else {
-            static_assert(false);
-        }
-    }
 
     template<class Fn>
     class flipped {
         Fn _func;
     public:
-        template<class T, class R>
-            requires std::invocable<Fn&, R, T>
-        std::invoke_result_t<Fn&, R, T> operator()(T&&, R&&);
+        template<class T, class U>
+            requires std::invocable<Fn&, U, T>
+        std::invoke_result_t<Fn&, U, T> operator()(T&&, U&&);
     };
 
-    template<class Fn, class T, class It, class R>
+    template<class Fn, class T, class It, class U>
     concept indirectly_binary_left_foldable_impl =
         std::movable<T>
-        && std::movable<R>
-        && std::convertible_to<T, R>
-        && std::invocable<Fn&, R, std::iter_reference_t<It>>
-        && std::assignable_from<R&, std::invoke_result_t<Fn&, R, std::iter_reference_t<It>>>;
+        && std::movable<U>
+        && std::convertible_to<T, U>
+        && std::invocable<Fn&, U, std::iter_reference_t<It>>
+        && std::assignable_from<U&, std::invoke_result_t<Fn&, U, std::iter_reference_t<It>>>;
 
     template<class Fn, class T, class It>
     concept indirectly_binary_left_foldable =
@@ -73,11 +53,33 @@ namespace plastic {
     template <class Fn, class T, class It>
     concept indirectly_binary_right_foldable = indirectly_binary_left_foldable<flipped<Fn>, T, It>;
 
-    template<class Fn, class T, class It>
-    using fold_left_result_t = std::decay_t<std::invoke_result_t<Fn&, T, std::iter_reference_t<It>>>;
+}
+
+// for internal implementation
+namespace plastic {
 
     template<class Fn, class T, class It>
+    using fold_left_result_t = std::decay_t<std::invoke_result_t<Fn&, T, std::iter_reference_t<It>>>;
+    template<class Fn, class T, class It>
     using fold_right_result_t = std::decay_t<std::invoke_result_t<flipped<Fn>&, T, std::iter_reference_t<It>>>;
+
+    struct satisfy_value {};
+    struct satisfy_predicate {};
+    struct satisfy_negated_predicate {};
+
+    template<class Sat, class T, class UPr>
+        requires std::same_as<Sat, satisfy_value> || std::same_as<Sat, satisfy_predicate> || std::same_as<Sat, satisfy_negated_predicate>
+    constexpr bool satisfy(const T& given, const UPr& value_or_pred) {
+        if constexpr (std::same_as<Sat, satisfy_value>) {
+            return given == value_or_pred;
+}
+        else if constexpr (std::same_as<Sat, satisfy_predicate>) {
+            return value_or_pred(given);
+        }
+        else {
+            return !value_or_pred(given);
+        }
+        }
 
 }
 
@@ -375,13 +377,13 @@ export namespace plastic {
 
     template<std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
     constexpr std::ranges::in_value_result<It, fold_left_result_t<Fn, T, It>> fold_left_with_iter(It first, Se last, T init, Fn func) {
-        using R = fold_left_result_t<Fn, T, It>;
+        using U = fold_left_result_t<Fn, T, It>;
 
         if (first == last) {
-            return { std::move(first), static_cast<R>(std::move(init)) };
+            return { std::move(first), static_cast<U>(std::move(init)) };
         }
 
-        R value{ func(init, *first) };
+        U value{ func(init, *first) };
         ++first;
         while (first != last) {
             value = func(value, *first);
@@ -394,14 +396,14 @@ export namespace plastic {
     template<std::input_iterator It, std::sentinel_for<It> Se, indirectly_binary_left_foldable<std::iter_value_t<It>, It> Fn>
         requires std::constructible_from<std::iter_value_t<It>, std::iter_reference_t<It>>
     constexpr std::ranges::in_value_result<It, std::optional<fold_left_result_t<Fn, std::iter_value_t<It>, It>>> fold_left_first_with_iter(It first, Se last, Fn func) {
-        using R = fold_left_result_t<Fn, std::iter_value_t<It>, It>;
+        using U = fold_left_result_t<Fn, std::iter_value_t<It>, It>;
 
         if (first == last) {
             return { std::move(first), {} };
         }
 
-        std::optional<R> opt{ std::in_place, *first };
-        R& value{ *opt };
+        std::optional<U> opt{ std::in_place, *first };
+        U& value{ *opt };
         ++first;
         while (first != last) {
             value = func(value, *first);
@@ -424,14 +426,14 @@ export namespace plastic {
 
     template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_right_foldable<T, It> Fn>
     constexpr fold_right_result_t<Fn, T, It> fold_right(It first, Se last, T init, Fn func) {
-        using R = fold_right_result_t<Fn, T, It>;
+        using U = fold_right_result_t<Fn, T, It>;
 
         if (first == last) {
-            return static_cast<R>(std::move(init));
+            return static_cast<U>(std::move(init));
         }
 
         It i{ std::ranges::next(first, last) };
-        R value{ func(*--i, init) };
+        U value{ func(*--i, init) };
         while (first != i) {
             value = func(*--i, value);
         }
@@ -442,15 +444,15 @@ export namespace plastic {
     template<std::bidirectional_iterator It, std::sentinel_for<It> Se, indirectly_binary_right_foldable<std::iter_value_t<It>, It> Fn>
         requires std::constructible_from<std::iter_value_t<It>, std::iter_reference_t<It>>
     constexpr std::optional<fold_right_result_t<Fn, std::iter_value_t<It>, It>> fold_right_last(It first, Se last, Fn func) {
-        using R = fold_right_result_t<Fn, std::iter_value_t<It>, It>;
+        using U = fold_right_result_t<Fn, std::iter_value_t<It>, It>;
 
         if (first == last) {
             return {};
         }
 
         It i{ std::ranges::next(first, last) };
-        std::optional<R> opt{ std::in_place, *--i };
-        R& value{ *opt };
+        std::optional<U> opt{ std::in_place, *--i };
+        U& value{ *opt };
         while (first != i) {
             value = func(*--i, value);
         }
