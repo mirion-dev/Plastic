@@ -6,9 +6,17 @@ export module plastic:algorithm;
 
 import std;
 
-// introduced in C++26, not yet implemented in MSVC
-namespace plastic {
+// temporary fixes
+namespace std {
 
+    // introduced in C++20, but EDG cannot recognize it within modules
+#ifdef __EDG__
+    template<class Fn, class... It>
+        requires (std::indirectly_readable<It> && ...) && std::invocable<Fn, std::iter_reference_t<It>...>
+    using indirect_result_t = std::invoke_result_t<Fn, std::iter_reference_t<It>...>;
+#endif
+
+    // introduced in C++26, but not yet implemented in MSVC
     template<std::indirectly_readable It, std::indirectly_regular_unary_invocable<It> Pj>
     using projected_value_t = std::remove_cvref_t<std::invoke_result_t<Pj&, std::iter_value_t<It>&>>;
 
@@ -110,7 +118,7 @@ namespace plastic {
     }
 
     export
-        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = projected_value_t<It, Pj>>
+        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>>
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     constexpr std::iter_difference_t<It> count(It first, Se last, const T& value, Pj proj = {}) {
         return count_impl<satisfy_value>(first, last, value, proj);
@@ -141,7 +149,7 @@ namespace plastic {
     }
 
     export
-        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = projected_value_t<It, Pj>>
+        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>>
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     constexpr It find(It first, Se last, const T& value, Pj proj = {}) {
         return find_impl<satisfy_value>(first, last, value, proj);
@@ -195,7 +203,7 @@ namespace plastic {
     }
 
     export
-        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = projected_value_t<It, Pj>>
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>>
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     constexpr std::ranges::subrange<It> find_last(It first, Se last, const T& value, Pj proj = {}) {
         return find_last_impl<satisfy_value>(first, last, value, proj);
@@ -286,35 +294,35 @@ namespace plastic {
     }
 
     export
-        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::equal_to, class Pj = std::identity, class T = projected_value_t<It, Pj>>
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::equal_to, class Pj = std::identity, class T = std::projected_value_t<It, Pj>>
         requires std::indirectly_comparable<It, const T*, Pr, Pj>
     constexpr std::ranges::subrange<It> search_n(It first, Se last, std::iter_difference_t<It> count, const T& value, Pr pred = {}, Pj proj = {}) {
         if (count > 0) {
-        while (first != last) {
-            if (pred(proj(*first), value)) {
-                It i{ first };
-                auto n{ count };
-                ++i, --n;
-                do {
-                    if (n-- == 0) {
-                        return { std::move(first), std::move(i) };
-                    }
-                    if (i == last) {
-                        return { i, i };
-                    }
-                } while (pred(proj(*i++), value));
-                first = i;
+            while (first != last) {
+                if (pred(proj(*first), value)) {
+                    It i{ first };
+                    auto n{ count };
+                    ++i, --n;
+                    do {
+                        if (n-- == 0) {
+                            return { std::move(first), std::move(i) };
+                        }
+                        if (i == last) {
+                            return { i, i };
+                        }
+                    } while (pred(proj(*i++), value));
+                    first = i;
+                }
+                else {
+                    ++first;
+                }
             }
-            else {
-                ++first;
-            }
-        }
         }
         return { first, first };
     }
 
     export
-        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = projected_value_t<It, Pj>>
+        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>>
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     constexpr bool contains(It first, Se last, const T& value, Pj proj = {}) {
         return find(first, last, value, proj) != last;
@@ -468,7 +476,7 @@ export namespace plastic {
         requires std::indirectly_copyable<It, Out>
     constexpr std::ranges::in_out_result<It, Out> copy_n(It first, std::iter_difference_t<It> count, Out output) {
         if (count > 0) {
-        while (count-- != 0) {
+            while (count-- != 0) {
                 *output = *first;
                 ++first, ++output;
             }
@@ -519,9 +527,9 @@ export namespace plastic {
         requires std::output_iterator<Out, const T&>
     constexpr Out fill_n(Out first, std::iter_difference_t<Out> count, const T& value) {
         if (count > 0) {
-        while (count-- != 0) {
-            *first++ = value;
-        }
+            while (count-- != 0) {
+                *first++ = value;
+            }
         }
         return first;
     }
