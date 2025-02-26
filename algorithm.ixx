@@ -197,7 +197,7 @@ namespace plastic {
             ++first;
         }
         if (!found) {
-            return { first, first };
+            i = first;
         }
         return { std::move(i), std::move(first) };
     }
@@ -237,7 +237,7 @@ namespace plastic {
                 }
                 if (i == last1) {
                     if (!found) {
-                        return { i, i };
+                        range = { i, i };
                     }
                     return range;
                 }
@@ -354,9 +354,11 @@ namespace plastic {
             }
             ++i, ++j;
         }
+
         while (i != last1) {
             ++i, ++first1;
         }
+
         while (first1 != last1) {
             if (!pred(proj1(*first1), proj2(*first2))) {
                 return false;
@@ -374,15 +376,18 @@ export namespace plastic {
     template<std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
     constexpr std::ranges::in_value_result<It, fold_left_result_t<Fn, T, It>> fold_left_with_iter(It first, Se last, T init, Fn func) {
         using R = fold_left_result_t<Fn, T, It>;
+
         if (first == last) {
             return { std::move(first), static_cast<R>(std::move(init)) };
         }
+
         R value{ func(init, *first) };
         ++first;
         while (first != last) {
             value = func(value, *first);
             ++first;
         }
+
         return { std::move(first), std::move(value) };
     }
 
@@ -390,9 +395,11 @@ export namespace plastic {
         requires std::constructible_from<std::iter_value_t<It>, std::iter_reference_t<It>>
     constexpr std::ranges::in_value_result<It, std::optional<fold_left_result_t<Fn, std::iter_value_t<It>, It>>> fold_left_first_with_iter(It first, Se last, Fn func) {
         using R = fold_left_result_t<Fn, std::iter_value_t<It>, It>;
+
         if (first == last) {
             return { std::move(first), {} };
         }
+
         std::optional<R> opt{ std::in_place, *first };
         R& value{ *opt };
         ++first;
@@ -400,6 +407,7 @@ export namespace plastic {
             value = func(value, *first);
             ++first;
         }
+
         return { std::move(first), std::move(opt) };
     }
 
@@ -417,14 +425,17 @@ export namespace plastic {
     template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_right_foldable<T, It> Fn>
     constexpr fold_right_result_t<Fn, T, It> fold_right(It first, Se last, T init, Fn func) {
         using R = fold_right_result_t<Fn, T, It>;
+
         if (first == last) {
             return static_cast<R>(std::move(init));
         }
+
         It i{ std::ranges::next(first, last) };
         R value{ func(*--i, init) };
         while (first != i) {
             value = func(*--i, value);
         }
+
         return value;
     }
 
@@ -432,15 +443,18 @@ export namespace plastic {
         requires std::constructible_from<std::iter_value_t<It>, std::iter_reference_t<It>>
     constexpr std::optional<fold_right_result_t<Fn, std::iter_value_t<It>, It>> fold_right_last(It first, Se last, Fn func) {
         using R = fold_right_result_t<Fn, std::iter_value_t<It>, It>;
+
         if (first == last) {
             return {};
         }
+
         It i{ std::ranges::next(first, last) };
         std::optional<R> opt{ std::in_place, *--i };
         R& value{ *opt };
         while (first != i) {
             value = func(*--i, value);
         }
+
         return opt;
     }
 
@@ -491,11 +505,11 @@ namespace plastic {
         template<std::bidirectional_iterator It1, std::sentinel_for<It1> Se1, std::bidirectional_iterator It2>
         requires std::indirectly_copyable<It1, It2>
     constexpr std::ranges::in_out_result<It1, It2> copy_backward(It1 first, Se1 last, It2 output) {
-        It1 it_last{ std::ranges::next(first, last) }, i{ it_last };
+        It1 i{ std::ranges::next(first, last) }, temp{ i };
         while (first != i) {
             *--output = *--i;
         }
-        return { std::move(it_last), std::move(output) };
+        return { std::move(temp), std::move(output) };
     }
 
     export
@@ -513,11 +527,11 @@ namespace plastic {
         template<std::bidirectional_iterator It1, std::sentinel_for<It1> Se1, std::bidirectional_iterator It2>
         requires std::indirectly_movable<It1, It2>
     constexpr std::ranges::in_out_result<It1, It2> move_backward(It1 first, Se1 last, It2 output) {
-        It1 it_last{ std::ranges::next(first, last) }, i{ it_last };
+        It1 i{ std::ranges::next(first, last) }, temp{ i };
         while (first != i) {
             *--output = std::move(*--i);
         }
-        return { std::move(it_last), std::move(output) };
+        return { std::move(temp), std::move(output) };
     }
 
     export
@@ -669,7 +683,7 @@ namespace plastic {
     }
 
     export
-        template<class Sat, class It, class Se, class Out, class Pj, class TPr, class U>
+        template<class Sat, class It, class Se, class Out, class TPr, class U, class Pj>
     constexpr std::ranges::in_out_result<It, Out> replace_copy_impl(It first, Se last, Out output, const TPr& value_or_pred, const U& value, Pj proj) {
         while (first != last) {
             *output = satisfy<Sat>(proj(*first), value_or_pred) ? value : *first;
@@ -707,33 +721,37 @@ namespace plastic {
         template<std::bidirectional_iterator It, std::sentinel_for<It> Se>
         requires std::permutable<It>
     constexpr It reverse(It first, Se last) {
-        It it_last{ std::ranges::next(first, last) }, i{ it_last };
+        It i{ std::ranges::next(first, last) }, temp{ i };
         while (first != i && first != --i) {
             std::swap(*first++, *i);
         }
-        return it_last;
+        return temp;
     }
 
     export
         template<std::bidirectional_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out>
         requires std::indirectly_copyable<It, Out>
     constexpr std::ranges::in_out_result<It, Out> reverse_copy(It first, Se last, Out output) {
-        It it_last{ std::ranges::next(first, last) }, i{ it_last };
+        It i{ std::ranges::next(first, last) }, temp{ i };
         while (first != i) {
             *output = *--i;
             ++output;
         }
-        return { std::move(it_last), std::move(output) };
+        return { std::move(temp), std::move(output) };
     }
 
-    template<class It>
-    It rotate(It first, It middle, It last) {
+    export
+        template<std::permutable It, std::sentinel_for<It> Se>
+    constexpr std::ranges::subrange<It> rotate(It first, It middle, Se last) {
         if (first == middle) {
-            return last;
+            It i{ std::ranges::next(middle, last) };
+            return { i, i };
         }
+
         if (middle == last) {
-            return first;
+            return { std::move(first), std::move(middle) };
         }
+
         It i{ middle };
         do {
             std::swap(*first++, *i++);
@@ -741,7 +759,8 @@ namespace plastic {
                 middle = i;
             }
         } while (i != last);
-        It res{ first };
+        It temp{ first };
+
         while (middle != last) {
             It i{ middle };
             do {
@@ -751,7 +770,8 @@ namespace plastic {
                 }
             } while (i != last);
         }
-        return res;
+
+        return { std::move(temp), std::move(middle) };
     }
 
     export
@@ -762,17 +782,12 @@ namespace plastic {
         return { std::move(res1.in), std::move(res2.out) };
     }
 
-    template<class It>
-    It shift_left(It first, It last, std::iter_difference_t<It> count) {
-        It source{ first };
-        while (count-- != 0) {
-            if (source == last) {
-                return first;
+    export
+        template<std::permutable It, std::sentinel_for<It> Se>
+    constexpr std::ranges::subrange<It> shift_left(It first, Se last, std::iter_difference_t<It> count) {
+        assert(count >= 0);
+        return { first, move(std::ranges::next(first, count, last), last, first).out };
             }
-            ++source;
-        }
-        return move(source, last, first);
-    }
 
     template<class It>
     It shift_right(It first, It last, std::iter_difference_t<It> count) {
