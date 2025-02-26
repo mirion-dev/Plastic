@@ -83,7 +83,7 @@ namespace plastic {
             func(proj(*first));
             ++first;
         }
-        return { first, func };
+        return { std::move(first), std::move(func) };
     }
 
     export
@@ -94,11 +94,11 @@ namespace plastic {
             func(proj(*first));
             ++first;
         }
-        return { first, func };
+        return { std::move(first), std::move(func) };
     }
 
     template<class Sat, class It, class Se, class TPr, class Pj>
-    constexpr auto count_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
+    constexpr std::iter_difference_t<It> count_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
         std::iter_difference_t<It> count{};
         while (first != last) {
             if (satisfy<Sat>(proj(*first), value_or_pred)) {
@@ -129,7 +129,7 @@ namespace plastic {
         while (first1 != last1 && first2 != last2 && pred(proj1(*first1), proj2(*first2))) {
             ++first1, ++first2;
         }
-        return { first1, first2 };
+        return { std::move(first1), std::move(first2) };
     }
 
     template<class Sat, class It, class Se, class TPr, class Pj>
@@ -191,7 +191,7 @@ namespace plastic {
         if (!found) {
             return { first, first };
         }
-        return { i, first };
+        return { std::move(i), std::move(first) };
     }
 
     export
@@ -275,7 +275,7 @@ namespace plastic {
             It2 j{ first2 };
             do {
                 if (j == last2) {
-                    return { first1, i };
+                    return { std::move(first1), std::move(i) };
                 }
                 if (i == last1) {
                     return { i, i };
@@ -299,7 +299,7 @@ namespace plastic {
                 ++i, --n;
                 do {
                     if (n-- == 0) {
-                        return { first, i };
+                        return { std::move(first), std::move(i) };
                     }
                     if (i == last) {
                         return { i, i };
@@ -365,11 +365,10 @@ namespace plastic {
 namespace plastic {
 
     template<std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
-    constexpr std::ranges::in_value_result<It, fold_left_result_t<Fn, T, It>>
-        fold_left_with_iter(It first, Se last, T init, Fn func) {
+    constexpr std::ranges::in_value_result<It, fold_left_result_t<Fn, T, It>> fold_left_with_iter(It first, Se last, T init, Fn func) {
         using R = fold_left_result_t<Fn, T, It>;
         if (first == last) {
-            return { first, static_cast<R>(init) };
+            return { std::move(first), static_cast<R>(std::move(init)) };
         }
         R value{ func(init, *first) };
         ++first;
@@ -377,16 +376,15 @@ namespace plastic {
             value = func(value, *first);
             ++first;
         }
-        return { first, value };
+        return { std::move(first), std::move(value) };
     }
 
     template<std::input_iterator It, std::sentinel_for<It> Se, indirectly_binary_left_foldable<std::iter_value_t<It>, It> Fn>
         requires std::constructible_from<std::iter_value_t<It>, std::iter_reference_t<It>>
-    constexpr std::ranges::in_value_result<It, std::optional<fold_left_result_t<Fn, std::iter_value_t<It>, It>>>
-        fold_left_first_with_iter(It first, Se last, Fn func) {
+    constexpr std::ranges::in_value_result<It, std::optional<fold_left_result_t<Fn, std::iter_value_t<It>, It>>> fold_left_first_with_iter(It first, Se last, Fn func) {
         using R = fold_left_result_t<Fn, std::iter_value_t<It>, It>;
         if (first == last) {
-            return { first, {} };
+            return { std::move(first), {} };
         }
         std::optional<R> opt{ std::in_place, *first };
         R& value{ *opt };
@@ -395,7 +393,7 @@ namespace plastic {
             value = func(value, *first);
             ++first;
         }
-        return { first, opt };
+        return { std::move(first), std::move(opt) };
     }
 
     template<std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
@@ -413,7 +411,7 @@ namespace plastic {
     constexpr fold_right_result_t<Fn, T, It> fold_right(It first, Se last, T init, Fn func) {
         using R = fold_right_result_t<Fn, T, It>;
         if (first == last) {
-            return static_cast<R>(init);
+            return static_cast<R>(std::move(init));
         }
         It i{ std::ranges::next(first, last) };
         R value{ func(*--i, init) };
