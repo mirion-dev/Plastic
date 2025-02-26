@@ -369,7 +369,7 @@ namespace plastic {
 }
 
 // fold operations 
-namespace plastic {
+export namespace plastic {
 
     template<std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
     constexpr std::ranges::in_value_result<It, fold_left_result_t<Fn, T, It>> fold_left_with_iter(It first, Se last, T init, Fn func) {
