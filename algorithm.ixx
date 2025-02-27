@@ -83,6 +83,37 @@ namespace plastic {
 
 }
 
+// comparison operations
+export namespace plastic {
+
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
+        requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
+    constexpr bool equal(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
+        while (first1 != last1 && first2 != last2) {
+            if (!pred(proj1(*first1), proj2(*first2))) {
+                return false;
+            }
+            ++first1, ++first2;
+        }
+        return true;
+    }
+
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_strict_weak_order<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::less>
+    constexpr bool lexicographical_compare(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
+        while (first1 != last1 && first2 != last2) {
+            if (pred(proj1(*first1), proj2(*first2))) {
+                return true;
+            }
+            if (pred(proj2(*first2), proj1(*first1))) {
+                return false;
+            }
+            ++first1, ++first2;
+        }
+        return first1 == last1 && first2 != last2;
+    }
+
+}
+
 // non-modifying sequence operations
 namespace plastic {
 
@@ -1436,58 +1467,6 @@ export namespace plastic {
     template<class T, class Cmp = std::less<>>
     const T& clamp(const T& value, const T& lowest, const T& highest, Cmp cmp = {}) {
         return cmp(value, lowest) ? lowest : cmp(highest, value) ? highest : value;
-    }
-
-}
-
-// comparison operations
-export namespace plastic {
-
-    template<class It1, class It2, class Pr = std::equal_to<>>
-    bool equal(It1 first1, It1 last1, It2 first2, Pr pred = {}) {
-        while (first1 != last1) {
-            if (!pred(*first1, *first2)) {
-                return false;
-            }
-            ++first1, ++first2;
-        }
-        return true;
-    }
-
-    template<class It1, class It2, class Pr = std::equal_to<>>
-    bool equal(It1 first1, It1 last1, It2 first2, It2 last2, Pr pred = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (!pred(*first1, *first2)) {
-                return false;
-            }
-            ++first1, ++first2;
-        }
-        return first1 == last1 && first2 == last2;
-    }
-
-    template<class It1, class It2, class Cmp = std::less<>>
-    bool lexicographical_compare(It1 first1, It1 last1, It2 first2, It2 last2, Cmp cmp = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (cmp(*first1, *first2)) {
-                return true;
-            }
-            if (cmp(*first2++, *first1++)) {
-                return false;
-            }
-        }
-        return first1 == last1 && first2 != last2;
-    }
-
-    template<class It1, class It2, class Cmp = std::compare_three_way>
-    std::compare_three_way_result_t<It1, It2> lexicographical_compare_three_way(It1 first1, It1 last1, It2 first2, It2 last2, Cmp cmp = {}) {
-        using result_t = std::compare_three_way_result_t<It1, It2>;
-        while (first1 != last1 && first2 != last2) {
-            result_t cmp{ cmp(*first1++, *first2++) };
-            if (cmp != 0) {
-                return cmp;
-            }
-        }
-        return first1 != last1 ? std::strong_ordering::greater : first2 != last2 ? std::strong_ordering::less : std::strong_ordering::equal;
     }
 
 }
