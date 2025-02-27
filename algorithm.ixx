@@ -985,7 +985,7 @@ namespace plastic {
             }
         }
         else {
-            std::iter_value_t<It> value{ *first };
+            auto value{ *first };
             *output = value;
             while (++first != last) {
                 if (!pred(proj(value), proj(*first))) {
@@ -1002,70 +1002,96 @@ namespace plastic {
 // partitioning operations
 namespace plastic {
 
-    template<class It, class Pr>
-    bool is_partitioned(It first, It last, Pr pred) {
-        while (first != last && pred(*first)) {
+    export
+        template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
+    constexpr bool is_partitioned(It first, Se last, Pr pred, Pj proj = {}) {
+        while (first != last && pred(proj(*first))) {
             ++first;
         }
-        while (first != last && !pred(*first)) {
+        while (first != last && !pred(proj(*first))) {
             ++first;
         }
         return first == last;
     }
-
-    template<class It, class Pr>
-    It partition(It first, It last, Pr pred) {
-        first = find_if_not(first, last, pred);
+    export
+        template<std::permutable It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
+    constexpr std::ranges::subrange<It> partition(It first, Se last, Pr pred, Pj proj = {}) {
+        first = find_if_not(first, last, pred, proj);
+        It i{ first };
         if (first != last) {
-            It i{ first };
             while (++i != last) {
-                if (pred(*i)) {
-                    std::swap(*i, *first);
-                    ++first;
+                if (pred(proj(*i))) {
+                    std::swap(*first++, *i);
                 }
             }
         }
-        return first;
+        return { std::move(first), std::move(i) };
     }
-
-    template<class It, class d_iter1, class d_iter2, class Pr>
-    std::pair<d_iter1, d_iter2> partition_copy(It first, It last, d_iter1 d_first1, d_iter2 d_first2, Pr pred) {
+    export
+        template<std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out1, std::weakly_incrementable Out2, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
+        requires std::indirectly_copyable<It, Out1>&& std::indirectly_copyable<It, Out2>
+    constexpr std::ranges::in_out_out_result<It, Out1, Out2> partition_copy(It first, Se last, Out1 output_true, Out2 output_false, Pr pred, Pj proj = {}) {
         while (first != last) {
-            (pred(*first) ? *d_first1++ : *d_first2++) = *first;
+            if (pred(proj(*first))) {
+                *output_true = *first;
+                ++output_true;
+            }
+            else {
+                *output_false = *first;
+                ++output_false;
+            }
             ++first;
         }
-        return { d_first1, d_first2 };
+        return { std::move(first), std::move(output_true), std::move(output_false) };
     }
 
-    template<class It, class Pr>
-    It stable_partition(It first, It last, Pr pred) {
-        using value_t = std::iter_value_t<It>;
-        first = find_if_not(first, last, pred);
-        while (first != last && !pred(*--last));
-        if (first != last) {
-            value_t* buffer{ new value_t[std::distance(first, last) + 1] };
-            value_t* p{ buffer };
-            It i{ first };
-            *p++ = std::move(*i++);
-            while (i != last) {
-                (pred(*i++) ? *first++ : *p++) = std::move(*i);
-            }
-            *first++ = std::move(*last);
-            move(buffer, p, first);
-            delete[] buffer;
+    export
+        template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
+        requires std::permutable<It>
+    std::ranges::subrange<It> stable_partition(It first, Se last, Pr pred, Pj proj = {}) {
+        first = find_if_not(first, last, pred, proj);
+        if (first == last) {
+            return { first, first };
         }
-        return first;
+
+        It i{ first }, r_last{ std::ranges::next(first, last) };
+        do {
+            if (first == --r_last) {
+                return { std::move(first), std::move(r_last) };
+            }
+        } while (pred(*r_last));
+
+        auto buf{ new std::iter_value_t<It>[std::ranges::distance(first, r_last) + 1] };
+        It i{ first };
+        auto j{ buf };
+
+        *j++ = std::move(*i++);
+        while (i != r_last) {
+            if (pred(proj(*i))) {
+                *first++ = std::move(*i);
+            }
+            else {
+                *j++ = std::move(*i);
+            }
+            ++i;
+        }
+        *first++ = std::move(*r_last);
+
+        It temp{ move(buf, j, first).out };
+        delete[] buf;
+
+        return { std::move(temp), std::move(first) };
     }
 
-    template<class It, class Pr>
-    It partition_point(It first, It last, Pr pred) {
-        using diff_t = std::iter_difference_t<It>;
-        diff_t size{ std::distance(first, last) };
+    export
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
+    constexpr It partition_point(It first, Se last, Pr pred, Pj proj = {}) {
+        auto size{ std::ranges::distance(first, last) };
         while (size != 0) {
-            diff_t half{ size / 2 };
-            It next{ std::next(first, half) };
-            if (pred(*next)) {
-                first = ++next;
+            auto half{ size / 2 };
+            It i{ std::ranges::next(first, half) };
+            if (pred(proj(*i))) {
+                first = ++i;
                 size -= half + 1;
             }
             else {
