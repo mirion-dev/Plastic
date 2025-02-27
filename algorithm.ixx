@@ -72,21 +72,21 @@ namespace plastic {
     constexpr bool satisfy(const T& given, const UPr& value_or_pred) {
         if constexpr (std::same_as<Sat, satisfy_value>) {
             return given == value_or_pred;
-}
+        }
         else if constexpr (std::same_as<Sat, satisfy_predicate>) {
             return value_or_pred(given);
         }
         else {
             return !value_or_pred(given);
         }
-        }
+    }
 
 }
 
 // comparison operations
 export namespace plastic {
 
-        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
+    template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr bool equal(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
@@ -98,7 +98,7 @@ export namespace plastic {
         return true;
     }
 
-        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_strict_weak_order<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::less>
+    template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_strict_weak_order<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::less>
     constexpr bool lexicographical_compare(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
             if (pred(proj1(*first1), proj2(*first2))) {
@@ -380,17 +380,17 @@ namespace plastic {
         requires (std::forward_iterator<It1> || std::sized_sentinel_for<Se1, It1>) && (std::forward_iterator<It2> || std::sized_sentinel_for<Se2, It2>) && std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr bool ends_with(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         if constexpr (std::forward_iterator<It1> && std::forward_iterator<It2>) {
-        It1 i{ first1 };
-        It2 j{ first2 };
-        while (j != last2) {
-            if (i == last1) {
-                return false;
+            It1 i{ first1 };
+            It2 j{ first2 };
+            while (j != last2) {
+                if (i == last1) {
+                    return false;
+                }
+                ++i, ++j;
             }
-            ++i, ++j;
-        }
-        while (i != last1) {
-            ++i, ++first1;
-        }
+            while (i != last1) {
+                ++i, ++first1;
+            }
         }
         else if constexpr (std::forward_iterator<It1>) {
             It1 i{ std::ranges::next(first1, last2 - first2, last1) };
@@ -399,8 +399,8 @@ namespace plastic {
             }
             while (i != last1) {
                 ++i, ++first1;
+            }
         }
-    }
         else if constexpr (std::forward_iterator<It2>) {
             auto size1{ last1 - first1 }, size2{};
             It2 i{ first2 };
@@ -411,7 +411,7 @@ namespace plastic {
                 ++i, ++size2;
             }
             first1 = std::ranges::next(first1, size1 - size2, last1);
-}
+        }
         else {
             first1 = std::ranges::next(first1, (last2 - first2) - (last1 - first1), last1);
         }
@@ -810,7 +810,7 @@ namespace plastic {
                 middle = i;
             }
         } while (i != last);
-        It temp{ first };
+        It dest{ first };
 
         while (middle != last) {
             It i{ middle };
@@ -822,7 +822,7 @@ namespace plastic {
             } while (i != last);
         }
 
-        return { std::move(temp), std::move(middle) };
+        return { std::move(dest), std::move(middle) };
     }
 
     export
@@ -838,17 +838,18 @@ namespace plastic {
     constexpr std::ranges::subrange<It> shift_left(It first, Se last, std::iter_difference_t<It> count) {
         assert(count >= 0);
         return { first, move(std::ranges::next(first, count, last), last, first).out };
-            }
+    }
 
-    template<class It>
-    It shift_right(It first, It last, std::iter_difference_t<It> count) {
-        It dest{ first };
-        while (count-- != 0) {
-            if (dest == last) {
-                return last;
-            }
-            ++dest;
+    export
+        template<std::permutable It, std::sentinel_for<It> Se>
+    constexpr std::ranges::subrange<It> shift_right(It first, Se last, std::iter_difference_t<It> count) {
+        assert(count >= 0);
+
+        auto dest{ std::ranges::next(first, count, last) };
+        if (dest == last) {
+            return { std::move(dest), std::move(dest) };
         }
+
         It i{ first }, j{ dest };
         while (i != dest) {
             if (j == last) {
@@ -857,66 +858,80 @@ namespace plastic {
             }
             ++i, ++j;
         }
-        It buffer{ first };
+
+        It buf{ first };
         while (j != last) {
-            std::swap(*buffer++, *i);
-            ++i, ++j;
-            if (buffer == dest) {
-                buffer = first;
+            std::swap(*buf, *i);
+            ++buf, ++i, ++j;
+            if (buf == dest) {
+                buf = first;
             }
         }
-        move(first, buffer, move(buffer, dest, i));
-        return dest;
+
+        move(first, buf, move(buf, dest, i).out);
+        return { std::move(dest), std::move(j) };
     }
 
-    template<std::random_access_iterator It, class URBG>
-    void shuffle(It first, It last, URBG&& gen) {
-        using diff_t = std::iter_difference_t<It>;
-        using distr_t = std::uniform_int_distribution<diff_t>;
-        using param_t = distr_t::param_type;
-        distr_t dist;
-        diff_t size{ last - first };
-        while (size-- != 0) {
-            std::swap(first[size], first[dist(gen, param_t{ 0, size })]);
-        }
-    }
+    export
+        template<std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out, class Gen>
+        requires (std::forward_iterator<It> || std::random_access_iterator<Out>) && std::indirectly_copyable<It, Out>&& std::uniform_random_bit_generator<std::remove_reference_t<Gen>>
+    Out sample(It first, Se last, Out output, std::iter_difference_t<It> count, Gen&& gen) {
+        using Diff = std::iter_difference_t<It>;
+        using Distr = std::uniform_int_distribution<Diff>;
+        using Param = Distr::param_type;
 
-    template<class It, class ItD, class size_t, class URBG>
-    ItD sample(It first, It last, ItD d_first, size_t count, URBG&& gen) {
-        using diff_t = std::iter_difference_t<It>;
-        using distr_t = std::uniform_int_distribution<diff_t>;
-        using param_t = distr_t::param_type;
-        distr_t dist;
+        Distr distr;
         if constexpr (std::forward_iterator<It>) {
-            diff_t size{ std::distance(first, last) };
+            Diff size{ std::ranges::distance(first, last) };
             if (count >= size) {
-                return copy(first, last, d_first);
+                return copy(first, last, output).out;
             }
+
             while (count != 0) {
-                if (dist(gen, param_t{ 0, --size }) < count) {
-                    *d_first++ = *first;
+                if (distr(gen, Param{ 0, --size }) < count) {
+                    *output++ = *first;
                     --count;
                 }
                 ++first;
             }
-            return d_first;
+
+            return output;
         }
         else {
-            diff_t size{ 0 };
+            Diff size{};
             while (first != last && size != count) {
-                d_first[size++] = *first;
+                output[size++] = *first;
                 ++first;
             }
-            It res{ d_first + size };
+
+            Out temp{ output + size };
             while (first != last) {
-                diff_t r{ dist(gen, param_t{ 0, size++ }) };
-                if (r < count) {
-                    d_first[r] = *first;
+                Diff i{ distr(gen, Param{ 0, size++ }) };
+                if (i < count) {
+                    output[i] = *first;
                 }
                 ++first;
             }
-            return res;
+
+            return temp;
         }
+    }
+
+    export
+        template<std::random_access_iterator It, std::sentinel_for<It> Se, class Gen>
+        requires std::permutable<It>&& std::uniform_random_bit_generator<std::remove_reference_t<Gen>>
+    It shuffle(It first, Se last, Gen&& gen) {
+        using Diff = std::iter_difference_t<It>;
+        using Distr = std::uniform_int_distribution<Diff>;
+        using Param = Distr::param_type;
+
+        Distr distr;
+        Diff size{ last - first };
+        while (--size != 0) {
+            std::swap(first[size], first[distr(gen, Param{ 0, size })]);
+        }
+
+        return std::ranges::next(first, last);
     }
 
     export
