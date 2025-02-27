@@ -939,18 +939,39 @@ namespace plastic {
         template<std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out, class Pj = std::identity, std::indirect_equivalence_relation<std::projected<It, Pj>> Pr = std::ranges::equal_to>
         requires std::indirectly_copyable<It, Out> && (std::forward_iterator<It> || std::input_iterator<Out> && std::same_as<std::iter_value_t<It>, std::iter_value_t<Out>> || std::indirectly_copyable_storable<It, Out>)
     constexpr std::ranges::in_out_result<It, Out> unique_copy(It first, Se last, Out output, Pr pred = {}, Pj proj = {}) {
-        if (first != last) {
-            std::iter_value_t<It> value{ *first };
-            *output = value;
-            ++output;
+        if (first == last) {
+            return { std::move(first), std::move(output) };
+        }
+
+        if constexpr (std::forward_iterator<It>) {
+            It i{ first };
+            *output = *first;
             while (++first != last) {
-                if (!pred(proj(value), proj(*first))) {
-                    *output = value = *first;
-                    ++output;
+                if (!pred(proj(*i), proj(*first))) {
+                    i = first;
+                    *++output = *first;
                 }
             }
         }
-        return { std::move(first), std::move(output) };
+        else if constexpr (std::input_iterator<Out> && std::same_as<std::iter_value_t<It>, std::iter_value_t<Out>>) {
+            *output = *first;
+            while (++first != last) {
+                if (!pred(proj(*output), proj(*first))) {
+                    *++output = *first;
+                }
+            }
+        }
+        else {
+            std::iter_value_t<It> value{ *first };
+            *output = value;
+            while (++first != last) {
+                if (!pred(proj(value), proj(*first))) {
+                    *++output = value = *first;
+                }
+            }
+        }
+
+        return { std::move(first), std::move(++output) };
     }
 
 }
