@@ -84,9 +84,10 @@ namespace plastic {
 }
 
 // comparison operations
-export namespace plastic {
+namespace plastic {
 
-    template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
+    export
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr bool equal(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
@@ -98,7 +99,8 @@ export namespace plastic {
         return true;
     }
 
-    template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_strict_weak_order<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::less>
+    export
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_strict_weak_order<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::less>
     constexpr bool lexicographical_compare(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
             if (pred(proj1(*first1), proj2(*first2))) {
@@ -422,9 +424,10 @@ namespace plastic {
 }
 
 // fold operations 
-export namespace plastic {
+namespace plastic {
 
-    template<std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
+    export
+        template<std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
     constexpr std::ranges::in_value_result<It, fold_left_result_t<Fn, T, It>> fold_left_with_iter(It first, Se last, T init, Fn func) {
         using U = fold_left_result_t<Fn, T, It>;
 
@@ -442,7 +445,8 @@ export namespace plastic {
         return { std::move(first), std::move(value) };
     }
 
-    template<std::input_iterator It, std::sentinel_for<It> Se, indirectly_binary_left_foldable<std::iter_value_t<It>, It> Fn>
+    export
+        template<std::input_iterator It, std::sentinel_for<It> Se, indirectly_binary_left_foldable<std::iter_value_t<It>, It> Fn>
         requires std::constructible_from<std::iter_value_t<It>, std::iter_reference_t<It>>
     constexpr std::ranges::in_value_result<It, std::optional<fold_left_result_t<Fn, std::iter_value_t<It>, It>>> fold_left_first_with_iter(It first, Se last, Fn func) {
         using U = fold_left_result_t<Fn, std::iter_value_t<It>, It>;
@@ -462,18 +466,21 @@ export namespace plastic {
         return { std::move(first), std::move(opt) };
     }
 
-    template<std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
+    export
+        template<std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
     constexpr fold_left_result_t<Fn, T, It> fold_left(It first, Se last, T init, Fn func) {
         return fold_left_with_iter(first, last, init, func).value;
     }
 
-    template<std::input_iterator It, std::sentinel_for<It> Se, indirectly_binary_left_foldable<std::iter_value_t<It>, It> Fn>
+    export
+        template<std::input_iterator It, std::sentinel_for<It> Se, indirectly_binary_left_foldable<std::iter_value_t<It>, It> Fn>
         requires std::constructible_from<std::iter_value_t<It>, std::iter_reference_t<It>>
     constexpr std::optional<fold_left_result_t<Fn, std::iter_value_t<It>, It>> fold_left_first(It first, Se last, Fn func) {
         return fold_left_first_with_iter(first, last, func).value;
     }
 
-    template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_right_foldable<T, It> Fn>
+    export
+        template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_right_foldable<T, It> Fn>
     constexpr fold_right_result_t<Fn, T, It> fold_right(It first, Se last, T init, Fn func) {
         using U = fold_right_result_t<Fn, T, It>;
 
@@ -490,7 +497,8 @@ export namespace plastic {
         return value;
     }
 
-    template<std::bidirectional_iterator It, std::sentinel_for<It> Se, indirectly_binary_right_foldable<std::iter_value_t<It>, It> Fn>
+    export
+        template<std::bidirectional_iterator It, std::sentinel_for<It> Se, indirectly_binary_right_foldable<std::iter_value_t<It>, It> Fn>
         requires std::constructible_from<std::iter_value_t<It>, std::iter_reference_t<It>>
     constexpr std::optional<fold_right_result_t<Fn, std::iter_value_t<It>, It>> fold_right_last(It first, Se last, Fn func) {
         using U = fold_right_result_t<Fn, std::iter_value_t<It>, It>;
@@ -992,7 +1000,7 @@ namespace plastic {
 }
 
 // partitioning operations
-export namespace plastic {
+namespace plastic {
 
     template<class It, class Pr>
     bool is_partitioned(It first, It last, Pr pred) {
