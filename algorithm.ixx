@@ -379,6 +379,7 @@ namespace plastic {
         template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires (std::forward_iterator<It1> || std::sized_sentinel_for<Se1, It1>) && (std::forward_iterator<It2> || std::sized_sentinel_for<Se2, It2>) && std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr bool ends_with(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
+        if constexpr (std::forward_iterator<It1> && std::forward_iterator<It2>) {
         It1 i{ first1 };
         It2 j{ first2 };
         while (j != last2) {
@@ -387,18 +388,35 @@ namespace plastic {
             }
             ++i, ++j;
         }
-
         while (i != last1) {
             ++i, ++first1;
         }
-
-        while (first1 != last1) {
-            if (!pred(proj1(*first1), proj2(*first2))) {
+        }
+        else if constexpr (std::forward_iterator<It1>) {
+            It1 i{ std::ranges::next(first1, last2 - first2, last1) };
+            if (i == last1) {
                 return false;
             }
-            ++first1, ++first2;
+            while (i != last1) {
+                ++i, ++first1;
         }
-        return true;
+    }
+        else if constexpr (std::forward_iterator<It2>) {
+            auto size1{ last1 - first1 }, size2{};
+            It2 i{ first2 };
+            while (i != last2) {
+                if (size1 == size2) {
+                    return false;
+                }
+                ++i, ++size2;
+            }
+            first1 = std::ranges::next(first1, size1 - size2, last1);
+}
+        else {
+            first1 = std::ranges::next(first1, (last2 - first2) - (last1 - first1), last1);
+        }
+
+        return equal(first1, last1, first2, last2, pred, proj1, proj2);
     }
 
 }
