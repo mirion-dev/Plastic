@@ -1103,6 +1103,34 @@ namespace plastic {
 
 }
 
+// merge operations
+export namespace plastic {
+
+    template<class It1, class It2, std::output_iterator<std::iter_value_t<It1>> ItD, class Cmp = std::less<>>
+    ItD merge(It1 first1, It1 last1, It2 first2, It2 last2, ItD d_first, Cmp cmp = {}) {
+        while (first1 != last1 && first2 != last2) {
+            if (cmp(*first2, *first1)) {
+                *d_first++ = *first2;
+                ++first2;
+            }
+            else {
+                *d_first++ = *first1;
+                ++first1;
+            }
+        }
+        return copy(first2, last2, copy(first1, last1, d_first));
+    }
+
+    template<class It, class Cmp = std::less<>>
+    void inplace_merge(It first, It middle, It last, Cmp cmp = {}) {
+        using value_t = std::iter_value_t<It>;
+        value_t* buffer{ new value_t[std::distance(first, last)] };
+        move(buffer, merge(first, middle, middle, last, buffer, cmp), first);
+        delete[] buffer;
+    }
+
+}
+
 // heap operations
 export namespace plastic {
 
@@ -1366,34 +1394,6 @@ export namespace plastic {
     template<class It, class T = std::iter_value_t<It>, class Cmp = std::less<>>
     std::pair<It, It> equal_range(It first, It last, const T& value, Cmp cmp = {}) {
         return { lower_bound(first, last, value, cmp), upper_bound(first, last, value, cmp) };
-    }
-
-}
-
-// merge operations
-export namespace plastic {
-
-    template<class It1, class It2, std::output_iterator<std::iter_value_t<It1>> ItD, class Cmp = std::less<>>
-    ItD merge(It1 first1, It1 last1, It2 first2, It2 last2, ItD d_first, Cmp cmp = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (cmp(*first2, *first1)) {
-                *d_first++ = *first2;
-                ++first2;
-            }
-            else {
-                *d_first++ = *first1;
-                ++first1;
-            }
-        }
-        return copy(first2, last2, copy(first1, last1, d_first));
-    }
-
-    template<class It, class Cmp = std::less<>>
-    void inplace_merge(It first, It middle, It last, Cmp cmp = {}) {
-        using value_t = std::iter_value_t<It>;
-        value_t* buffer{ new value_t[std::distance(first, last)] };
-        move(buffer, merge(first, middle, middle, last, buffer, cmp), first);
-        delete[] buffer;
     }
 
 }
