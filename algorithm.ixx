@@ -1263,7 +1263,7 @@ namespace plastic {
 }
 
 // sorting operations
-export namespace plastic {
+namespace plastic {
 
     template<class It, class Cmp = std::less<>>
     It is_sorted_until(It first, It last, Cmp cmp = {}) {
@@ -1283,64 +1283,60 @@ export namespace plastic {
         return is_sorted_until(first, last, cmp) == last;
     }
 
-    namespace detail {
+    constexpr std::size_t insertion_sort_threshold{ 32 };
 
-        constexpr std::size_t insertion_sort_threshold{ 32 };
-
-        template<class It, class Cmp = std::less<>>
-        void insertion_sort(It first, It last, Cmp cmp = {}) {
-            using value_t = std::iter_value_t<It>;
-            if (first != last) {
-                It i{ first };
-                while (++i != last) {
-                    value_t value{ std::move(*i) };
-                    It j{ i };
-                    while (j != first && cmp(value, *--j)) {
-                        *i-- = std::move(*j);
-                    }
-                    *i = std::move(value);
+    template<class It, class Cmp = std::less<>>
+    void insertion_sort(It first, It last, Cmp cmp = {}) {
+        using value_t = std::iter_value_t<It>;
+        if (first != last) {
+            It i{ first };
+            while (++i != last) {
+                value_t value{ std::move(*i) };
+                It j{ i };
+                while (j != first && cmp(value, *--j)) {
+                    *i-- = std::move(*j);
                 }
+                *i = std::move(value);
             }
         }
+    }
 
-        template<class It, class Cmp = std::less<>>
-        void triple_sort(It a, It b, It c, Cmp cmp = {}) {
+    template<class It, class Cmp = std::less<>>
+    void triple_sort(It a, It b, It c, Cmp cmp = {}) {
+        if (cmp(*b, *a)) {
+            std::swap(*b, *a);
+        }
+        if (cmp(*c, *b)) {
+            std::swap(*c, *b);
             if (cmp(*b, *a)) {
                 std::swap(*b, *a);
             }
-            if (cmp(*c, *b)) {
-                std::swap(*c, *b);
-                if (cmp(*b, *a)) {
-                    std::swap(*b, *a);
-                }
-            }
         }
+    }
 
-        template<std::random_access_iterator It, class Cmp = std::less<>>
-        void intro_sort(It first, It last, std::iter_difference_t<It> threshold, Cmp cmp = {}) {
-            using diff_t = std::iter_difference_t<It>;
-            if (last - first <= detail::insertion_sort_threshold) {
-                detail::insertion_sort(first, last, cmp);
-            }
-            else if (threshold == 0) {
-                make_heap(first, last, cmp);
-                sort_heap(first, last, cmp);
-            }
-            else {
-                It median{ first + (last - first) / 2 };
-                detail::triple_sort(first, median, last - 1);
-                It point{ partition(first, last, [&](auto&& param) { return cmp(param, *median); }) };
-                threshold = threshold / 2 + threshold / 4;
-                detail::intro_sort(first, point, threshold, cmp);
-                detail::intro_sort(point, last, threshold, cmp);
-            }
+    template<std::random_access_iterator It, class Cmp = std::less<>>
+    void intro_sort(It first, It last, std::iter_difference_t<It> threshold, Cmp cmp = {}) {
+        using diff_t = std::iter_difference_t<It>;
+        if (last - first <= insertion_sort_threshold) {
+            insertion_sort(first, last, cmp);
         }
-
+        else if (threshold == 0) {
+            make_heap(first, last, cmp);
+            sort_heap(first, last, cmp);
+        }
+        else {
+            It median{ first + (last - first) / 2 };
+            triple_sort(first, median, last - 1);
+            It point{ partition(first, last, [&](auto&& param) { return cmp(param, *median); }) };
+            threshold = threshold / 2 + threshold / 4;
+            intro_sort(first, point, threshold, cmp);
+            intro_sort(point, last, threshold, cmp);
+        }
     }
 
     template<std::random_access_iterator It, class Cmp = std::less<>>
     void sort(It first, It last, Cmp cmp = {}) {
-        detail::intro_sort(first, last, last - first, cmp);
+        intro_sort(first, last, last - first, cmp);
     }
 
     template<std::random_access_iterator It, class Cmp = std::less<>>
@@ -1379,8 +1375,8 @@ export namespace plastic {
     template<std::random_access_iterator It, class Cmp = std::less<>>
     void stable_sort(It first, It last, Cmp cmp = {}) {
         using diff_t = std::iter_difference_t<It>;
-        if (last - first <= detail::insertion_sort_threshold) {
-            detail::insertion_sort(first, last, cmp);
+        if (last - first <= insertion_sort_threshold) {
+            insertion_sort(first, last, cmp);
         }
         else {
             It middle{ first + (last - first) / 2 };
@@ -1395,16 +1391,16 @@ export namespace plastic {
     template<std::random_access_iterator It, class Cmp = std::less<>>
     void nth_element(It first, It middle, It last, Cmp cmp = {}) {
         using diff_t = std::iter_difference_t<It>;
-        while (last - first > detail::insertion_sort_threshold) {
+        while (last - first > insertion_sort_threshold) {
             It median{ first + (last - first) / 2 };
-            detail::triple_sort(first, median, last - 1);
+            triple_sort(first, median, last - 1);
             It point{ partition(first, last, [&](auto&& param) { return cmp(param, *median); }) };
             if (point == middle) {
                 return;
             }
             (point < middle ? first : last) = point;
         }
-        detail::insertion_sort(first, last, cmp);
+        insertion_sort(first, last, cmp);
     }
 
 }
