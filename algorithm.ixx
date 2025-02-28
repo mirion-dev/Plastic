@@ -1048,7 +1048,7 @@ namespace plastic {
     export
         template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
         requires std::permutable<It>
-    std::ranges::subrange<It> stable_partition(It first, Se last, Pr pred, Pj proj = {}) {
+    constexpr std::ranges::subrange<It> stable_partition(It first, Se last, Pr pred, Pj proj = {}) {
         first = find_if_not(first, last, pred, proj);
         if (first == last) {
             return { first, first };
@@ -1104,29 +1104,40 @@ namespace plastic {
 }
 
 // merge operations
-export namespace plastic {
+namespace plastic {
 
-    template<class It1, class It2, std::output_iterator<std::iter_value_t<It1>> ItD, class Cmp = std::less<>>
-    ItD merge(It1 first1, It1 last1, It2 first2, It2 last2, ItD d_first, Cmp cmp = {}) {
+    export
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, std::weakly_incrementable Out, class Pr = std::ranges::less, class Pj1 = std::identity, class Pj2 = std::identity>
+        requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
+    constexpr std::ranges::in_in_out_result<It1, It2, Out> merge(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (cmp(*first2, *first1)) {
-                *d_first++ = *first2;
-                ++first2;
+            if (pred(proj2(*first2), proj1(*first1))) {
+                *output = *first2;
+                ++first2, ++output;
             }
             else {
-                *d_first++ = *first1;
-                ++first1;
+                *output = *first1;
+                ++first1, ++output;
             }
         }
-        return copy(first2, last2, copy(first1, last1, d_first));
+
+        if (first1 == last1) {
+            auto res{ copy(first2, last2, output) };
+            return { std::move(first1), std::move(res.in), std::move(res.out) };
+        }
+
+        auto res{ copy(first1, last1, output) };
+        return { std::move(res.in), std::move(first2), std::move(res.out) };
     }
 
-    template<class It, class Cmp = std::less<>>
-    void inplace_merge(It first, It middle, It last, Cmp cmp = {}) {
-        using value_t = std::iter_value_t<It>;
-        value_t* buffer{ new value_t[std::distance(first, last)] };
-        move(buffer, merge(first, middle, middle, last, buffer, cmp), first);
-        delete[] buffer;
+    export
+        template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr It inplace_merge(It first, It middle, Se last, Pr pred = {}, Pj proj = {}) {
+        auto buf{ new std::iter_value_t<It>[std::ranges::distance(first, last)] };
+        It temp{ move(buf, merge(first, middle, middle, last, buf, pred, proj).out, first).out };
+        delete[] buf;
+        return temp;
     }
 
 }
