@@ -169,7 +169,10 @@ namespace plastic {
         template<std::input_iterator It1, std::sentinel_for<It1> S1, std::input_iterator It2, std::sentinel_for<It2> S2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr std::ranges::in_in_result<It1, It2> mismatch(It1 first1, S1 last1, It2 first2, S2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-        while (first1 != last1 && first2 != last2 && pred(proj1(*first1), proj2(*first2))) {
+        while (first1 != last1 && first2 != last2) {
+            if (!pred(proj1(*first1), proj2(*first2))) {
+                break;
+            }
             ++first1, ++first2;
         }
         return { std::move(first1), std::move(first2) };
@@ -177,7 +180,10 @@ namespace plastic {
 
     template<class Sat, class It, class Se, class TPr, class Pj>
     constexpr It find_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
-        while (first != last && !satisfy<Sat>(proj(*first), value_or_pred)) {
+        while (first != last) {
+            if (satisfy<Sat>(proj(*first), value_or_pred)) {
+                break;
+            }
             ++first;
         }
         return first;
@@ -300,12 +306,18 @@ namespace plastic {
     export
         template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_binary_predicate<std::projected<It, Pj>, std::projected<It, Pj>> Pr = std::ranges::equal_to>
     constexpr It adjacent_find(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        if (first != last) {
-            It i{ first };
-            while (++i != last && !pred(proj(*first), proj(*i))) {
-                ++first;
-            }
+        if (first == last) {
+            return first;
         }
+
+        It i{ first };
+        while (++i != last) {
+            if (pred(proj(*first), proj(*i))) {
+                break;
+            }
+            ++first;
+        }
+
         return first;
     }
 
@@ -332,27 +344,30 @@ namespace plastic {
         template<std::forward_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::equal_to, class Pj = std::identity, class T = std::projected_value_t<It, Pj>>
         requires std::indirectly_comparable<It, const T*, Pr, Pj>
     constexpr std::ranges::subrange<It> search_n(It first, Se last, std::iter_difference_t<It> count, const T& value, Pr pred = {}, Pj proj = {}) {
-        if (count > 0) {
-            while (first != last) {
-                if (pred(proj(*first), value)) {
-                    It i{ first };
-                    auto n{ count };
-                    ++i, --n;
-                    do {
-                        if (n-- == 0) {
-                            return { std::move(first), std::move(i) };
-                        }
-                        if (i == last) {
-                            return { i, i };
-                        }
-                    } while (pred(proj(*i++), value));
-                    first = i;
-                }
-                else {
-                    ++first;
-                }
+        if (count <= 0) {
+            return { first, first };
+        }
+
+        while (first != last) {
+            if (pred(proj(*first), value)) {
+                It i{ first };
+                auto n{ count };
+                ++i, --n;
+                do {
+                    if (n-- == 0) {
+                        return { std::move(first), std::move(i) };
+                    }
+                    if (i == last) {
+                        return { i, i };
+                    }
+                } while (pred(proj(*i++), value));
+                first = i;
+            }
+            else {
+                ++first;
             }
         }
+
         return { first, first };
     }
 
@@ -551,12 +566,15 @@ namespace plastic {
         template<std::input_iterator It, std::weakly_incrementable Out>
         requires std::indirectly_copyable<It, Out>
     constexpr std::ranges::in_out_result<It, Out> copy_n(It first, std::iter_difference_t<It> count, Out output) {
-        if (count > 0) {
-            while (count-- != 0) {
-                *output = *first;
-                ++first, ++output;
-            }
+        if (count <= 0) {
+            return { std::move(first), std::move(output) };
         }
+
+        while (count-- != 0) {
+            *output = *first;
+            ++first, ++output;
+        }
+
         return { std::move(first), std::move(output) };
     }
 
@@ -608,12 +626,15 @@ namespace plastic {
         template<class Out, class T = std::iter_value_t<Out>>
         requires std::output_iterator<Out, const T&>
     constexpr Out fill_n(Out first, std::iter_difference_t<Out> count, const T& value) {
-        if (count > 0) {
-            while (count-- != 0) {
-                *first = value;
-                ++first;
-            }
+        if (count <= 0) {
+            return first;
         }
+
+        while (count-- != 0) {
+            *first = value;
+            ++first;
+        }
+
         return first;
     }
 
@@ -654,26 +675,32 @@ namespace plastic {
         template<std::input_or_output_iterator Out, std::copy_constructible Fn>
         requires std::invocable<Fn&>&& std::indirectly_writable<Out, std::invoke_result_t<Fn&>>
     constexpr Out generate_n(Out first, std::iter_difference_t<Out> count, Fn func) {
-        if (count > 0) {
-            while (count-- != 0) {
-                *first = func();
-                ++first;
-            }
+        if (count <= 0) {
+            return first;
         }
+
+        while (count-- != 0) {
+            *first = func();
+            ++first;
+        }
+
         return first;
     }
 
     template<class Sat, class It, class Se, class TPr, class Pj>
     constexpr std::ranges::subrange<It> remove_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
         first = find_impl<Sat>(first, last, value_or_pred, proj);
+        if (first == last) {
+            return { first, first };
+        }
+
         It i{ first };
-        if (first != last) {
-            while (++i != last) {
-                if (satisfy<Sat>(proj(*i), value_or_pred)) {
-                    *first++ = std::move(*i);
-                }
+        while (++i != last) {
+            if (satisfy<Sat>(proj(*i), value_or_pred)) {
+                *first++ = std::move(*i);
             }
         }
+
         return { std::move(first), std::move(i) };
     }
 
@@ -946,15 +973,18 @@ namespace plastic {
         template<std::permutable It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_equivalence_relation<std::projected<It, Pj>> Pr = std::ranges::equal_to>
     constexpr std::ranges::subrange<It> unique(It first, Se last, Pr pred = {}, Pj proj = {}) {
         first = adjacent_find(first, last, pred, proj);
-        It i{ first };
-        if (first != last) {
-            while (++i != last) {
-                if (!pred(proj(*first), proj(*i))) {
-                    *++first = std::move(*i);
-                }
-            }
-            ++first;
+        if (first == last) {
+            return { first, first };
         }
+
+        It i{ first };
+        while (++i != last) {
+            if (!pred(proj(*first), proj(*i))) {
+                *++first = std::move(*i);
+            }
+        }
+        ++first;
+
         return { std::move(first), std::move(i) };
     }
 
@@ -1005,28 +1035,27 @@ namespace plastic {
     export
         template<std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
     constexpr bool is_partitioned(It first, Se last, Pr pred, Pj proj = {}) {
-        while (first != last && pred(proj(*first))) {
-            ++first;
-        }
-        while (first != last && !pred(proj(*first))) {
-            ++first;
-        }
-        return first == last;
+        return find_if(find_if_not(first, last, pred, proj), last, pred, proj) == last;
     }
+
     export
         template<std::permutable It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
     constexpr std::ranges::subrange<It> partition(It first, Se last, Pr pred, Pj proj = {}) {
         first = find_if_not(first, last, pred, proj);
+        if (first == last) {
+            return { first, first };
+        }
+
         It i{ first };
-        if (first != last) {
-            while (++i != last) {
-                if (pred(proj(*i))) {
-                    std::swap(*first++, *i);
-                }
+        while (++i != last) {
+            if (pred(proj(*i))) {
+                std::swap(*first++, *i);
             }
         }
+
         return { std::move(first), std::move(i) };
     }
+
     export
         template<std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out1, std::weakly_incrementable Out2, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
         requires std::indirectly_copyable<It, Out1>&& std::indirectly_copyable<It, Out2>
@@ -1164,7 +1193,10 @@ namespace plastic {
         template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
     constexpr It is_heap_until(It first, Se last, Pr pred = {}, Pj proj = {}) {
         auto size{ last - first }, i{};
-        while (i != size && !pred(proj(first[(i - 1) >> 1]), proj(first[i]))) {
+        while (i != size) {
+            if (pred(proj(first[(i - 1) >> 1]), proj(first[i]))) {
+                break;
+            }
             ++i;
         }
         return first + i;
@@ -1265,22 +1297,27 @@ namespace plastic {
 // sorting operations
 namespace plastic {
 
-    template<class It, class Cmp = std::less<>>
-    It is_sorted_until(It first, It last, Cmp cmp = {}) {
-        if (first != last) {
-            It i{ first };
-            while (++i != last) {
-                if (cmp(*i, *first++)) {
-                    return i;
-                }
+    export
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr It is_sorted_until(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        if (first == last) {
+            return first;
+        }
+
+        It i{ first };
+        while (++i != last) {
+            if (!pred(proj(*i), proj(*first++))) {
+                break;
             }
         }
-        return last;
+
+        return i;
     }
 
-    template<class It, class Cmp = std::less<>>
-    bool is_sorted(It first, It last, Cmp cmp = {}) {
-        return is_sorted_until(first, last, cmp) == last;
+    export
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr bool is_sorted(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        return is_sorted_until(first, last, pred, proj) == last;
     }
 
     constexpr std::size_t insertion_sort_threshold{ 32 };
