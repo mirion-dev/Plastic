@@ -1135,15 +1135,30 @@ namespace plastic {
         requires std::sortable<It, Pr, Pj>
     constexpr It inplace_merge(It first, It middle, Se last, Pr pred = {}, Pj proj = {}) {
         auto buf{ new std::iter_value_t<It>[std::ranges::distance(first, last)] };
-        It temp{ move(buf, merge(first, middle, middle, last, buf, pred, proj).out, first).out };
+
+        It i{ first }, j{ middle };
+        auto k{ buf };
+        while (i != middle && j != last) {
+            *k++ = pred(proj(*j), proj(*i)) ? std::move(*j++) : std::move(*i++);
+        }
+
+        if (i == middle) {
+            move(j, last, k);
+        }
+        else {
+            move(i, middle, k);
+        }
+
+        It temp{ move(buf, k, first).out };
         delete[] buf;
+
         return temp;
     }
 
 }
 
 // heap operations
-export namespace plastic {
+namespace plastic {
 
     template<std::random_access_iterator It, class Cmp = std::less<>>
     It is_heap_until(It first, It last, Cmp cmp = {}) {
