@@ -564,11 +564,11 @@ namespace plastic {
         template<std::bidirectional_iterator It1, std::sentinel_for<It1> Se1, std::bidirectional_iterator It2>
         requires std::indirectly_copyable<It1, It2>
     constexpr std::ranges::in_out_result<It1, It2> copy_backward(It1 first, Se1 last, It2 output) {
-        It1 i{ std::ranges::next(first, last) }, temp{ i };
+        It1 r_last{ std::ranges::next(first, last) }, i{ r_last };
         while (first != i) {
             *--output = *--i;
         }
-        return { std::move(temp), std::move(output) };
+        return { std::move(r_last), std::move(output) };
     }
 
     export
@@ -586,11 +586,11 @@ namespace plastic {
         template<std::bidirectional_iterator It1, std::sentinel_for<It1> Se1, std::bidirectional_iterator It2>
         requires std::indirectly_movable<It1, It2>
     constexpr std::ranges::in_out_result<It1, It2> move_backward(It1 first, Se1 last, It2 output) {
-        It1 i{ std::ranges::next(first, last) }, temp{ i };
+        It1 r_last{ std::ranges::next(first, last) }, i{ r_last };
         while (first != i) {
             *--output = std::move(*--i);
         }
-        return { std::move(temp), std::move(output) };
+        return { std::move(r_last), std::move(output) };
     }
 
     export
@@ -791,12 +791,12 @@ namespace plastic {
         template<std::bidirectional_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out>
         requires std::indirectly_copyable<It, Out>
     constexpr std::ranges::in_out_result<It, Out> reverse_copy(It first, Se last, Out output) {
-        It i{ std::ranges::next(first, last) }, temp{ i };
+        It r_last{ std::ranges::next(first, last) }, i{ r_last };
         while (first != i) {
             *output = *--i;
             ++output;
         }
-        return { std::move(temp), std::move(output) };
+        return { std::move(r_last), std::move(output) };
     }
 
     export
@@ -853,7 +853,7 @@ namespace plastic {
     constexpr std::ranges::subrange<It> shift_right(It first, Se last, std::iter_difference_t<It> count) {
         assert(count >= 0);
 
-        auto dest{ std::ranges::next(first, count, last) };
+        It dest{ std::ranges::next(first, count, last) };
         if (dest == last) {
             return { std::move(dest), std::move(dest) };
         }
@@ -1088,7 +1088,7 @@ namespace plastic {
     constexpr It partition_point(It first, Se last, Pr pred, Pj proj = {}) {
         auto size{ std::ranges::distance(first, last) };
         while (size != 0) {
-            auto half{ size / 2 };
+            auto half{ size >> 1 };
             It i{ std::ranges::next(first, half) };
             if (pred(proj(*i))) {
                 first = ++i;
@@ -1160,93 +1160,104 @@ namespace plastic {
 // heap operations
 namespace plastic {
 
-    template<std::random_access_iterator It, class Cmp = std::less<>>
-    It is_heap_until(It first, It last, Cmp cmp = {}) {
-        using diff_t = std::iter_difference_t<It>;
-        if (first != last) {
-            diff_t i{ 0 }, size{ last - first };
-            while (++i != size) {
-                if (cmp(first[(i - 1) >> 1], first[i])) {
-                    return first + i;
-                }
+    export
+        template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr It is_heap_until(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        auto size{ last - first }, i{};
+        while (i != size && !pred(proj(first[(i - 1) >> 1]), proj(first[i]))) {
+            ++i;
+        }
+        return first + i;
+    }
+
+    export
+        template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr bool is_heap(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        return is_heap_until(first, last, pred, proj) == last;
+    }
+
+    template<class It, class Diff, class Pr, class Pj>
+    constexpr void sift_up(It first, Diff index, Pr pred, Pj proj) {
+        auto value{ std::move(first[index]) };
+        while (index != 0) {
+            Diff parent{ (index - 1) >> 1 };
+            if (!pred(proj(first[parent]), proj(value))) {
+                break;
             }
+            first[index] = std::move(first[parent]);
+            index = parent;
         }
-        return last;
+        first[index] = std::move(value);
     }
 
-    template<std::random_access_iterator It, class Cmp = std::less<>>
-    bool is_heap(It first, It last, Cmp cmp = {}) {
-        return is_heap_until(first, last, cmp) == last;
-    }
-
-    namespace detail {
-
-        template<std::random_access_iterator It, class Cmp = std::less<>>
-        void sift_up(It first, It middle, It last, Cmp cmp = {}) {
-            using value_t = std::iter_value_t<It>;
-            using diff_t = std::iter_difference_t<It>;
-            if (first != last) {
-                value_t value{ std::move(*middle) };
-                diff_t hole{ middle - first };
-                while (hole != 0) {
-                    diff_t parent{ (hole - 1) / 2 };
-                    if (!cmp(first[parent], value)) {
-                        break;
-                    }
-                    first[hole] = std::move(first[parent]);
-                    hole = parent;
-                }
-                first[hole] = std::move(value);
+    template<class It, class Diff, class Pr, class Pj>
+    constexpr void sift_down(It first, Diff index, Diff size, Pr pred, Pj proj) {
+        auto value{ std::move(first[index]) };
+        while (true) {
+            Diff child{ (index << 1) + 1 };
+            if (child >= size) {
+                break;
             }
-        }
-
-        template<std::random_access_iterator It, class Cmp = std::less<>>
-        void sift_down(It first, It middle, It last, Cmp cmp = {}) {
-            using value_t = std::iter_value_t<It>;
-            using diff_t = std::iter_difference_t<It>;
-            if (first != last) {
-                value_t value{ std::move(*middle) };
-                diff_t hole{ middle - first }, size{ last - first }, child;
-                while (child = hole * 2 + 1, child < size) {
-                    if (child + 1 < size && cmp(first[child], first[child + 1])) {
-                        ++child;
-                    }
-                    if (!cmp(value, first[child])) {
-                        break;
-                    }
-                    first[hole] = std::move(first[child]);
-                    hole = child;
-                }
-                first[hole] = std::move(value);
+            if (child + 1 < size && pred(proj(first[child]), proj(first[child + 1]))) {
+                ++child;
             }
+            if (!pred(proj(value), proj(first[child]))) {
+                break;
+            }
+            first[index] = std::move(first[child]);
+            index = child;
         }
-
+        first[index] = std::move(value);
     }
 
-    template<std::random_access_iterator It, class Cmp = std::less<>>
-    void make_heap(It first, It last, Cmp cmp = {}) {
-        It i{ first + (last - first) / 2 };
-        while (i != first) {
-            detail::sift_down(first, --i, last, cmp);
+    export
+        template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr It make_heap(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        It r_last{ std::ranges::next(first, last) };
+        auto size{ r_last - first }, i{ size >> 1 };
+        while (i-- != 0) {
+            sift_down(first, i, size, pred, proj);
         }
+        return r_last;
     }
 
-    template<std::random_access_iterator It, class Cmp = std::less<>>
-    void push_heap(It first, It last, Cmp cmp = {}) {
-        detail::sift_up(first, last - 1, last, cmp);
-    }
-
-    template<std::random_access_iterator It, class Cmp = std::less<>>
-    void pop_heap(It first, It last, Cmp cmp = {}) {
-        std::swap(*first, *--last);
-        detail::sift_down(first, first, last, cmp);
-    }
-
-    template<std::random_access_iterator It, class Cmp = std::less<>>
-    void sort_heap(It first, It last, Cmp cmp = {}) {
-        while (first != last) {
-            pop_heap(first, last--, cmp);
+    export
+        template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr It push_heap(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        It r_last{ std::ranges::next(first, last) };
+        auto size{ r_last - first };
+        if (size > 1) {
+            sift_up(first, size - 1, pred, proj);
         }
+        return r_last;
+    }
+
+    export
+        template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr It pop_heap(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        It r_last{ std::ranges::next(first, last) }, i{ r_last };
+        auto size{ r_last - first };
+        if (size > 1) {
+            std::swap(*first, *--i);
+            sift_down(first, 0, size, pred, proj);
+        }
+        return r_last;
+    }
+
+    export
+        template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr It sort_heap(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        It r_last{ std::ranges::next(first, last) }, i{ r_last };
+        auto size{ r_last - first };
+        while (size > 1) {
+            std::swap(*first, *--i);
+            sift_down(first, 0, size--, pred, proj);
+        }
+        return r_last;
     }
 
 }
@@ -1339,7 +1350,7 @@ export namespace plastic {
         while (i != last) {
             if (cmp(*i, *first)) {
                 std::swap(*i, *first);
-                detail::sift_down(first, first, middle, cmp);
+                sift_down(first, first, middle, cmp);
             }
             ++i;
         }
@@ -1357,7 +1368,7 @@ export namespace plastic {
         while (first != last) {
             if (cmp(*first, *d_first)) {
                 *d_first = *first;
-                detail::sift_down(d_first, d_first, i, cmp);
+                sift_down(d_first, d_first, i, cmp);
             }
             ++first;
         }
