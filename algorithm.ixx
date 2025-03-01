@@ -1625,15 +1625,16 @@ namespace plastic {
 }
 
 // set operations
-export namespace plastic {
+namespace plastic {
 
-    template<class It1, class It2, class Cmp = std::less<>>
-    bool includes(It1 first1, It1 last1, It2 first2, It2 last2, Cmp cmp = {}) {
+    export
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_strict_weak_order<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::less>
+    constexpr bool includes(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (cmp(*first2, *first1)) {
+            if (pred(proj2(*first2), proj1(*first1))) {
                 return false;
             }
-            if (!cmp(*first1, *first2)) {
+            if (!pred(proj1(*first1), proj2(*first2))) {
                 ++first2;
             }
             ++first1;
@@ -1641,75 +1642,85 @@ export namespace plastic {
         return first2 == last2;
     }
 
-    template<class It1, class It2, std::output_iterator<std::iter_value_t<It1>> ItD, class Cmp = std::less<>>
-    ItD set_difference(It1 first1, It1 last1, It2 first2, It2 last2, ItD d_first, Cmp cmp = {}) {
+    export
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, std::weakly_incrementable Out, class Pr = std::ranges::less, class Pj1 = std::identity, class Pj2 = std::identity>
+        requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
+    constexpr std::ranges::in_out_result<It1, Out> set_difference(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (cmp(*first1, *first2)) {
-                *d_first++ = *first1;
-                ++first1;
+            if (pred(proj1(*first1), proj2(*first2))) {
+                *output = *first1;
+                ++first1, ++output;
             }
             else {
-                if (!cmp(*first2, *first1)) {
+                if (!pred(proj2(*first2), proj1(*first1))) {
                     ++first1;
                 }
                 ++first2;
             }
         }
-        return copy(first1, last1, d_first);
+        return copy(first1, last1, output);
     }
 
-    template<class It1, class It2, std::output_iterator<std::iter_value_t<It1>> ItD, class Cmp = std::less<>>
-    ItD set_intersection(It1 first1, It1 last1, It2 first2, It2 last2, ItD d_first, Cmp cmp = {}) {
+    export
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, std::weakly_incrementable Out, class Pr = std::ranges::less, class Pj1 = std::identity, class Pj2 = std::identity>
+        requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
+    constexpr std::ranges::in_in_out_result<It1, It2, Out> set_intersection(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (cmp(*first1, *first2)) {
+            if (pred(proj1(*first1), proj2(*first2))) {
                 ++first1;
             }
-            else if (cmp(*first2, *first1)) {
+            else if (pred(proj2(*first2), proj1(*first1))) {
                 ++first2;
             }
             else {
-                *d_first++ = *first1;
-                ++first1, ++first2;
+                *output = *first1;
+                ++first1, ++first2, ++output;
             }
         }
-        return d_first;
+        return { std::ranges::next(first1, last1), std::ranges::next(first2, last2), std::move(output) };
     }
 
-    template<class It1, class It2, std::output_iterator<std::iter_value_t<It1>> ItD, class Cmp = std::less<>>
-    ItD set_symmetric_difference(It1 first1, It1 last1, It2 first2, It2 last2, ItD d_first, Cmp cmp = {}) {
+    export
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, std::weakly_incrementable Out, class Pr = std::ranges::less, class Pj1 = std::identity, class Pj2 = std::identity>
+        requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
+    constexpr std::ranges::in_in_out_result<It1, It2, Out> set_symmetric_difference(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (cmp(*first1, *first2)) {
-                *d_first++ = *first1;
-                ++first1;
+            if (pred(proj1(*first1), proj2(*first2))) {
+                *output = *first1;
+                ++first1, ++output;
             }
-            else if (cmp(*first2, *first1)) {
-                *d_first++ = *first2;
-                ++first2;
+            else if (pred(proj2(*first2), proj1(*first1))) {
+                *output = *first2;
+                ++first2, ++output;
             }
             else {
                 ++first1, ++first2;
             }
         }
-        return copy(first2, last2, copy(first1, last1, d_first));
+        auto res1{ copy(first1, last1, output) }, res2{ copy(first2, last2, res1.out) };
+        return { std::move(res1.in), std::move(res2.in), std::move(res2.out) };
     }
 
-    template<class It1, class It2, std::output_iterator<std::iter_value_t<It1>> ItD, class Cmp = std::less<>>
-    ItD set_union(It1 first1, It1 last1, It2 first2, It2 last2, ItD d_first, Cmp cmp = {}) {
+    export
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, std::weakly_incrementable Out, class Pr = std::ranges::less, class Pj1 = std::identity, class Pj2 = std::identity>
+        requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
+    constexpr std::ranges::in_in_out_result<It1, It2, Out> set_union(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (cmp(*first1, *first2)) {
-                *d_first++ = *first1;
-                ++first1;
+            if (pred(proj1(*first1), proj2(*first2))) {
+                *output = *first1;
+                ++first1, ++output;
             }
-            else if (cmp(*first2, *first1)) {
-                *d_first++ = *first2;
-                ++first2;
+            else if (pred(proj2(*first2), proj1(*first1))) {
+                *output = *first2;
+                ++first2, ++output;
             }
             else {
-                *d_first++ = *first1;
-                ++first1, ++first2;
+                *output = *first1;
+                ++first1, ++first2, ++output;
             }
         }
-        return copy(first2, last2, copy(first1, last1, d_first));
+        auto res1{ copy(first1, last1, output) }, res2{ copy(first2, last2, res1.out) };
+        return { std::move(res1.in), std::move(res2.in), std::move(res2.out) };
     }
 
 }
