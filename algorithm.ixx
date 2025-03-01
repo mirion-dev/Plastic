@@ -1132,6 +1132,103 @@ namespace plastic {
 
 }
 
+// minimum/maximum operations
+namespace plastic {
+
+    export
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr It max_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        if (first == last) {
+            return first;
+        }
+
+        It i{ first };
+        while (++first != last) {
+            if (pred(proj(*i), proj(*first))) {
+                i = first;
+            }
+        }
+
+        return i;
+    }
+
+    export
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr It min_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        if (first == last) {
+            return first;
+        }
+
+        It i{ first };
+        while (++first != last) {
+            if (pred(proj(*first), proj(*i))) {
+                i = first;
+            }
+        }
+
+        return i;
+    }
+
+    export
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr std::ranges::minmax_result<It> minmax_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        return { min_element(first, last, pred, proj), max_element(first, last, pred, proj) };
+    }
+
+    export
+        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr const T& max(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
+        return pred(proj(a), proj(b)) ? b : a;
+    }
+
+    export
+        template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr T max(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
+        assert(!list.empty());
+        return *max_element(list.begin(), list.end(), pred, proj);
+    }
+
+    export
+        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr const T& min(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
+        return pred(proj(b), proj(a)) ? b : a;
+    }
+
+    export
+        template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr T min(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
+        assert(!list.empty());
+        return *min_element(list.begin(), list.end(), pred, proj);
+    }
+
+    export
+        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr std::ranges::minmax_result<const T&> minmax(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
+        return { min(a, b, pred, proj), max(a, b, pred, proj) };
+    }
+
+    export
+        template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr std::ranges::minmax_result<T> minmax(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
+        assert(!list.empty());
+        return { min(list, pred, proj), max(list, pred, proj) };
+    }
+
+    export
+        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr const T& clamp(const T& value, const T& lowest, const T& highest, Pr pred = {}, Pj proj = {}) {
+        assert(!pred(proj(lowest), proj(highest)));
+        if (pred(proj(value), proj(lowest))) {
+            return lowest;
+        }
+        if (pred(proj(highest), proj(value))) {
+            return highest;
+        }
+        return value;
+    }
+
+}
+
 // binary search operations
 namespace plastic {
 
@@ -1623,77 +1720,6 @@ export namespace plastic {
             }
         }
         return copy(first2, last2, copy(first1, last1, d_first));
-    }
-
-}
-
-// minimum/maximum operations
-export namespace plastic {
-
-    template<class It, class Cmp = std::less<>>
-    It max_element(It first, It last, Cmp cmp = {}) {
-        It res{ first };
-        if (first != last) {
-            while (++first != last) {
-                if (cmp(*res, *first)) {
-                    res = first;
-                }
-            }
-        }
-        return res;
-    }
-
-    template<class It, class Cmp = std::less<>>
-    It min_element(It first, It last, Cmp cmp = {}) {
-        It res{ first };
-        if (first != last) {
-            while (++first != last) {
-                if (cmp(*first, *res)) {
-                    res = first;
-                }
-            }
-        }
-        return res;
-    }
-
-    template<class It, class Cmp = std::less<>>
-    std::pair<It, It> minmax_element(It first, It last, Cmp cmp = {}) {
-        return { min_element(first, last, cmp), max_element(first, last, cmp) };
-    }
-
-    template<class T, class Cmp = std::less<>>
-    const T& max(const T& a, const T& b, Cmp cmp = {}) {
-        return cmp(a, b) ? b : a;
-    }
-
-    template<class T, class Cmp = std::less<>>
-    T max(std::initializer_list<T> list, Cmp cmp = {}) {
-        return *max_element(list.begin(), list.end(), cmp);
-    }
-
-    template<class T, class Cmp = std::less<>>
-    const T& min(const T& a, const T& b, Cmp cmp = {}) {
-        return cmp(b, a) ? b : a;
-    }
-
-    template<class T, class Cmp = std::less<>>
-    T min(std::initializer_list<T> list, Cmp cmp = {}) {
-        return *min_element(list.begin(), list.end(), cmp);
-    }
-
-    template<class T, class Cmp = std::less<>>
-    std::pair<const T&, const T&> minmax(const T& a, const T& b, Cmp cmp = {}) {
-        return { min(a, b, cmp), max(a, b, cmp) };
-    }
-
-    template<class T, class Cmp = std::less<>>
-    std::pair<T, T> minmax(std::initializer_list<T> list, Cmp cmp = {}) {
-        return { min(list, cmp), max(list, cmp) };
-    }
-
-    template<class T, class Cmp = std::less<>>
-    const T& clamp(const T& value, const T& lowest, const T& highest, Cmp cmp = {}) {
-        return cmp(value, lowest) ? lowest : cmp(highest, value) ? highest : value;
     }
 
 }
