@@ -1208,11 +1208,11 @@ namespace plastic {
         return is_heap_until(first, last, pred, proj) == last;
     }
 
-    template<class It, class Diff, class Pr, class Pj>
-    constexpr void sift_up(It first, Diff index, Pr pred, Pj proj) {
+    template<class It, class Pr, class Pj>
+    constexpr void sift_up(It first, std::iter_difference_t<It> index, Pr pred, Pj proj) {
         auto value{ std::move(first[index]) };
         while (index != 0) {
-            Diff parent{ (index - 1) >> 1 };
+            auto parent{ (index - 1) >> 1 };
             if (!pred(proj(first[parent]), proj(value))) {
                 break;
             }
@@ -1222,11 +1222,11 @@ namespace plastic {
         first[index] = std::move(value);
     }
 
-    template<class It, class Diff, class Pr, class Pj>
-    constexpr void sift_down(It first, Diff index, Diff size, Pr pred, Pj proj) {
+    template<class It, class Pr, class Pj>
+    constexpr void sift_down(It first, std::iter_difference_t<It> index, std::iter_difference_t<It> size, Pr pred, Pj proj) {
         auto value{ std::move(first[index]) };
         while (true) {
-            Diff child{ (index << 1) + 1 };
+            auto child{ (index << 1) + 1 };
             if (child >= size) {
                 break;
             }
@@ -1320,124 +1320,165 @@ namespace plastic {
         return is_sorted_until(first, last, pred, proj) == last;
     }
 
-    constexpr std::size_t insertion_sort_threshold{ 32 };
+    template<class It, class Pr, class Pj>
+    void insertion_sort(It first, It last, Pr pred, Pj proj) {
+        if (first == last) {
+            return;
+        }
 
-    template<class It, class Cmp = std::less<>>
-    void insertion_sort(It first, It last, Cmp cmp = {}) {
-        using value_t = std::iter_value_t<It>;
-        if (first != last) {
-            It i{ first };
-            while (++i != last) {
-                value_t value{ std::move(*i) };
-                It j{ i };
-                while (j != first && cmp(value, *--j)) {
-                    *i-- = std::move(*j);
+        It i{ first };
+        while (++i != last) {
+            auto value{ std::move(*i) };
+            It hole{ i }, prev{ i };
+            while (prev != first) {
+                if (!pred(proj(value), proj(*--prev))) {
+                    break;
                 }
-                *i = std::move(value);
+                *hole-- = std::move(*prev);
             }
+            *hole = std::move(value);
         }
     }
 
-    template<class It, class Cmp = std::less<>>
-    void triple_sort(It a, It b, It c, Cmp cmp = {}) {
-        if (cmp(*b, *a)) {
-            std::swap(*b, *a);
+    constexpr std::ptrdiff_t insertion_sort_threshold{ 32 };
+
+    template<class It, class Pr, class Pj>
+    It median_partition(It first, It last, Pr pred, Pj proj) {
+        It median{ first + (last - first >> 1) }, last_prev{ std::ranges::prev(last) };
+        if (pred(proj(*median), proj(*first))) {
+            std::swap(*first, *median);
         }
-        if (cmp(*c, *b)) {
-            std::swap(*c, *b);
-            if (cmp(*b, *a)) {
-                std::swap(*b, *a);
+        if (pred(proj(*last_prev), proj(*median))) {
+            std::swap(*median, *last_prev);
+            if (pred(proj(*median), proj(*first))) {
+                std::swap(*first, *median);
             }
         }
+
+        first = find_if_not(first, last, pred, proj); // upper_bound
+        if (first == last) {
+            return first;
+        }
+
+        It i{ first };
+        while (++i != last) {
+            if (pred(proj(*i), proj(*median))) {
+                std::swap(*first++, *i);
+            }
+        }
+
+        return first;
     }
 
-    template<std::random_access_iterator It, class Cmp = std::less<>>
-    void intro_sort(It first, It last, std::iter_difference_t<It> threshold, Cmp cmp = {}) {
-        using diff_t = std::iter_difference_t<It>;
+    template<class It, class Pr, class Pj>
+    void intro_sort(It first, It last, std::iter_difference_t<It> margin, Pr pred, Pj proj) {
         if (last - first <= insertion_sort_threshold) {
-            insertion_sort(first, last, cmp);
+            insertion_sort(first, last, pred, proj);
+            return;
         }
-        else if (threshold == 0) {
-            make_heap(first, last, cmp);
-            sort_heap(first, last, cmp);
+
+        if (margin == 0) {
+            make_heap(first, last, pred, proj);
+            sort_heap(first, last, pred, proj);
+            return;
         }
-        else {
-            It median{ first + (last - first) / 2 };
-            triple_sort(first, median, last - 1);
-            It point{ partition(first, last, [&](auto&& param) { return cmp(param, *median); }) };
-            threshold = threshold / 2 + threshold / 4;
-            intro_sort(first, point, threshold, cmp);
-            intro_sort(point, last, threshold, cmp);
-        }
+
+        margin = (margin >> 1) + (margin >> 2);
+        It point{ median_partition(first, last, pred, proj) };
+        intro_sort(first, point, margin, pred, proj);
+        intro_sort(point, last, margin, pred, proj);
     }
 
-    template<std::random_access_iterator It, class Cmp = std::less<>>
-    void sort(It first, It last, Cmp cmp = {}) {
-        intro_sort(first, last, last - first, cmp);
+    export
+        template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr It sort(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        It r_last{ std::ranges::next(first, last) };
+        intro_sort(first, r_last, r_last - first, pred, proj);
+        return r_last;
     }
 
-    template<std::random_access_iterator It, class Cmp = std::less<>>
-    void partial_sort(It first, It middle, It last, Cmp cmp = {}) {
-        make_heap(first, middle, cmp);
+    export
+        template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr It partial_sort(It first, It middle, Se last, Pr pred = {}, Pj proj = {}) {
+        make_heap(first, middle, pred, proj);
         It i{ middle };
+        auto size{ middle - first };
         while (i != last) {
-            if (cmp(*i, *first)) {
+            if (pred(proj(*i), proj(*first))) {
                 std::swap(*i, *first);
-                sift_down(first, first, middle, cmp);
+                sift_down(first, 0, size, pred, proj);
             }
             ++i;
         }
-        sort_heap(first, middle, cmp);
-    }
-
-    template<class It, std::random_access_iterator ItD, class Cmp = std::less<>>
-    ItD partial_sort_copy(It first, It last, ItD d_first, ItD d_last, Cmp cmp = {}) {
-        ItD i{ d_first };
-        while (first != last && i != d_last) {
-            *i++ = *first;
-            ++first;
-        }
-        make_heap(d_first, i, cmp);
-        while (first != last) {
-            if (cmp(*first, *d_first)) {
-                *d_first = *first;
-                sift_down(d_first, d_first, i, cmp);
-            }
-            ++first;
-        }
-        sort_heap(d_first, i, cmp);
+        sort_heap(first, middle, pred, proj);
         return i;
     }
 
-    template<std::random_access_iterator It, class Cmp = std::less<>>
-    void stable_sort(It first, It last, Cmp cmp = {}) {
-        using diff_t = std::iter_difference_t<It>;
-        if (last - first <= insertion_sort_threshold) {
-            insertion_sort(first, last, cmp);
+    export
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::random_access_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::less, class Pj1 = std::identity, class Pj2 = std::identity>
+        requires std::indirectly_copyable<It1, It2>&& std::sortable<It2, Pr, Pj2>&& std::indirect_strict_weak_order<Pr, std::projected<It1, Pj1>, std::projected<It2, Pj2>>
+    constexpr std::ranges::in_out_result<It1, It2> partial_sort_copy(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
+        It2 i{ first2 };
+        while (first1 != last1 && i != first2) {
+            *i++ = *first1;
+            ++first1;
         }
-        else {
-            It middle{ first + (last - first) / 2 };
-            stable_sort(first, middle, cmp);
-            stable_sort(middle, last, cmp);
-            if (cmp(*middle, *std::prev(middle))) {
-                inplace_merge(first, middle, last, cmp);
+
+        auto size{ i - first2 };
+        make_heap(first2, i, pred, proj2);
+        while (first1 != last1) {
+            if (pred(proj1(*first1), proj2(*first2))) {
+                *first2 = *first1;
+                sift_down(first2, 0, size, pred, proj2);
             }
+            ++first1;
         }
+        sort_heap(first2, i, pred, proj2);
+
+        return i;
     }
 
-    template<std::random_access_iterator It, class Cmp = std::less<>>
-    void nth_element(It first, It middle, It last, Cmp cmp = {}) {
-        using diff_t = std::iter_difference_t<It>;
-        while (last - first > insertion_sort_threshold) {
-            It median{ first + (last - first) / 2 };
-            triple_sort(first, median, last - 1);
-            It point{ partition(first, last, [&](auto&& param) { return cmp(param, *median); }) };
-            if (point == middle) {
-                return;
-            }
-            (point < middle ? first : last) = point;
+    export
+        template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr It stable_sort(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        It r_last{ std::ranges::next(first, last) };
+        if (r_last - first <= insertion_sort_threshold) {
+            insertion_sort(first, r_last, pred, proj);
+            return r_last;
         }
-        insertion_sort(first, last, cmp);
+
+        It middle{ first + (r_last - first >> 1) };
+        stable_sort(first, middle, pred, proj);
+        stable_sort(middle, r_last, pred, proj);
+        if (pred(proj(*middle), proj(*std::ranges::prev(middle)))) {
+            inplace_merge(first, middle, r_last, pred, proj);
+        }
+
+        return r_last;
+    }
+
+    export
+        template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr It nth_element(It first, It middle, Se last, Pr pred = {}, Pj proj = {}) {
+        It r_last{ std::ranges::next(first, last) };
+        while (r_last - first > insertion_sort_threshold) {
+            It point{ median_partition(first, r_last, pred, proj) };
+            if (point == middle) {
+                break;
+            }
+            if (point < middle) {
+                first = point;
+            }
+            else {
+                r_last = point;
+            }
+        }
+        insertion_sort(first, r_last, pred, proj);
+        return r_last;
     }
 
 }
