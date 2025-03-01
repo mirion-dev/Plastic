@@ -1132,56 +1132,56 @@ namespace plastic {
 
 }
 
-// merge operations
+// binary search operations
 namespace plastic {
 
     export
-        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, std::weakly_incrementable Out, class Pr = std::ranges::less, class Pj1 = std::identity, class Pj2 = std::identity>
-        requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
-    constexpr std::ranges::in_in_out_result<It1, It2, Out> merge(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (pred(proj2(*first2), proj1(*first1))) {
-                *output = *first2;
-                ++first2, ++output;
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>, std::indirect_strict_weak_order<const T*, std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr It lower_bound(It first, Se last, const T& value, Pr pred = {}, Pj proj = {}) {
+        auto size{ std::ranges::distance(first, last) };
+        while (size != 0) {
+            auto half{ size >> 1 };
+            It i{ std::ranges::next(first, half) };
+            if (pred(proj(*i), proj(value))) {
+                first = ++i;
+                size -= half + 1;
             }
             else {
-                *output = *first1;
-                ++first1, ++output;
+                size = half;
             }
         }
-
-        if (first1 == last1) {
-            auto res{ copy(first2, last2, output) };
-            return { std::move(first1), std::move(res.in), std::move(res.out) };
-        }
-
-        auto res{ copy(first1, last1, output) };
-        return { std::move(res.in), std::move(first2), std::move(res.out) };
+        return first;
     }
 
     export
-        template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
-        requires std::sortable<It, Pr, Pj>
-    constexpr It inplace_merge(It first, It middle, Se last, Pr pred = {}, Pj proj = {}) {
-        auto buf{ new std::iter_value_t<It>[std::ranges::distance(first, last)] };
-
-        It i{ first }, j{ middle };
-        auto k{ buf };
-        while (i != middle && j != last) {
-            *k++ = pred(proj(*j), proj(*i)) ? std::move(*j++) : std::move(*i++);
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>, std::indirect_strict_weak_order<const T*, std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr It upper_bound(It first, Se last, const T& value, Pr pred = {}, Pj proj = {}) {
+        auto size{ std::ranges::distance(first, last) };
+        while (size != 0) {
+            auto half{ size >> 1 };
+            It i{ std::ranges::next(first, half) };
+            if (!pred(proj(value), proj(*i))) {
+                first = ++i;
+                size -= half + 1;
+            }
+            else {
+                size = half;
+            }
         }
+        return first;
+    }
 
-        if (i == middle) {
-            move(j, last, k);
-        }
-        else {
-            move(i, middle, k);
-        }
+    export
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>, std::indirect_strict_weak_order<const T*, std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr bool binary_search(It first, Se last, const T& value, Pr pred = {}, Pj proj = {}) {
+        first = lower_bound(first, last, value, pred, proj);
+        return first != last && !pred(proj(value), proj(*first));
+    }
 
-        It temp{ move(buf, k, first).out };
-        delete[] buf;
-
-        return temp;
+    export
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>, std::indirect_strict_weak_order<const T*, std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr std::ranges::subrange<It> equal_range(It first, Se last, const T& value, Pr pred = {}, Pj proj = {}) {
+        return { lower_bound(first, last, value, pred, proj), upper_bound(first, last, value, pred, proj) };
     }
 
 }
@@ -1294,6 +1294,60 @@ namespace plastic {
 
 }
 
+// merge operations
+namespace plastic {
+
+    export
+        template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, std::weakly_incrementable Out, class Pr = std::ranges::less, class Pj1 = std::identity, class Pj2 = std::identity>
+        requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
+    constexpr std::ranges::in_in_out_result<It1, It2, Out> merge(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
+        while (first1 != last1 && first2 != last2) {
+            if (pred(proj2(*first2), proj1(*first1))) {
+                *output = *first2;
+                ++first2, ++output;
+            }
+            else {
+                *output = *first1;
+                ++first1, ++output;
+            }
+        }
+
+        if (first1 == last1) {
+            auto res{ copy(first2, last2, output) };
+            return { std::move(first1), std::move(res.in), std::move(res.out) };
+        }
+
+        auto res{ copy(first1, last1, output) };
+        return { std::move(res.in), std::move(first2), std::move(res.out) };
+    }
+
+    export
+        template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr It inplace_merge(It first, It middle, Se last, Pr pred = {}, Pj proj = {}) {
+        auto buf{ new std::iter_value_t<It>[std::ranges::distance(first, last)] };
+
+        It i{ first }, j{ middle };
+        auto k{ buf };
+        while (i != middle && j != last) {
+            *k++ = pred(proj(*j), proj(*i)) ? std::move(*j++) : std::move(*i++);
+        }
+
+        if (i == middle) {
+            move(j, last, k);
+        }
+        else {
+            move(i, middle, k);
+        }
+
+        It temp{ move(buf, k, first).out };
+        delete[] buf;
+
+        return temp;
+    }
+
+}
+
 // sorting operations
 namespace plastic {
 
@@ -1355,7 +1409,7 @@ namespace plastic {
             }
         }
 
-        first = find_if_not(first, last, pred, proj); // upper_bound
+        first = upper_bound(first, last, *median, pred, proj);
         if (first == last) {
             return first;
         }
@@ -1479,32 +1533,6 @@ namespace plastic {
         }
         insertion_sort(first, r_last, pred, proj);
         return r_last;
-    }
-
-}
-
-// binary search operations
-export namespace plastic {
-
-    template<class It, class T = std::iter_value_t<It>, class Cmp = std::less<>>
-    It lower_bound(It first, It last, const T& value, Cmp cmp = {}) {
-        return partition_point(first, last, [&](auto&& param) { return cmp(param, value); });
-    }
-
-    template<class It, class T = std::iter_value_t<It>, class Cmp = std::less<>>
-    It upper_bound(It first, It last, const T& value, Cmp cmp = {}) {
-        return partition_point(first, last, [&](auto&& param) { return !cmp(value, param); });
-    }
-
-    template<class It, class T = std::iter_value_t<It>, class Cmp = std::less<>>
-    bool binary_search(It first, It last, const T& value, Cmp cmp = {}) {
-        first = lower_bound(first, last, value, cmp);
-        return first != last && !cmp(value, *first);
-    }
-
-    template<class It, class T = std::iter_value_t<It>, class Cmp = std::less<>>
-    std::pair<It, It> equal_range(It first, It last, const T& value, Cmp cmp = {}) {
-        return { lower_bound(first, last, value, cmp), upper_bound(first, last, value, cmp) };
     }
 
 }
