@@ -1495,25 +1495,15 @@ namespace plastic {
 
     template<class It, class Pr, class Pj>
     It median_partition(It first, It last, Pr pred, Pj proj) {
-        It median{ first + (last - first >> 1) }, last_prev{ std::ranges::prev(last) };
-        if (pred(proj(*median), proj(*first))) {
-            std::swap(*first, *median);
-        }
-        if (pred(proj(*last_prev), proj(*median))) {
-            std::swap(*median, *last_prev);
-            if (pred(proj(*median), proj(*first))) {
-                std::swap(*first, *median);
-            }
-        }
-
-        first = upper_bound(first, last, *median, pred, proj);
+        auto pivot{ max({ *first, first[last - first >> 1], *std::ranges::prev(last) }, pred, proj) };
+        first = upper_bound(first, last, pivot, pred, proj);
         if (first == last) {
             return first;
         }
 
         It i{ first };
         while (++i != last) {
-            if (pred(proj(*i), proj(*median))) {
+            if (pred(proj(*i), proj(pivot))) {
                 std::swap(*first++, *i);
             }
         }
