@@ -1726,54 +1726,69 @@ namespace plastic {
 }
 
 // permutation operations
-export namespace plastic {
+namespace plastic {
 
-    template<class It1, class It2, class Pr = std::equal_to<>>
-    bool is_permutation(It1 first1, It1 last1, It2 first2, It2 last2, Pr cmp = {}) {
-        std::tie(first1, first2) = mismatch(first1, last1, first2, last2, cmp);
-        if ((first1 == last1) != (first2 == last2)) {
-            return false;
-        }
-        if (first1 != last1) {
-            It1 i{ first1 };
-            while (i != last1) {
-                if (count(i, last1, *i) != count(first2, last2, *i)) {
-                    return false;
-                }
-                ++i;
+    export
+        template<std::forward_iterator It1, std::sentinel_for<It1> Se1, std::forward_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_equivalence_relation<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::equal_to>
+    constexpr bool is_permutation(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
+        It1 i{ first1 };
+        while (i != last1) {
+            if (count(i, last1, *i, proj1) != count(first2, last2, *i, proj2)) {
+                return false;
             }
+            ++i;
         }
         return true;
     }
 
-    template<class It1, class It2, class Pr = std::equal_to<>>
-    bool is_permutation(It1 first1, It1 last1, It2 first2, Pr cmp = {}) {
-        std::tie(first1, first2) = mismatch(first1, last1, first2, cmp);
-        return first1 == last1 || is_permutation(first1, last1, first2, std::next(first2, std::distance(first1, last1)), cmp);
-    }
-
-    template<class It, class Cmp = std::less<>>
-    bool next_permutation(It first, It last, Cmp cmp = {}) {
-        It i{ last }, j{ last };
-        if (first != last && first != --i) {
-            while (!cmp(*--i, *--j)) {
-                if (i == first) {
-                    reverse(first, last);
-                    return false;
-                }
-            }
-            j = last;
-            while (!cmp(*i, *--j));
-            std::swap(*i, *j);
-            reverse(++i, last);
-            return true;
+    export
+        template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr std::ranges::in_found_result<It> next_permutation(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        It r_last{ std::ranges::next(first, last) }, i{ r_last }, j{ r_last };
+        if (first == r_last || first == --i) {
+            return { std::move(first), false };
         }
-        return false;
+
+        while (!pred(proj(*--i), proj(*--j))) {
+            if (i == first) {
+                reverse(first, r_last);
+                return { std::move(r_last), false };
+            }
+        }
+
+        j = r_last;
+        while (!pred(proj(*i), proj(*--j))) {
+        }
+        std::swap(*i, *j);
+        reverse(++i, r_last);
+
+        return { std::move(r_last), true };
     }
 
-    template<class It, class Cmp = std::less<>>
-    bool prev_permutation(It first, It last, Cmp cmp = {}) {
-        return next_permutation(first, last, [&](auto&& param1, auto&& param2) { return cmp(param2, param1); });
+    export
+        template<std::bidirectional_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
+        requires std::sortable<It, Pr, Pj>
+    constexpr std::ranges::in_found_result<It> prev_permutation(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        It r_last{ std::ranges::next(first, last) }, i{ r_last }, j{ r_last };
+        if (first == r_last || first == --i) {
+            return { std::move(first), false };
+        }
+
+        while (!pred(proj(*--j), proj(*--i))) {
+            if (i == first) {
+                reverse(first, r_last);
+                return { std::move(r_last), false };
+            }
+        }
+
+        j = r_last;
+        while (!pred(proj(*--j), proj(*i))) {
+        }
+        std::swap(*i, *j);
+        reverse(++i, r_last);
+
+        return { std::move(r_last), true };
     }
 
 }
