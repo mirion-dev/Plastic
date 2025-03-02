@@ -487,6 +487,38 @@ int main() {
 
     }
 
+    // fold opertions
+    {
+        std::vector<int> empty, a{ 1, 2, 3, 4, 5 }, b{ 2, 4, 6, 8, 10 };
+
+        assert(plastic::fold_left(empty.begin(), empty.end(), 10, std::plus{}) == 10);
+        assert(plastic::fold_left(a.begin(), a.end(), 0, std::plus{}) == 15);
+        assert(plastic::fold_left(a.begin(), a.end(), 10, std::minus{}) == -5);
+        assert(plastic::fold_left(b.begin(), b.end(), 1, std::multiplies{}) == 3840);
+
+        assert(!plastic::fold_left_first(empty.begin(), empty.end(), std::plus{}));
+        assert(plastic::fold_left_first(a.begin(), a.end(), std::plus{}).value() == 15);
+        assert(*plastic::fold_left_first(b.begin(), b.end(), std::multiplies{}) == 3840);
+
+        assert(plastic::fold_right(empty.begin(), empty.end(), 100, std::plus{}) == 100);
+        assert(plastic::fold_right(a.begin(), a.end(), 0, std::plus{}) == 15);
+        assert(plastic::fold_right(b.begin(), b.end(), 2, std::minus{}) == 4);
+
+        assert(!plastic::fold_right_last(empty.begin(), empty.end(), std::plus{}));
+        assert(*plastic::fold_right_last(a.begin(), a.end(), std::plus{}) == 15);
+        assert(*plastic::fold_right_last(b.begin(), b.end(), std::minus{}) == 6);
+
+        auto res1{ plastic::fold_left_with_iter(a.begin(), a.end(), 0, std::plus{}) };
+        assert(res1.value == 15 && res1.in == a.end());
+        auto res2{ plastic::fold_left_with_iter(a.begin(), a.begin() + 3, 10, std::multiplies{}) };
+        assert(res2.value == 60 && res2.in == a.begin() + 3);
+
+        auto res3{ plastic::fold_left_first_with_iter(empty.begin(), empty.end(), std::plus{}) };
+        assert(!res3.value && res3.in == empty.end());
+        auto res4{ plastic::fold_left_first_with_iter(b.begin(), b.end(), std::multiplies{}) };
+        assert(*res4.value == 3840 && res4.in == b.end());
+    }
+
     // comparison operations
     {
         std::vector<int> empty, a{ 1, 2, 3, 4, 5 }, b{ 2, 4, 6, 8, 10 };
