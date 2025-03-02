@@ -465,6 +465,26 @@ int main() {
 
         assert(plastic::search_n(d.begin(), d.end(), 4, 5).begin() == d.begin());
         assert(plastic::search_n(c.begin(), c.end(), 2, 2, [](int x, int v) { return x >= v; }).begin() == c.begin() + 1);
+
+        assert(plastic::contains(a.begin(), a.end(), 3) == true);
+        assert(plastic::contains(b.begin(), b.end(), 3) == false);
+        assert(plastic::contains(c.begin(), c.end(), 3) == true);
+
+        x = { 3, 2, 1 };
+        assert(plastic::contains_subrange(a.begin(), a.end(), x.begin(), x.end()) == false);
+        assert(plastic::contains_subrange(b.begin(), b.end(), x.begin(), x.end()) == false);
+        assert(plastic::contains_subrange(c.begin(), c.end(), x.begin(), x.end()) == true);
+
+        x = { 1, 3, 5 };
+        assert(plastic::starts_with(a.begin(), a.end(), x.begin(), x.end()) == true);
+        assert(plastic::starts_with(b.begin(), b.end(), x.begin(), x.end()) == false);
+        assert(plastic::starts_with(c.begin(), c.end(), x.begin(), x.end()) == false);
+
+        x = { 3, 2, 1 };
+        assert(plastic::ends_with(a.begin(), a.end(), x.begin(), x.end()) == false);
+        assert(plastic::ends_with(b.begin(), b.end(), x.begin(), x.end()) == false);
+        assert(plastic::ends_with(c.begin(), c.end(), x.begin(), x.end()) == true);
+
     }
 
     // comparison operations
