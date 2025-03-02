@@ -549,35 +549,35 @@ public:
     }
 
     TEST_METHOD(modification) {
-
+        assert(false);
     }
 
     TEST_METHOD(partition) {
-
+        assert(false);
     }
 
     TEST_METHOD(sorting) {
-
+        assert(false);
     }
 
     TEST_METHOD(binary_search) {
-
+        assert(false);
     }
 
     TEST_METHOD(merging) {
-
+        assert(false);
     }
 
     TEST_METHOD(set) {
-
+        assert(false);
     }
 
     TEST_METHOD(heap) {
-
+        assert(false);
     }
 
     TEST_METHOD(minimun_maximum) {
-
+        assert(false);
     }
 
     TEST_METHOD(comparison) {
@@ -595,7 +595,7 @@ public:
     }
 
     TEST_METHOD(permutation) {
-
+        assert(false);
     }
 
 };
