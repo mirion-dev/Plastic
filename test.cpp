@@ -1,4 +1,6 @@
-#include <assert.h>
+#include <CppUnitTest.h>
+
+#define assert Microsoft::VisualStudio::CppUnitTestFramework::Assert::IsTrue
 
 import std;
 import plastic;
@@ -25,9 +27,10 @@ std::string format(const plastic::binary_heap<T, Cmp>& heap) {
     return format(temp);
 }
 
-int main() {
-    // linear structures
-    {
+TEST_CLASS(data_structure) {
+public:
+
+    TEST_METHOD(vector) {
         plastic::vector<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
         assert(format(b) == "[4, 4, 4, 4]");
@@ -96,7 +99,8 @@ int main() {
         assert(d < e);
         assert(d <= f);
     }
-    {
+
+    TEST_METHOD(deque) {
         plastic::deque<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
         assert(format(b) == "[4, 4, 4, 4]");
@@ -171,7 +175,8 @@ int main() {
         assert(d < e);
         assert(d <= f);
     }
-    {
+
+    TEST_METHOD(forward_list) {
         plastic::forward_list<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
         assert(format(b) == "[4, 4, 4, 4]");
@@ -226,7 +231,8 @@ int main() {
         assert(d < e);
         assert(d <= f);
     }
-    {
+
+    TEST_METHOD(list) {
         plastic::list<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
         assert(format(b) == "[4, 4, 4, 4]");
@@ -287,8 +293,7 @@ int main() {
         assert(d <= f);
     }
 
-    // search trees
-    {
+    TEST_METHOD(binary_search_tree) {
         /*
         plastic::binary_search_tree<int> a, b{ 1, 2, 2, 2, 3 }, c{ 6, 4, 8, 2 };
         assert(format(a) == "[]");
@@ -360,8 +365,7 @@ int main() {
         */
     }
 
-    // addressable heaps
-    {
+    TEST_METHOD(binary_heap) {
         plastic::binary_heap<int> a, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 };
         assert(format(a) == "[]");
         assert(format(b) == "[4, 4, 4, 4]");
@@ -402,8 +406,12 @@ int main() {
         assert(format(c) == "[1, 2, 3, 4, 5]");
     }
 
-    // non-modifying sequence operations
-    {
+};
+
+TEST_CLASS(algorithm) {
+public:
+
+    TEST_METHOD(non_modification) {
         std::vector<int> empty, a{ 1, 3, 5, 7, 9 }, b{ 2, 4, 6, 8, 10 }, c{ 1, 2, 3, 2, 1 }, d{ 5, 5, 5, 5 }, x;
 
         assert(plastic::all_of(empty.begin(), empty.end(), [](int x) { return x % 2 == 0; }) == true);
@@ -484,11 +492,9 @@ int main() {
         assert(plastic::ends_with(a.begin(), a.end(), x.begin(), x.end()) == false);
         assert(plastic::ends_with(b.begin(), b.end(), x.begin(), x.end()) == false);
         assert(plastic::ends_with(c.begin(), c.end(), x.begin(), x.end()) == true);
-
     }
 
-    // fold opertions
-    {
+    TEST_METHOD(fold) {
         std::vector<int> empty, a{ 1, 2, 3, 4, 5 }, b{ 2, 4, 6, 8, 10 };
 
         assert(plastic::fold_left(empty.begin(), empty.end(), 10, std::plus{}) == 10);
@@ -519,8 +525,39 @@ int main() {
         assert(*res4.value == 3840 && res4.in == b.end());
     }
 
-    // comparison operations
-    {
+    TEST_METHOD(modification) {
+
+    }
+
+    TEST_METHOD(partition) {
+
+    }
+
+    TEST_METHOD(sorting) {
+
+    }
+
+    TEST_METHOD(binary_search) {
+
+    }
+
+    TEST_METHOD(merging) {
+
+    }
+
+    TEST_METHOD(set) {
+
+    }
+
+    TEST_METHOD(heap) {
+
+    }
+
+    TEST_METHOD(minimun_maximum) {
+
+    }
+
+    TEST_METHOD(comparison) {
         std::vector<int> empty, a{ 1, 2, 3, 4, 5 }, b{ 2, 4, 6, 8, 10 };
 
         assert(plastic::equal(empty.begin(), empty.end(), empty.begin(), empty.end()) == true);
@@ -533,4 +570,9 @@ int main() {
         assert(plastic::lexicographical_compare(b.begin(), b.end(), a.begin(), a.end()) == false);
         assert(plastic::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), {}, [](int x) { return x * 3; }) == false);
     }
-}
+
+    TEST_METHOD(permutation) {
+
+    }
+
+};

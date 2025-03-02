@@ -18,10 +18,10 @@
     <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="data_structure.ixx">
+    <ClCompile Include="algorithm.ixx">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="algorithm.ixx">
+    <ClCompile Include="data_structure.ixx">
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="plastic.ixx">
@@ -29,13 +29,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.md">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <Natvis Include="plastic.natvis">
       <Filter>Resource Files</Filter>
     </Natvis>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
