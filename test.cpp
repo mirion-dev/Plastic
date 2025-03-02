@@ -403,4 +403,19 @@ int main() {
         c.erase(c.data());
         assert(format(c) == "[1, 2, 3, 4, 5]");
     }
+
+    // comparison operations
+    {
+        std::forward_list<int> a, b{ 1, 2, 3, 4, 5 }, c{ 2, 4, 6, 8, 10 };
+
+        assert(equal(a.begin(), a.end(), a.begin(), a.end()) == true);
+        assert(equal(a.begin(), a.end(), b.begin(), b.end()) == false);
+        assert(equal(b.begin(), b.end(), c.begin(), c.end()) == false);
+        assert(equal(b.begin(), b.end(), c.begin(), c.end(), {}, [](int x) { return x * 2; }) == true);
+
+        assert(lexicographical_compare(a.begin(), a.end(), b.begin(), b.end()) == true);
+        assert(lexicographical_compare(b.begin(), b.end(), c.begin(), c.end()) == true);
+        assert(lexicographical_compare(c.begin(), c.end(), b.begin(), b.end()) == false);
+        assert(lexicographical_compare(b.begin(), b.end(), c.begin(), c.end(), {}, [](int x) { return x * 3; }) == false);
+    }
 }
