@@ -438,7 +438,7 @@ namespace plastic {
 
 }
 
-// fold operations 
+// fold operations
 namespace plastic {
 
     export
@@ -1029,7 +1029,7 @@ namespace plastic {
 
 }
 
-// partitioning operations
+// partition operations
 namespace plastic {
 
     export

@@ -5,11 +5,13 @@ import plastic;
 
 using namespace plastic;
 
-std::string format(const auto& arg) {
+template<class T>
+std::string format(const T& arg) {
     return std::format("{}", arg);
 }
 
-std::string format(std::random_access_iterator auto first, std::size_t size) {
+template<std::contiguous_iterator Cont>
+std::string format(const Cont& first, std::size_t size) {
     return format(std::span{ first, size });
 }
 
@@ -288,8 +290,8 @@ int main() {
     }
 
     // search trees
-    /*
     {
+        /*
         binary_search_tree<int> a, b{ 1, 2, 2, 2, 3 }, c{ 6, 4, 8, 2 };
         assert(format(a) == "[]");
         assert(format(b) == "[1, 2, 2, 2, 3]");
@@ -357,8 +359,8 @@ int main() {
         assert(d != e);
         assert(d < e);
         assert(d <= f);
+        */
     }
-    */
 
     // addressable heaps
     {
