@@ -402,6 +402,71 @@ int main() {
         assert(format(c) == "[1, 2, 3, 4, 5]");
     }
 
+    // non-modifying sequence operations
+    {
+        std::vector<int> empty, a{ 1, 3, 5, 7, 9 }, b{ 2, 4, 6, 8, 10 }, c{ 1, 2, 3, 2, 1 }, d{ 5, 5, 5, 5 }, x;
+
+        assert(plastic::all_of(empty.begin(), empty.end(), [](int x) { return x % 2 == 0; }) == true);
+        assert(plastic::all_of(a.begin(), a.end(), [](int x) { return x % 2 == 1; }) == true);
+        assert(plastic::all_of(b.begin(), b.end(), [](int x) { return x % 2 == 1; }) == false);
+        assert(plastic::all_of(c.begin(), c.end(), [](int x) { return x % 2 == 1; }) == false);
+
+        assert(plastic::any_of(empty.begin(), empty.end(), [](int x) { return x > 0; }) == false);
+        assert(plastic::any_of(a.begin(), a.end(), [](int x) { return x > 5; }) == true);
+        assert(plastic::any_of(b.begin(), b.end(), [](int x) { return x % 2 == 0; }) == true);
+        assert(plastic::any_of(c.begin(), c.end(), [](int x) { return x == 4; }) == false);
+
+        assert(plastic::none_of(empty.begin(), empty.end(), [](int x) { return x < 0; }) == true);
+        assert(plastic::none_of(a.begin(), a.end(), [](int x) { return x % 2 == 0; }) == true);
+        assert(plastic::none_of(b.begin(), b.end(), [](int x) { return x > 2; }) == false);
+        assert(plastic::none_of(c.begin(), c.end(), [](int x) { return x == 2; }) == false);
+
+        x = { 1, 2, 3 };
+        plastic::for_each(x.begin(), x.end(), [](int& x) { x += 10; });
+        assert(format(x) == "[11, 12, 13]");
+
+        x = { 1, 2, 3, 4, 5 };
+        plastic::for_each_n(x.begin(), 3, [](int& x) { x *= 2; });
+        assert(format(x) == "[2, 4, 6, 4, 5]");
+
+        assert(plastic::count(empty.begin(), empty.end(), 0) == 0);
+        assert(plastic::count(c.begin(), c.end(), 2) == 2);
+        assert(plastic::count(d.begin(), d.end(), 5) == 4);
+
+        assert(plastic::count_if(a.begin(), a.end(), [](int x) { return x > 5; }) == 2);
+        assert(plastic::count_if(b.begin(), b.end(), [](int x) { return x % 4 == 2; }) == 3);
+
+        assert(plastic::mismatch(a.begin(), a.end(), b.begin(), b.end()).in1 == a.begin());
+        assert(plastic::mismatch(b.begin(), b.end(), b.begin(), b.end()).in2 == b.end());
+
+        assert(plastic::find(a.begin(), a.end(), 7) == a.begin() + 3);
+        assert(plastic::find(b.begin(), b.end(), 5) == b.end());
+
+        assert(plastic::find_if(a.begin(), a.end(), [](int x) { return x < 0; }) == a.end());
+        assert(plastic::find_if(b.begin(), b.end(), [](int x) { return x > 5; }) == b.begin() + 2);
+
+        assert(plastic::find_if_not(c.begin(), c.end(), [](int x) { return x < 3; }) == c.begin() + 2);
+        assert(plastic::find_if_not(d.begin(), d.end(), [](int x) { return x == 5; }) == d.end());
+
+        x = { 5, 5 };
+        assert(plastic::find_end(c.begin(), c.end(), x.begin(), x.end()).begin() == c.end());
+        assert(plastic::find_end(d.begin(), d.end(), x.begin(), x.end()).begin() == d.begin() + 2);
+
+        x = { 0, 10 };
+        assert(plastic::find_first_of(a.begin(), a.end(), x.begin(), x.end()) == a.end());
+        assert(plastic::find_first_of(b.begin(), b.end(), x.begin(), x.end()) == b.begin() + 4);
+
+        assert(plastic::adjacent_find(a.begin(), a.end()) == a.end());
+        assert(plastic::adjacent_find(d.begin(), d.end()) == d.begin());
+
+        x = { 3, 5, 7 };
+        assert(plastic::search(a.begin(), a.end(), x.begin(), x.end()).begin() == a.begin() + 1);
+        assert(plastic::search(b.begin(), b.end(), x.begin(), x.end()).begin() == b.end());
+
+        assert(plastic::search_n(d.begin(), d.end(), 4, 5).begin() == d.begin());
+        assert(plastic::search_n(c.begin(), c.end(), 2, 2, [](int x, int v) { return x >= v; }).begin() == c.begin() + 1);
+    }
+
     // comparison operations
     {
         std::vector<int> empty, a{ 1, 2, 3, 4, 5 }, b{ 2, 4, 6, 8, 10 };

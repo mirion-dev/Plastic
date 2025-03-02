@@ -313,12 +313,11 @@ namespace plastic {
         It i{ first };
         while (++i != last) {
             if (pred(proj(*first), proj(*i))) {
-                break;
+                return first;
             }
             ++first;
         }
-
-        return first;
+        return i;
     }
 
     export
@@ -367,7 +366,6 @@ namespace plastic {
                 ++first;
             }
         }
-
         return { first, first };
     }
 
