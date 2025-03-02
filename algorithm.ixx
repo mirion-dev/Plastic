@@ -90,20 +90,20 @@ namespace plastic {
         template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     constexpr bool equal(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (!pred(proj1(*first1), proj2(*first2))) {
+        while (first2 != last2) {
+            if (first1 == last1 || !pred(proj1(*first1), proj2(*first2))) {
                 return false;
             }
             ++first1, ++first2;
         }
-        return true;
+        return first1 == last1;
     }
 
     export
         template<std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_strict_weak_order<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::less>
     constexpr bool lexicographical_compare(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-        while (first1 != last1 && first2 != last2) {
-            if (pred(proj1(*first1), proj2(*first2))) {
+        while (first2 != last2) {
+            if (first1 == last1 || pred(proj1(*first1), proj2(*first2))) {
                 return true;
             }
             if (pred(proj2(*first2), proj1(*first1))) {
@@ -111,7 +111,7 @@ namespace plastic {
             }
             ++first1, ++first2;
         }
-        return first1 == last1 && first2 != last2;
+        return false;
     }
 
 }
