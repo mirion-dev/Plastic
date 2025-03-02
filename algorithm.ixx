@@ -1391,7 +1391,7 @@ namespace plastic {
 
 }
 
-// merge operations
+// merging operations
 namespace plastic {
 
     export

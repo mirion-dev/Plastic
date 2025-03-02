@@ -10,8 +10,8 @@ std::string format(const T& arg) {
     return std::format("{}", arg);
 }
 
-template<std::contiguous_iterator Cont>
-std::string format(const Cont& first, std::size_t size) {
+template<std::contiguous_iterator It>
+std::string format(It first, std::size_t size) {
     return format(std::span{ first, size });
 }
 

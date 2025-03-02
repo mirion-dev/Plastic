@@ -86,10 +86,10 @@ Same as the constrained algorithms in `<algorithm>`, but only meet the standard'
 | Modification | `copy`, `copy_if`, `copy_n`, `copy_backward`, `move`, `move_backward`, `fill`, `fill_n`, `transform`, `generate`, `generate_n`, `remove`, `remove_if`, `remove_copy`, `remove_copy_if`, `replace`, `replace_if`, `replace_copy`, `replace_copy_if`, `swap_ranges`, `reverse`, `reverse_copy`, `rotate`, `rotate_copy`, `shift_left`, `shift_right`, `sample`, `shuffle`, `unique`, `unique_copy` |
 | Partition | `is_partitioned`, `partition`, `partition_copy`, `stable_partition`, `partition_point` |
 | Sorting | `is_sorted`, `is_sorted_until`, `sort`, `partial_sort`, `partial_sort_copy`, `stable_sort`, `nth_element` |
-| Binary search | `lower_bound`, `upper_bound`, `binary_search`, `equal_range` |
+| Binary Search | `lower_bound`, `upper_bound`, `binary_search`, `equal_range` |
 | Merging | `merge`, `inplace_merge` |
 | Set | `includes`, `set_difference`, `set_intersection`, `set_symmetric_difference`, `set_union` |
 | Heap | `is_heap`, `is_heap_until`, `make_heap`, `push_heap`, `pop_heap`, `sort_heap` |
-| Minimum/maximum | `max`, `max_element`, `min`, `min_element`, `minmax`, `minmax_element`, `clamp` |
+| Minimum/Maximum | `max`, `max_element`, `min`, `min_element`, `minmax`, `minmax_element`, `clamp` |
 | Comparison | `equal`, `lexicographical_compare` |
 | Permutation | `is_permutation`, `next_permutation`, `prev_permutation` |
