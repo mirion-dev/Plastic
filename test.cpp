@@ -294,7 +294,6 @@ public:
     }
 
     TEST_METHOD(binary_search_tree) {
-        /*
         plastic::binary_search_tree<int> a, b{ 1, 2, 2, 2, 3 }, c{ 6, 4, 8, 2 };
         assert(format(a) == "[]");
         assert(format(b) == "[1, 2, 2, 2, 3]");
@@ -362,7 +361,6 @@ public:
         assert(d != e);
         assert(d < e);
         assert(d <= f);
-        */
     }
 
     TEST_METHOD(binary_heap) {
@@ -412,105 +410,130 @@ TEST_CLASS(algorithm) {
 public:
 
     TEST_METHOD(non_modification) {
-        std::vector<int> empty, a{ 1, 3, 5, 7, 9 }, b{ 2, 4, 6, 8, 10 }, c{ 1, 2, 3, 2, 1 }, d{ 5, 5, 5, 5 }, x;
+        std::vector<int> e, a{ 1, 3, 5, 7, 9 }, b{ 2, 4, 6, 8, 10 }, c{ 1, 2, 3, 2, 1 }, d{ 5, 5, 5, 5 }, x;
 
-        assert(plastic::all_of(empty.begin(), empty.end(), [](int x) { return x % 2 == 0; }) == true);
+        assert(plastic::all_of(e.begin(), e.end(), [](int x) { return x % 2 == 0; }) == true);
         assert(plastic::all_of(a.begin(), a.end(), [](int x) { return x % 2 == 1; }) == true);
         assert(plastic::all_of(b.begin(), b.end(), [](int x) { return x % 2 == 1; }) == false);
         assert(plastic::all_of(c.begin(), c.end(), [](int x) { return x % 2 == 1; }) == false);
 
-        assert(plastic::any_of(empty.begin(), empty.end(), [](int x) { return x > 0; }) == false);
+        assert(plastic::any_of(e.begin(), e.end(), [](int x) { return x > 0; }) == false);
         assert(plastic::any_of(a.begin(), a.end(), [](int x) { return x > 5; }) == true);
         assert(plastic::any_of(b.begin(), b.end(), [](int x) { return x % 2 == 0; }) == true);
         assert(plastic::any_of(c.begin(), c.end(), [](int x) { return x == 4; }) == false);
 
-        assert(plastic::none_of(empty.begin(), empty.end(), [](int x) { return x < 0; }) == true);
+        assert(plastic::none_of(e.begin(), e.end(), [](int x) { return x < 0; }) == true);
         assert(plastic::none_of(a.begin(), a.end(), [](int x) { return x % 2 == 0; }) == true);
         assert(plastic::none_of(b.begin(), b.end(), [](int x) { return x > 2; }) == false);
         assert(plastic::none_of(c.begin(), c.end(), [](int x) { return x == 2; }) == false);
 
         x = { 1, 2, 3 };
+        plastic::for_each(e.begin(), e.end(), [](int& x) { x += 10; });
         plastic::for_each(x.begin(), x.end(), [](int& x) { x += 10; });
+        assert(format(e) == "[]");
         assert(format(x) == "[11, 12, 13]");
 
         x = { 1, 2, 3, 4, 5 };
+        plastic::for_each_n(e.begin(), 0, [](int& x) { x += 10; });
         plastic::for_each_n(x.begin(), 3, [](int& x) { x *= 2; });
+        assert(format(e) == "[]");
         assert(format(x) == "[2, 4, 6, 4, 5]");
 
-        assert(plastic::count(empty.begin(), empty.end(), 0) == 0);
+        assert(plastic::count(e.begin(), e.end(), 0) == 0);
         assert(plastic::count(c.begin(), c.end(), 2) == 2);
         assert(plastic::count(d.begin(), d.end(), 5) == 4);
 
+        assert(plastic::count_if(e.begin(), e.end(), [](int x) { return x == 0; }) == 0);
         assert(plastic::count_if(a.begin(), a.end(), [](int x) { return x > 5; }) == 2);
         assert(plastic::count_if(b.begin(), b.end(), [](int x) { return x % 4 == 2; }) == 3);
 
-        assert(plastic::mismatch(a.begin(), a.end(), b.begin(), b.end()).in1 == a.begin());
+        assert(plastic::mismatch(e.begin(), e.end(), e.begin(), e.end()).in1 == e.begin());
+        assert(plastic::mismatch(a.begin(), a.end(), c.begin(), c.end()).in1 == a.begin() + 1);
         assert(plastic::mismatch(b.begin(), b.end(), b.begin(), b.end()).in2 == b.end());
 
+        assert(plastic::find(e.begin(), e.end(), 0) == e.end());
         assert(plastic::find(a.begin(), a.end(), 7) == a.begin() + 3);
         assert(plastic::find(b.begin(), b.end(), 5) == b.end());
 
+        assert(plastic::find_if(e.begin(), e.end(), [](int x) { return x == 0; }) == e.end());
         assert(plastic::find_if(a.begin(), a.end(), [](int x) { return x < 0; }) == a.end());
         assert(plastic::find_if(b.begin(), b.end(), [](int x) { return x > 5; }) == b.begin() + 2);
 
+        assert(plastic::find_if_not(e.begin(), e.end(), [](int x) { return x != 0; }) == e.end());
         assert(plastic::find_if_not(c.begin(), c.end(), [](int x) { return x < 3; }) == c.begin() + 2);
         assert(plastic::find_if_not(d.begin(), d.end(), [](int x) { return x == 5; }) == d.end());
 
         x = { 5, 5 };
+        assert(plastic::find_end(a.begin(), a.end(), e.begin(), e.end()).begin() == a.end());
+        assert(plastic::find_end(e.begin(), e.end(), a.begin(), a.end()).begin() == e.end());
         assert(plastic::find_end(c.begin(), c.end(), x.begin(), x.end()).begin() == c.end());
         assert(plastic::find_end(d.begin(), d.end(), x.begin(), x.end()).begin() == d.begin() + 2);
 
         x = { 0, 10 };
+        assert(plastic::find_first_of(a.begin(), a.end(), e.begin(), e.end()) == a.end());
+        assert(plastic::find_first_of(e.begin(), e.end(), a.begin(), a.end()) == e.end());
         assert(plastic::find_first_of(a.begin(), a.end(), x.begin(), x.end()) == a.end());
         assert(plastic::find_first_of(b.begin(), b.end(), x.begin(), x.end()) == b.begin() + 4);
 
+        assert(plastic::adjacent_find(e.begin(), e.end()) == e.end());
         assert(plastic::adjacent_find(a.begin(), a.end()) == a.end());
         assert(plastic::adjacent_find(d.begin(), d.end()) == d.begin());
 
         x = { 3, 5, 7 };
+        assert(plastic::search(a.begin(), a.end(), e.begin(), e.end()).begin() == a.begin());
+        assert(plastic::search(e.begin(), e.end(), a.begin(), a.end()).begin() == e.end());
         assert(plastic::search(a.begin(), a.end(), x.begin(), x.end()).begin() == a.begin() + 1);
         assert(plastic::search(b.begin(), b.end(), x.begin(), x.end()).begin() == b.end());
 
+        assert(plastic::search_n(e.begin(), e.end(), 0, 10).begin() == e.begin());
+        assert(plastic::search_n(e.begin(), e.end(), 10, 0).begin() == e.end());
+        assert(plastic::search_n(c.begin(), c.end(), 2, 1, std::ranges::greater{}).begin() == c.begin() + 1);
         assert(plastic::search_n(d.begin(), d.end(), 4, 5).begin() == d.begin());
-        assert(plastic::search_n(c.begin(), c.end(), 2, 2, [](int x, int v) { return x >= v; }).begin() == c.begin() + 1);
 
+        assert(plastic::contains(e.begin(), e.end(), 3) == false);
         assert(plastic::contains(a.begin(), a.end(), 3) == true);
         assert(plastic::contains(b.begin(), b.end(), 3) == false);
         assert(plastic::contains(c.begin(), c.end(), 3) == true);
 
         x = { 3, 2, 1 };
+        assert(plastic::contains_subrange(e.begin(), e.end(), x.begin(), x.end()) == false);
+        assert(plastic::contains_subrange(a.begin(), a.end(), e.begin(), e.end()) == true);
         assert(plastic::contains_subrange(a.begin(), a.end(), x.begin(), x.end()) == false);
         assert(plastic::contains_subrange(b.begin(), b.end(), x.begin(), x.end()) == false);
         assert(plastic::contains_subrange(c.begin(), c.end(), x.begin(), x.end()) == true);
 
         x = { 1, 3, 5 };
+        assert(plastic::starts_with(e.begin(), e.end(), x.begin(), x.end()) == false);
+        assert(plastic::starts_with(a.begin(), a.end(), e.begin(), e.end()) == true);
         assert(plastic::starts_with(a.begin(), a.end(), x.begin(), x.end()) == true);
         assert(plastic::starts_with(b.begin(), b.end(), x.begin(), x.end()) == false);
         assert(plastic::starts_with(c.begin(), c.end(), x.begin(), x.end()) == false);
 
         x = { 3, 2, 1 };
+        assert(plastic::ends_with(e.begin(), e.end(), x.begin(), x.end()) == false);
+        assert(plastic::ends_with(a.begin(), a.end(), e.begin(), e.end()) == true);
         assert(plastic::ends_with(a.begin(), a.end(), x.begin(), x.end()) == false);
         assert(plastic::ends_with(b.begin(), b.end(), x.begin(), x.end()) == false);
         assert(plastic::ends_with(c.begin(), c.end(), x.begin(), x.end()) == true);
     }
 
     TEST_METHOD(fold) {
-        std::vector<int> empty, a{ 1, 2, 3, 4, 5 }, b{ 2, 4, 6, 8, 10 };
+        std::vector<int> e, a{ 1, 2, 3, 4, 5 }, b{ 2, 4, 6, 8, 10 };
 
-        assert(plastic::fold_left(empty.begin(), empty.end(), 10, std::plus{}) == 10);
+        assert(plastic::fold_left(e.begin(), e.end(), 10, std::plus{}) == 10);
         assert(plastic::fold_left(a.begin(), a.end(), 0, std::plus{}) == 15);
         assert(plastic::fold_left(a.begin(), a.end(), 10, std::minus{}) == -5);
         assert(plastic::fold_left(b.begin(), b.end(), 1, std::multiplies{}) == 3840);
 
-        assert(!plastic::fold_left_first(empty.begin(), empty.end(), std::plus{}));
-        assert(plastic::fold_left_first(a.begin(), a.end(), std::plus{}).value() == 15);
+        assert(!plastic::fold_left_first(e.begin(), e.end(), std::plus{}));
+        assert(*plastic::fold_left_first(a.begin(), a.end(), std::plus{}) == 15);
         assert(*plastic::fold_left_first(b.begin(), b.end(), std::multiplies{}) == 3840);
 
-        assert(plastic::fold_right(empty.begin(), empty.end(), 100, std::plus{}) == 100);
+        assert(plastic::fold_right(e.begin(), e.end(), 100, std::plus{}) == 100);
         assert(plastic::fold_right(a.begin(), a.end(), 0, std::plus{}) == 15);
         assert(plastic::fold_right(b.begin(), b.end(), 2, std::minus{}) == 4);
 
-        assert(!plastic::fold_right_last(empty.begin(), empty.end(), std::plus{}));
+        assert(!plastic::fold_right_last(e.begin(), e.end(), std::plus{}));
         assert(*plastic::fold_right_last(a.begin(), a.end(), std::plus{}) == 15);
         assert(*plastic::fold_right_last(b.begin(), b.end(), std::minus{}) == 6);
 
@@ -519,8 +542,8 @@ public:
         auto res2{ plastic::fold_left_with_iter(a.begin(), a.begin() + 3, 10, std::multiplies{}) };
         assert(res2.value == 60 && res2.in == a.begin() + 3);
 
-        auto res3{ plastic::fold_left_first_with_iter(empty.begin(), empty.end(), std::plus{}) };
-        assert(!res3.value && res3.in == empty.end());
+        auto res3{ plastic::fold_left_first_with_iter(e.begin(), e.end(), std::plus{}) };
+        assert(!res3.value && res3.in == e.end());
         auto res4{ plastic::fold_left_first_with_iter(b.begin(), b.end(), std::multiplies{}) };
         assert(*res4.value == 3840 && res4.in == b.end());
     }
@@ -558,14 +581,14 @@ public:
     }
 
     TEST_METHOD(comparison) {
-        std::vector<int> empty, a{ 1, 2, 3, 4, 5 }, b{ 2, 4, 6, 8, 10 };
+        std::vector<int> e, a{ 1, 2, 3, 4, 5 }, b{ 2, 4, 6, 8, 10 };
 
-        assert(plastic::equal(empty.begin(), empty.end(), empty.begin(), empty.end()) == true);
-        assert(plastic::equal(empty.begin(), empty.end(), a.begin(), a.end()) == false);
+        assert(plastic::equal(e.begin(), e.end(), e.begin(), e.end()) == true);
+        assert(plastic::equal(e.begin(), e.end(), a.begin(), a.end()) == false);
         assert(plastic::equal(a.begin(), a.end(), b.begin(), b.end()) == false);
         assert(plastic::equal(a.begin(), a.end(), b.begin(), b.end(), {}, [](int x) { return x * 2; }) == true);
 
-        assert(plastic::lexicographical_compare(empty.begin(), empty.end(), a.begin(), a.end()) == true);
+        assert(plastic::lexicographical_compare(e.begin(), e.end(), a.begin(), a.end()) == true);
         assert(plastic::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end()) == true);
         assert(plastic::lexicographical_compare(b.begin(), b.end(), a.begin(), a.end()) == false);
         assert(plastic::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), {}, [](int x) { return x * 3; }) == false);
