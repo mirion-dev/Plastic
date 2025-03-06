@@ -447,17 +447,15 @@ namespace plastic {
         using U = fold_left_result_t<Fn, T, It>;
 
         if (first == last) {
-            return { std::move(first), static_cast<U>(std::move(init)) };
+            return { first, static_cast<U>(init) };
         }
 
-        U value{ func(init, *first) };
-        ++first;
+        U value{ func(init, *first++) };
         while (first != last) {
-            value = func(value, *first);
-            ++first;
+            value = func(value, *first++);
         }
 
-        return { std::move(first), std::move(value) };
+        return { first, value };
     }
 
     export
@@ -467,18 +465,16 @@ namespace plastic {
         using U = fold_left_result_t<Fn, std::iter_value_t<It>, It>;
 
         if (first == last) {
-            return { std::move(first), {} };
+            return { first, {} };
         }
 
-        std::optional<U> opt{ std::in_place, *first };
+        std::optional<U> opt{ std::in_place, *first++ };
         U& value{ *opt };
-        ++first;
         while (first != last) {
-            value = func(value, *first);
-            ++first;
+            value = func(value, *first++);
         }
 
-        return { std::move(first), std::move(opt) };
+        return { first, opt };
     }
 
     export
@@ -500,7 +496,7 @@ namespace plastic {
         using U = fold_right_result_t<Fn, T, It>;
 
         if (first == last) {
-            return static_cast<U>(std::move(init));
+            return static_cast<U>(init);
         }
 
         It i{ std::ranges::next(first, last) };
@@ -542,10 +538,9 @@ namespace plastic {
         requires std::indirectly_copyable<It, Out>
     constexpr std::ranges::in_out_result<It, Out> copy(It first, Se last, Out output) {
         while (first != last) {
-            *output = *first;
-            ++first, ++output;
+            *output++ = *first++;
         }
-        return { std::move(first), std::move(output) };
+        return { first, output };
     }
 
     export
@@ -559,7 +554,7 @@ namespace plastic {
             }
             ++first;
         }
-        return { std::move(first), std::move(output) };
+        return { first, output };
     }
 
     export
@@ -567,7 +562,7 @@ namespace plastic {
         requires std::indirectly_copyable<It, Out>
     constexpr std::ranges::in_out_result<It, Out> copy_n(It first, std::iter_difference_t<It> count, Out output) {
         if (count <= 0) {
-            return { std::move(first), std::move(output) };
+            return { first, output };
         }
 
         while (count-- != 0) {
@@ -575,7 +570,7 @@ namespace plastic {
             ++first, ++output;
         }
 
-        return { std::move(first), std::move(output) };
+        return { first, output };
     }
 
     export
@@ -586,7 +581,7 @@ namespace plastic {
         while (first != i) {
             *--output = *--i;
         }
-        return { std::move(r_last), std::move(output) };
+        return { r_last, output };
     }
 
     export
@@ -597,7 +592,7 @@ namespace plastic {
             *output = std::move(*first);
             ++first, ++output;
         }
-        return { std::move(first), std::move(output) };
+        return { first, output };
     }
 
     export
@@ -608,7 +603,7 @@ namespace plastic {
         while (first != i) {
             *--output = std::move(*--i);
         }
-        return { std::move(r_last), std::move(output) };
+        return { r_last, output };
     }
 
     export
@@ -646,7 +641,7 @@ namespace plastic {
             *output = func(proj(*first));
             ++first, ++output;
         }
-        return { std::move(first), std::move(output) };
+        return { first, output };
     }
 
     export
@@ -657,7 +652,7 @@ namespace plastic {
             *output = func(proj1(*first1), proj2(*first2));
             ++first1, ++first2, ++output;
         }
-        return { std::move(first1), std::move(first2), std::move(output) };
+        return { first1, first2, output };
     }
 
     export
@@ -701,7 +696,7 @@ namespace plastic {
             }
         }
 
-        return { std::move(first), std::move(i) };
+        return { first, i };
     }
 
     export
@@ -726,7 +721,7 @@ namespace plastic {
             }
             ++first;
         }
-        return { std::move(first), std::move(output) };
+        return { first, output };
     }
 
     export
@@ -775,7 +770,7 @@ namespace plastic {
             *output = plastic::satisfy<Sat>(proj(*first), value_or_pred) ? value : *first;
             ++first, ++output;
         }
-        return { std::move(first), std::move(output) };
+        return { first, output };
     }
 
     export
@@ -800,7 +795,7 @@ namespace plastic {
             std::swap(*first1, *first2);
             ++first1, ++first2;
         }
-        return { std::move(first1), std::move(first2) };
+        return { first1, first2 };
     }
 
     export
@@ -823,7 +818,7 @@ namespace plastic {
             *output = *--i;
             ++output;
         }
-        return { std::move(r_last), std::move(output) };
+        return { r_last, output };
     }
 
     export
@@ -835,7 +830,7 @@ namespace plastic {
         }
 
         if (middle == last) {
-            return { std::move(first), std::move(middle) };
+            return { first, middle };
         }
 
         It i{ middle };
@@ -857,7 +852,7 @@ namespace plastic {
             } while (i != last);
         }
 
-        return { std::move(dest), std::move(middle) };
+        return { dest, middle };
     }
 
     export
@@ -865,7 +860,7 @@ namespace plastic {
         requires std::indirectly_copyable<It, Out>
     constexpr std::ranges::in_out_result<It, Out> rotate_copy(It first, It middle, Se last, Out output) {
         auto res1{ plastic::copy(middle, last, output) }, res2{ plastic::copy(first, middle, res1.out) };
-        return { std::move(res1.in), std::move(res2.out) };
+        return { res1.in, res2.out };
     }
 
     export
@@ -882,14 +877,14 @@ namespace plastic {
 
         It dest{ std::ranges::next(first, count, last) };
         if (dest == last) {
-            return { std::move(dest), std::move(dest) };
+            return { dest, dest };
         }
 
         It i{ first }, j{ dest };
         while (i != dest) {
             if (j == last) {
                 plastic::move(first, i, dest);
-                return { std::move(dest), std::move(j) };
+                return { dest, j };
             }
             ++i, ++j;
         }
@@ -904,7 +899,7 @@ namespace plastic {
         }
 
         plastic::move(first, buf, plastic::move(buf, dest, i).out);
-        return { std::move(dest), std::move(j) };
+        return { dest, j };
     }
 
     export
@@ -985,7 +980,7 @@ namespace plastic {
         }
         ++first;
 
-        return { std::move(first), std::move(i) };
+        return { first, i };
     }
 
     export
@@ -993,7 +988,7 @@ namespace plastic {
         requires std::indirectly_copyable<It, Out> && (std::forward_iterator<It> || std::input_iterator<Out> && std::same_as<std::iter_value_t<It>, std::iter_value_t<Out>> || std::indirectly_copyable_storable<It, Out>)
     constexpr std::ranges::in_out_result<It, Out> unique_copy(It first, Se last, Out output, Pr pred = {}, Pj proj = {}) {
         if (first == last) {
-            return { std::move(first), std::move(output) };
+            return { first, output };
         }
 
         if constexpr (std::forward_iterator<It>) {
@@ -1024,7 +1019,7 @@ namespace plastic {
             }
         }
 
-        return { std::move(first), std::move(++output) };
+        return { first, ++output };
     }
 
 }
@@ -1053,7 +1048,7 @@ namespace plastic {
             }
         }
 
-        return { std::move(first), std::move(i) };
+        return { first, i };
     }
 
     export
@@ -1071,7 +1066,7 @@ namespace plastic {
             }
             ++first;
         }
-        return { std::move(first), std::move(output_true), std::move(output_false) };
+        return { first, output_true, output_false };
     }
 
     export
@@ -1086,7 +1081,7 @@ namespace plastic {
         It r_last{ std::ranges::next(first, last) };
         do {
             if (first == --r_last) {
-                return { std::move(first), std::move(r_last) };
+                return { first, r_last };
             }
         } while (!pred(proj(*r_last)));
 
@@ -1109,7 +1104,7 @@ namespace plastic {
         It temp{ plastic::move(buf, j, first).out };
         delete[] buf;
 
-        return { std::move(first), std::move(temp) };
+        return { first, temp };
     }
 
     export
@@ -1186,7 +1181,7 @@ namespace plastic {
             }
         }
 
-        return { std::move(min), std::move(max) };
+        return { min, max };
     }
 
     export
@@ -1229,7 +1224,7 @@ namespace plastic {
     constexpr std::ranges::minmax_result<T> minmax(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
         assert(list.size() != 0);
         auto res{ plastic::minmax_element(list.begin(), list.end(), pred, proj) };
-        return { std::move(*res.min), std::move(*res.max) };
+        return { *res.min, *res.max };
     }
 
     export
@@ -1434,11 +1429,11 @@ namespace plastic {
 
         if (first1 == last1) {
             auto res{ plastic::copy(first2, last2, output) };
-            return { std::move(first1), std::move(res.in), std::move(res.out) };
+            return { first1, res.in, res.out };
         }
 
         auto res{ plastic::copy(first1, last1, output) };
-        return { std::move(res.in), std::move(first2), std::move(res.out) };
+        return { res.in, first2, res.out };
     }
 
     export
@@ -1601,7 +1596,7 @@ namespace plastic {
         }
         plastic::sort_heap(first2, i, pred, proj2);
 
-        return { std::move(first1), std::move(i) };
+        return { first1, i };
     }
 
     export
@@ -1700,7 +1695,7 @@ namespace plastic {
                 ++first1, ++first2, ++output;
             }
         }
-        return { std::ranges::next(first1, last1), std::ranges::next(first2, last2), std::move(output) };
+        return { std::ranges::next(first1, last1), std::ranges::next(first2, last2), output };
     }
 
     export
@@ -1721,7 +1716,7 @@ namespace plastic {
             }
         }
         auto res1{ plastic::copy(first1, last1, output) }, res2{ plastic::copy(first2, last2, res1.out) };
-        return { std::move(res1.in), std::move(res2.in), std::move(res2.out) };
+        return { res1.in, res2.in, res2.out };
     }
 
     export
@@ -1743,7 +1738,7 @@ namespace plastic {
             }
         }
         auto res1{ plastic::copy(first1, last1, output) }, res2{ plastic::copy(first2, last2, res1.out) };
-        return { std::move(res1.in), std::move(res2.in), std::move(res2.out) };
+        return { res1.in, res2.in, res2.out };
     }
 
 }
@@ -1777,13 +1772,13 @@ namespace plastic {
     constexpr std::ranges::in_found_result<It> next_permutation(It first, Se last, Pr pred = {}, Pj proj = {}) {
         It r_last{ std::ranges::next(first, last) }, i{ r_last }, j{ r_last };
         if (first == r_last || first == --i) {
-            return { std::move(first), false };
+            return { first, false };
         }
 
         while (!pred(proj(*--i), proj(*--j))) {
             if (i == first) {
                 plastic::reverse(first, r_last);
-                return { std::move(r_last), false };
+                return { r_last, false };
             }
         }
 
@@ -1793,7 +1788,7 @@ namespace plastic {
         std::swap(*i, *j);
         plastic::reverse(++i, r_last);
 
-        return { std::move(r_last), true };
+        return { r_last, true };
     }
 
     export
@@ -1802,13 +1797,13 @@ namespace plastic {
     constexpr std::ranges::in_found_result<It> prev_permutation(It first, Se last, Pr pred = {}, Pj proj = {}) {
         It r_last{ std::ranges::next(first, last) }, i{ r_last }, j{ r_last };
         if (first == r_last || first == --i) {
-            return { std::move(first), false };
+            return { first, false };
         }
 
         while (!pred(proj(*--j), proj(*--i))) {
             if (i == first) {
                 plastic::reverse(first, r_last);
-                return { std::move(r_last), false };
+                return { r_last, false };
             }
         }
 
@@ -1818,7 +1813,7 @@ namespace plastic {
         std::swap(*i, *j);
         plastic::reverse(++i, r_last);
 
-        return { std::move(r_last), true };
+        return { r_last, true };
     }
 
 }
