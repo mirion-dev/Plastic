@@ -857,7 +857,7 @@ public:
 
     TEST_METHOD(sorting) {
         std::vector<int> e, a{ 1, 2, 3, 4, 5 }, b{ 3, 4, 1, 5, 2 }, c(100), x;
-        std::ranges::iota(c, 0);
+        std::ranges::iota(c, 1);
         std::ranges::shuffle(c, std::mt19937{ std::random_device{}() });
 
         assert(plastic::is_sorted(e.begin(), e.end()) == true);
