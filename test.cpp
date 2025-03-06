@@ -972,7 +972,7 @@ public:
         assert(plastic::includes(a.begin(), a.end(), e.begin(), e.end()) == true);
         assert(plastic::includes(e.begin(), e.end(), a.begin(), a.end()) == false);
         assert(plastic::includes(a.begin(), a.end(), b.begin(), b.end()) == false);
-        assert(plastic::includes(a.begin(), a.end(), b.begin() + 1, b.begin() + 2) == true);
+        assert(plastic::includes(a.begin(), a.end(), b.begin(), b.begin() + 2) == true);
 
         x = { 0, 0, 0, 0, 0 };
         plastic::set_difference(e.begin(), e.end(), e.begin(), e.end(), x.begin());

@@ -1620,10 +1620,9 @@ namespace plastic {
             if (pred(proj2(*first2), proj1(*first1))) {
                 return false;
             }
-            if (!pred(proj1(*first1), proj2(*first2))) {
+            if (!pred(proj1(*first1++), proj2(*first2))) {
                 ++first2;
             }
-            ++first1;
         }
         return first2 == last2;
     }
@@ -1634,14 +1633,10 @@ namespace plastic {
     constexpr std::ranges::in_out_result<It1, Out> set_difference(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
             if (pred(proj1(*first1), proj2(*first2))) {
-                *output = *first1;
-                ++first1, ++output;
+                *output++ = *first1++;
             }
-            else {
-                if (!pred(proj2(*first2), proj1(*first1))) {
-                    ++first1;
-                }
-                ++first2;
+            else if (!pred(proj2(*first2++), proj1(*first1))) {
+                ++first1;
             }
         }
         return plastic::copy(first1, last1, output);
@@ -1655,12 +1650,8 @@ namespace plastic {
             if (pred(proj1(*first1), proj2(*first2))) {
                 ++first1;
             }
-            else if (pred(proj2(*first2), proj1(*first1))) {
-                ++first2;
-            }
-            else {
-                *output = *first1;
-                ++first1, ++first2, ++output;
+            else if (!pred(proj2(*first2++), proj1(*first1))) {
+                *output++ = *first1++;
             }
         }
         return { std::ranges::next(first1, last1), std::ranges::next(first2, last2), output };
@@ -1672,19 +1663,22 @@ namespace plastic {
     constexpr std::ranges::in_in_out_result<It1, It2, Out> set_symmetric_difference(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
             if (pred(proj1(*first1), proj2(*first2))) {
-                *output = *first1;
-                ++first1, ++output;
+                *output++ = *first1++;
             }
             else if (pred(proj2(*first2), proj1(*first1))) {
-                *output = *first2;
-                ++first2, ++output;
+                *output++ = *first2++;
             }
             else {
                 ++first1, ++first2;
             }
         }
-        auto res1{ plastic::copy(first1, last1, output) }, res2{ plastic::copy(first2, last2, res1.out) };
-        return { res1.in, res2.in, res2.out };
+
+        if (first1 == last1) {
+            auto res{ plastic::copy(first2, last2, output) };
+            return { first1, res.in, res.out };
+        }
+        auto res{ plastic::copy(first1, last1, output) };
+        return { res.in, first2, res.out };
     }
 
     export
@@ -1692,21 +1686,23 @@ namespace plastic {
         requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
     constexpr std::ranges::in_in_out_result<It1, It2, Out> set_union(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (pred(proj1(*first1), proj2(*first2))) {
-                *output = *first1;
-                ++first1, ++output;
-            }
-            else if (pred(proj2(*first2), proj1(*first1))) {
-                *output = *first2;
-                ++first2, ++output;
+            if (pred(proj2(*first2), proj1(*first1))) {
+                *output++ = *first2++;
             }
             else {
-                *output = *first1;
-                ++first1, ++first2, ++output;
+                *output++ = *first1;
+                if (!pred(proj1(*first1++), proj2(*first2))) {
+                    ++first2;
+                }
             }
         }
-        auto res1{ plastic::copy(first1, last1, output) }, res2{ plastic::copy(first2, last2, res1.out) };
-        return { res1.in, res2.in, res2.out };
+
+        if (first1 == last1) {
+            auto res{ plastic::copy(first2, last2, output) };
+            return { first1, res.in, res.out };
+        }
+        auto res{ plastic::copy(first1, last1, output) };
+        return { res.in, first2, res.out };
     }
 
 }
