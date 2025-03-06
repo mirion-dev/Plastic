@@ -845,12 +845,9 @@ public:
         plastic::stable_partition(x.begin(), x.end(), [](int x) { return x % 2 == 0; });
         assert(format(x) == "[2, 2, 1, 3, 1]");
 
-        x = e;
-        assert(plastic::partition_point(x.begin(), x.end(), [](int x) { return x > 0; }) == x.begin());
-        x = a;
-        assert(plastic::partition_point(x.begin(), x.end(), [](int x) { return x < 10; }) == x.end());
-        x = b;
-        assert(plastic::partition_point(x.begin(), x.end(), [](int x) { return x <= 6; }) == x.begin() + 3);
+        assert(plastic::partition_point(e.begin(), e.end(), [](int x) { return x > 0; }) == e.begin());
+        assert(plastic::partition_point(a.begin(), a.end(), [](int x) { return x < 10; }) == a.end());
+        assert(plastic::partition_point(b.begin(), b.end(), [](int x) { return x <= 6; }) == b.begin() + 3);
     }
 
     TEST_METHOD(sorting) {
