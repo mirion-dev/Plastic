@@ -1510,8 +1510,8 @@ namespace plastic {
             return;
         }
 
-        margin = (margin >> 1) + (margin >> 2);
         It point{ plastic::median_partition(first, last, pred, proj) };
+        margin = (margin >> 1) + (margin >> 2);
         plastic::intro_sort(first, point, margin, pred, proj);
         plastic::intro_sort(point, last, margin, pred, proj);
     }
@@ -1549,8 +1549,7 @@ namespace plastic {
     constexpr std::ranges::in_out_result<It1, It2> partial_sort_copy(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         It2 i{ first2 };
         while (first1 != last1 && i != last2) {
-            *i++ = *first1;
-            ++first1;
+            *i++ = *first1++;
         }
 
         auto size{ i - first2 };
@@ -1713,13 +1712,21 @@ namespace plastic {
     export
         template<std::forward_iterator It1, std::sentinel_for<It1> Se1, std::forward_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_equivalence_relation<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::equal_to>
     constexpr bool is_permutation(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
-        if (std::ranges::distance(first1, last1) != std::ranges::distance(first2, last2)) {
+        It1 i{ first1 };
+        It2 j{ first2 };
+        while (j != last2) {
+            if (i == last1) {
+                return false;
+            }
+            ++i, ++j;
+        }
+        if (i != last1) {
             return false;
         }
 
-        It1 i{ first1 };
+        i = first1;
         while (i != last1) {
-            if (plastic::find(first1, i, *i, proj1) == i) {
+            if (!plastic::contains(first1, i, *i, proj1)) {
                 auto count{ plastic::count(first2, last2, *i, proj2) };
                 if (count == 0 || count != plastic::count(i, last1, *i, proj1)) {
                     return false;
