@@ -549,8 +549,7 @@ namespace plastic {
     constexpr std::ranges::in_out_result<It, Out> copy_if(It first, Se last, Out output, Pr pred, Pj proj = {}) {
         while (first != last) {
             if (pred(proj(*first))) {
-                *output = *first;
-                ++output;
+                *output++ = *first;
             }
             ++first;
         }
@@ -566,8 +565,7 @@ namespace plastic {
         }
 
         while (count-- != 0) {
-            *output = *first;
-            ++first, ++output;
+            *output++ = *first++;
         }
 
         return { first, output };
@@ -589,8 +587,7 @@ namespace plastic {
         requires std::indirectly_movable<It, Out>
     constexpr std::ranges::in_out_result<It, Out> move(It first, Se last, Out output) {
         while (first != last) {
-            *output = std::move(*first);
-            ++first, ++output;
+            *output++ = std::move(*first++);
         }
         return { first, output };
     }
@@ -611,8 +608,7 @@ namespace plastic {
         requires std::output_iterator<Out, const T&>
     constexpr Out fill(Out first, Se last, const T& value) {
         while (first != last) {
-            *first = value;
-            ++first;
+            *first++ = value;
         }
         return first;
     }
@@ -626,8 +622,7 @@ namespace plastic {
         }
 
         while (count-- != 0) {
-            *first = value;
-            ++first;
+            *first++ = value;
         }
 
         return first;
@@ -638,8 +633,7 @@ namespace plastic {
         requires std::indirectly_writable<Out, std::indirect_result_t<Fn&, std::projected<It, Pj>>>
     constexpr std::ranges::in_out_result<It, Out> transform(It first, Se last, Out output, Fn func, Pj proj = {}) {
         while (first != last) {
-            *output = func(proj(*first));
-            ++first, ++output;
+            *output++ = func(proj(*first++));
         }
         return { first, output };
     }
@@ -649,8 +643,7 @@ namespace plastic {
         requires std::indirectly_writable<Out, std::indirect_result_t<Fn&, std::projected<It1, Pj1>, std::projected<It2, Pj2>>>
     constexpr std::ranges::in_in_out_result<It1, It2, Out> transform(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Fn func, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            *output = func(proj1(*first1), proj2(*first2));
-            ++first1, ++first2, ++output;
+            *output++ = func(proj1(*first1++), proj2(*first2++));
         }
         return { first1, first2, output };
     }
@@ -660,8 +653,7 @@ namespace plastic {
         requires std::invocable<Fn&>&& std::indirectly_writable<Out, std::invoke_result_t<Fn&>>
     constexpr Out generate(Out first, Se last, Fn func) {
         while (first != last) {
-            *first = func();
-            ++first;
+            *first++ = func();
         }
         return first;
     }
@@ -675,8 +667,7 @@ namespace plastic {
         }
 
         while (count-- != 0) {
-            *first = func();
-            ++first;
+            *first++ = func();
         }
 
         return first;
@@ -716,8 +707,7 @@ namespace plastic {
     constexpr std::ranges::in_out_result<It, Out> remove_copy_impl(It first, Se last, Out output, const TPr& value_or_pred, Pj proj) {
         while (first != last) {
             if (!plastic::satisfy<Sat>(proj(*first), value_or_pred)) {
-                *output = *first;
-                ++output;
+                *output++ = *first;
             }
             ++first;
         }
@@ -767,8 +757,8 @@ namespace plastic {
         template<class Sat, class It, class Se, class Out, class TPr, class U, class Pj>
     constexpr std::ranges::in_out_result<It, Out> replace_copy_impl(It first, Se last, Out output, const TPr& value_or_pred, const U& value, Pj proj) {
         while (first != last) {
-            *output = plastic::satisfy<Sat>(proj(*first), value_or_pred) ? value : *first;
-            ++first, ++output;
+            *output++ = plastic::satisfy<Sat>(proj(*first), value_or_pred) ? value : *first;
+            ++first;
         }
         return { first, output };
     }
@@ -792,8 +782,7 @@ namespace plastic {
         requires std::indirectly_swappable<It1, It2>
     constexpr std::ranges::in_in_result<It1, It2> swap_ranges(It1 first1, Se1 last1, It2 first2, Se2 last2) {
         while (first1 != last1 && first2 != last2) {
-            std::swap(*first1, *first2);
-            ++first1, ++first2;
+            std::swap(*first1++, *first2++);
         }
         return { first1, first2 };
     }
@@ -802,11 +791,11 @@ namespace plastic {
         template<std::bidirectional_iterator It, std::sentinel_for<It> Se>
         requires std::permutable<It>
     constexpr It reverse(It first, Se last) {
-        It i{ std::ranges::next(first, last) }, temp{ i };
+        It r_last{ std::ranges::next(first, last) }, i{ r_last };
         while (first != i && first != --i) {
             std::swap(*first++, *i);
         }
-        return temp;
+        return r_last;
     }
 
     export
@@ -815,8 +804,7 @@ namespace plastic {
     constexpr std::ranges::in_out_result<It, Out> reverse_copy(It first, Se last, Out output) {
         It r_last{ std::ranges::next(first, last) }, i{ r_last };
         while (first != i) {
-            *output = *--i;
-            ++output;
+            *output++ = *--i;
         }
         return { r_last, output };
     }
@@ -867,7 +855,11 @@ namespace plastic {
         template<std::permutable It, std::sentinel_for<It> Se>
     constexpr std::ranges::subrange<It> shift_left(It first, Se last, std::iter_difference_t<It> count) {
         assert(count >= 0);
-        return { first, plastic::move(std::ranges::next(first, count, last), last, first).out };
+        It dest{ std::ranges::next(first, count, last) };
+        if (dest == last) {
+            return { dest, dest };
+        }
+        return { first, plastic::move(dest, last, first).out };
     }
 
     export
@@ -891,8 +883,8 @@ namespace plastic {
 
         It buf{ first };
         while (j != last) {
-            std::swap(*buf, *i);
-            ++buf, ++i, ++j;
+            std::swap(*buf++, *i++);
+            ++j;
             if (buf == dest) {
                 buf = first;
             }
@@ -930,8 +922,7 @@ namespace plastic {
         else {
             Diff size{};
             while (first != last && size != count) {
-                output[size++] = *first;
-                ++first;
+                output[size++] = *first++;
             }
 
             Out temp{ output + size };
@@ -1056,15 +1047,7 @@ namespace plastic {
         requires std::indirectly_copyable<It, Out1>&& std::indirectly_copyable<It, Out2>
     constexpr std::ranges::in_out_out_result<It, Out1, Out2> partition_copy(It first, Se last, Out1 output_true, Out2 output_false, Pr pred, Pj proj = {}) {
         while (first != last) {
-            if (pred(proj(*first))) {
-                *output_true = *first;
-                ++output_true;
-            }
-            else {
-                *output_false = *first;
-                ++output_false;
-            }
-            ++first;
+            (pred(proj(*first++)) ? *output_true++ : *output_false++) = *first;
         }
         return { first, output_true, output_false };
     }
@@ -1091,13 +1074,7 @@ namespace plastic {
 
         *j++ = std::move(*i++);
         while (i != r_last) {
-            if (pred(proj(*i))) {
-                *first++ = std::move(*i);
-            }
-            else {
-                *j++ = std::move(*i);
-            }
-            ++i;
+            (pred(proj(*i++)) ? *first++ : *j++) = std::move(*i);
         }
         *first++ = std::move(*r_last);
 
@@ -1389,7 +1366,7 @@ namespace plastic {
         auto size{ r_last - first };
         if (size > 1) {
             std::swap(*first, *--i);
-            plastic::sift_down(first, 0, --size, pred, proj);
+            plastic::sift_down(first, 0, size - 1, pred, proj);
         }
         return r_last;
     }
@@ -1417,21 +1394,13 @@ namespace plastic {
         requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
     constexpr std::ranges::in_in_out_result<It1, It2, Out> merge(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (pred(proj2(*first2), proj1(*first1))) {
-                *output = *first2;
-                ++first2, ++output;
-            }
-            else {
-                *output = *first1;
-                ++first1, ++output;
-            }
+            *output++ = !pred(proj2(*first2), proj1(*first1)) ? *first1++ : *first2++;
         }
 
         if (first1 == last1) {
             auto res{ plastic::copy(first2, last2, output) };
             return { first1, res.in, res.out };
         }
-
         auto res{ plastic::copy(first1, last1, output) };
         return { res.in, first2, res.out };
     }
@@ -1441,11 +1410,10 @@ namespace plastic {
         requires std::sortable<It, Pr, Pj>
     constexpr It inplace_merge(It first, It middle, Se last, Pr pred = {}, Pj proj = {}) {
         auto buf{ new std::iter_value_t<It>[std::ranges::distance(first, last)] };
-
         It i{ first }, j{ middle };
         auto k{ buf };
         while (i != middle && j != last) {
-            *k++ = pred(proj(*j), proj(*i)) ? std::move(*j++) : std::move(*i++);
+            *k++ = !pred(proj(*j), proj(*i)) ? std::move(*i++) : std::move(*j++);
         }
 
         if (i == middle) {
