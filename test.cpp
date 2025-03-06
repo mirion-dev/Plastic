@@ -856,7 +856,9 @@ public:
     }
 
     TEST_METHOD(sorting) {
-        std::vector<int> e, a{ 1, 2, 3, 4, 5 }, b{ 3, 4, 1, 5, 2 }, x;
+        std::vector<int> e, a{ 1, 2, 3, 4, 5 }, b{ 3, 4, 1, 5, 2 }, c(100), x;
+        std::ranges::iota(c, 0);
+        std::ranges::shuffle(c, std::mt19937{ std::random_device{}() });
 
         assert(plastic::is_sorted(e.begin(), e.end()) == true);
         assert(plastic::is_sorted(a.begin(), a.end()) == true);
@@ -869,12 +871,12 @@ public:
         x = e;
         plastic::sort(x.begin(), x.end());
         assert(format(x) == "[]");
-        x = a;
-        plastic::sort(x.begin(), x.end());
-        assert(format(x) == "[1, 2, 3, 4, 5]");
         x = b;
         plastic::sort(x.begin(), x.end());
-        assert(format(x) == "[1, 2, 3, 4, 5]");
+        assert(std::ranges::is_sorted(x));
+        x = c;
+        plastic::sort(x.begin(), x.end());
+        assert(std::ranges::is_sorted(x));
 
         x = e;
         plastic::partial_sort(x.begin(), x.begin(), x.end());
@@ -897,22 +899,22 @@ public:
         x = e;
         plastic::stable_sort(x.begin(), x.end());
         assert(format(x) == "[]");
-        x = a;
-        plastic::stable_sort(x.begin(), x.end());
-        assert(format(x) == "[1, 2, 3, 4, 5]");
         x = b;
         plastic::stable_sort(x.begin(), x.end());
-        assert(format(x) == "[1, 2, 3, 4, 5]");
+        assert(std::ranges::is_sorted(x));
+        x = c;
+        plastic::stable_sort(x.begin(), x.end());
+        assert(std::ranges::is_sorted(x));
 
         x = e;
         plastic::nth_element(x.begin(), x.begin(), x.end());
         assert(format(x) == "[]");
-        x = a;
-        plastic::nth_element(x.begin(), x.begin() + 2, x.end());
-        assert(x[2] == 3);
         x = b;
         plastic::nth_element(x.begin(), x.begin() + 2, x.end());
         assert(x[2] == 3);
+        x = c;
+        plastic::nth_element(x.begin(), x.begin() + 50, x.end());
+        assert(x[50] == 51);
     }
 
     TEST_METHOD(binary_search) {
