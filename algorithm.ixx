@@ -1182,7 +1182,7 @@ namespace plastic {
     export
         template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
     constexpr T max(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
-        assert(!list.empty());
+        assert(list.size() != 0);
         return *plastic::max_element(list.begin(), list.end(), pred, proj);
     }
 
@@ -1195,7 +1195,7 @@ namespace plastic {
     export
         template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
     constexpr T min(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
-        assert(!list.empty());
+        assert(list.size() != 0);
         return *plastic::min_element(list.begin(), list.end(), pred, proj);
     }
 
@@ -1208,14 +1208,14 @@ namespace plastic {
     export
         template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
     constexpr std::ranges::minmax_result<T> minmax(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
-        assert(!list.empty());
+        assert(list.size() != 0);
         return { plastic::min(list, pred, proj), plastic::max(list, pred, proj) };
     }
 
     export
         template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
     constexpr const T& clamp(const T& value, const T& lowest, const T& highest, Pr pred = {}, Pj proj = {}) {
-        assert(!pred(proj(lowest), proj(highest)));
+        assert(!pred(proj(highest), proj(lowest)));
         if (pred(proj(value), proj(lowest))) {
             return lowest;
         }

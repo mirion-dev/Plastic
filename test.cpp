@@ -874,7 +874,46 @@ public:
     }
 
     TEST_METHOD(minimun_maximum) {
-        assert(false);
+        std::vector<int> e, a{ 1, 3, 5, 7, 9 }, b{ 10, 8, 6, 4, 2 };
+
+        assert(plastic::max(0, 0) == 0);
+        assert(plastic::max(5, 1) == 5);
+        assert(plastic::max({ 0, 0, 0, 0, 0 }) == 0);
+        assert(plastic::max({ 5, 3, 2, 4, 1 }) == 5);
+
+        assert(plastic::max_element(e.begin(), e.end()) == e.end());
+        assert(plastic::max_element(a.begin(), a.end()) == a.end() - 1);
+        assert(plastic::max_element(b.begin(), b.end()) == b.begin());
+
+        assert(plastic::min(0, 0) == 0);
+        assert(plastic::min(5, 1) == 1);
+        assert(plastic::min({ 0, 0, 0, 0, 0 }) == 0);
+        assert(plastic::min({ 5, 3, 2, 4, 1 }) == 1);
+
+        assert(plastic::min_element(e.begin(), e.end()) == e.end());
+        assert(plastic::min_element(a.begin(), a.end()) == a.begin());
+        assert(plastic::min_element(b.begin(), b.end()) == b.end() - 1);
+
+        auto res1{ plastic::minmax(0, 0) };
+        assert(res1.min == 0 && res1.max == 0);
+        auto res2{ plastic::minmax(5, 1) };
+        assert(res2.min == 1 && res2.max == 5);
+        auto res3{ plastic::minmax({ 0, 0, 0, 0, 0 }) };
+        assert(res3.min == 0 && res3.max == 0);
+        auto res4{ plastic::minmax({ 5, 3, 2, 4, 1 }) };
+        assert(res4.min == 1 && res4.max == 5);
+
+        auto res5{ plastic::minmax_element(e.begin(), e.end()) };
+        assert(res5.min == e.end() && res5.max == e.end());
+        auto res6{ plastic::minmax_element(a.begin(), a.end()) };
+        assert(res6.min == a.begin() && res6.max == a.end() - 1);
+        auto res7{ plastic::minmax_element(b.begin(), b.end()) };
+        assert(res7.min == b.end() - 1 && res7.max == b.begin());
+
+        assert(plastic::clamp(0, 1, 5) == 1);
+        assert(plastic::clamp(3, 1, 5) == 3);
+        assert(plastic::clamp(6, 1, 5) == 5);
+        assert(plastic::clamp(2, 2, 2) == 2);
     }
 
     TEST_METHOD(comparison) {
