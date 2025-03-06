@@ -1170,7 +1170,21 @@ namespace plastic {
     export
         template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
     constexpr std::ranges::minmax_result<It> minmax_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        return { plastic::min_element(first, last, pred, proj), plastic::max_element(first, last, pred, proj) };
+        if (first == last) {
+            return { first, first };
+        }
+
+        It min{ first }, max{ first };
+        while (++first != last) {
+            if (pred(proj(*first), proj(*min))) {
+                min = first;
+            }
+            else if (!pred(proj(*first), proj(*max))) {
+                max = first;
+            }
+        }
+
+        return { std::move(min), std::move(max) };
     }
 
     export
@@ -1202,14 +1216,18 @@ namespace plastic {
     export
         template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
     constexpr std::ranges::minmax_result<const T&> minmax(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
-        return { plastic::min(a, b, pred, proj), plastic::max(a, b, pred, proj) };
+        if (pred(proj(b), proj(a))) {
+            return { b, a };
+        }
+        return { a, b };
     }
 
     export
         template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
     constexpr std::ranges::minmax_result<T> minmax(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
         assert(list.size() != 0);
-        return { plastic::min(list, pred, proj), plastic::max(list, pred, proj) };
+        auto res{ plastic::minmax_element(list.begin(), list.end(), pred, proj) };
+        return { std::move(*res.min), std::move(*res.max) };
     }
 
     export
