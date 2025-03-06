@@ -807,7 +807,50 @@ public:
     }
 
     TEST_METHOD(partition) {
-        assert(false);
+        std::vector<int> e, a{ 1, 3, 5, 7, 9 }, b{ 2, 4, 6, 8, 10 }, c{ 1, 2, 3, 2, 1 }, d{ 5, 5, 5, 5 }, x, y;
+
+        assert(plastic::is_partitioned(e.begin(), e.end(), [](int x) { return x % 2 == 0; }) == true);
+        assert(plastic::is_partitioned(a.begin(), a.end(), [](int x) { return x % 2 == 1; }) == true);
+        assert(plastic::is_partitioned(b.begin(), b.end(), [](int x) { return x % 4 == 2; }) == false);
+        assert(plastic::is_partitioned(c.begin(), c.end(), [](int x) { return x < 3; }) == false);
+
+        x = e;
+        plastic::partition(x.begin(), x.end(), [](int x) { return x > 0; });
+        assert(format(x) == "[]");
+        x = a;
+        plastic::partition(x.begin(), x.end(), [](int x) { return x < 5; });
+        assert(plastic::is_partitioned(x.begin(), x.end(), [](int x) { return x < 5; }));
+        x = c;
+        plastic::partition(x.begin(), x.end(), [](int x) { return x % 2 == 0; });
+        assert(plastic::is_partitioned(x.begin(), x.end(), [](int x) { return x % 2 == 0; }));
+
+        x = y = { 0, 0, 0, 0, 0 };
+        plastic::partition_copy(e.begin(), e.end(), x.begin(), y.begin(), [](int x) { return x > 0; });
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        assert(format(y) == "[0, 0, 0, 0, 0]");
+        plastic::partition_copy(a.begin(), a.end(), x.begin(), y.begin(), [](int x) { return x > 5; });
+        assert(format(x) == "[7, 9, 0, 0, 0]");
+        assert(format(y) == "[1, 3, 5, 0, 0]");
+        plastic::partition_copy(c.begin(), c.end(), x.begin(), y.begin(), [](int x) { return x % 2 == 1; });
+        assert(format(x) == "[1, 3, 1, 0, 0]");
+        assert(format(y) == "[2, 2, 5, 0, 0]");
+
+        x = e;
+        plastic::stable_partition(x.begin(), x.end(), [](int x) { return x > 0; });
+        assert(format(x) == "[]");
+        x = a;
+        plastic::stable_partition(x.begin(), x.end(), [](int x) { return x % 3 == 1; });
+        assert(format(x) == "[1, 7, 3, 5, 9]");
+        x = c;
+        plastic::stable_partition(x.begin(), x.end(), [](int x) { return x % 2 == 0; });
+        assert(format(x) == "[2, 2, 1, 3, 1]");
+
+        x = e;
+        assert(plastic::partition_point(x.begin(), x.end(), [](int x) { return x > 0; }) == x.begin());
+        x = a;
+        assert(plastic::partition_point(x.begin(), x.end(), [](int x) { return x < 10; }) == x.end());
+        x = b;
+        assert(plastic::partition_point(x.begin(), x.end(), [](int x) { return x <= 6; }) == x.begin() + 3);
     }
 
     TEST_METHOD(sorting) {

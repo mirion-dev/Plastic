@@ -1081,12 +1081,12 @@ namespace plastic {
             return { first, first };
         }
 
-        It i{ first }, r_last{ std::ranges::next(first, last) };
+        It r_last{ std::ranges::next(first, last) };
         do {
             if (first == --r_last) {
                 return { std::move(first), std::move(r_last) };
             }
-        } while (pred(*r_last));
+        } while (!pred(proj(*r_last)));
 
         auto buf{ new std::iter_value_t<It>[std::ranges::distance(first, r_last) + 1] };
         It i{ first };
@@ -1107,7 +1107,7 @@ namespace plastic {
         It temp{ plastic::move(buf, j, first).out };
         delete[] buf;
 
-        return { std::move(temp), std::move(first) };
+        return { std::move(first), std::move(temp) };
     }
 
     export
