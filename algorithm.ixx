@@ -773,7 +773,7 @@ namespace plastic {
             *output = plastic::satisfy<Sat>(proj(*first), value_or_pred) ? value : *first;
             ++first, ++output;
         }
-        return output;
+        return { std::move(first), std::move(output) };
     }
 
     export
@@ -887,7 +887,7 @@ namespace plastic {
         while (i != dest) {
             if (j == last) {
                 plastic::move(first, i, dest);
-                return dest;
+                return { std::move(dest), std::move(j) };
             }
             ++i, ++j;
         }
