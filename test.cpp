@@ -737,7 +737,7 @@ public:
         plastic::reverse_copy(a.begin(), a.end(), x.begin());
         assert(format(x) == "[9, 7, 5, 3, 1]");
         plastic::reverse_copy(c.begin(), c.begin() + 3, x.begin());
-        assert(format(x) == "[3, 2, 1, 2, 1]");
+        assert(format(x) == "[3, 2, 1, 3, 1]");
 
         x = e;
         plastic::rotate(x.begin(), x.begin(), x.end());
