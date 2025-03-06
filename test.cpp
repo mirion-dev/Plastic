@@ -883,11 +883,75 @@ public:
     }
 
     TEST_METHOD(merging) {
-        assert(false);
+        std::vector<int> e, a{ 1, 3, 5 }, b{ 2, 4, 6 }, c{ 1, 2, 3 }, x;
+
+        x = { 0, 0, 0, 0, 0, 0 };
+        plastic::merge(e.begin(), e.end(), e.begin(), e.end(), x.begin());
+        assert(format(x) == "[0, 0, 0, 0, 0, 0]");
+        plastic::merge(a.begin(), a.end(), b.begin(), b.end(), x.begin());
+        assert(format(x) == "[1, 2, 3, 4, 5, 6]");
+        plastic::merge(c.begin(), c.end(), c.begin(), c.end(), x.begin());
+        assert(format(x) == "[1, 1, 2, 2, 3, 3]");
+
+        x = e;
+        plastic::inplace_merge(x.begin(), x.begin(), x.end());
+        assert(format(x) == "[]");
+        x = { 1, 3, 5, 2, 4, 6 };
+        plastic::inplace_merge(x.begin(), x.begin() + 3, x.end());
+        assert(format(x) == "[1, 2, 3, 4, 5, 6]");
+        x = { 1, 2, 3, 1, 2, 3 };
+        plastic::inplace_merge(x.begin(), x.begin() + 3, x.end());
+        assert(format(x) == "[1, 1, 2, 2, 3, 3]");
     }
 
     TEST_METHOD(set) {
-        assert(false);
+        std::vector<int> e, a{ 1, 2, 3, 5, 7 }, b{ 1, 3, 4, 6, 7 }, x;
+
+        assert(plastic::includes(e.begin(), e.end(), e.begin(), e.end()) == true);
+        assert(plastic::includes(a.begin(), a.end(), e.begin(), e.end()) == true);
+        assert(plastic::includes(e.begin(), e.end(), a.begin(), a.end()) == false);
+        assert(plastic::includes(a.begin(), a.end(), b.begin(), b.end()) == false);
+        assert(plastic::includes(a.begin(), a.end(), b.begin() + 1, b.begin() + 2) == true);
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::set_difference(e.begin(), e.end(), e.begin(), e.end(), x.begin());
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::set_difference(a.begin(), a.end(), e.begin(), e.end(), x.begin());
+        assert(format(x) == "[1, 2, 3, 5, 7]");
+        plastic::set_difference(a.begin(), a.end(), b.begin(), b.end(), x.begin());
+        assert(format(x) == "[2, 5, 3, 5, 7]");
+        plastic::set_difference(b.begin(), b.end(), a.begin(), a.end(), x.begin());
+        assert(format(x) == "[4, 6, 3, 5, 7]");
+
+        x = { 0, 0, 0 };
+        plastic::set_intersection(e.begin(), e.end(), e.begin(), e.end(), x.begin());
+        assert(format(x) == "[0, 0, 0]");
+        plastic::set_intersection(a.begin(), a.end(), e.begin(), e.end(), x.begin());
+        assert(format(x) == "[0, 0, 0]");
+        plastic::set_intersection(a.begin(), a.end(), b.begin(), b.end(), x.begin());
+        assert(format(x) == "[1, 3, 7]");
+        plastic::set_intersection(b.begin(), b.end(), a.begin(), a.end(), x.begin());
+        assert(format(x) == "[1, 3, 7]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::set_symmetric_difference(e.begin(), e.end(), e.begin(), e.end(), x.begin());
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::set_symmetric_difference(a.begin(), a.end(), e.begin(), e.end(), x.begin());
+        assert(format(x) == "[1, 2, 3, 5, 7]");
+        plastic::set_symmetric_difference(a.begin(), a.end(), b.begin(), b.end(), x.begin());
+        assert(format(x) == "[2, 4, 5, 6, 7]");
+        plastic::set_symmetric_difference(b.begin(), b.end(), a.begin(), a.end(), x.begin());
+        assert(format(x) == "[2, 4, 5, 6, 7]");
+
+        x = { 0, 0, 0, 0, 0, 0, 0 };
+        plastic::set_union(e.begin(), e.end(), e.begin(), e.end(), x.begin());
+        assert(format(x) == "[0, 0, 0, 0, 0, 0, 0]");
+        plastic::set_union(a.begin(), a.end(), e.begin(), e.end(), x.begin());
+        assert(format(x) == "[1, 2, 3, 5, 7, 0, 0]");
+        plastic::set_union(a.begin(), a.end(), b.begin(), b.end(), x.begin());
+        assert(format(x) == "[1, 2, 3, 4, 5, 6, 7]");
+        plastic::set_union(b.begin(), b.end(), a.begin(), a.end(), x.begin());
+        assert(format(x) == "[1, 2, 3, 4, 5, 6, 7]");
     }
 
     TEST_METHOD(heap) {
