@@ -855,7 +855,31 @@ public:
     }
 
     TEST_METHOD(binary_search) {
-        assert(false);
+        std::vector<int> e, a{ 2, 4, 6, 8, 10 }, b{ 1, 2, 2, 3, 3 }, c{ 5, 5, 5, 5 };
+
+        assert(plastic::lower_bound(e.begin(), e.end(), 3) == e.end());
+        assert(plastic::lower_bound(a.begin(), a.end(), 5) == a.begin() + 2);
+        assert(plastic::lower_bound(b.begin(), b.end(), 2) == b.begin() + 1);
+        assert(plastic::lower_bound(c.begin(), c.end(), 5) == c.begin());
+
+        assert(plastic::upper_bound(e.begin(), e.end(), 3) == e.end());
+        assert(plastic::upper_bound(a.begin(), a.end(), 5) == a.begin() + 2);
+        assert(plastic::upper_bound(b.begin(), b.end(), 2) == b.begin() + 3);
+        assert(plastic::upper_bound(c.begin(), c.end(), 5) == c.end());
+
+        assert(plastic::binary_search(e.begin(), e.end(), 3) == false);
+        assert(plastic::binary_search(a.begin(), a.end(), 10) == true);
+        assert(plastic::binary_search(b.begin(), b.end(), 2) == true);
+        assert(plastic::binary_search(c.begin(), c.end(), 6) == false);
+
+        auto res1{ plastic::equal_range(e.begin(), e.end(), 3) };
+        assert(res1.begin() == e.end() && res1.end() == e.end());
+        auto res2{ plastic::equal_range(a.begin(), a.end(), 5) };
+        assert(res2.begin() == a.begin() + 2 && res2.end() == a.begin() + 2);
+        auto res3{ plastic::equal_range(b.begin(), b.end(), 2) };
+        assert(res3.begin() == b.begin() + 1 && res3.end() == b.begin() + 3);
+        auto res4{ plastic::equal_range(c.begin(), c.end(), 5) };
+        assert(res4.begin() == c.begin() && res4.end() == c.end());
     }
 
     TEST_METHOD(merging) {
