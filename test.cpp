@@ -707,16 +707,19 @@ public:
         plastic::replace_copy_if(b.begin(), b.end(), x.begin(), [](int x) { return x % 2 == 0; }, 7);
         assert(format(x) == "[7, 7, 7, 7, 7]");
 
-        x = a;
+        x = { 0, 0, 0, 0, 0 };
         y = e;
         plastic::swap_ranges(x.begin(), x.end(), y.begin(), y.end());
-        assert(format(x) == "[]");
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        assert(format(y) == "[]");
         y = b;
         plastic::swap_ranges(x.begin(), x.end(), y.begin(), y.end());
         assert(format(x) == "[2, 4, 6, 8, 10]");
+        assert(format(y) == "[0, 0, 0, 0, 0]");
         y = d;
-        plastic::swap_ranges(x.begin(), x.begin(), y.begin(), y.end());
-        assert(format(x) == "[5, 5, 5, 5]");
+        plastic::swap_ranges(x.begin(), x.end(), y.begin(), y.end());
+        assert(format(x) == "[5, 5, 5, 5, 10]");
+        assert(format(y) == "[2, 4, 6, 8]");
 
         x = e;
         plastic::reverse(x.begin(), x.end());
@@ -733,7 +736,7 @@ public:
         assert(format(x) == "[0, 0, 0, 0, 0]");
         plastic::reverse_copy(a.begin(), a.end(), x.begin());
         assert(format(x) == "[9, 7, 5, 3, 1]");
-        plastic::reverse_copy(c.begin(), c.end() + 3, x.begin());
+        plastic::reverse_copy(c.begin(), c.begin() + 3, x.begin());
         assert(format(x) == "[3, 2, 1, 2, 1]");
 
         x = e;
