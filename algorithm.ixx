@@ -694,7 +694,7 @@ namespace plastic {
 
         It i{ first };
         while (++i != last) {
-            if (plastic::satisfy<Sat>(proj(*i), value_or_pred)) {
+            if (!plastic::satisfy<Sat>(proj(*i), value_or_pred)) {
                 *first++ = std::move(*i);
             }
         }
@@ -718,7 +718,7 @@ namespace plastic {
     template<class Sat, class It, class Se, class Out, class TPr, class Pj >
     constexpr std::ranges::in_out_result<It, Out> remove_copy_impl(It first, Se last, Out output, const TPr& value_or_pred, Pj proj) {
         while (first != last) {
-            if (plastic::satisfy<Sat>(proj(*first), value_or_pred)) {
+            if (!plastic::satisfy<Sat>(proj(*first), value_or_pred)) {
                 *output = *first;
                 ++output;
             }
