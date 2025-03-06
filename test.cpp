@@ -549,7 +549,258 @@ public:
     }
 
     TEST_METHOD(modification) {
-        assert(false);
+        std::vector<int> e, a{ 1, 3, 5, 7, 9 }, b{ 2, 4, 6, 8, 10 }, c{ 1, 2, 3, 2, 1 }, d{ 5, 5, 5, 5 }, x, y;
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::copy(e.begin(), e.end(), x.begin());
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::copy(a.begin(), a.end(), x.begin());
+        assert(format(x) == "[1, 3, 5, 7, 9]");
+        plastic::copy(d.begin(), d.end(), x.begin());
+        assert(format(x) == "[5, 5, 5, 5, 9]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::copy_if(e.begin(), e.end(), x.begin(), [](int x) { return x > 0; });
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::copy_if(a.begin(), a.end(), x.begin(), [](int x) { return x > 3; });
+        assert(format(x) == "[5, 7, 9, 0, 0]");
+        plastic::copy_if(d.begin(), d.end(), d.begin(), [](int x) { return x <= 5; });
+        assert(format(x) == "[5, 5, 5, 5, 0]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::copy_n(e.begin(), 0, x.begin());
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::copy_n(a.begin(), 3, x.begin());
+        assert(format(x) == "[1, 3, 5, 0, 0]");
+        plastic::copy_n(b.begin(), 4, x.begin());
+        assert(format(x) == "[2, 4, 6, 8, 0]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::copy_backward(e.begin(), e.end(), x.end());
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::copy_backward(a.begin(), a.end(), x.end());
+        assert(format(x) == "[1, 3, 5, 7, 9]");
+        plastic::copy_backward(d.begin(), d.end(), x.end());
+        assert(format(x) == "[1, 5, 5, 5, 5]");
+
+        x = { 0, 0, 0, 0, 0 };
+        y = { 1, 2, 3, 4, 5 };
+        plastic::move(e.begin(), e.end(), x.begin());
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::move(y.begin(), y.end(), x.begin());
+        assert(format(x) == "[1, 2, 3, 4, 5]");
+
+        x = { 0, 0, 0, 0, 0 };
+        y = { 1, 2, 3, 4, 5 };
+        plastic::move_backward(e.begin(), e.end(), x.end());
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::move_backward(y.begin(), y.end(), x.end());
+        assert(format(x) == "[1, 2, 3, 4, 5]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::fill(e.begin(), e.end(), 3);
+        plastic::fill(x.begin(), x.end(), 3);
+        assert(format(e) == "[]");
+        assert(format(x) == "[3, 3, 3, 3, 3]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::fill_n(e.begin(), 0, 7);
+        plastic::fill_n(x.begin(), 3, 7);
+        assert(format(e) == "[]");
+        assert(format(x) == "[7, 7, 7, 0, 0]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::transform(e.begin(), e.end(), x.begin(), [](int x) { return x * 2; });
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::transform(a.begin(), a.end(), x.begin(), [](int x) { return x * 2; });
+        assert(format(x) == "[2, 6, 10, 14, 18]");
+        plastic::transform(d.begin(), d.end(), x.begin(), [](int x) { return x + 1; });
+        assert(format(x) == "[6, 6, 6, 6, 18]");
+        plastic::transform(e.begin(), e.end(), a.begin(), a.end(), x.begin(), [](int x, int y) { return x + y; });
+        assert(format(x) == "[6, 6, 6, 6, 18]");
+        plastic::transform(a.begin(), a.end(), b.begin(), b.end(), x.begin(), [](int x, int y) { return y - x; });
+        assert(format(x) == "[1, 1, 1, 1, 1]");
+        plastic::transform(a.begin(), a.end(), d.begin(), d.end(), x.begin(), [](int x, int y) { return y * 2 - x - 1; });
+        assert(format(x) == "[8, 6, 4, 2, 1]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::generate(x.begin(), x.end(), [v{ 0 }] mutable { return v += 2; });
+        assert(format(x) == "[2, 4, 6, 8, 10]");
+        plastic::generate(x.begin(), x.end(), [i{ a.begin() }] mutable { return *i++; });
+        assert(format(x) == "[1, 3, 5, 7, 9]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::generate_n(x.begin(), 4, [v{ 0 }] mutable { return v += 2; });
+        assert(format(x) == "[2, 4, 6, 8, 0]");
+        plastic::generate_n(x.begin(), 5, [i{ a.begin() }] mutable { return *i++; });
+        assert(format(x) == "[1, 3, 5, 7, 9]");
+
+        x = { 1, 2, 2, 2, 5 };
+        x.erase(plastic::remove(x.begin(), x.end(), 2).end(), x.end());
+        assert(format(x) == "[1, 5]");
+        x.erase(plastic::remove(x.begin(), x.end(), 1).end(), x.end());
+        assert(format(x) == "[5]");
+        x.erase(plastic::remove(x.begin(), x.end(), 5).end(), x.end());
+        assert(format(x) == "[]");
+        x.erase(plastic::remove(x.begin(), x.end(), 0).end(), x.end());
+        assert(format(x) == "[]");
+
+        x = { 1, 2, 3, 2, 1 };
+        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return x % 2 == 0; }).end(), x.end());
+        assert(format(x) == "[1, 3, 1]");
+        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return x >= 2; }).end(), x.end());
+        assert(format(x) == "[1, 1]");
+        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return x == 1; }).end(), x.end());
+        assert(format(x) == "[]");
+        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return true; }).end(), x.end());
+        assert(format(x) == "[]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::remove_copy(e.begin(), e.end(), x.begin(), 2);
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::remove_copy(c.begin(), c.end(), x.begin(), 2);
+        assert(format(x) == "[1, 3, 1, 0, 0]");
+        plastic::remove_copy(d.begin(), d.end(), x.begin(), 5);
+        assert(format(x) == "[1, 3, 1, 0, 0]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::remove_copy_if(e.begin(), e.end(), x.begin(), [](int x) { return x > 0; });
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::remove_copy_if(a.begin(), a.end(), x.begin(), [](int x) { return x < 5; });
+        assert(format(x) == "[5, 7, 9, 0, 0]");
+        plastic::remove_copy_if(b.begin(), b.end(), x.begin(), [](int x) { return x > 5; });
+        assert(format(x) == "[2, 4, 9, 0, 0]");
+
+        x = e;
+        plastic::replace(x.begin(), x.end(), 2, 9);
+        assert(format(x) == "[]");
+        x = c;
+        plastic::replace(x.begin(), x.end(), 2, 9);
+        assert(format(x) == "[1, 9, 3, 9, 1]");
+        x = d;
+        plastic::replace(x.begin(), x.end(), 5, 0);
+        assert(format(x) == "[0, 0, 0, 0]");
+
+        x = e;
+        plastic::replace_if(x.begin(), x.end(), [](int x) { return x > 0; }, 0);
+        assert(format(x) == "[]");
+        x = a;
+        plastic::replace_if(x.begin(), x.end(), [](int x) { return x % 3 == 0; }, 0);
+        assert(format(x) == "[1, 0, 5, 7, 0]");
+        x = b;
+        plastic::replace_if(x.begin(), x.end(), [](int x) { return x < 6; }, 1);
+        assert(format(x) == "[1, 1, 6, 8, 10]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::replace_copy(e.begin(), e.end(), x.begin(), 2, 8);
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::replace_copy(c.begin(), c.end(), x.begin(), 2, 8);
+        assert(format(x) == "[1, 8, 3, 8, 1]");
+        plastic::replace_copy(d.begin(), d.end(), x.begin(), 5, 2);
+        assert(format(x) == "[2, 2, 2, 2, 1]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::replace_copy_if(e.begin(), e.end(), x.begin(), [](int x) { return x > 0; }, 0);
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::replace_copy_if(a.begin(), a.end(), x.begin(), [](int x) { return x > 5; }, 1);
+        assert(format(x) == "[1, 3, 5, 1, 1]");
+        plastic::replace_copy_if(b.begin(), b.end(), x.begin(), [](int x) { return x % 2 == 0; }, 7);
+        assert(format(x) == "[7, 7, 7, 7, 7]");
+
+        x = a;
+        y = e;
+        plastic::swap_ranges(x.begin(), x.end(), y.begin(), y.end());
+        assert(format(x) == "[]");
+        y = b;
+        plastic::swap_ranges(x.begin(), x.end(), y.begin(), y.end());
+        assert(format(x) == "[2, 4, 6, 8, 10]");
+        y = d;
+        plastic::swap_ranges(x.begin(), x.begin(), y.begin(), y.end());
+        assert(format(x) == "[5, 5, 5, 5]");
+
+        x = e;
+        plastic::reverse(x.begin(), x.end());
+        assert(format(x) == "[]");
+        x = a;
+        plastic::reverse(x.begin(), x.end());
+        assert(format(x) == "[9, 7, 5, 3, 1]");
+        x = c;
+        plastic::reverse(x.begin(), x.begin() + 3);
+        assert(format(x) == "[3, 2, 1, 2, 1]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::reverse_copy(e.begin(), e.end(), x.begin());
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::reverse_copy(a.begin(), a.end(), x.begin());
+        assert(format(x) == "[9, 7, 5, 3, 1]");
+        plastic::reverse_copy(c.begin(), c.end() + 3, x.begin());
+        assert(format(x) == "[3, 2, 1, 2, 1]");
+
+        x = e;
+        plastic::rotate(x.begin(), x.begin(), x.end());
+        assert(format(x) == "[]");
+        x = a;
+        plastic::rotate(x.begin(), x.begin() + 2, x.end());
+        assert(format(x) == "[5, 7, 9, 1, 3]");
+        x = c;
+        plastic::rotate(x.begin(), x.begin() + 1, x.end());
+        assert(format(x) == "[2, 3, 2, 1, 1]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::rotate_copy(e.begin(), e.begin(), e.end(), x.begin());
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::rotate_copy(a.begin(), a.begin() + 1, a.end(), x.begin());
+        assert(format(x) == "[3, 5, 7, 9, 1]");
+        plastic::rotate_copy(c.begin(), c.begin() + 2, c.end(), x.begin());
+        assert(format(x) == "[3, 2, 1, 1, 2]");
+
+        x = e;
+        plastic::shift_left(x.begin(), x.end(), 2);
+        assert(format(x) == "[]");
+        x = a;
+        plastic::shift_left(x.begin(), x.end(), 2);
+        assert(format(x.begin(), x.end() - 2) == "[5, 7, 9]");
+        x = c;
+        plastic::shift_left(x.begin(), x.end(), 1);
+        assert(format(x.begin(), x.end() - 1) == "[2, 3, 2, 1]");
+
+        x = e;
+        plastic::shift_right(x.begin(), x.end(), 1);
+        assert(format(x) == "[]");
+        x = a;
+        plastic::shift_right(x.begin(), x.end(), 1);
+        assert(format(x.begin() + 1, x.end()) == "[1, 3, 5, 7]");
+        x = c;
+        plastic::shift_right(x.begin(), x.end(), 2);
+        assert(format(x.begin() + 2, x.end()) == "[1, 2, 3]");
+
+        std::mt19937 eng{ std::random_device{}() };
+        x = { 0, 0, 0, 0, 0 };
+        assert(plastic::sample(e.begin(), e.end(), x.begin(), 3, eng) == x.begin());
+        assert(plastic::sample(a.begin(), a.end(), x.begin(), 3, eng) == x.begin() + 3);
+
+        x = e;
+        assert(plastic::shuffle(x.begin(), x.end(), eng) == x.end());
+        x = a;
+        assert(plastic::shuffle(x.begin(), x.end(), eng) == x.end());
+
+        x = e;
+        x.erase(plastic::unique(x.begin(), x.end()).end(), x.end());
+        assert(format(x) == "[]");
+        x = d;
+        x.erase(plastic::unique(x.begin(), x.end()).end(), x.end());
+        assert(format(x) == "[5]");
+        x = { 1, 1, 2, 2, 3 };
+        x.erase(plastic::unique(x.begin(), x.end()).end(), x.end());
+        assert(format(x) == "[1, 2, 3]");
+
+        x = { 0, 0, 0, 0, 0 };
+        plastic::unique_copy(e.begin(), e.end(), x.begin());
+        assert(format(x) == "[0, 0, 0, 0, 0]");
+        plastic::unique_copy(c.begin(), c.end(), x.begin());
+        assert(format(x) == "[1, 2, 3, 2, 1]");
+        plastic::unique_copy(d.begin(), d.end(), x.begin());
+        assert(format(x) == "[5, 2, 3, 2, 1]");
     }
 
     TEST_METHOD(partition) {
