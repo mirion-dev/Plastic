@@ -784,13 +784,13 @@ public:
 
         x = e;
         plastic::shuffle(x.begin(), x.end(), eng);
-        assert(std::ranges::is_permutation(x.begin(), x.end(), e.begin(), e.end()));
+        assert(format(e) == "[]");
         x = a;
         plastic::shuffle(x.begin(), x.end(), eng);
-        assert(std::ranges::is_permutation(x.begin(), x.end(), a.begin(), a.end()));
+        assert(std::ranges::is_permutation(x, a));
         x = d;
         plastic::shuffle(x.begin(), x.end(), eng);
-        assert(std::ranges::is_permutation(x.begin(), x.end(), d.begin(), d.end()));
+        assert(std::ranges::is_permutation(x, d));
 
         x = e;
         x.erase(plastic::unique(x.begin(), x.end()).begin(), x.end());
@@ -824,10 +824,10 @@ public:
         assert(format(x) == "[]");
         x = a;
         plastic::partition(x.begin(), x.end(), [](int x) { return x < 5; });
-        assert(std::ranges::is_partitioned(x.begin(), x.end(), [](int x) { return x < 5; }));
+        assert(std::ranges::is_partitioned(x, [](int x) { return x < 5; }));
         x = c;
         plastic::partition(x.begin(), x.end(), [](int x) { return x % 2 == 0; });
-        assert(std::ranges::is_partitioned(x.begin(), x.end(), [](int x) { return x % 2 == 0; }));
+        assert(std::ranges::is_partitioned(x, [](int x) { return x % 2 == 0; }));
 
         x = y = { 0, 0, 0, 0, 0 };
         plastic::partition_copy(e.begin(), e.end(), x.begin(), y.begin(), [](int x) { return x > 0; });
@@ -960,7 +960,57 @@ public:
     }
 
     TEST_METHOD(heap) {
-        assert(false);
+        std::vector<int> e, a{ 1, 2, 3, 4, 5 }, b{ 5, 4, 3, 2, 1 }, x;
+
+        assert(plastic::is_heap(e.begin(), e.end()) == true);
+        assert(plastic::is_heap(a.begin(), a.end()) == false);
+        assert(plastic::is_heap(b.begin(), b.end()) == true);
+
+        assert(plastic::is_heap_until(e.begin(), e.end()) == e.end());
+        assert(plastic::is_heap_until(a.begin(), a.end()) == a.begin() + 1);
+        assert(plastic::is_heap_until(b.begin(), b.end()) == b.end());
+
+        x = e;
+        plastic::make_heap(x.begin(), x.end());
+        assert(format(x) == "[]");
+        x = a;
+        plastic::make_heap(x.begin(), x.end());
+        assert(std::ranges::is_heap(x));
+        x = b;
+        plastic::make_heap(x.begin(), x.end());
+        assert(std::ranges::is_heap(x));
+
+        x = e;
+        plastic::push_heap(x.begin(), x.end());
+        assert(format(x) == "[]");
+        x = { 4, 1, 2, 0, 3 };
+        plastic::push_heap(x.begin(), x.end());
+        assert(std::ranges::is_heap(x) && std::ranges::contains(x, 3));
+        x = { 5, 4, 3, 2, 6 };
+        plastic::push_heap(x.begin(), x.end());
+        assert(std::ranges::is_heap(x) && std::ranges::contains(x, 6));
+
+        x = e;
+        plastic::pop_heap(x.begin(), x.end());
+        assert(format(x) == "[]");
+        x = { 4, 3, 1, 2, 0 };
+        plastic::pop_heap(x.begin(), x.end());
+        x.pop_back();
+        assert(std::ranges::is_heap(x) && !std::ranges::contains(x, 4));
+        x = { 5, 4, 3, 2, 1 };
+        plastic::pop_heap(x.begin(), x.end());
+        x.pop_back();
+        assert(std::ranges::is_heap(x) && !std::ranges::contains(x, 5));
+
+        x = e;
+        plastic::sort_heap(x.begin(), x.end());
+        assert(format(x) == "[]");
+        x = { 4, 3, 1, 2, 0 };
+        plastic::sort_heap(x.begin(), x.end());
+        assert(format(x) == "[0, 1, 2, 3, 4]");
+        x = { 5, 4, 3, 2, 1 };
+        plastic::sort_heap(x.begin(), x.end());
+        assert(format(x) == "[1, 2, 3, 4, 5]");
     }
 
     TEST_METHOD(minimun_maximum) {

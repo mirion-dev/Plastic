@@ -1305,13 +1305,18 @@ namespace plastic {
     export
         template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
     constexpr It is_heap_until(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        auto size{ last - first }, i{};
+        if (first == last) {
+            return first;
+        }
+
+        std::iter_difference_t<It> size{ last - first }, i{ 1 };
         while (i != size) {
             if (pred(proj(first[(i - 1) >> 1]), proj(first[i]))) {
                 break;
             }
             ++i;
         }
+
         return first + i;
     }
 
@@ -1387,7 +1392,7 @@ namespace plastic {
         auto size{ r_last - first };
         if (size > 1) {
             std::swap(*first, *--i);
-            plastic::sift_down(first, 0, size, pred, proj);
+            plastic::sift_down(first, 0, --size, pred, proj);
         }
         return r_last;
     }
@@ -1400,7 +1405,7 @@ namespace plastic {
         auto size{ r_last - first };
         while (size > 1) {
             std::swap(*first, *--i);
-            plastic::sift_down(first, 0, size--, pred, proj);
+            plastic::sift_down(first, 0, --size, pred, proj);
         }
         return r_last;
     }
