@@ -856,7 +856,63 @@ public:
     }
 
     TEST_METHOD(sorting) {
-        assert(false);
+        std::vector<int> e, a{ 1, 2, 3, 4, 5 }, b{ 3, 4, 1, 5, 2 }, x;
+
+        assert(plastic::is_sorted(e.begin(), e.end()) == true);
+        assert(plastic::is_sorted(a.begin(), a.end()) == true);
+        assert(plastic::is_sorted(b.begin(), b.end()) == false);
+
+        assert(plastic::is_sorted_until(e.begin(), e.end()) == e.end());
+        assert(plastic::is_sorted_until(a.begin(), a.end()) == a.end());
+        assert(plastic::is_sorted_until(b.begin(), b.end()) == b.begin() + 2);
+
+        x = e;
+        plastic::sort(x.begin(), x.end());
+        assert(format(x) == "[]");
+        x = a;
+        plastic::sort(x.begin(), x.end());
+        assert(format(x) == "[1, 2, 3, 4, 5]");
+        x = b;
+        plastic::sort(x.begin(), x.end());
+        assert(format(x) == "[1, 2, 3, 4, 5]");
+
+        x = e;
+        plastic::partial_sort(x.begin(), x.begin(), x.end());
+        assert(format(x) == "[]");
+        x = b;
+        plastic::partial_sort(x.begin(), x.begin() + 3, x.end());
+        assert(format(x.begin(), x.begin() + 3) == "[1, 2, 3]");
+        x = b;
+        plastic::partial_sort(x.begin(), x.begin() + 4, x.end());
+        assert(format(x.begin(), x.begin() + 4) == "[1, 2, 3, 4]");
+
+        x = { 0, 0, 0, 0 };
+        plastic::partial_sort_copy(e.begin(), e.end(), x.begin(), x.end());
+        assert(format(x) == "[0, 0, 0, 0]");
+        plastic::partial_sort_copy(a.begin(), a.end(), x.begin(), x.begin() + 3);
+        assert(format(x) == "[1, 2, 3, 0]");
+        plastic::partial_sort_copy(b.begin(), b.end(), x.begin(), x.begin() + 4);
+        assert(format(x) == "[1, 2, 3, 4]");
+
+        x = e;
+        plastic::stable_sort(x.begin(), x.end());
+        assert(format(x) == "[]");
+        x = a;
+        plastic::stable_sort(x.begin(), x.end());
+        assert(format(x) == "[1, 2, 3, 4, 5]");
+        x = b;
+        plastic::stable_sort(x.begin(), x.end());
+        assert(format(x) == "[1, 2, 3, 4, 5]");
+
+        x = e;
+        plastic::nth_element(x.begin(), x.begin(), x.end());
+        assert(format(x) == "[]");
+        x = a;
+        plastic::nth_element(x.begin(), x.begin() + 2, x.end());
+        assert(x[2] == 3);
+        x = b;
+        plastic::nth_element(x.begin(), x.begin() + 2, x.end());
+        assert(x[2] == 3);
     }
 
     TEST_METHOD(binary_search) {

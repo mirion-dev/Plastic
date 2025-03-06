@@ -1478,7 +1478,7 @@ namespace plastic {
 
         It i{ first };
         while (++i != last) {
-            if (!pred(proj(*i), proj(*first++))) {
+            if (pred(proj(*i), proj(*first++))) {
                 break;
             }
         }
@@ -1583,7 +1583,7 @@ namespace plastic {
         requires std::indirectly_copyable<It1, It2>&& std::sortable<It2, Pr, Pj2>&& std::indirect_strict_weak_order<Pr, std::projected<It1, Pj1>, std::projected<It2, Pj2>>
     constexpr std::ranges::in_out_result<It1, It2> partial_sort_copy(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         It2 i{ first2 };
-        while (first1 != last1 && i != first2) {
+        while (first1 != last1 && i != last2) {
             *i++ = *first1;
             ++first1;
         }
@@ -1599,7 +1599,7 @@ namespace plastic {
         }
         plastic::sort_heap(first2, i, pred, proj2);
 
-        return i;
+        return { std::move(first1), std::move(i) };
     }
 
     export
