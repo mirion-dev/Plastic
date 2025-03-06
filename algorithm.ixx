@@ -960,7 +960,7 @@ namespace plastic {
 
         Distr distr;
         Diff size{ last - first };
-        while (--size != 0) {
+        while (size-- != 0) {
             std::swap(first[size], first[distr(gen, Param{ 0, size })]);
         }
 
