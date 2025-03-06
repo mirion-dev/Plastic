@@ -1747,10 +1747,17 @@ namespace plastic {
     export
         template<std::forward_iterator It1, std::sentinel_for<It1> Se1, std::forward_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_equivalence_relation<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::equal_to>
     constexpr bool is_permutation(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
+        if (std::ranges::distance(first1, last1) != std::ranges::distance(first2, last2)) {
+            return false;
+        }
+
         It1 i{ first1 };
         while (i != last1) {
-            if (plastic::count(i, last1, *i, proj1) != plastic::count(first2, last2, *i, proj2)) {
-                return false;
+            if (plastic::find(first1, i, *i, proj1) == i) {
+                auto count{ plastic::count(first2, last2, *i, proj2) };
+                if (count == 0 || count != plastic::count(i, last1, *i, proj1)) {
+                    return false;
+                }
             }
             ++i;
         }

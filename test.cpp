@@ -783,9 +783,14 @@ public:
         assert(plastic::sample(a.begin(), a.end(), x.begin(), 3, eng) == x.begin() + 3);
 
         x = e;
-        assert(plastic::shuffle(x.begin(), x.end(), eng) == x.end());
+        plastic::shuffle(x.begin(), x.end(), eng);
+        assert(std::ranges::is_permutation(x.begin(), x.end(), e.begin(), e.end()));
         x = a;
-        assert(plastic::shuffle(x.begin(), x.end(), eng) == x.end());
+        plastic::shuffle(x.begin(), x.end(), eng);
+        assert(std::ranges::is_permutation(x.begin(), x.end(), a.begin(), a.end()));
+        x = d;
+        plastic::shuffle(x.begin(), x.end(), eng);
+        assert(std::ranges::is_permutation(x.begin(), x.end(), d.begin(), d.end()));
 
         x = e;
         x.erase(plastic::unique(x.begin(), x.end()).begin(), x.end());
@@ -819,10 +824,10 @@ public:
         assert(format(x) == "[]");
         x = a;
         plastic::partition(x.begin(), x.end(), [](int x) { return x < 5; });
-        assert(plastic::is_partitioned(x.begin(), x.end(), [](int x) { return x < 5; }));
+        assert(std::ranges::is_partitioned(x.begin(), x.end(), [](int x) { return x < 5; }));
         x = c;
         plastic::partition(x.begin(), x.end(), [](int x) { return x % 2 == 0; });
-        assert(plastic::is_partitioned(x.begin(), x.end(), [](int x) { return x % 2 == 0; }));
+        assert(std::ranges::is_partitioned(x.begin(), x.end(), [](int x) { return x % 2 == 0; }));
 
         x = y = { 0, 0, 0, 0, 0 };
         plastic::partition_copy(e.begin(), e.end(), x.begin(), y.begin(), [](int x) { return x > 0; });
@@ -1016,7 +1021,38 @@ public:
     }
 
     TEST_METHOD(permutation) {
-        assert(false);
+        std::string e, a{ "abc" }, b{ "cba" }, c{ "aab" }, d{ "abcd" };
+
+        assert(plastic::is_permutation(e.begin(), e.end(), e.begin(), e.end()) == true);
+        assert(plastic::is_permutation(a.begin(), a.end(), b.begin(), b.end()) == true);
+        assert(plastic::is_permutation(a.begin(), a.end(), c.begin(), c.end()) == false);
+        assert(plastic::is_permutation(a.begin(), a.end(), d.begin(), d.end()) == false);
+
+        plastic::next_permutation(a.begin(), a.end());
+        assert(a == "acb");
+        plastic::next_permutation(a.begin(), a.end());
+        assert(a == "bac");
+        plastic::next_permutation(a.begin(), a.end());
+        assert(a == "bca");
+        plastic::next_permutation(a.begin(), a.end());
+        assert(a == "cab");
+        plastic::next_permutation(a.begin(), a.end());
+        assert(a == "cba");
+        plastic::next_permutation(a.begin(), a.end());
+        assert(a == "abc");
+
+        plastic::prev_permutation(a.begin(), a.end());
+        assert(a == "cba");
+        plastic::prev_permutation(a.begin(), a.end());
+        assert(a == "cab");
+        plastic::prev_permutation(a.begin(), a.end());
+        assert(a == "bca");
+        plastic::prev_permutation(a.begin(), a.end());
+        assert(a == "bac");
+        plastic::prev_permutation(a.begin(), a.end());
+        assert(a == "acb");
+        plastic::prev_permutation(a.begin(), a.end());
+        assert(a == "abc");
     }
 
 };
