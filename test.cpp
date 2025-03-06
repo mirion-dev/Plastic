@@ -564,7 +564,7 @@ public:
         assert(format(x) == "[0, 0, 0, 0, 0]");
         plastic::copy_if(a.begin(), a.end(), x.begin(), [](int x) { return x > 3; });
         assert(format(x) == "[5, 7, 9, 0, 0]");
-        plastic::copy_if(d.begin(), d.end(), d.begin(), [](int x) { return x <= 5; });
+        plastic::copy_if(d.begin(), d.end(), x.begin(), [](int x) { return x <= 5; });
         assert(format(x) == "[5, 5, 5, 5, 0]");
 
         x = { 0, 0, 0, 0, 0 };
@@ -636,23 +636,23 @@ public:
         assert(format(x) == "[1, 3, 5, 7, 9]");
 
         x = { 1, 2, 2, 2, 5 };
-        x.erase(plastic::remove(x.begin(), x.end(), 2).end(), x.end());
+        x.erase(plastic::remove(x.begin(), x.end(), 2).begin(), x.end());
         assert(format(x) == "[1, 5]");
-        x.erase(plastic::remove(x.begin(), x.end(), 1).end(), x.end());
+        x.erase(plastic::remove(x.begin(), x.end(), 1).begin(), x.end());
         assert(format(x) == "[5]");
-        x.erase(plastic::remove(x.begin(), x.end(), 5).end(), x.end());
+        x.erase(plastic::remove(x.begin(), x.end(), 5).begin(), x.end());
         assert(format(x) == "[]");
-        x.erase(plastic::remove(x.begin(), x.end(), 0).end(), x.end());
+        x.erase(plastic::remove(x.begin(), x.end(), 0).begin(), x.end());
         assert(format(x) == "[]");
 
         x = { 1, 2, 3, 2, 1 };
-        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return x % 2 == 0; }).end(), x.end());
+        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return x % 2 == 0; }).begin(), x.end());
         assert(format(x) == "[1, 3, 1]");
-        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return x >= 2; }).end(), x.end());
+        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return x >= 2; }).begin(), x.end());
         assert(format(x) == "[1, 1]");
-        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return x == 1; }).end(), x.end());
+        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return x == 1; }).begin(), x.end());
         assert(format(x) == "[]");
-        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return true; }).end(), x.end());
+        x.erase(plastic::remove_if(x.begin(), x.end(), [](int x) { return true; }).begin(), x.end());
         assert(format(x) == "[]");
 
         x = { 0, 0, 0, 0, 0 };
@@ -785,13 +785,13 @@ public:
         assert(plastic::shuffle(x.begin(), x.end(), eng) == x.end());
 
         x = e;
-        x.erase(plastic::unique(x.begin(), x.end()).end(), x.end());
+        x.erase(plastic::unique(x.begin(), x.end()).begin(), x.end());
         assert(format(x) == "[]");
         x = d;
-        x.erase(plastic::unique(x.begin(), x.end()).end(), x.end());
+        x.erase(plastic::unique(x.begin(), x.end()).begin(), x.end());
         assert(format(x) == "[5]");
         x = { 1, 1, 2, 2, 3 };
-        x.erase(plastic::unique(x.begin(), x.end()).end(), x.end());
+        x.erase(plastic::unique(x.begin(), x.end()).begin(), x.end());
         assert(format(x) == "[1, 2, 3]");
 
         x = { 0, 0, 0, 0, 0 };
