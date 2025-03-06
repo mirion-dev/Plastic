@@ -1104,121 +1104,6 @@ namespace plastic {
 
 }
 
-// minimum/maximum operations
-namespace plastic {
-
-    export
-        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
-    constexpr It max_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        if (first == last) {
-            return first;
-        }
-
-        It i{ first };
-        while (++first != last) {
-            if (pred(proj(*i), proj(*first))) {
-                i = first;
-            }
-        }
-
-        return i;
-    }
-
-    export
-        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
-    constexpr It min_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        if (first == last) {
-            return first;
-        }
-
-        It i{ first };
-        while (++first != last) {
-            if (pred(proj(*first), proj(*i))) {
-                i = first;
-            }
-        }
-
-        return i;
-    }
-
-    export
-        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
-    constexpr std::ranges::minmax_result<It> minmax_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        if (first == last) {
-            return { first, first };
-        }
-
-        It min{ first }, max{ first };
-        while (++first != last) {
-            if (pred(proj(*first), proj(*min))) {
-                min = first;
-            }
-            else if (!pred(proj(*first), proj(*max))) {
-                max = first;
-            }
-        }
-
-        return { min, max };
-    }
-
-    export
-        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
-    constexpr const T& max(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
-        return pred(proj(a), proj(b)) ? b : a;
-    }
-
-    export
-        template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
-    constexpr T max(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
-        assert(list.size() != 0);
-        return *plastic::max_element(list.begin(), list.end(), pred, proj);
-    }
-
-    export
-        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
-    constexpr const T& min(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
-        return pred(proj(b), proj(a)) ? b : a;
-    }
-
-    export
-        template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
-    constexpr T min(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
-        assert(list.size() != 0);
-        return *plastic::min_element(list.begin(), list.end(), pred, proj);
-    }
-
-    export
-        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
-    constexpr std::ranges::minmax_result<const T&> minmax(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
-        if (pred(proj(b), proj(a))) {
-            return { b, a };
-        }
-        return { a, b };
-    }
-
-    export
-        template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
-    constexpr std::ranges::minmax_result<T> minmax(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
-        assert(list.size() != 0);
-        auto res{ plastic::minmax_element(list.begin(), list.end(), pred, proj) };
-        return { *res.min, *res.max };
-    }
-
-    export
-        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
-    constexpr const T& clamp(const T& value, const T& lowest, const T& highest, Pr pred = {}, Pj proj = {}) {
-        assert(!pred(proj(highest), proj(lowest)));
-        if (pred(proj(value), proj(lowest))) {
-            return lowest;
-        }
-        if (pred(proj(highest), proj(value))) {
-            return highest;
-        }
-        return value;
-    }
-
-}
-
 // binary search operations
 namespace plastic {
 
@@ -1702,6 +1587,121 @@ namespace plastic {
         }
         auto res{ plastic::copy(first1, last1, output) };
         return { res.in, first2, res.out };
+    }
+
+}
+
+// minimum/maximum operations
+namespace plastic {
+
+    export
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr It max_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        if (first == last) {
+            return first;
+        }
+
+        It i{ first };
+        while (++first != last) {
+            if (pred(proj(*i), proj(*first))) {
+                i = first;
+            }
+        }
+
+        return i;
+    }
+
+    export
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr It min_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        if (first == last) {
+            return first;
+        }
+
+        It i{ first };
+        while (++first != last) {
+            if (pred(proj(*first), proj(*i))) {
+                i = first;
+            }
+        }
+
+        return i;
+    }
+
+    export
+        template<std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
+    constexpr std::ranges::minmax_result<It> minmax_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
+        if (first == last) {
+            return { first, first };
+        }
+
+        It min{ first }, max{ first };
+        while (++first != last) {
+            if (pred(proj(*first), proj(*min))) {
+                min = first;
+            }
+            else if (!pred(proj(*first), proj(*max))) {
+                max = first;
+            }
+        }
+
+        return { min, max };
+    }
+
+    export
+        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr const T& max(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
+        return pred(proj(a), proj(b)) ? b : a;
+    }
+
+    export
+        template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr T max(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
+        assert(list.size() != 0);
+        return *plastic::max_element(list.begin(), list.end(), pred, proj);
+    }
+
+    export
+        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr const T& min(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
+        return pred(proj(b), proj(a)) ? b : a;
+    }
+
+    export
+        template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr T min(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
+        assert(list.size() != 0);
+        return *plastic::min_element(list.begin(), list.end(), pred, proj);
+    }
+
+    export
+        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr std::ranges::minmax_result<const T&> minmax(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
+        if (pred(proj(b), proj(a))) {
+            return { b, a };
+        }
+        return { a, b };
+    }
+
+    export
+        template<std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr std::ranges::minmax_result<T> minmax(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
+        assert(list.size() != 0);
+        auto res{ plastic::minmax_element(list.begin(), list.end(), pred, proj) };
+        return { *res.min, *res.max };
+    }
+
+    export
+        template<class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
+    constexpr const T& clamp(const T& value, const T& lowest, const T& highest, Pr pred = {}, Pj proj = {}) {
+        assert(!pred(proj(highest), proj(lowest)));
+        if (pred(proj(value), proj(lowest))) {
+            return lowest;
+        }
+        if (pred(proj(highest), proj(value))) {
+            return highest;
+        }
+        return value;
     }
 
 }
