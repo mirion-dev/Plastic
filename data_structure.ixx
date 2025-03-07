@@ -7,19 +7,20 @@ export module plastic:data_structure;
 import std; 
 
 // construction options
-export namespace plastic {
+namespace plastic {
 
-    struct uninitialized_t {
+    export struct uninitialized_t {
         explicit uninitialized_t() noexcept = default;
     };
 
-    uninitialized_t uninitialized{};
+    export uninitialized_t uninitialized{};
 
 }
 
 // linear structures
-export namespace plastic {
+namespace plastic {
 
+    export
     template<class T>
     class vector {
         T* _begin{};
@@ -377,6 +378,7 @@ export namespace plastic {
     template<class It>
     explicit vector(It, It)->vector<std::iter_value_t<It>>;
 
+    export
     template<class T>
     class deque {
         T* _begin;
@@ -830,6 +832,7 @@ export namespace plastic {
     template<class It>
     explicit deque(It, It)->deque<std::iter_value_t<It>>;
 
+    export
     template<class T>
     class forward_list {
         struct node {
@@ -1045,6 +1048,7 @@ export namespace plastic {
     template<class It>
     explicit forward_list(It, It)->forward_list<std::iter_value_t<It>>;
 
+    export
     template<class T>
     class list {
         struct node {
@@ -1322,9 +1326,9 @@ export namespace plastic {
 }
 
 // search trees (incompleted)
-export namespace plastic {
+namespace plastic {
 
-    // incompleted
+    export
     template<class T, class Cmp = std::less<T>>
     class binary_search_tree {
         static constexpr Cmp _cmp{};
@@ -1740,7 +1744,7 @@ export namespace plastic {
     template<class It>
     explicit binary_search_tree(It, It)->binary_search_tree<std::iter_value_t<It>>;
 
-    // incompleted
+    export
     template<class T, class Cmp = std::less<T>>
     class red_black_tree {
         static constexpr Cmp _cmp{};
@@ -2038,7 +2042,10 @@ export namespace plastic {
         }
     };
 
-    // incompleted
+    template<class It>
+    explicit red_black_tree(It, It)->red_black_tree<std::iter_value_t<It>>;
+
+    export
     template<class T, class Cmp = std::less<T>>
     class avl_tree {
         static constexpr Cmp _cmp{};
@@ -2340,12 +2347,15 @@ export namespace plastic {
         }
     };
 
-    // incompleted
-    template<class T, class Cmp = std::less<T>, std::size_t order = 5>
+    template<class It>
+    explicit avl_tree(It, It)->avl_tree<std::iter_value_t<It>>;
+
+    export
+        template<class T, std::size_t N = 5, class Cmp = std::less<T>>
     class b_tree {
         static constexpr Cmp _cmp{};
-        static constexpr std::size_t _min_size{ order - 1 };
-        static constexpr std::size_t _max_size{ 2 * order - 1 };
+        static constexpr std::size_t _min_size{ N - 1 };
+        static constexpr std::size_t _max_size{ 2 * N - 1 };
 
         struct node {
             T value[_max_size];
@@ -2365,8 +2375,9 @@ export namespace plastic {
 }
 
 // addressable heaps
-export namespace plastic {
+namespace plastic {
 
+    export
     template<class T, class Cmp = std::less<T>>
     class binary_heap {
         static constexpr Cmp _cmp{};

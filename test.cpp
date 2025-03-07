@@ -30,6 +30,10 @@ std::string format(const plastic::binary_heap<T, Cmp>& heap) {
 TEST_CLASS(data_structure) {
 public:
 
+    TEST_METHOD(inplace_vector) {
+        assert(false);
+    }
+
     TEST_METHOD(vector) {
         plastic::vector<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
@@ -98,6 +102,10 @@ public:
         assert(d != e);
         assert(d < e);
         assert(d <= f);
+    }
+
+    TEST_METHOD(inplace_deque) {
+        assert(false);
     }
 
     TEST_METHOD(deque) {
