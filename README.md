@@ -4,11 +4,13 @@ My implementations of common data structures and algorithms for study.
 
 ## Data Structures
 
-The class designs are primarily referenced from the [MSVC STL](https://github.com/microsoft/STL), but not strictly adhered to. For instance, the underlying structure of `deque` is implemented as a circular queue rather than multiple blocks.
+The class designs are primarily based on [MSVC STL](https://github.com/microsoft/STL), though not identical. For instance, the underlying structure of `deque` is implemented as a bidirectional dynamic array instead of blocks.
 
 ### Linear Structures
 
-| | **`vector`** | **`deque`** | **`forward_list`** | **`list`** |
+![](./res/linear.svg)
+
+| | **`inplace_vector`<br>`vector`** | **`inplace_deque`<br>`deque`** | **`forward_list`** | **`list`** |
 | :--: | :--: | :--: | :--: | :--: |
 | **`empty`** | `empty` | `empty` | `empty` | `empty` |
 | **`size`** | `size` | `size` | `size` | `size` |
