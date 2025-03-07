@@ -87,7 +87,7 @@ Same as the constrained algorithms in `<algorithm>`, but only meet the standard'
 | Partition | `is_partitioned`, `partition`, `partition_copy`, `stable_partition`, `partition_point` |
 | Sorting | `is_sorted`, `is_sorted_until`, `sort`, `partial_sort`, `partial_sort_copy`, `stable_sort`, `nth_element` |
 | Binary Search | `lower_bound`, `upper_bound`, `binary_search`, `equal_range` |
-| Merging | `merge`, `inplace_merge` |
+| Merge | `merge`, `inplace_merge` |
 | Set | `includes`, `set_difference`, `set_intersection`, `set_symmetric_difference`, `set_union` |
 | Heap | `is_heap`, `is_heap_until`, `make_heap`, `push_heap`, `pop_heap`, `sort_heap` |
 | Minimum/Maximum | `max`, `max_element`, `min`, `min_element`, `minmax`, `minmax_element`, `clamp` |

@@ -945,7 +945,7 @@ public:
         assert(res4.begin() == c.begin() && res4.end() == c.end());
     }
 
-    TEST_METHOD(merging) {
+    TEST_METHOD(merge) {
         std::vector<int> e, a{ 1, 3, 5 }, b{ 2, 4, 6 }, c{ 1, 2, 3 }, x;
 
         x = { 0, 0, 0, 0, 0, 0 };

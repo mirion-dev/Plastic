@@ -1271,7 +1271,7 @@ namespace plastic {
 
 }
 
-// merging operations
+// merge operations
 namespace plastic {
 
     export
@@ -1302,16 +1302,15 @@ namespace plastic {
         }
 
         if (i == middle) {
-            plastic::move(j, last, k);
+            j = std::ranges::next(j, last);
         }
         else {
-            plastic::move(i, middle, k);
+            plastic::move_backward(i, middle, j);
         }
-
-        It temp{ plastic::move(buf, k, first).out };
+        plastic::move(buf, k, first);
         delete[] buf;
 
-        return temp;
+        return j;
     }
 
 }
@@ -1412,8 +1411,8 @@ namespace plastic {
 
         It point{ plastic::median_partition(first, last, pred, proj) };
         margin = (margin >> 1) + (margin >> 2);
-        plastic::intro_sort(first, point, margin, pred, proj);
-        plastic::intro_sort(point, last, margin, pred, proj);
+        intro_sort(first, point, margin, pred, proj);
+        intro_sort(point, last, margin, pred, proj);
     }
 
     export
@@ -1466,23 +1465,27 @@ namespace plastic {
         return { first1, i };
     }
 
+    template<class It, class Pr, class Pj>
+    constexpr void merge_sort(It first, It last, Pr pred, Pj proj) {
+        if (last - first <= plastic::insertion_sort_threshold) {
+            plastic::insertion_sort(first, last, pred, proj);
+            return;
+        }
+
+        It middle{ first + (last - first >> 1) };
+        merge_sort(first, middle, pred, proj);
+        merge_sort(middle, last, pred, proj);
+        if (pred(proj(*middle), proj(*std::ranges::prev(middle)))) {
+            plastic::inplace_merge(first, middle, last, pred, proj);
+        }
+    }
+
     export
         template<std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     constexpr It stable_sort(It first, Se last, Pr pred = {}, Pj proj = {}) {
         It r_last{ std::ranges::next(first, last) };
-        if (r_last - first <= plastic::insertion_sort_threshold) {
-            plastic::insertion_sort(first, r_last, pred, proj);
-            return r_last;
-        }
-
-        It middle{ first + (r_last - first >> 1) };
-        plastic::stable_sort(first, middle, pred, proj);
-        plastic::stable_sort(middle, r_last, pred, proj);
-        if (pred(proj(*middle), proj(*std::ranges::prev(middle)))) {
-            plastic::inplace_merge(first, middle, r_last, pred, proj);
-        }
-
+        plastic::merge_sort(first, r_last, pred, proj);
         return r_last;
     }
 
