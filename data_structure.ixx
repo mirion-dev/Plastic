@@ -6,19 +6,10 @@ export module plastic:data_structure;
 
 import std; 
 
-// construction options
-namespace plastic {
-
-    export struct uninitialized_t {
-        explicit uninitialized_t() noexcept = default;
-    };
-
-    export uninitialized_t uninitialized{};
-
-}
-
 // linear structures
 namespace plastic {
+
+    struct uninitialized_t {} uninitialized;
 
     export
     template<class T>
@@ -26,6 +17,11 @@ namespace plastic {
         T* _begin{};
         T* _last{};
         T* _end{};
+
+        constexpr vector(uninitialized_t, std::size_t size) noexcept :
+            _begin{ new T[size] },
+            _last{ _begin + size },
+            _end{ _last } {}
 
         constexpr void _extend(std::size_t size) noexcept {
             reserve(capacity() + std::max(capacity() >> 1, size));
@@ -43,11 +39,6 @@ namespace plastic {
         using size_type = std::size_t;
 
         constexpr vector() noexcept = default;
-
-        constexpr vector(uninitialized_t, std::size_t size) noexcept :
-            _begin{ new T[size] },
-            _last{ _begin + size },
-            _end{ _last } {}
 
         constexpr vector(std::size_t size) noexcept :
             vector(uninitialized, size) {
