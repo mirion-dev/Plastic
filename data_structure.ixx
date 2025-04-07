@@ -1,12 +1,10 @@
-module;
-
-#include <assert.h>
+﻿module;
 
 #include <cassert>
 
 export module plastic:data_structure;
 
-import std; 
+import std;
 
 // for internal implementation
 namespace plastic {
@@ -19,7 +17,7 @@ namespace plastic {
 namespace plastic {
 
     export
-    template<class T>
+        template<class T>
     class vector {
         T* _begin{};
         T* _end{};
@@ -37,8 +35,8 @@ namespace plastic {
     public:
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
-            using value_type = T;
-            using reference = T&;
+        using value_type = T;
+        using reference = T&;
         using const_reference = const T&;
 
         using iterator = T*;
@@ -73,21 +71,33 @@ namespace plastic {
         constexpr vector(const vector& other) noexcept :
             vector(other._begin, other._last) {}
 
+        constexpr vector(vector&& other) noexcept {
+            swap(other);
+        }
+
         constexpr ~vector() noexcept {
             delete[] _begin;
         }
 
         constexpr vector& operator=(const vector& other) noexcept {
-            if (this == &other) {
-                return *this;
-            }
-
-            vector temp{ other };
-            std::swap(_begin, temp._begin);
-            std::swap(_last, temp._last);
-            std::swap(_end, temp._end);
-
+            vector temp(other);
+            swap(temp);
             return *this;
+        }
+
+        constexpr vector& operator=(vector&& other) noexcept {
+            swap(other);
+            return *this;
+        }
+
+        constexpr void swap(vector& other) noexcept {
+            std::swap(_begin, other._begin);
+            std::swap(_last, other._last);
+            std::swap(_end, other._end);
+        }
+
+        friend constexpr void swap(vector& left, vector& right) noexcept {
+            left.swap(right);
         }
 
         constexpr bool empty() const noexcept {
@@ -305,7 +315,7 @@ namespace plastic {
     explicit vector(It, It)->vector<std::iter_value_t<It>>;
 
     export
-    template<class T>
+        template<class T>
     class deque {
         T* _begin;
         T* _end;
@@ -759,7 +769,7 @@ namespace plastic {
     explicit deque(It, It)->deque<std::iter_value_t<It>>;
 
     export
-    template<class T>
+        template<class T>
     class forward_list {
         struct node {
             T value;
@@ -975,7 +985,7 @@ namespace plastic {
     explicit forward_list(It, It)->forward_list<std::iter_value_t<It>>;
 
     export
-    template<class T>
+        template<class T>
     class list {
         struct node {
             T value;
@@ -1255,7 +1265,7 @@ namespace plastic {
 namespace plastic {
 
     export
-    template<class T, class Cmp = std::less<T>>
+        template<class T, class Cmp = std::less<T>>
     class binary_search_tree {
         static constexpr Cmp _cmp{};
 
@@ -1671,7 +1681,7 @@ namespace plastic {
     explicit binary_search_tree(It, It)->binary_search_tree<std::iter_value_t<It>>;
 
     export
-    template<class T, class Cmp = std::less<T>>
+        template<class T, class Cmp = std::less<T>>
     class red_black_tree {
         static constexpr Cmp _cmp{};
 
@@ -1972,7 +1982,7 @@ namespace plastic {
     explicit red_black_tree(It, It)->red_black_tree<std::iter_value_t<It>>;
 
     export
-    template<class T, class Cmp = std::less<T>>
+        template<class T, class Cmp = std::less<T>>
     class avl_tree {
         static constexpr Cmp _cmp{};
 
@@ -2304,7 +2314,7 @@ namespace plastic {
 namespace plastic {
 
     export
-    template<class T, class Cmp = std::less<T>>
+        template<class T, class Cmp = std::less<T>>
     class binary_heap {
         static constexpr Cmp _cmp{};
 
