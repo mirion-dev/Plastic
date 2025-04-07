@@ -1,28 +1,18 @@
-module;
+﻿module;
 
-#include <assert.h>
+#include <cassert>
 
 export module plastic:algorithm;
 
 import std;
 
-// temporary fixes
+// introduced in C++26, but not yet implemented in MSVC
 namespace std {
-
-    // introduced in C++20, but EDG cannot recognize it within modules
-#ifdef __EDG__
-    template<class Fn, class... It>
-        requires (std::indirectly_readable<It> && ...) && std::invocable<Fn, std::iter_reference_t<It>...>
-    using indirect_result_t = std::invoke_result_t<Fn, std::iter_reference_t<It>...>;
-#endif
-
-    // introduced in C++26, but not yet implemented in MSVC
     template<std::indirectly_readable It, std::indirectly_regular_unary_invocable<It> Pj>
     using projected_value_t = std::remove_cvref_t<std::invoke_result_t<Pj&, std::iter_value_t<It>&>>;
-
 }
 
-// exposition-only concepts
+// for internal implementation
 namespace plastic {
 
     template<class Fn>
@@ -52,11 +42,6 @@ namespace plastic {
 
     template <class Fn, class T, class It>
     concept indirectly_binary_right_foldable = indirectly_binary_left_foldable<flipped<Fn>, T, It>;
-
-}
-
-// for internal implementation
-namespace plastic {
 
     template<class Fn, class T, class It>
     using fold_left_result_t = std::decay_t<std::invoke_result_t<Fn&, T, std::iter_reference_t<It>>>;
