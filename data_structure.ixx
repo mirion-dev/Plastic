@@ -2,41 +2,49 @@ module;
 
 #include <assert.h>
 
+#include <cassert>
+
 export module plastic:data_structure;
 
 import std; 
 
-// linear structures
+// for internal implementation
 namespace plastic {
 
     struct uninitialized_t {} uninitialized;
+
+}
+
+// linear structures
+namespace plastic {
 
     export
     template<class T>
     class vector {
         T* _begin{};
-        T* _last{};
         T* _end{};
+        T* _last{};
 
         constexpr vector(uninitialized_t, std::size_t size) noexcept :
             _begin{ new T[size] },
-            _last{ _begin + size },
-            _end{ _last } {}
+            _end{ _begin + size },
+            _last{ _end } {}
 
         constexpr void _extend(std::size_t size) noexcept {
             reserve(capacity() + std::max(capacity() >> 1, size));
         }
 
     public:
+        using difference_type = std::ptrdiff_t;
+        using size_type = std::size_t;
             using value_type = T;
             using reference = T&;
         using const_reference = const T&;
+
         using iterator = T*;
         using const_iterator = std::const_iterator<iterator>;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::const_iterator<reverse_iterator>;
-        using difference_type = std::ptrdiff_t;
-        using size_type = std::size_t;
 
         constexpr vector() noexcept = default;
 

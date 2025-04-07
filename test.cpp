@@ -1,4 +1,4 @@
-#include <CppUnitTest.h>
+﻿#include <CppUnitTest.h>
 
 #define assert Microsoft::VisualStudio::CppUnitTestFramework::Assert::IsTrue
 

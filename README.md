@@ -1,4 +1,4 @@
-# Plastic
+﻿# Plastic
 
 My implementations of common data structures and algorithms for study.
 
@@ -8,7 +8,7 @@ The class designs are primarily based on [MSVC STL](https://github.com/microsoft
 
 ### Linear Structures
 
-![](./res/linear.svg)
+![](./img/linear.svg)
 
 | | **`inplace_vector`<br>`vector`** | **`inplace_deque`<br>`deque`** | **`forward_list`** | **`list`** |
 | :--: | :--: | :--: | :--: | :--: |
