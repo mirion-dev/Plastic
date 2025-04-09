@@ -35,8 +35,9 @@ public:
     }
 
     TEST_METHOD(vector) {
-        plastic::vector<int> a, b(4, 4), c{ 3, 2, 1 };
-        assert(format(a) == "[]");
+        plastic::vector<int> a(3), b(4, 4), c{ 3, 2, 1 }, x;
+        assert(format(x) == "[]");
+        assert(format(a) == "[0, 0, 0]");
         assert(format(b) == "[4, 4, 4, 4]");
         assert(format(c) == "[3, 2, 1]");
 
@@ -45,63 +46,95 @@ public:
         assert(format(c.rbegin(), c.rend()) == "[1, 2, 3]");
         assert(format(c.crbegin(), c.crend()) == "[1, 2, 3]");
 
-        c = c;
+        x = c;
+        assert(format(x) == "[3, 2, 1]");
+        c = std::move(x);
         assert(format(c) == "[3, 2, 1]");
-        c = b;
-        assert(format(c) == "[4, 4, 4, 4]");
+        x = {};
+        assert(format(x) == "[]");
 
-        assert(a.empty() == true);
+        assert(x.empty() == true);
+        assert(a.empty() == false);
         assert(b.empty() == false);
+        assert(c.empty() == false);
 
-        assert(a.size() == 0);
+        assert(x.size() == 0);
+        assert(a.size() == 3);
         assert(b.size() == 4);
+        assert(c.size() == 3);
 
-        c.clear();
-        assert(format(c) == "[]");
+        assert(x.max_size() == std::numeric_limits<std::size_t>::max());
 
-        c.resize(2);
-        assert(format(c) == "[0, 0]");
-        c.resize(1);
-        assert(format(c) == "[0]");
-        c.resize(5, 1);
-        assert(format(c) == "[0, 1, 1, 1, 1]");
+        x = c;
+        x.clear();
+        assert(format(x) == "[]");
 
-        c.reserve(10);
-        assert(c.capacity() == 10);
-        c.reserve(5);
-        assert(c.capacity() == 10);
+        x = c;
+        x.resize(2);
+        assert(format(x) == "[3, 2]");
+        x.resize(3);
+        assert(format(x) == "[3, 2, 0]");
+        x.resize(5, 1);
+        assert(format(x) == "[3, 2, 0, 1, 1]");
 
+        x.reserve(10);
+        assert(x.capacity() == 10);
+        x.reserve(5);
+        assert(x.capacity() == 10);
+
+        assert(x[0] == 3);
+        assert(x[4] == 1);
+        assert(a[0] == 0);
         assert(b[1] == 4);
-        assert(c[1] == 1);
+        assert(c[2] == 1);
 
+        assert(x.front() == 3);
+        assert(a.front() == 0);
         assert(b.front() == 4);
-        assert(c.front() == 0);
+        assert(c.front() == 3);
 
+        assert(x.back() == 1);
+        assert(a.back() == 0);
         assert(b.back() == 4);
         assert(c.back() == 1);
 
-        c.push_back(2);
-        assert(format(c) == "[0, 1, 1, 1, 1, 2]");
+        x.data()[3] = 2;
+        assert(format(x) == "[3, 2, 0, 2, 1]");
 
-        c.pop_back();
-        c.pop_back();
-        assert(format(c) == "[0, 1, 1, 1]");
+        x.push_back(1);
+        assert(format(x) == "[3, 2, 0, 2, 1, 1]");
+        x.push_back(2);
+        assert(format(x) == "[3, 2, 0, 2, 1, 1, 2]");
+        x.push_back(3);
+        assert(format(x) == "[3, 2, 0, 2, 1, 1, 2, 3]");
 
-        c.insert(c.begin() + 2, 3, 2);
-        assert(format(c) == "[0, 1, 2, 2, 2, 1, 1]");
-        c.insert(c.begin() + 3, { 3, 4, 5 });
-        assert(format(c) == "[0, 1, 2, 3, 4, 5, 2, 2, 1, 1]");
+        x.pop_back();
+        assert(format(x) == "[3, 2, 0, 2, 1, 1, 2]");
+        x.pop_back();
+        assert(format(x) == "[3, 2, 0, 2, 1, 1]");
+        x.pop_back();
+        assert(format(x) == "[3, 2, 0, 2, 1]");
 
-        c.erase(c.begin() + 5);
-        assert(format(c) == "[0, 1, 2, 3, 4, 2, 2, 1, 1]");
-        c.erase(c.begin() + 5, c.end() - 1);
-        assert(format(c) == "[0, 1, 2, 3, 4, 1]");
+        x.insert(x.begin() + 2, 1);
+        assert(format(x) == "[3, 2, 1, 0, 2, 1]");
+        x.insert(x.end() - 2, 2, 1);
+        assert(format(x) == "[3, 2, 1, 0, 1, 1, 2, 1]");
+        x.insert(x.begin() + 5, { 2, 3, 2 });
+        assert(format(x) == "[3, 2, 1, 0, 1, 2, 3, 2, 1, 2, 1]");
+
+        x.erase(x.begin() + 1);
+        assert(format(x) == "[3, 1, 0, 1, 2, 3, 2, 1, 2, 1]");
+        x.erase(x.begin() + 2, x.end() - 2);
+        assert(format(x) == "[3, 1, 2, 1]");
 
         plastic::vector d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
         assert(d == d);
         assert(d != e);
+        assert(e != d);
         assert(d < e);
+        assert(e > d);
         assert(d <= f);
+        assert(f >= d);
     }
 
     TEST_METHOD(inplace_deque) {
