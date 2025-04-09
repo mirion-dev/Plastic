@@ -327,6 +327,7 @@ namespace plastic {
 
         constexpr iterator erase(const_iterator pos) noexcept {
             T* i{ pos.base() };
+            assert(i != _last);
             std::move(i + 1, _last, i);
             std::destroy_at(--_last);
             return i;
