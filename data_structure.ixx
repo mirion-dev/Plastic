@@ -20,13 +20,13 @@ namespace plastic {
         template<class T>
     class vector {
         T* _begin{};
-        T* _end{};
         T* _last{};
+        T* _end{};
 
         constexpr vector(uninitialized_t, std::size_t size) noexcept :
             _begin{ new T[size] },
-            _end{ _begin + size },
-            _last{ _end } {}
+            _last{ _begin + size },
+            _end{ _last } {}
 
         constexpr void _extend(std::size_t size) noexcept {
             reserve(capacity() + std::max(capacity() >> 1, size));
@@ -36,9 +36,10 @@ namespace plastic {
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
         using value_type = T;
+        using pointer = T*;
+        using const_pointer = const T*;
         using reference = T&;
         using const_reference = const T&;
-
         using iterator = T*;
         using const_iterator = std::const_iterator<iterator>;
         using reverse_iterator = std::reverse_iterator<iterator>;
@@ -106,6 +107,10 @@ namespace plastic {
 
         constexpr std::size_t size() const noexcept {
             return _last - _begin;
+        }
+
+        static constexpr std::size_t max_size() noexcept {
+            return std::numeric_limits<std::size_t>::max();
         }
 
         constexpr void clear() noexcept {
