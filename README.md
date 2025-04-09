@@ -29,7 +29,7 @@ The class designs are primarily based on [MSVC STL](https://github.com/microsoft
 | **`crend`** | `crend` | `crend` | | `crend` |
 | **`front`** | `front` | `front` | `front` | `front` |
 | **`back`** | `back` | `back` | | `back` |
-| **`data`** | `data` | `deque.data` | | |
+| **`data`** | `data` | `deque::data` | | |
 | **`operator[]`** | `operator[]` | `operator[]` | | |
 | **`push_front`** | | `push_front` | `push_front` | `push_front` |
 | **`pop_front`** | | `pop_front` | `pop_front` | `pop_front` |
