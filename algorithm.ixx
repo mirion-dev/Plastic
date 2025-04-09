@@ -15,38 +15,15 @@ namespace std {
 // for internal implementation
 namespace plastic {
 
-    template<class Fn>
-    class flipped {
-        Fn _func;
-    public:
-        template<class T, class U>
-            requires std::invocable<Fn&, U, T>
-        std::invoke_result_t<Fn&, U, T> operator()(T&&, U&&);
-    };
-
-    template<class Fn, class T, class It, class U>
-    concept indirectly_binary_left_foldable_impl =
-        std::movable<T>
-        && std::movable<U>
-        && std::convertible_to<T, U>
-        && std::invocable<Fn&, U, std::iter_reference_t<It>>
-        && std::assignable_from<U&, std::invoke_result_t<Fn&, U, std::iter_reference_t<It>>>;
-
     template<class Fn, class T, class It>
-    concept indirectly_binary_left_foldable =
-        std::copy_constructible<Fn>
-        && std::indirectly_readable<It>
-        && std::invocable<Fn&, T, std::iter_reference_t<It>>
-        && std::convertible_to<std::invoke_result_t<Fn&, T, std::iter_reference_t<It>>, std::decay_t<std::invoke_result_t<Fn&, T, std::iter_reference_t<It>>>>
-        && indirectly_binary_left_foldable_impl<Fn, T, It, std::decay_t<std::invoke_result_t<Fn&, T, std::iter_reference_t<It>>>>;
-
+    concept indirectly_binary_left_foldable = std::ranges::_Indirectly_binary_left_foldable<Fn, T, It>;
     template <class Fn, class T, class It>
-    concept indirectly_binary_right_foldable = indirectly_binary_left_foldable<flipped<Fn>, T, It>;
+    concept indirectly_binary_right_foldable = std::ranges::_Indirectly_binary_right_foldable<Fn, T, It>;
 
     template<class Fn, class T, class It>
     using fold_left_result_t = std::decay_t<std::invoke_result_t<Fn&, T, std::iter_reference_t<It>>>;
     template<class Fn, class T, class It>
-    using fold_right_result_t = std::decay_t<std::invoke_result_t<flipped<Fn>&, T, std::iter_reference_t<It>>>;
+    using fold_right_result_t = std::decay_t<std::invoke_result_t<Fn&, std::iter_reference_t<It>, T>>;
 
     struct satisfy_value {};
     struct satisfy_predicate {};
