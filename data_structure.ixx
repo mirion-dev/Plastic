@@ -35,10 +35,6 @@ namespace plastic {
 
         template<class... Args>
         constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
-            if (new_size == _size) {
-                return;
-            }
-
             if (new_size < _size) {
                 std::destroy(_data + new_size, _data + _size);
             }
@@ -328,11 +324,7 @@ namespace plastic {
 
         template<class... Args>
         constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
-            if (new_size == size()) {
-                return;
-            }
-
-            if (new_size < size()) {
+            if (new_size <= size()) {
                 T* new_last{ _begin + new_size };
                 std::destroy(new_last, _last);
                 _last = new_last;
