@@ -13,10 +13,10 @@ namespace plastic {
 
     template<class It, class... Args>
         requires (sizeof...(Args) <= 1)
-    void construct(It first, It last, Args... args) {
+    void construct(It first, It last, const Args&... args) {
         if constexpr (sizeof...(Args) == 0) {
             std::uninitialized_value_construct(first, last);
-}
+        }
         else {
             std::uninitialized_fill(first, last, args...);
         }
@@ -40,7 +40,7 @@ namespace plastic {
             _end{ _last } {}
 
         template<class... Args>
-        constexpr void _resize(std::size_t new_size, Args... args) noexcept {
+        constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
             if (new_size == size()) {
                 return;
             }
@@ -156,11 +156,11 @@ namespace plastic {
 
         constexpr void resize(size_type new_size) noexcept {
             _resize(new_size);
-            }
+        }
 
         constexpr void resize(size_type new_size, const_reference value) noexcept {
             _resize(new_size, value);
-            }
+        }
 
         constexpr size_type capacity() const noexcept {
             return _end - _begin;
@@ -267,7 +267,7 @@ namespace plastic {
             return _begin;
         }
 
-        constexpr void push_back(const T& value) noexcept {
+        constexpr void push_back(const_reference value) noexcept {
             if (_last == _end) {
                 _extend(1);
             }
@@ -279,66 +279,70 @@ namespace plastic {
             std::destroy_at(--_last);
         }
 
-        constexpr iterator insert(iterator pos, const T& value) noexcept {
+        constexpr iterator insert(const_iterator pos, const_reference value) noexcept {
             return insert(pos, 1, value);
         }
 
-        constexpr iterator insert(iterator pos, std::size_t count, const T& value) noexcept {
+        constexpr iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
+            T* i{ pos.base() };
             if (count == 0) {
-                return pos;
+                return i;
             }
 
             if (_end - _last < static_cast<std::ptrdiff_t>(count)) {
-                std::ptrdiff_t offset{ pos - begin() };
+                std::ptrdiff_t offset{ i - _begin };
                 _extend(count);
-                pos = begin() + offset;
+                i = _begin + offset;
             }
 
-            std::fill(pos, std::move_backward(pos, end(), end() + count), value);
+            std::fill(i, std::move_backward(i, _last, _last + count), value);
             _last += count;
 
-            return pos;
+            return i;
         }
 
         template<std::input_iterator It>
-        constexpr iterator insert(iterator pos, It first, It last) noexcept {
+        constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
+            T* i{ pos.base() };
             if (first == last) {
-                return pos;
+                return i;
             }
 
             std::ptrdiff_t count{ std::distance(first, last) };
             if (_end - _last < count) {
-                std::ptrdiff_t offset{ pos - begin() };
+                std::ptrdiff_t offset{ i - _begin };
                 _extend(count);
-                pos = begin() + offset;
+                i = _begin + offset;
             }
 
-            std::copy_backward(first, last, std::move_backward(pos, end(), end() + count));
+            std::copy_backward(first, last, std::move_backward(i, _last, _last + count));
             _last += count;
 
-            return pos;
+            return i;
         }
 
-        constexpr iterator insert(iterator pos, std::initializer_list<T> list) noexcept {
+        constexpr iterator insert(const_iterator pos, std::initializer_list<T> list) noexcept {
             return insert(pos, list.begin(), list.end());
         }
 
-        constexpr iterator erase(iterator pos) noexcept {
-            _last = std::move(std::next(pos), end(), pos);
-            std::destroy_at(_last);
-            return pos;
+        constexpr iterator erase(const_iterator pos) noexcept {
+            T* i{ pos.base() };
+            std::move(i + 1, _last, i);
+            std::destroy_at(--_last);
+            return i;
         }
 
-        constexpr iterator erase(iterator first, iterator last) noexcept {
-            if (first == last) {
-                return first;
+        constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
+            T* i{ first.base() }, * s{ last.base() };
+            if (i == s) {
+                return i;
             }
 
-            T* new_last{ std::move(last, end(), first) };
+            T* new_last{ std::move(s, _last, i) };
             std::destroy(new_last, _last);
             _last = new_last;
 
-            return first;
+            return i;
         }
 
         friend constexpr bool operator==(const vector& cont1, const vector& cont2) noexcept {

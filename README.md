@@ -14,6 +14,7 @@ The class designs are primarily based on [MSVC STL](https://github.com/microsoft
 | :--: | :--: | :--: | :--: | :--: |
 | **`empty`** | `empty` | `empty` | `empty` | `empty` |
 | **`size`** | `size` | `size` | `size` | `size` |
+| **`max_size`** | `max_size` | `max_size` | `max_size` | `max_size` |
 | **`clear`** | `clear` | `clear` | `clear` | `clear` |
 | **`resize`** | `resize` | `resize` | `resize` | `resize` |
 | **`capacity`** | `capacity` | `capacity` | | |
@@ -28,7 +29,7 @@ The class designs are primarily based on [MSVC STL](https://github.com/microsoft
 | **`crend`** | `crend` | `crend` | | `crend` |
 | **`front`** | `front` | `front` | `front` | `front` |
 | **`back`** | `back` | `back` | | `back` |
-| **`data`** | `data` | | | |
+| **`data`** | `data` | `deque.data` | | |
 | **`operator[]`** | `operator[]` | `operator[]` | | |
 | **`push_front`** | | `push_front` | `push_front` | `push_front` |
 | **`pop_front`** | | `pop_front` | `pop_front` | `pop_front` |
@@ -36,6 +37,7 @@ The class designs are primarily based on [MSVC STL](https://github.com/microsoft
 | **`pop_back`** | `pop_back` | `pop_back` | | `pop_back` |
 | **`insert`** | `insert` | `insert` | `insert_after` | `insert` |
 | **`erase`** | `erase` | `erase` | `erase_after` | `erase` |
+| **`swap`** | `swap` | `swap` | `swap` | `swap` |
 | **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` |
 | **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` |
 
