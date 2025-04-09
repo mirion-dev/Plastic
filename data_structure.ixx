@@ -22,6 +22,17 @@ namespace plastic {
         }
     }
 
+    template<class It, class... Args>
+        requires (sizeof...(Args) <= 1)
+    It construct_n(It first, std::size_t count, const Args&... args) {
+        if constexpr (sizeof...(Args) == 0) {
+            return std::uninitialized_value_construct_n(first, count);
+        }
+        else {
+            return std::uninitialized_fill_n(first, count, args...);
+        }
+    }
+
 }
 
 // linear structures
@@ -36,10 +47,10 @@ namespace plastic {
         template<class... Args>
         constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
             if (new_size < _size) {
-                std::destroy(_data + new_size, _data + _size);
+                std::destroy_n(_data + new_size, _size - new_size);
             }
             else {
-                plastic::construct(_data + _size, _data + new_size, args...);
+                plastic::construct_n(_data + _size, new_size - _size, args...);
             }
             _size = new_size;
         }
@@ -61,13 +72,13 @@ namespace plastic {
 
         explicit constexpr inplace_vector(size_type size) noexcept {
             assert(size <= N);
-            plastic::construct(_data, _data + size);
+            plastic::construct_n(_data, size);
             _size = size;
         }
 
         constexpr inplace_vector(size_type size, const_reference value) noexcept {
             assert(size <= N);
-            plastic::construct(_data, _data + size, value);
+            plastic::construct_n(_data, size, value);
             _size = size;
         }
 
@@ -78,7 +89,7 @@ namespace plastic {
 
         constexpr inplace_vector(std::initializer_list<T> list) noexcept {
             assert(list.size() <= N);
-            std::uninitialized_copy(list.begin(), list.end(), _data);
+            _size = std::uninitialized_copy(list.begin(), list.end(), _data) - _data;
         }
 
         constexpr inplace_vector(const inplace_vector& other) noexcept :
@@ -125,7 +136,7 @@ namespace plastic {
         }
 
         constexpr void clear() noexcept {
-            std::destroy(_data, _data + _size);
+            std::destroy_n(_data, _size);
             _size = 0;
         }
 
@@ -254,7 +265,7 @@ namespace plastic {
                 return i;
             }
 
-            std::fill(i, std::move_backward(i, _data + _size, _data + _size + count), value);
+            std::fill(i, std::move_backward(i, end(), end() + count), value);
             _size += count;
 
             return i;
@@ -269,7 +280,7 @@ namespace plastic {
 
             std::ptrdiff_t count{ std::distance(first, last) };
             assert(_size + count <= N);
-            std::copy_backward(first, last, std::move_backward(i, _data + _size, _data + _size + count));
+            std::copy_backward(first, last, std::move_backward(i, end(), end() + count));
             _size += count;
 
             return i;
@@ -281,8 +292,8 @@ namespace plastic {
 
         constexpr iterator erase(const_iterator pos) noexcept {
             T* i{ pos.base() };
-            assert(i != _data + _size);
-            std::move(i + 1, _data + _size, i);
+            assert(i != end());
+            std::move(i + 1, end(), i);
             std::destroy_at(_data + --_size);
             return i;
         }
@@ -293,9 +304,9 @@ namespace plastic {
                 return i;
             }
 
-            T* new_last{ std::move(s, _data + _size, i) };
-            std::destroy(new_last, _data + _size);
-            _size -= _data + _size - new_last;
+            T* new_last{ std::move(s, end(), i) };
+            std::destroy(new_last, end());
+            _size = new_last - _data;
 
             return i;
         }
