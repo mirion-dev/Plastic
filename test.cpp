@@ -31,7 +31,106 @@ TEST_CLASS(data_structure) {
 public:
 
     TEST_METHOD(inplace_vector) {
-        assert(false);
+        plastic::inplace_vector<int, 12> a(3), b(4, 4), c{ 3, 2, 1 }, x;
+        assert(format(x) == "[]");
+        assert(format(a) == "[0, 0, 0]");
+        assert(format(b) == "[4, 4, 4, 4]");
+        assert(format(c) == "[3, 2, 1]");
+
+        assert(format(c.data(), c.size()) == "[3, 2, 1]");
+        assert(format(c.cbegin(), c.cend()) == "[3, 2, 1]");
+        assert(format(c.rbegin(), c.rend()) == "[1, 2, 3]");
+        assert(format(c.crbegin(), c.crend()) == "[1, 2, 3]");
+
+        x = c;
+        assert(format(x) == "[3, 2, 1]");
+        c = std::move(x);
+        assert(format(c) == "[3, 2, 1]");
+        x = {};
+        assert(format(x) == "[]");
+
+        assert(x.empty() == true);
+        assert(a.empty() == false);
+        assert(b.empty() == false);
+        assert(c.empty() == false);
+
+        assert(x.size() == 0);
+        assert(a.size() == 3);
+        assert(b.size() == 4);
+        assert(c.size() == 3);
+
+        assert(x.max_size() == 12);
+
+        x = c;
+        x.clear();
+        assert(format(x) == "[]");
+
+        x = c;
+        x.resize(2);
+        assert(format(x) == "[3, 2]");
+        x.resize(3);
+        assert(format(x) == "[3, 2, 0]");
+        x.resize(5, 1);
+        assert(format(x) == "[3, 2, 0, 1, 1]");
+
+        x.reserve(12);
+        assert(x.capacity() == 12);
+        x.reserve(6);
+        assert(x.capacity() == 12);
+
+        assert(x[0] == 3);
+        assert(x[4] == 1);
+        assert(a[0] == 0);
+        assert(b[1] == 4);
+        assert(c[2] == 1);
+
+        assert(x.front() == 3);
+        assert(a.front() == 0);
+        assert(b.front() == 4);
+        assert(c.front() == 3);
+
+        assert(x.back() == 1);
+        assert(a.back() == 0);
+        assert(b.back() == 4);
+        assert(c.back() == 1);
+
+        x.data()[3] = 2;
+        assert(format(x) == "[3, 2, 0, 2, 1]");
+
+        x.push_back(1);
+        assert(format(x) == "[3, 2, 0, 2, 1, 1]");
+        x.push_back(2);
+        assert(format(x) == "[3, 2, 0, 2, 1, 1, 2]");
+        x.push_back(3);
+        assert(format(x) == "[3, 2, 0, 2, 1, 1, 2, 3]");
+
+        x.pop_back();
+        assert(format(x) == "[3, 2, 0, 2, 1, 1, 2]");
+        x.pop_back();
+        assert(format(x) == "[3, 2, 0, 2, 1, 1]");
+        x.pop_back();
+        assert(format(x) == "[3, 2, 0, 2, 1]");
+
+        x.insert(x.begin() + 2, 1);
+        assert(format(x) == "[3, 2, 1, 0, 2, 1]");
+        x.insert(x.end() - 2, 2, 1);
+        assert(format(x) == "[3, 2, 1, 0, 1, 1, 2, 1]");
+        x.insert(x.begin() + 5, { 2, 3, 2 });
+        assert(format(x) == "[3, 2, 1, 0, 1, 2, 3, 2, 1, 2, 1]");
+
+        x.erase(x.begin() + 1);
+        assert(format(x) == "[3, 1, 0, 1, 2, 3, 2, 1, 2, 1]");
+        x.erase(x.begin() + 2, x.end() - 2);
+        assert(format(x) == "[3, 1, 2, 1]");
+
+        plastic::inplace_vector<int, 12> d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
+        assert(d == d);
+        assert(d != e);
+        assert(e != d);
+        assert(d < e);
+        assert(e > d);
+        assert(d <= f);
+        assert(f >= d);
     }
 
     TEST_METHOD(vector) {
@@ -142,6 +241,7 @@ public:
     }
 
     TEST_METHOD(deque) {
+        assert(false);
         plastic::deque<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
         assert(format(b) == "[4, 4, 4, 4]");
@@ -218,6 +318,7 @@ public:
     }
 
     TEST_METHOD(forward_list) {
+        assert(false);
         plastic::forward_list<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
         assert(format(b) == "[4, 4, 4, 4]");
@@ -274,6 +375,7 @@ public:
     }
 
     TEST_METHOD(list) {
+        assert(false);
         plastic::list<int> a, b(4, 4), c{ 3, 2, 1 };
         assert(format(a) == "[]");
         assert(format(b) == "[4, 4, 4, 4]");
@@ -335,6 +437,7 @@ public:
     }
 
     TEST_METHOD(binary_search_tree) {
+        assert(false);
         plastic::binary_search_tree<int> a, b{ 1, 2, 2, 2, 3 }, c{ 6, 4, 8, 2 };
         assert(format(a) == "[]");
         assert(format(b) == "[1, 2, 2, 2, 3]");
@@ -405,6 +508,7 @@ public:
     }
 
     TEST_METHOD(binary_heap) {
+        assert(false);
         plastic::binary_heap<int> a, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 };
         assert(format(a) == "[]");
         assert(format(b) == "[4, 4, 4, 4]");
