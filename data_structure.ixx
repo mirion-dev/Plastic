@@ -11,6 +11,17 @@ namespace plastic {
 
     struct uninitialized_t {} uninitialized;
 
+    template<class It, class... Args>
+        requires (sizeof...(Args) <= 1)
+    void construct(It first, It last, Args... args) {
+        if constexpr (sizeof...(Args) == 0) {
+            std::uninitialized_value_construct(first, last);
+}
+        else {
+            std::uninitialized_fill(first, last, args...);
+        }
+    }
+
 }
 
 // linear structures
@@ -27,6 +38,31 @@ namespace plastic {
             _begin{ new T[size] },
             _last{ _begin + size },
             _end{ _last } {}
+
+        template<class... Args>
+        constexpr void _resize(std::size_t new_size, Args... args) noexcept {
+            if (new_size == size()) {
+                return;
+            }
+
+            if (new_size < size()) {
+                T* new_last{ _begin + new_size };
+                std::destroy(new_last, _last);
+                _last = new_last;
+                return;
+            }
+
+            if (new_size <= capacity()) {
+                T* new_last{ _begin + new_size };
+                plastic::construct(_last, new_last, args...);
+                _last = new_last;
+                return;
+            }
+
+            reserve(new_size);
+            plastic::construct(_last, _end, args...);
+            _last = _end;
+        }
 
         constexpr void _extend(std::size_t size) noexcept {
             reserve(capacity() + std::max(capacity() >> 1, size));
@@ -47,20 +83,20 @@ namespace plastic {
 
         constexpr vector() noexcept = default;
 
-        constexpr vector(std::size_t size) noexcept :
+        explicit constexpr vector(size_type size) noexcept :
             vector(uninitialized, size) {
 
-            std::uninitialized_value_construct(_begin, _end);
+            plastic::construct(_begin, _end);
         }
 
-        constexpr vector(std::size_t size, const T& value) noexcept :
+        constexpr vector(size_type size, const_reference value) noexcept :
             vector(uninitialized, size) {
 
-            std::uninitialized_fill(_begin, _end, value);
+            plastic::construct(_begin, _end, value);
         }
 
         template<std::input_iterator It>
-        explicit constexpr vector(It first, It last) noexcept :
+        constexpr vector(It first, It last) noexcept :
             vector(uninitialized, std::distance(first, last)) {
 
             std::uninitialized_copy(first, last, _begin);
@@ -105,12 +141,12 @@ namespace plastic {
             return _begin == _last;
         }
 
-        constexpr std::size_t size() const noexcept {
+        constexpr size_type size() const noexcept {
             return _last - _begin;
         }
 
-        static constexpr std::size_t max_size() noexcept {
-            return std::numeric_limits<std::size_t>::max();
+        static constexpr size_type max_size() noexcept {
+            return std::numeric_limits<size_type>::max();
         }
 
         constexpr void clear() noexcept {
@@ -118,35 +154,19 @@ namespace plastic {
             _last = _begin;
         }
 
-        constexpr void resize(std::size_t new_size, const T& value = {}) noexcept {
-            if (new_size == size()) {
-                return;
+        constexpr void resize(size_type new_size) noexcept {
+            _resize(new_size);
             }
 
-            if (new_size < size()) {
-                T* new_last{ _begin + new_size };
-                std::destroy(new_last, _last);
-                _last = new_last;
-                return;
+        constexpr void resize(size_type new_size, const_reference value) noexcept {
+            _resize(new_size, value);
             }
 
-            if (new_size <= capacity()) {
-                T* new_last{ _begin + new_size };
-                std::uninitialized_fill(_last, new_last, value);
-                _last = new_last;
-                return;
-            }
-
-            reserve(new_size);
-            std::uninitialized_fill(_last, _end, value);
-            _last = _end;
-        }
-
-        constexpr std::size_t capacity() const noexcept {
+        constexpr size_type capacity() const noexcept {
             return _end - _begin;
         }
 
-        constexpr void reserve(std::size_t new_capacity) noexcept {
+        constexpr void reserve(size_type new_capacity) noexcept {
             if (new_capacity <= capacity()) {
                 return;
             }
@@ -209,26 +229,41 @@ namespace plastic {
             return reverse_iterator{ _begin };
         }
 
-        constexpr auto&& operator[](this auto&& self, std::size_t index) noexcept {
-            assert(index < self.size());
-            return std::forward_like<decltype(self)>(self._begin[index]);
+        constexpr reference operator[](size_type index) noexcept {
+            assert(index < size());
+            return _begin[index];
         }
 
-        constexpr auto&& front(this auto&& self) noexcept {
-            assert(!self.empty());
-            return std::forward_like<decltype(self)>(*self._begin);
+        constexpr const_reference operator[](size_type index) const noexcept {
+            assert(index < size());
+            return _begin[index];
         }
 
-        constexpr auto&& back(this auto&& self) noexcept {
-            assert(!self.empty());
-            return std::forward_like<decltype(self)>(self._last[-1]);
+        constexpr reference front() noexcept {
+            assert(!empty());
+            return *_begin;
         }
 
-        constexpr T* data() noexcept {
+        constexpr const_reference front() const noexcept {
+            assert(!empty());
+            return *_begin;
+        }
+
+        constexpr reference back() noexcept {
+            assert(!empty());
+            return _last[-1];
+        }
+
+        constexpr const_reference back() const noexcept {
+            assert(!empty());
+            return _last[-1];
+        }
+
+        constexpr pointer data() noexcept {
             return _begin;
         }
 
-        constexpr const T* data() const noexcept {
+        constexpr const_pointer data() const noexcept {
             return _begin;
         }
 
