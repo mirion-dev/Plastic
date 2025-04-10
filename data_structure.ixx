@@ -234,7 +234,7 @@ namespace plastic {
 
         constexpr void push_back(const_reference value) noexcept {
             assert(size() != N);
-            *_last++ = value;
+            std::construct_at(_last++, value);
         }
 
         constexpr void pop_back() noexcept {
@@ -549,7 +549,7 @@ namespace plastic {
             if (_last == _end) {
                 _extend(1);
             }
-            *_last++ = value;
+            std::construct_at(_last++, value);
         }
 
         constexpr void pop_back() noexcept {
@@ -977,10 +977,10 @@ namespace plastic {
             assert(size() != N);
             if (_first == _data) {
                 _first = _data + N;
-                *_first = value;
+                std::construct_at(_first, value);
             }
             else {
-                *--_first = value;
+                std::construct_at(--_first, value);
             }
         }
 
@@ -998,11 +998,11 @@ namespace plastic {
         constexpr void push_back(const_reference value) noexcept {
             assert(size() != N);
             if (_last == _data + N) {
-                *_last = value;
+                std::construct_at(_last, value);
                 _last = _data;
             }
             else {
-                *_last++ = value;
+                std::construct_at(_last++, value);
             }
         }
 
