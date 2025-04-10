@@ -22,17 +22,6 @@ namespace plastic {
         }
     }
 
-    template<class It, class... Args>
-        requires (sizeof...(Args) <= 1)
-    It construct_n(It first, std::size_t count, const Args&... args) {
-        if constexpr (sizeof...(Args) == 0) {
-            return std::uninitialized_value_construct_n(first, count);
-        }
-        else {
-            return std::uninitialized_fill_n(first, count, args...);
-        }
-    }
-
 }
 
 // linear structures
@@ -41,18 +30,19 @@ namespace plastic {
     export
         template<class T, std::size_t N>
     class inplace_vector {
-        std::size_t _size{};
         T _data[N];
+        T* _last{ _data };
 
         template<class... Args>
         constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
-            if (new_size < _size) {
-                std::destroy_n(_data + new_size, _size - new_size);
+            T* new_last{ _data + new_size };
+            if (new_size <= size()) {
+                std::destroy(new_last, _last);
             }
             else {
-                plastic::construct_n(_data + _size, new_size - _size, args...);
+                plastic::construct(_last, new_last, args...);
             }
-            _size = new_size;
+            _last = new_last;
         }
 
     public:
@@ -70,29 +60,25 @@ namespace plastic {
 
         constexpr inplace_vector() noexcept = default;
 
-        explicit constexpr inplace_vector(size_type size) noexcept :
-            _size{ size } {
-
+        explicit constexpr inplace_vector(size_type size) noexcept {
             assert(size <= N);
-            plastic::construct_n(_data, size);
+            _last = _data + size;
+            plastic::construct(begin(), end());
         }
 
-        constexpr inplace_vector(size_type size, const_reference value) noexcept :
-            _size{ size } {
-
+        constexpr inplace_vector(size_type size, const_reference value) noexcept {
             assert(size <= N);
-            plastic::construct_n(_data, size, value);
+            _last = _data + size;
+            plastic::construct(begin(), end(), value);
         }
 
         template<std::input_iterator It>
         constexpr inplace_vector(It first, It last) noexcept :
-            _size{ static_cast<std::size_t>(std::uninitialized_copy(first, last, _data) - _data) } {}
+            _last{ std::uninitialized_copy(first, last, _data) } {}
 
-        constexpr inplace_vector(std::initializer_list<T> list) noexcept :
-            _size{ list.size() } {
-
+        constexpr inplace_vector(std::initializer_list<T> list) noexcept {
             assert(list.size() <= N);
-            std::uninitialized_copy_n(list.begin(), list.size(), _data);
+            _last = std::uninitialized_copy(list.begin(), list.end(), _data);
         }
 
         constexpr inplace_vector(const inplace_vector& other) noexcept :
@@ -114,8 +100,11 @@ namespace plastic {
         }
 
         constexpr void swap(inplace_vector& other) noexcept {
-            std::swap(_size, other._size);
             std::swap(_data, other._data);
+
+            std::size_t old_size{ size() };
+            _last = _data + other.size();
+            other._last = other._data + old_size;
         }
 
         friend constexpr void swap(inplace_vector& left, inplace_vector& right) noexcept {
@@ -123,11 +112,11 @@ namespace plastic {
         }
 
         constexpr bool empty() const noexcept {
-            return _size == 0;
+            return _data == _last;
         }
 
         constexpr size_type size() const noexcept {
-            return _size;
+            return _last - _data;
         }
 
         static constexpr size_type max_size() noexcept {
@@ -135,8 +124,8 @@ namespace plastic {
         }
 
         constexpr void clear() noexcept {
-            std::destroy_n(_data, _size);
-            _size = 0;
+            std::destroy(begin(), end());
+            _last = _data;
         }
 
         constexpr void resize(size_type new_size) noexcept {
@@ -170,11 +159,11 @@ namespace plastic {
         }
 
         constexpr iterator end() noexcept {
-            return _data + _size;
+            return _last;
         }
 
         constexpr const_iterator end() const noexcept {
-            return _data + _size;
+            return _last;
         }
 
         constexpr const_iterator cend() const noexcept {
@@ -206,12 +195,12 @@ namespace plastic {
         }
 
         constexpr reference operator[](size_type index) noexcept {
-            assert(index < _size);
+            assert(index < size());
             return _data[index];
         }
 
         constexpr const_reference operator[](size_type index) const noexcept {
-            assert(index < _size);
+            assert(index < size());
             return _data[index];
         }
 
@@ -227,12 +216,12 @@ namespace plastic {
 
         constexpr reference back() noexcept {
             assert(!empty());
-            return end()[-1];
+            return _last[-1];
         }
 
         constexpr const_reference back() const noexcept {
             assert(!empty());
-            return end()[-1];
+            return _last[-1];
         }
 
         constexpr pointer data() noexcept {
@@ -244,13 +233,13 @@ namespace plastic {
         }
 
         constexpr void push_back(const_reference value) noexcept {
-            assert(_size != N);
-            _data[_size++] = value;
+            assert(size() != N);
+            *_last++ = value;
         }
 
         constexpr void pop_back() noexcept {
             assert(!empty());
-            std::destroy_at(_data + --_size);
+            std::destroy_at(--_last);
         }
 
         constexpr iterator insert(const_iterator pos, const_reference value) noexcept {
@@ -258,14 +247,14 @@ namespace plastic {
         }
 
         constexpr iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
-            assert(_size + count <= N);
+            assert(size() + count <= N);
             T* i{ const_cast<T*>(pos) };
             if (count == 0) {
                 return i;
             }
 
-            std::fill(i, std::move_backward(i, end(), end() + count), value);
-            _size += count;
+            std::fill(i, std::move_backward(i, _last, _last + count), value);
+            _last += count;
 
             return i;
         }
@@ -278,9 +267,9 @@ namespace plastic {
             }
 
             std::ptrdiff_t count{ std::distance(first, last) };
-            assert(_size + count <= N);
-            std::copy_backward(first, last, std::move_backward(i, end(), end() + count));
-            _size += count;
+            assert(size() + count <= N);
+            std::copy_backward(first, last, std::move_backward(i, _last, _last + count));
+            _last += count;
 
             return i;
         }
@@ -291,9 +280,9 @@ namespace plastic {
 
         constexpr iterator erase(const_iterator pos) noexcept {
             T* i{ const_cast<T*>(pos) };
-            assert(i != end());
-            std::move(i + 1, end(), i);
-            std::destroy_at(_data + --_size);
+            assert(i != _last);
+            std::move(i + 1, _last, i);
+            std::destroy_at(--_last);
             return i;
         }
 
@@ -303,19 +292,19 @@ namespace plastic {
                 return i;
             }
 
-            T* new_last{ std::move(s, end(), i) };
-            std::destroy(new_last, end());
-            _size = new_last - _data;
+            T* new_last{ std::move(s, _last, i) };
+            std::destroy(new_last, _last);
+            _last = new_last;
 
             return i;
         }
 
-        friend constexpr bool operator==(const inplace_vector& cont1, const inplace_vector& cont2) noexcept {
-            return std::equal(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        friend constexpr bool operator==(const inplace_vector& left, const inplace_vector& right) noexcept {
+            return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend constexpr auto operator<=>(const inplace_vector& cont1, const inplace_vector& cont2) noexcept {
-            return std::lexicographical_compare_three_way(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        friend constexpr auto operator<=>(const inplace_vector& left, const inplace_vector& right) noexcept {
+            return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
 
     };
@@ -635,12 +624,12 @@ namespace plastic {
             return i;
         }
 
-        friend constexpr bool operator==(const vector& cont1, const vector& cont2) noexcept {
-            return std::equal(cont1._begin, cont1._end, cont2._begin, cont2._end);
+        friend constexpr bool operator==(const vector& left, const vector& right) noexcept {
+            return std::equal(left._begin, left._last, right._begin, right._last);
         }
 
-        friend constexpr auto operator<=>(const vector& cont1, const vector& cont2) noexcept {
-            return std::lexicographical_compare_three_way(cont1._begin, cont1._end, cont2._begin, cont2._end);
+        friend constexpr auto operator<=>(const vector& left, const vector& right) noexcept {
+            return std::lexicographical_compare_three_way(left._begin, left._last, right._begin, right._last);
         }
 
     };
