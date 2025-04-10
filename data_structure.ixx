@@ -70,26 +70,29 @@ namespace plastic {
 
         constexpr inplace_vector() noexcept = default;
 
-        explicit constexpr inplace_vector(size_type size) noexcept {
+        explicit constexpr inplace_vector(size_type size) noexcept :
+            _size{ size } {
+
             assert(size <= N);
             plastic::construct_n(_data, size);
-            _size = size;
         }
 
-        constexpr inplace_vector(size_type size, const_reference value) noexcept {
+        constexpr inplace_vector(size_type size, const_reference value) noexcept :
+            _size{ size } {
+
             assert(size <= N);
             plastic::construct_n(_data, size, value);
-            _size = size;
         }
 
         template<std::input_iterator It>
-        constexpr inplace_vector(It first, It last) noexcept {
-            _size = std::uninitialized_copy(first, last, _data) - _data;
-        }
+        constexpr inplace_vector(It first, It last) noexcept :
+            _size{ static_cast<std::size_t>(std::uninitialized_copy(first, last, _data) - _data) } {}
 
-        constexpr inplace_vector(std::initializer_list<T> list) noexcept {
+        constexpr inplace_vector(std::initializer_list<T> list) noexcept :
+            _size{ list.size() } {
+
             assert(list.size() <= N);
-            _size = std::uninitialized_copy(list.begin(), list.end(), _data) - _data;
+            std::uninitialized_copy_n(list.begin(), list.size(), _data);
         }
 
         constexpr inplace_vector(const inplace_vector& other) noexcept :
