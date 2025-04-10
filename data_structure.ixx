@@ -63,13 +63,13 @@ namespace plastic {
         explicit constexpr inplace_vector(size_type size) noexcept {
             assert(size <= N);
             _last = _data + size;
-            plastic::construct(begin(), end());
+            plastic::construct(_data, _last);
         }
 
         constexpr inplace_vector(size_type size, const_reference value) noexcept {
             assert(size <= N);
             _last = _data + size;
-            plastic::construct(begin(), end(), value);
+            plastic::construct(_data, _last, value);
         }
 
         template<std::input_iterator It>
@@ -124,7 +124,7 @@ namespace plastic {
         }
 
         constexpr void clear() noexcept {
-            std::destroy(begin(), end());
+            std::destroy(_data, _last);
             _last = _data;
         }
 
