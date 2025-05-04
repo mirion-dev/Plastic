@@ -11,7 +11,7 @@ namespace plastic {
 
     struct uninitialized_t {} uninitialized;
 
-    template<class It, class... Args>
+    template <class It, class... Args>
         requires (sizeof...(Args) <= 1)
     void construct(It first, It last, const Args&... args) {
         if constexpr (sizeof...(Args) == 0) {
@@ -27,13 +27,12 @@ namespace plastic {
 // linear structures
 namespace plastic {
 
-    export
-        template<class T, std::size_t N>
+    export template <class T, std::size_t N>
     class inplace_vector {
         T _data[N];
         T* _last{ _data };
 
-        template<class... Args>
+        template <class... Args>
         constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
             T* new_last{ _data + new_size };
             if (new_size <= size()) {
@@ -72,7 +71,7 @@ namespace plastic {
             plastic::construct(_data, _last, value);
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         constexpr inplace_vector(It first, It last) noexcept :
             _last{ std::uninitialized_copy(first, last, _data) } {}
 
@@ -259,7 +258,7 @@ namespace plastic {
             return i;
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
             T* i{ const_cast<T*>(pos) };
             if (first == last) {
@@ -287,7 +286,7 @@ namespace plastic {
         }
 
         constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
-            T* i{ const_cast<T*>(first) }, * s{ const_cast<T*>(last) };
+            T *i{ const_cast<T*>(first) }, *s{ const_cast<T*>(last) };
             if (i == s) {
                 return i;
             }
@@ -309,8 +308,7 @@ namespace plastic {
 
     };
 
-    export
-        template<class T>
+    export template <class T>
     class vector {
         T* _begin{};
         T* _last{};
@@ -321,7 +319,7 @@ namespace plastic {
             _last{ _begin + size },
             _end{ _last } {}
 
-        template<class... Args>
+        template <class... Args>
         constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
             if (new_size <= size()) {
                 T* new_last{ _begin + new_size };
@@ -373,7 +371,7 @@ namespace plastic {
             plastic::construct(_begin, _end, value);
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         constexpr vector(It first, It last) noexcept :
             vector(uninitialized, std::distance(first, last)) {
 
@@ -579,7 +577,7 @@ namespace plastic {
             return i;
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
             T* i{ const_cast<T*>(pos) };
             if (first == last) {
@@ -612,7 +610,7 @@ namespace plastic {
         }
 
         constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
-            T* i{ const_cast<T*>(first) }, * s{ const_cast<T*>(last) };
+            T *i{ const_cast<T*>(first) }, *s{ const_cast<T*>(last) };
             if (i == s) {
                 return i;
             }
@@ -634,17 +632,16 @@ namespace plastic {
 
     };
 
-    template<class It>
-    explicit vector(It, It)->vector<std::iter_value_t<It>>;
+    template <class It>
+    explicit vector(It, It) -> vector<std::iter_value_t<It>>;
 
-    export
-        template<class T, std::size_t N>
+    export template <class T, std::size_t N>
     class inplace_deque {
         T _data[N + 1];
         T* _first{ _data };
         T* _last{ _data };
 
-        template<class... Args>
+        template <class... Args>
         constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
             T* new_last{ (begin() + new_size)._ptr };
             if (new_size <= size()) {
@@ -805,7 +802,7 @@ namespace plastic {
             plastic::construct(_data, _last, value);
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         constexpr inplace_deque(It first, It last) noexcept :
             _last{ std::uninitialized_copy(first, last, _data) } {}
 
@@ -819,8 +816,11 @@ namespace plastic {
                 _last = std::uninitialized_copy(other._first, other._last, _data);
             }
             else {
-                _last = std::uninitialized_copy(other._data, other._last,
-                    std::uninitialized_copy(other._first, other._data + N + 1, _data));
+                _last = std::uninitialized_copy(
+                    other._data,
+                    other._last,
+                    std::uninitialized_copy(other._first, other._data + N + 1, _data)
+                );
             }
         }
 
@@ -1033,7 +1033,7 @@ namespace plastic {
             return pos;
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
             if (first == last) {
                 return pos;
@@ -1079,8 +1079,7 @@ namespace plastic {
         }
     };
 
-    export
-        template<class T>
+    export template <class T>
     class deque {
         T* _begin;
         T* _end;
@@ -1237,7 +1236,7 @@ namespace plastic {
             std::uninitialized_fill(_first, _last, value);
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         explicit deque(It first, It last) noexcept :
             deque(uninitialized, std::distance(first, last)) {
 
@@ -1480,7 +1479,7 @@ namespace plastic {
             return pos;
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         iterator insert(iterator pos, It first, It last) noexcept {
             if (first == last) {
                 return pos;
@@ -1530,11 +1529,10 @@ namespace plastic {
         }
     };
 
-    template<class It>
-    explicit deque(It, It)->deque<std::iter_value_t<It>>;
+    template <class It>
+    explicit deque(It, It) -> deque<std::iter_value_t<It>>;
 
-    export
-        template<class T>
+    export template <class T>
     class forward_list {
         struct node {
             T value;
@@ -1601,7 +1599,7 @@ namespace plastic {
             insert_after(end(), size, value);
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         explicit forward_list(It first, It last) noexcept :
             forward_list() {
 
@@ -1706,7 +1704,7 @@ namespace plastic {
             return i;
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         iterator insert_after(iterator pos, It first, It last) noexcept {
             node* i{ pos._ptr };
             while (first != last) {
@@ -1728,7 +1726,7 @@ namespace plastic {
         }
 
         iterator erase_after(iterator first, iterator last) noexcept {
-            node* i{ first._ptr }, * j{ last._ptr };
+            node *i{ first._ptr }, *j{ last._ptr };
             i = std::exchange(i->next, j);
             while (i != j) {
                 delete std::exchange(i, i->next);
@@ -1746,11 +1744,10 @@ namespace plastic {
         }
     };
 
-    template<class It>
-    explicit forward_list(It, It)->forward_list<std::iter_value_t<It>>;
+    template <class It>
+    explicit forward_list(It, It) -> forward_list<std::iter_value_t<It>>;
 
-    export
-        template<class T>
+    export template <class T>
     class list {
         struct node {
             T value;
@@ -1831,7 +1828,7 @@ namespace plastic {
             insert(end(), size, value);
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         explicit list(It first, It last) noexcept :
             list() {
 
@@ -1978,7 +1975,7 @@ namespace plastic {
             return pos;
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         iterator insert(iterator pos, It first, It last) noexcept {
             node* i{ pos._ptr->prev };
             while (first != last) {
@@ -2002,7 +1999,7 @@ namespace plastic {
         }
 
         iterator erase(iterator first, iterator last) noexcept {
-            node* i{ first._ptr }, * j{ last._ptr };
+            node *i{ first._ptr }, *j{ last._ptr };
             i->prev->next = j;
             j->prev = i->prev;
             while (i != j) {
@@ -2021,16 +2018,15 @@ namespace plastic {
         }
     };
 
-    template<class It>
-    explicit list(It, It)->list<std::iter_value_t<It>>;
+    template <class It>
+    explicit list(It, It) -> list<std::iter_value_t<It>>;
 
 }
 
 // search trees (incompleted)
 namespace plastic {
 
-    export
-        template<class T, class Cmp = std::less<T>>
+    export template <class T, class Cmp = std::less<T>>
     class binary_search_tree {
         static constexpr Cmp _cmp{};
 
@@ -2158,7 +2154,7 @@ namespace plastic {
             _head->is_head = true;
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         explicit binary_search_tree(It first, It last) noexcept :
             binary_search_tree() {
 
@@ -2304,7 +2300,7 @@ namespace plastic {
         }
 
         std::size_t count(const T& value) const noexcept {
-            auto [first, last] { equal_range(value) };
+            auto [first, last]{ equal_range(value) };
             return std::distance(first, last);
         }
 
@@ -2341,7 +2337,7 @@ namespace plastic {
             return new_node;
         }
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         void insert(It first, It last) noexcept {
             while (first != last) {
                 insert(*first++);
@@ -2425,7 +2421,7 @@ namespace plastic {
 
         std::size_t erase(const T& value) noexcept {
             std::size_t count{};
-            auto [first, last] { equal_range(value) };
+            auto [first, last]{ equal_range(value) };
             while (first != last) {
                 erase(first++);
                 ++count;
@@ -2442,11 +2438,10 @@ namespace plastic {
         }
     };
 
-    template<class It>
-    explicit binary_search_tree(It, It)->binary_search_tree<std::iter_value_t<It>>;
+    template <class It>
+    explicit binary_search_tree(It, It) -> binary_search_tree<std::iter_value_t<It>>;
 
-    export
-        template<class T, class Cmp = std::less<T>>
+    export template <class T, class Cmp = std::less<T>>
     class red_black_tree {
         static constexpr Cmp _cmp{};
 
@@ -2596,7 +2591,7 @@ namespace plastic {
                 _root = new node{ value, count, node::color::black, nullptr, nullptr, nullptr };
                 return;
             }
-            auto [nd, pr] {_find_with_parent(value)};
+            auto [nd, pr]{ _find_with_parent(value) };
             if (nd != nullptr) {
                 nd->count += count;
                 return;
@@ -2743,11 +2738,10 @@ namespace plastic {
         }
     };
 
-    template<class It>
-    explicit red_black_tree(It, It)->red_black_tree<std::iter_value_t<It>>;
+    template <class It>
+    explicit red_black_tree(It, It) -> red_black_tree<std::iter_value_t<It>>;
 
-    export
-        template<class T, class Cmp = std::less<T>>
+    export template <class T, class Cmp = std::less<T>>
     class avl_tree {
         static constexpr Cmp _cmp{};
 
@@ -2892,7 +2886,7 @@ namespace plastic {
                 _root = new node{ value, count, 0, nullptr, nullptr, nullptr };
                 return;
             }
-            auto [nd, pr] {_find_with_parent(value)};
+            auto [nd, pr]{ _find_with_parent(value) };
             if (nd != nullptr) {
                 nd->count += count;
                 return;
@@ -2968,7 +2962,7 @@ namespace plastic {
                 nd->count = successor->count;
                 erased_ptr = &successor;
             }
-            if (node*& erased{ *erased_ptr }, *& left{ erased->left }, *& right{ erased->right };
+            if (node *&erased{ *erased_ptr }, *&left{ erased->left }, *&right{ erased->right };
                 left != nullptr) {
                 erased->value = left->value;
                 erased->count = left->count;
@@ -3048,11 +3042,10 @@ namespace plastic {
         }
     };
 
-    template<class It>
-    explicit avl_tree(It, It)->avl_tree<std::iter_value_t<It>>;
+    template <class It>
+    explicit avl_tree(It, It) -> avl_tree<std::iter_value_t<It>>;
 
-    export
-        template<class T, std::size_t N = 5, class Cmp = std::less<T>>
+    export template <class T, std::size_t N = 5, class Cmp = std::less<T>>
     class b_tree {
         static constexpr Cmp _cmp{};
         static constexpr std::size_t _min_size{ N - 1 };
@@ -3078,8 +3071,7 @@ namespace plastic {
 // addressable heaps
 namespace plastic {
 
-    export
-        template<class T, class Cmp = std::less<T>>
+    export template <class T, class Cmp = std::less<T>>
     class binary_heap {
         static constexpr Cmp _cmp{};
 
@@ -3132,7 +3124,7 @@ namespace plastic {
     public:
         explicit binary_heap() noexcept = default;
 
-        template<std::input_iterator It>
+        template <std::input_iterator It>
         explicit binary_heap(It first, It last) noexcept :
             _data(first, last) {
 
@@ -3195,7 +3187,7 @@ namespace plastic {
         }
     };
 
-    template<class It>
-    explicit binary_heap(It, It)->binary_heap<std::iter_value_t<It>>;
+    template <class It>
+    explicit binary_heap(It, It) -> binary_heap<std::iter_value_t<It>>;
 
 }
