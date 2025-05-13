@@ -81,7 +81,7 @@ namespace plastic {
         }
 
         constexpr inplace_vector(const inplace_vector& other) noexcept :
-            inplace_vector(other.begin(), other.end()) {}
+            inplace_vector(other._data, const_cast<const T*>(other._last)) {}
 
         constexpr inplace_vector(inplace_vector&& other) noexcept {
             swap(other);
@@ -101,8 +101,8 @@ namespace plastic {
         constexpr void swap(inplace_vector& other) noexcept {
             std::swap(_data, other._data);
 
-            std::size_t offset{ size() };
-            _last = _data + other.size();
+            std::ptrdiff_t offset{ _last - _data };
+            _last = _data + (other._last - other._data);
             other._last = other._data + offset;
         }
 
@@ -280,8 +280,8 @@ namespace plastic {
         constexpr iterator erase(const_iterator pos) noexcept {
             T* i{ pos.base() };
             assert(i != _last);
-            std::move(i + 1, _last, i);
-            std::destroy_at(--_last);
+            _last = std::move(i + 1, _last, i);
+            std::destroy_at(_last);
             return i;
         }
 
@@ -321,16 +321,14 @@ namespace plastic {
 
         template <class... Args>
         constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
-            if (new_size <= size()) {
-                T* new_last{ _begin + new_size };
-                std::destroy(new_last, _last);
-                _last = new_last;
-                return;
-            }
-
             if (new_size <= capacity()) {
                 T* new_last{ _begin + new_size };
-                plastic::construct(_last, new_last, args...);
+                if (new_size <= size()) {
+                    std::destroy(new_last, _last);
+                }
+                else {
+                    plastic::construct(_last, new_last, args...);
+                }
                 _last = new_last;
                 return;
             }
@@ -362,13 +360,13 @@ namespace plastic {
         explicit constexpr vector(size_type size) noexcept :
             vector(uninitialized, size) {
 
-            plastic::construct(_begin, _end);
+            plastic::construct(_begin, _last);
         }
 
         constexpr vector(size_type size, const_reference value) noexcept :
             vector(uninitialized, size) {
 
-            plastic::construct(_begin, _end, value);
+            plastic::construct(_begin, _last, value);
         }
 
         template <std::input_iterator It>
@@ -604,8 +602,8 @@ namespace plastic {
         constexpr iterator erase(const_iterator pos) noexcept {
             T* i{ pos.base() };
             assert(i != _last);
-            std::move(i + 1, _last, i);
-            std::destroy_at(--_last);
+            _last = std::move(i + 1, _last, i);
+            std::destroy_at(_last);
             return i;
         }
 
@@ -669,8 +667,6 @@ namespace plastic {
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
         using value_type = T;
-        using pointer = T*;
-        using const_pointer = const T*;
         using reference = T&;
         using const_reference = const T&;
 
@@ -816,13 +812,13 @@ namespace plastic {
                 _last = std::uninitialized_copy(other._first, other._last, _data);
             }
             else {
-                _last = std::uninitialized_copy(
-                    static_cast<const T*>(other._data),
-                    static_cast<const T*>(other._last),
-                    std::uninitialized_copy(
-                        const_cast<const T*>(other._first),
-                        const_cast<const T*>(other._data + N + 1),
-                        static_cast<T*>(_data)
+                _last = std::uninitialized_copy<const T*>(
+                    other._data,
+                    other._last,
+                    std::uninitialized_copy<const T*>(
+                        other._first,
+                        other._data + N + 1,
+                        _data
                     )
                 );
             }
@@ -1060,8 +1056,8 @@ namespace plastic {
         constexpr iterator erase(const_iterator pos) noexcept {
             iterator i{ pos.base() };
             assert(i != end());
-            std::move(++iterator{ i }, end(), i)._ptr;
-            pop_back();
+            _last = std::move(i + 1, end(), i)._ptr;
+            std::destroy_at(_last);
             return i;
         }
 
