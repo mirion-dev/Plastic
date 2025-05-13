@@ -53,9 +53,9 @@ namespace plastic {
         using reference = T&;
         using const_reference = const T&;
         using iterator = pointer;
-        using const_iterator = const_pointer;
-        using reverse_iterator = std::reverse_iterator<pointer>;
-        using const_reverse_iterator = std::reverse_iterator<const_pointer>;
+        using const_iterator = std::const_iterator<iterator>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
         constexpr inplace_vector() noexcept = default;
 
@@ -150,7 +150,7 @@ namespace plastic {
         }
 
         constexpr const_iterator begin() const noexcept {
-            return _data;
+            return const_cast<T*>(_data);
         }
 
         constexpr const_iterator cbegin() const noexcept {
@@ -247,7 +247,7 @@ namespace plastic {
 
         constexpr iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
             assert(size() + count <= N);
-            T* i{ const_cast<T*>(pos) };
+            T* i{ pos.base() };
             if (count == 0) {
                 return i;
             }
@@ -260,7 +260,7 @@ namespace plastic {
 
         template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
-            T* i{ const_cast<T*>(pos) };
+            T* i{ pos.base() };
             if (first == last) {
                 return i;
             }
@@ -278,7 +278,7 @@ namespace plastic {
         }
 
         constexpr iterator erase(const_iterator pos) noexcept {
-            T* i{ const_cast<T*>(pos) };
+            T* i{ pos.base() };
             assert(i != _last);
             std::move(i + 1, _last, i);
             std::destroy_at(--_last);
@@ -286,7 +286,7 @@ namespace plastic {
         }
 
         constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
-            T *i{ const_cast<T*>(first) }, *s{ const_cast<T*>(last) };
+            T *i{ first.base() }, *s{ last.base() };
             if (i == s) {
                 return i;
             }
@@ -353,9 +353,9 @@ namespace plastic {
         using reference = T&;
         using const_reference = const T&;
         using iterator = pointer;
-        using const_iterator = const_pointer;
-        using reverse_iterator = std::reverse_iterator<pointer>;
-        using const_reverse_iterator = std::reverse_iterator<const_pointer>;
+        using const_iterator = std::const_iterator<iterator>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
         constexpr vector() noexcept = default;
 
@@ -560,7 +560,7 @@ namespace plastic {
         }
 
         constexpr iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
-            T* i{ const_cast<T*>(pos) };
+            T* i{ pos.base() };
             if (count == 0) {
                 return i;
             }
@@ -579,7 +579,7 @@ namespace plastic {
 
         template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
-            T* i{ const_cast<T*>(pos) };
+            T* i{ pos.base() };
             if (first == last) {
                 return i;
             }
@@ -602,7 +602,7 @@ namespace plastic {
         }
 
         constexpr iterator erase(const_iterator pos) noexcept {
-            T* i{ const_cast<T*>(pos) };
+            T* i{ pos.base() };
             assert(i != _last);
             std::move(i + 1, _last, i);
             std::destroy_at(--_last);
@@ -610,7 +610,7 @@ namespace plastic {
         }
 
         constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
-            T *i{ const_cast<T*>(first) }, *s{ const_cast<T*>(last) };
+            T *i{ first.base() }, *s{ last.base() };
             if (i == s) {
                 return i;
             }
