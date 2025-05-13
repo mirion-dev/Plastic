@@ -678,7 +678,7 @@ namespace plastic {
             friend class inplace_deque;
 
             T* _ptr{};
-            const inplace_deque* _cont{};
+            inplace_deque* _cont{};
 
             constexpr std::ptrdiff_t _offset() const noexcept {
                 std::ptrdiff_t diff{ _cont->_first - _ptr };
@@ -694,7 +694,7 @@ namespace plastic {
 
             constexpr iterator() noexcept = default;
 
-            constexpr iterator(T* ptr, const inplace_deque* cont) noexcept :
+            constexpr iterator(T* ptr, inplace_deque* cont) noexcept :
                 _ptr{ ptr },
                 _cont{ cont } {}
 
@@ -817,9 +817,13 @@ namespace plastic {
             }
             else {
                 _last = std::uninitialized_copy(
-                    other._data,
-                    other._last,
-                    std::uninitialized_copy(other._first, other._data + N + 1, _data)
+                    static_cast<const T*>(other._data),
+                    static_cast<const T*>(other._last),
+                    std::uninitialized_copy(
+                        const_cast<const T*>(other._first),
+                        const_cast<const T*>(other._data + N + 1),
+                        static_cast<T*>(_data)
+                    )
                 );
             }
         }
@@ -842,7 +846,7 @@ namespace plastic {
         constexpr void swap(inplace_deque& other) noexcept {
             std::swap(_data, other._data);
 
-            std::size_t first_offset{ _first - _data }, last_offset{ _last - _data };
+            std::ptrdiff_t first_offset{ _first - _data }, last_offset{ _last - _data };
             _first = _data + (other._first - other._data);
             _last = _data + (other._last - other._data);
             other._first = other._data + first_offset;
@@ -900,7 +904,7 @@ namespace plastic {
         }
 
         constexpr const_iterator begin() const noexcept {
-            return { _first, this };
+            return iterator{ _first, const_cast<inplace_deque*>(this) };
         }
 
         constexpr const_iterator cbegin() const noexcept {
@@ -912,7 +916,7 @@ namespace plastic {
         }
 
         constexpr const_iterator end() const noexcept {
-            return { _last, this };
+            return iterator{ _last, const_cast<inplace_deque*>(this) };
         }
 
         constexpr const_iterator cend() const noexcept {
@@ -1023,28 +1027,30 @@ namespace plastic {
 
         constexpr iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
             assert(size() + count <= N);
+            iterator i{ pos.base() };
             if (count == 0) {
-                return pos;
+                return i;
             }
 
-            std::fill(pos, std::move_backward(pos, end(), end() + count), value);
+            std::fill(i, std::move_backward(i, end(), end() + count), value);
             _last = (end() + count)._ptr;
 
-            return pos;
+            return i;
         }
 
         template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
+            iterator i{ pos.base() };
             if (first == last) {
-                return pos;
+                return i;
             }
 
             std::ptrdiff_t count{ std::distance(first, last) };
             assert(size() + count <= N);
-            std::copy_backward(first, last, std::move_backward(pos, end(), end() + count));
+            std::copy_backward(first, last, std::move_backward(i, end(), end() + count));
             _last = (end() + count)._ptr;
 
-            return pos;
+            return i;
         }
 
         constexpr iterator insert(const_iterator pos, std::initializer_list<T> list) noexcept {
@@ -1052,30 +1058,32 @@ namespace plastic {
         }
 
         constexpr iterator erase(const_iterator pos) noexcept {
-            assert(pos != end());
-            _last = std::move(++const_iterator{ pos }, end(), pos)._ptr;
-            std::destroy_at(--_last);
-            return pos;
+            iterator i{ pos.base() };
+            assert(i != end());
+            std::move(++iterator{ i }, end(), i)._ptr;
+            pop_back();
+            return i;
         }
 
         constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
-            if (first == last) {
-                return first;
+            iterator i{ first.base() }, s{ last.base() };
+            if (i == s) {
+                return i;
             }
 
-            T* new_last{ std::move(last, end(), first)._ptr };
+            T* new_last{ std::move(s, end(), i)._ptr };
             std::destroy(new_last, _last);
             _last = new_last;
 
-            return first;
+            return i;
         }
 
-        friend constexpr bool operator==(const inplace_deque& cont1, const inplace_deque& cont2) noexcept {
-            return std::equal(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        friend constexpr bool operator==(const inplace_deque& left, const inplace_deque& right) noexcept {
+            return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend constexpr auto operator<=>(const inplace_deque& cont1, const inplace_deque& cont2) noexcept {
-            return std::lexicographical_compare_three_way(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        friend constexpr auto operator<=>(const inplace_deque& left, const inplace_deque& right) noexcept {
+            return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
 
