@@ -859,7 +859,7 @@ namespace plastic {
 
         constexpr size_type size() const noexcept {
             std::ptrdiff_t diff{ _last - _first };
-            return diff >= 0 ? diff : N + 1 - diff;
+            return diff >= 0 ? diff : diff + N + 1;
         }
 
         static constexpr size_type max_size() noexcept {
