@@ -319,27 +319,38 @@ namespace plastic {
             _last{ _begin + size },
             _end{ _last } {}
 
-        template <class... Args>
-        constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
-            if (new_size <= capacity()) {
-                T* new_last{ _begin + new_size };
-                if (new_size <= size()) {
-                    std::destroy(new_last, _last);
-                }
-                else {
-                    plastic::construct(_last, new_last, args...);
-                }
-                _last = new_last;
-                return;
-            }
+        constexpr void _reserve(std::size_t new_capacity) noexcept {
+            T* new_begin{ new T[new_capacity] };
+            T* new_last{ std::uninitialized_move(_begin, _last, new_begin) };
+            T* new_end{ new_begin + new_capacity };
+            delete[] _begin;
 
-            reserve(new_size);
-            plastic::construct(_last, _end, args...);
-            _last = _end;
+            _begin = new_begin;
+            _last = new_last;
+            _end = new_end;
         }
 
         constexpr void _extend(std::size_t size) noexcept {
-            reserve(capacity() + std::max(capacity() >> 1, size));
+            _reserve(capacity() + std::max(capacity() >> 1, size));
+        }
+
+        template <class... Args>
+        constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
+            if (new_size > capacity()) {
+                reserve(new_size);
+                plastic::construct(_last, _end, args...);
+                _last = _end;
+                return;
+            }
+
+            T* new_last{ _begin + new_size };
+            if (new_size <= size()) {
+                std::destroy(new_last, _last);
+            }
+            else {
+                plastic::construct(_last, new_last, args...);
+            }
+            _last = new_last;
         }
 
     public:
@@ -441,18 +452,9 @@ namespace plastic {
         }
 
         constexpr void reserve(size_type new_capacity) noexcept {
-            if (new_capacity <= capacity()) {
-                return;
+            if (new_capacity > capacity()) {
+                _reserve(new_capacity);
             }
-
-            T* new_begin{ new T[new_capacity] };
-            T* new_last{ std::uninitialized_move(_begin, _last, new_begin) };
-            T* new_end{ new_begin + new_capacity };
-            delete[] _begin;
-
-            _begin = new_begin;
-            _last = new_last;
-            _end = new_end;
         }
 
         constexpr iterator begin() noexcept {
@@ -1117,52 +1119,52 @@ namespace plastic {
 
         template <class... Args>
         constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
-            if (new_size <= capacity()) {
-                T* new_first{ _begin + (capacity() - new_size >> 1) };
-                T* new_last{ new_first + new_size };
-                if (new_size <= size()) {
-                    T* middle{ _first + new_size };
-                    if (_first <= new_first && _last <= new_first || _first > new_last && _last > new_last) {
-                        std::uninitialized_move(_first, middle, new_first);
-                        std::destroy(_first, _last);
-                    }
-                    else if (_last <= new_last) {
-                        std::move_backward(_first, middle, new_last);
-                        std::destroy(_first, new_first);
-                    }
-                    else if (_first > new_first) {
-                        std::move(_first, middle, new_first);
-                        std::destroy(new_last, _last);
-                    }
-                    else {
-                        std::move(_first, middle, new_first);
-                        std::destroy(_first, new_first);
-                        std::destroy(new_last, _last);
-                    }
-                }
-                else {
-                    T* new_middle{ new_first + size() };
-                    if (_first <= new_first && _last <= new_first || _first > new_middle && _last > new_middle) {
-                        std::uninitialized_move(_first, _last, new_first);
-                        std::destroy(new_first, new_middle);
-                    }
-                    else if (_first <= new_first) {
-                        std::move_backward(_first, _last, new_middle);
-                        std::destroy(_first, new_first);
-                    }
-                    else {
-                        std::move(_first, _last, new_first);
-                        std::destroy(new_middle, _last);
-                    }
-                    plastic::construct(new_middle, new_last, args...);
-                }
-                _last = new_last;
+            if (new_size > capacity()) {
+                _reserve(new_size, 0);
+                plastic::construct(_last, _end, args...);
+                _last = _end;
                 return;
             }
 
-            _reserve(new_size, 0);
-            plastic::construct(_last, _end, args...);
-            _last = _end;
+            T* new_first{ _begin + (capacity() - new_size >> 1) };
+            T* new_last{ new_first + new_size };
+            if (new_size <= size()) {
+                T* middle{ _first + new_size };
+                if (_first <= new_first && _last <= new_first || _first > new_last && _last > new_last) {
+                    std::uninitialized_move(_first, middle, new_first);
+                    std::destroy(_first, _last);
+                }
+                else if (_last <= new_last) {
+                    std::move_backward(_first, middle, new_last);
+                    std::destroy(_first, new_first);
+                }
+                else if (_first > new_first) {
+                    std::move(_first, middle, new_first);
+                    std::destroy(new_last, _last);
+                }
+                else {
+                    std::move(_first, middle, new_first);
+                    std::destroy(_first, new_first);
+                    std::destroy(new_last, _last);
+                }
+            }
+            else {
+                T* new_middle{ new_first + size() };
+                if (_first <= new_first && _last <= new_first || _first > new_middle && _last > new_middle) {
+                    std::uninitialized_move(_first, _last, new_first);
+                    std::destroy(new_first, new_middle);
+                }
+                else if (_first <= new_first) {
+                    std::move_backward(_first, _last, new_middle);
+                    std::destroy(_first, new_first);
+                }
+                else {
+                    std::move(_first, _last, new_first);
+                    std::destroy(new_middle, _last);
+                }
+                plastic::construct(new_middle, new_last, args...);
+            }
+            _last = new_last;
         }
 
     public:
