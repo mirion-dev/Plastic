@@ -708,12 +708,12 @@ namespace plastic {
                 return *(*this + index);
             }
 
-            friend constexpr bool operator==(iterator iter1, iterator iter2) noexcept {
-                return iter1._ptr == iter2._ptr;
+            friend constexpr bool operator==(iterator left, iterator right) noexcept {
+                return left._ptr == right._ptr;
             }
 
-            friend constexpr auto operator<=>(iterator iter1, iterator iter2) noexcept {
-                return iter1._offset() <=> iter2._offset();
+            friend constexpr auto operator<=>(iterator left, iterator right) noexcept {
+                return left._offset() <=> right._offset();
             }
 
             constexpr iterator& operator+=(difference_type diff) noexcept {
@@ -745,8 +745,8 @@ namespace plastic {
                 return iter -= diff;
             }
 
-            friend constexpr difference_type operator-(iterator iter1, iterator iter2) noexcept {
-                return iter1._offset() - iter2._offset();
+            friend constexpr difference_type operator-(iterator left, iterator right) noexcept {
+                return left._offset() - right._offset();
             }
 
             constexpr iterator& operator++() noexcept {
@@ -1497,8 +1497,8 @@ namespace plastic {
                 return &_ptr->value;
             }
 
-            friend bool operator==(iterator iter1, iterator iter2) noexcept {
-                return iter1._ptr == iter2._ptr;
+            friend bool operator==(iterator left, iterator right) noexcept {
+                return left._ptr == right._ptr;
             }
 
             iterator& operator++() noexcept {
@@ -1664,12 +1664,12 @@ namespace plastic {
             return last;
         }
 
-        friend bool operator==(const forward_list& cont1, const forward_list& cont2) noexcept {
-            return std::equal(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        friend bool operator==(const forward_list& left, const forward_list& right) noexcept {
+            return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const forward_list& cont1, const forward_list& cont2) noexcept {
-            return std::lexicographical_compare_three_way(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        friend auto operator<=>(const forward_list& left, const forward_list& right) noexcept {
+            return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
 
@@ -1713,8 +1713,8 @@ namespace plastic {
                 return &_ptr->value;
             }
 
-            friend bool operator==(iterator iter1, iterator iter2) noexcept {
-                return iter1._ptr == iter2._ptr;
+            friend bool operator==(iterator left, iterator right) noexcept {
+                return left._ptr == right._ptr;
             }
 
             iterator& operator++() noexcept {
@@ -1938,12 +1938,12 @@ namespace plastic {
             return last;
         }
 
-        friend bool operator==(const list& cont1, const list& cont2) noexcept {
-            return std::equal(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        friend bool operator==(const list& left, const list& right) noexcept {
+            return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const list& cont1, const list& cont2) noexcept {
-            return std::lexicographical_compare_three_way(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        friend auto operator<=>(const list& left, const list& right) noexcept {
+            return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
 
@@ -2026,8 +2026,8 @@ namespace plastic {
                 return &_ptr->value;
             }
 
-            friend bool operator==(iterator iter1, iterator iter2) noexcept {
-                return iter1._ptr == iter2._ptr;
+            friend bool operator==(iterator left, iterator right) noexcept {
+                return left._ptr == right._ptr;
             }
 
             iterator& operator++() noexcept {
@@ -2358,12 +2358,12 @@ namespace plastic {
             return count;
         }
 
-        friend bool operator==(const binary_search_tree& cont1, const binary_search_tree& cont2) noexcept {
-            return std::equal(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        friend bool operator==(const binary_search_tree& left, const binary_search_tree& right) noexcept {
+            return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const binary_search_tree& cont1, const binary_search_tree& cont2) noexcept {
-            return std::lexicographical_compare_three_way(cont1.begin(), cont1.end(), cont2.begin(), cont2.end());
+        friend auto operator<=>(const binary_search_tree& left, const binary_search_tree& right) noexcept {
+            return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
 
