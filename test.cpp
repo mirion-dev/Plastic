@@ -94,6 +94,7 @@ public:
         ASSERT(b.back() == 4);
         ASSERT(c.back() == 1);
 
+        x = { 3, 2, 0, 1, 1 };
         x.data()[3] = 2;
         ASSERT(format(x) == "[3, 2, 0, 2, 1]");
 
@@ -197,6 +198,7 @@ public:
         ASSERT(b.back() == 4);
         ASSERT(c.back() == 1);
 
+        x = { 3, 2, 0, 1, 1 };
         x.data()[3] = 2;
         ASSERT(format(x) == "[3, 2, 0, 2, 1]");
 
@@ -299,6 +301,7 @@ public:
         ASSERT(b.back() == 4);
         ASSERT(c.back() == 1);
 
+        x = { 3, 2, 0, 1, 1 };
         x.push_back(1);
         ASSERT(format(x) == "[3, 2, 0, 1, 1, 1]");
         x.push_front(1);
@@ -411,6 +414,7 @@ public:
         ASSERT(b.back() == 4);
         ASSERT(c.back() == 1);
 
+        x = { 3, 2, 0, 1, 1 };
         x.push_back(1);
         ASSERT(format(x) == "[3, 2, 0, 1, 1, 1]");
         x.push_front(1);
