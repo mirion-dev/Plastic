@@ -34,6 +34,16 @@
         </Expand>
     </Type>
 
+    <Type Name="plastic::deque&lt;*&gt;">
+        <Intrinsic Name="size" Expression="size_t(_last - _first)"/>
+        <Intrinsic Name="capacity" Expression="size_t(_end - _begin)"/>
+        <DisplayString>{{ size={size()} }}</DisplayString>
+        <Expand>
+            <Item Name="[capacity]">capacity()</Item>
+            <ExpandedItem>_first, [size()]</ExpandedItem>
+        </Expand>
+    </Type>
+
     <Type Name="plastic::forward_list&lt;*&gt;">
         <Intrinsic Name="size" Expression="_size"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
