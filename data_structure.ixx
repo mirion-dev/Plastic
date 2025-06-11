@@ -81,7 +81,7 @@ namespace plastic {
         }
 
         constexpr inplace_vector(const inplace_vector& other) noexcept :
-            inplace_vector(other._data, const_cast<const T*>(other._last)) {}
+            inplace_vector(const_cast<T*>(other._data), other._last) {}
 
         constexpr inplace_vector(inplace_vector&& other) noexcept {
             swap(other);
@@ -319,7 +319,7 @@ namespace plastic {
             _last{ _begin + size },
             _end{ _last } {}
 
-        constexpr void _reserve(std::size_t new_capacity) noexcept {
+        constexpr void _reallocate(std::size_t new_capacity) noexcept {
             T* new_begin{ new T[new_capacity] };
             T* new_last{ std::uninitialized_move(_begin, _last, new_begin) };
             T* new_end{ new_begin + new_capacity };
@@ -331,13 +331,13 @@ namespace plastic {
         }
 
         constexpr void _extend(std::size_t size) noexcept {
-            _reserve(capacity() + std::max(capacity() >> 1, size));
+            _reallocate(capacity() + std::max(capacity() >> 1, size));
         }
 
         template <class... Args>
         constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
             if (new_size > capacity()) {
-                reserve(new_size);
+                _reallocate(new_size);
                 plastic::construct(_last, _end, args...);
                 _last = _end;
                 return;
@@ -453,7 +453,7 @@ namespace plastic {
 
         constexpr void reserve(size_type new_capacity) noexcept {
             if (new_capacity > capacity()) {
-                _reserve(new_capacity);
+                _reallocate(new_capacity);
             }
         }
 
@@ -1098,7 +1098,7 @@ namespace plastic {
             _first{ _begin },
             _last{ _end } {}
 
-        constexpr void _reserve(std::size_t new_capacity, std::ptrdiff_t offset) noexcept {
+        constexpr void _reallocate(std::size_t new_capacity, std::ptrdiff_t offset) noexcept {
             T* new_begin{ new T[new_capacity] };
             T* new_end{ new_begin + new_capacity };
             T* new_first{ new_begin + offset };
@@ -1114,13 +1114,13 @@ namespace plastic {
         constexpr void _extend(std::size_t size, std::ptrdiff_t offset) noexcept {
             std::size_t new_capacity{ capacity() + std::max(capacity(), size) };
             std::size_t new_size{ this->size() + size };
-            _reserve(new_capacity, (new_capacity - new_size >> 1) + offset);
+            _reallocate(new_capacity, (new_capacity - new_size >> 1) + offset);
         }
 
         template <class... Args>
         constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
             if (new_size > capacity()) {
-                _reserve(new_size, 0);
+                _reallocate(new_size, 0);
                 plastic::construct(_last, _end, args...);
                 _last = _end;
                 return;
@@ -1268,7 +1268,7 @@ namespace plastic {
 
         constexpr void reserve(size_type new_capacity) noexcept {
             if (new_capacity > capacity()) {
-                _reserve(new_capacity, capacity() - size() >> 1);
+                _reallocate(new_capacity, capacity() - size() >> 1);
             }
         }
 
