@@ -1471,7 +1471,7 @@ namespace plastic {
         node_t* _head;
         std::size_t _size;
 
-        constexpr void _insert_after(node_t* pos, size_t count) noexcept {
+        constexpr void _insert_after(node_t* pos, std::size_t count) noexcept {
             _size += count;
             while (count-- != 0) {
                 pos->next = new node_t{ {}, pos->next };
@@ -1479,10 +1479,9 @@ namespace plastic {
         }
 
         template <class... Args>
-        constexpr void _resize(size_t new_size, const Args&... args) noexcept {
+        constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
             if (new_size <= _size) {
                 erase_after(std::next(end(), new_size), end());
-                return;
             }
 
             if constexpr (sizeof...(Args) == 0) {
@@ -1581,6 +1580,7 @@ namespace plastic {
 
         constexpr ~forward_list() noexcept {
             clear();
+            delete _head;
         }
 
         constexpr forward_list& operator=(const forward_list& other) noexcept {
@@ -1729,20 +1729,50 @@ namespace plastic {
 
     export template <class T>
     class list {
-        struct node {
+        struct node_t {
             T value;
-            node* prev;
-            node* next;
+            node_t* prev;
+            node_t* next;
         };
 
-        node* _sentinel;
+        node_t* _head;
         std::size_t _size;
 
+        constexpr void _insert(node_t* pos, std::size_t count) noexcept {
+            _size += count;
+            while (count-- != 0) {
+                pos->prev = new node_t{ {}, pos->prev, pos };
+            }
+        }
+
+        template <class... Args>
+        constexpr void _resize(std::size_t new_size, const Args&... args) noexcept {
+            if (new_size <= _size) {
+                while (_size != new_size) {
+                    pop_back();
+                }
+                return;
+            }
+
+            if constexpr (sizeof...(Args) == 0) {
+                _insert(_head, new_size - _size);
+            }
+            else {
+                insert(end(), new_size - _size, args...);
+            }
+        }
+
     public:
+        using difference_type = std::ptrdiff_t;
+        using size_type = std::size_t;
+        using value_type = T;
+        using reference = T&;
+        using const_reference = const T&;
+
         class iterator {
             friend class list;
 
-            node* _ptr{};
+            node_t* _ptr{};
 
         public:
             using difference_type = std::ptrdiff_t;
@@ -1751,40 +1781,40 @@ namespace plastic {
             using reference = T&;
             using iterator_category = std::bidirectional_iterator_tag;
 
-            iterator() noexcept = default;
+            constexpr iterator() noexcept = default;
 
-            iterator(node* ptr) noexcept :
+            constexpr iterator(node_t* ptr) noexcept :
                 _ptr{ ptr } {}
 
-            reference operator*() const noexcept {
+            constexpr reference operator*() const noexcept {
                 return _ptr->value;
             }
 
-            pointer operator->() const noexcept {
+            constexpr pointer operator->() const noexcept {
                 return &_ptr->value;
             }
 
-            friend bool operator==(iterator left, iterator right) noexcept {
+            friend constexpr bool operator==(iterator left, iterator right) noexcept {
                 return left._ptr == right._ptr;
             }
 
-            iterator& operator++() noexcept {
+            constexpr iterator& operator++() noexcept {
                 _ptr = _ptr->next;
                 return *this;
             }
 
-            iterator operator++(int) noexcept {
+            constexpr iterator operator++(int) noexcept {
                 iterator temp{ *this };
                 ++*this;
                 return temp;
             }
 
-            iterator& operator--() noexcept {
+            constexpr iterator& operator--() noexcept {
                 _ptr = _ptr->prev;
                 return *this;
             }
 
-            iterator operator--(int) noexcept {
+            constexpr iterator operator--(int) noexcept {
                 iterator temp{ *this };
                 --*this;
                 return temp;
@@ -1793,207 +1823,229 @@ namespace plastic {
 
         using const_iterator = std::const_iterator<iterator>;
         using reverse_iterator = std::reverse_iterator<iterator>;
-        using const_reverse_iterator = std::const_iterator<reverse_iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        explicit list() noexcept :
-            _sentinel{ new node },
+        constexpr list() noexcept :
+            _head{ new node_t },
             _size{} {
 
-            _sentinel->next = _sentinel->prev = _sentinel;
+            _head->prev = _head->next = _head;
         }
 
-        explicit list(std::size_t size, const T& value = {}) noexcept :
+        explicit constexpr list(size_type size) noexcept :
+            list() {
+            _insert(end(), size);
+        }
+
+        constexpr list(size_type size, const T& value) noexcept :
             list() {
 
             insert(end(), size, value);
         }
 
         template <std::input_iterator It>
-        explicit list(It first, It last) noexcept :
+        constexpr list(It first, It last) noexcept :
             list() {
 
             insert(end(), first, last);
         }
 
-        explicit list(std::initializer_list<T> list) noexcept :
+        constexpr list(std::initializer_list<T> list) noexcept :
             list(list.begin(), list.end()) {}
 
-        explicit list(const list& other) noexcept :
+        constexpr list(const list& other) noexcept :
             list(other.begin(), other.end()) {}
 
-        ~list() noexcept {
-            clear();
-            delete _sentinel;
+        constexpr list(list&& other) noexcept {
+            swap(other);
         }
 
-        list& operator=(const list& other) noexcept {
-            if (this == &other) {
-                return *this;
-            }
+        constexpr ~list() noexcept {
+            clear();
+            delete _head;
+        }
 
+        constexpr list& operator=(const list& other) noexcept {
             list temp{ other };
-            std::swap(_sentinel, temp._sentinel);
-            std::swap(_size, temp._size);
-
+            swap(temp);
             return *this;
         }
 
-        bool empty() const noexcept {
+        constexpr list& operator=(list&& other) noexcept {
+            swap(other);
+            return *this;
+        }
+
+        constexpr void swap(list& other) noexcept {
+            std::swap(_head, other._head);
+            std::swap(_size, other._size);
+        }
+
+        constexpr bool empty() const noexcept {
             return _size == 0;
         }
 
-        std::size_t size() const noexcept {
+        constexpr size_type size() const noexcept {
             return _size;
         }
 
-        void clear() noexcept {
+        static constexpr size_type max_size() noexcept {
+            return std::numeric_limits<size_type>::max();
+        }
+
+        constexpr void clear() noexcept {
             erase(begin(), end());
         }
 
-        void resize(std::size_t new_size, const T& value = {}) noexcept {
-            if (new_size == _size) {
-                return;
-            }
-            if (new_size < _size) {
-                while (_size != new_size) {
-                    pop_back();
-                }
-                return;
-            }
-            insert(end(), new_size - _size, value);
+        constexpr void resize(size_type new_size) noexcept {
+            _resize(new_size);
         }
 
-        iterator begin() noexcept {
-            return _sentinel->next;
+        constexpr void resize(size_type new_size, const_reference value) noexcept {
+            _resize(new_size, value);
         }
 
-        const_iterator begin() const noexcept {
-            return iterator{ _sentinel->next };
+        constexpr iterator begin() noexcept {
+            return _head->next;
         }
 
-        const_iterator cbegin() const noexcept {
-            return iterator{ _sentinel->next };
+        constexpr const_iterator begin() const noexcept {
+            return iterator{ _head->next };
         }
 
-        iterator end() noexcept {
-            return _sentinel;
+        constexpr const_iterator cbegin() const noexcept {
+            return begin();
         }
 
-        const_iterator end() const noexcept {
-            return iterator{ _sentinel };
+        constexpr iterator end() noexcept {
+            return _head;
         }
 
-        const_iterator cend() const noexcept {
-            return iterator{ _sentinel };
+        constexpr const_iterator end() const noexcept {
+            return iterator{ _head };
         }
 
-        reverse_iterator rbegin() noexcept {
-            return reverse_iterator{ { _sentinel } };
+        constexpr const_iterator cend() const noexcept {
+            return end();
         }
 
-        const_reverse_iterator rbegin() const noexcept {
-            return reverse_iterator{ { _sentinel } };
+        constexpr reverse_iterator rbegin() noexcept {
+            return reverse_iterator{ end() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
-            return reverse_iterator{ { _sentinel } };
+        constexpr const_reverse_iterator rbegin() const noexcept {
+            return const_reverse_iterator{ end() };
         }
 
-        reverse_iterator rend() noexcept {
-            return reverse_iterator{ { _sentinel->next } };
+        constexpr const_reverse_iterator crbegin() const noexcept {
+            return const_reverse_iterator{ end() };
         }
 
-        const_reverse_iterator rend() const noexcept {
-            return reverse_iterator{ { _sentinel->next } };
+        constexpr reverse_iterator rend() noexcept {
+            return reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator crend() const noexcept {
-            return reverse_iterator{ { _sentinel->next } };
+        constexpr const_reverse_iterator rend() const noexcept {
+            return const_reverse_iterator{ begin() };
         }
 
-        auto&& front(this auto&& self) noexcept {
-            assert(!self.empty());
-            return std::forward_like<decltype(self)>(self._sentinel->next->value);
+        constexpr const_reverse_iterator crend() const noexcept {
+            return const_reverse_iterator{ begin() };
         }
 
-        auto&& back(this auto&& self) noexcept {
-            assert(!self.empty());
-            return std::forward_like<decltype(self)>(self._sentinel->prev->value);
+        constexpr reference front() noexcept {
+            assert(!empty());
+            return _head->next->value;
         }
 
-        void push_front(const T& value) noexcept {
-            _sentinel->next->next->prev = _sentinel->next = new node{ value, _sentinel, _sentinel->next };
+        constexpr const_reference front() const noexcept {
+            assert(!empty());
+            return _head->next->value;
+        }
+
+        constexpr reference back() noexcept {
+            assert(!empty());
+            return _head->prev->value;
+        }
+
+        constexpr const_reference back() const noexcept {
+            assert(!empty());
+            return _head->prev->value;
+        }
+
+        constexpr void push_front(const_reference value) noexcept {
+            _head->next->next->prev = _head->next = new node_t{ value, _head, _head->next };
             ++_size;
         }
 
-        void pop_front() noexcept {
+        constexpr void pop_front() noexcept {
             assert(!empty());
             erase(begin());
         }
 
-        void push_back(const T& value) noexcept {
-            _sentinel->prev->prev->next = _sentinel->prev = new node{ value, _sentinel->prev, _sentinel };
+        constexpr void push_back(const_reference value) noexcept {
+            _head->prev->prev->next = _head->prev = new node_t{ value, _head->prev, _head };
             ++_size;
         }
 
-        void pop_back() noexcept {
+        constexpr void pop_back() noexcept {
             assert(!empty());
             erase(--end());
         }
 
-        iterator insert(iterator pos, const T& value) noexcept {
+        constexpr iterator insert(const_iterator pos, const_reference value) noexcept {
             return insert(pos, 1, value);
         }
 
-        iterator insert(iterator pos, std::size_t count, const T& value) noexcept {
-            node* i{ pos._ptr->prev };
+        constexpr iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
+            node_t* i{ pos.base()._ptr->prev };
             _size += count;
             while (count-- != 0) {
-                i = i->next = new node{ value, i, i->next };
+                i = i->next = new node_t{ value, i, i->next };
             }
             i->next->prev = i;
-            return pos;
+            return i;
         }
 
         template <std::input_iterator It>
-        iterator insert(iterator pos, It first, It last) noexcept {
-            node* i{ pos._ptr->prev };
+        constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
+            node_t* i{ pos.base()._ptr->prev };
             while (first != last) {
-                i = i->next = new node{ *first++, i, i->next };
+                i = i->next = new node_t{ *first++, i, i->next };
                 ++_size;
             }
             i->next->prev = i;
-            return pos;
+            return i;
         }
 
-        iterator insert(iterator pos, std::initializer_list<T> list) noexcept {
+        constexpr iterator insert(const_iterator pos, std::initializer_list<T> list) noexcept {
             return insert(pos, list.begin(), list.end());
         }
 
-        iterator erase(iterator pos) noexcept {
-            node* i{ (++pos)._ptr };
-            delete std::exchange(i->prev, i->prev->prev);
+        constexpr iterator erase(const_iterator pos) noexcept {
+            node_t* i{ pos.base()._ptr->prev };
+            delete std::exchange(i->next, i->next->next);
             --_size;
-            i->prev->next = i;
-            return pos;
+            i->next->prev = i;
+            return i->next;
         }
 
-        iterator erase(iterator first, iterator last) noexcept {
-            node *i{ first._ptr }, *j{ last._ptr };
+        constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
+            node_t *i{ first.base()._ptr }, *j{ last.base()._ptr };
             i->prev->next = j;
             j->prev = i->prev;
             while (i != j) {
                 delete std::exchange(i, i->next);
                 --_size;
             }
-            return last;
+            return i;
         }
 
-        friend bool operator==(const list& left, const list& right) noexcept {
+        friend constexpr bool operator==(const list& left, const list& right) noexcept {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const list& left, const list& right) noexcept {
+        friend constexpr auto operator<=>(const list& left, const list& right) noexcept {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
