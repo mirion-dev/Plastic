@@ -464,60 +464,84 @@ public:
     }
 
     TEST_METHOD(forward_list) {
-        ASSERT(false);
-        plastic::forward_list<int> a, b(4, 4), c{ 3, 2, 1 };
-        ASSERT(format(a) == "[]");
+        plastic::forward_list<int> a(3), b(4, 4), c{ 3, 2, 1 }, x;
+        ASSERT(format(x) == "[]");
+        ASSERT(format(a) == "[0, 0, 0]");
         ASSERT(format(b) == "[4, 4, 4, 4]");
         ASSERT(format(c) == "[3, 2, 1]");
 
         ASSERT(format(c.cbegin(), c.cend()) == "[3, 2, 1]");
 
-        c = c; // NOLINT
+        x = c;
+        ASSERT(format(x) == "[3, 2, 1]");
+        c = std::move(x);
         ASSERT(format(c) == "[3, 2, 1]");
-        c = b;
-        ASSERT(format(c) == "[4, 4, 4, 4]");
+        x = {};
+        ASSERT(format(x) == "[]");
 
-        ASSERT(a.empty() == true);
+        ASSERT(x.empty() == true);
+        ASSERT(a.empty() == false);
         ASSERT(b.empty() == false);
+        ASSERT(c.empty() == false);
 
-        ASSERT(a.size() == 0);
+        ASSERT(x.size() == 0);
+        ASSERT(a.size() == 3);
         ASSERT(b.size() == 4);
+        ASSERT(c.size() == 3);
 
-        c.clear();
-        ASSERT(format(c) == "[]");
+        ASSERT(x.max_size() == std::numeric_limits<std::size_t>::max());
 
-        c.resize(2);
-        ASSERT(format(c) == "[0, 0]");
-        c.resize(1);
-        ASSERT(format(c) == "[0]");
-        c.resize(5, 1);
-        ASSERT(format(c) == "[0, 1, 1, 1, 1]");
+        x = c;
+        x.clear();
+        ASSERT(format(x) == "[]");
 
+        x = c;
+        x.resize(2);
+        ASSERT(format(x) == "[3, 2]");
+        x.resize(3);
+        ASSERT(format(x) == "[3, 2, 0]");
+        x.resize(5, 1);
+        ASSERT(format(x) == "[3, 2, 0, 1, 1]");
+
+        ASSERT(x.front() == 3);
+        ASSERT(a.front() == 0);
         ASSERT(b.front() == 4);
-        ASSERT(c.front() == 0);
+        ASSERT(c.front() == 3);
 
-        c.push_front(-1);
-        c.push_front(-1);
-        ASSERT(format(c) == "[-1, -1, 0, 1, 1, 1, 1]");
+        x.push_front(1);
+        ASSERT(format(x) == "[1, 3, 2, 0, 1, 1]");
+        x.push_front(2);
+        ASSERT(format(x) == "[2, 1, 3, 2, 0, 1, 1]");
+        x.push_front(3);
+        ASSERT(format(x) == "[3, 2, 1, 3, 2, 0, 1, 1]");
 
-        c.pop_front();
-        ASSERT(format(c) == "[-1, 0, 1, 1, 1, 1]");
+        x.pop_front();
+        ASSERT(format(x) == "[2, 1, 3, 2, 0, 1, 1]");
+        x.pop_front();
+        ASSERT(format(x) == "[1, 3, 2, 0, 1, 1]");
+        x.pop_front();
+        ASSERT(format(x) == "[3, 2, 0, 1, 1]");
 
-        c.insert_after(std::next(c.begin(), 2), 2, 2);
-        ASSERT(format(c) == "[-1, 0, 1, 2, 2, 1, 1, 1]");
-        c.insert_after(std::next(c.begin(), 3), { 3, 4, 5 });
-        ASSERT(format(c) == "[-1, 0, 1, 2, 3, 4, 5, 2, 1, 1, 1]");
+        x.insert_after(++x.begin(), 1);
+        ASSERT(format(x) == "[3, 2, 1, 0, 1, 1]");
+        x.insert_after(std::next(x.begin(), 3), 2, 1);
+        ASSERT(format(x) == "[3, 2, 1, 0, 1, 1, 1, 1]");
+        x.insert_after(std::next(x.begin(), 4), { 2, 3, 2 });
+        ASSERT(format(x) == "[3, 2, 1, 0, 1, 2, 3, 2, 1, 1, 1]");
 
-        c.erase_after(c.end());
-        ASSERT(format(c) == "[0, 1, 2, 3, 4, 5, 2, 1, 1, 1]");
-        c.erase_after(std::next(c.begin(), 4), c.end());
-        ASSERT(format(c) == "[0, 1, 2, 3, 4]");
+        x.erase_after(x.begin());
+        ASSERT(format(x) == "[3, 1, 0, 1, 2, 3, 2, 1, 1, 1]");
+        x.erase_after(++x.begin(), std::next(x.begin(), 8));
+        ASSERT(format(x) == "[3, 1, 1, 1]");
 
         plastic::forward_list d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
         ASSERT(d == d); // NOLINT
         ASSERT(d != e);
+        ASSERT(e != d);
         ASSERT(d < e);
+        ASSERT(e > d);
         ASSERT(d <= f);
+        ASSERT(f >= d);
     }
 
     TEST_METHOD(list) {

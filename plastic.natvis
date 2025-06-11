@@ -50,7 +50,7 @@
         <Expand>
             <LinkedListItems>
                 <Size>size()</Size>
-                <HeadPointer>_sentinel->next</HeadPointer>
+                <HeadPointer>_head.next</HeadPointer>
                 <NextPointer>next</NextPointer>
                 <ValueNode>value</ValueNode>
             </LinkedListItems>
