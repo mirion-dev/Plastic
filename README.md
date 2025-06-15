@@ -10,6 +10,8 @@ The class designs are primarily based on [MSVC STL](https://github.com/microsoft
 
 ![](./img/linear.svg)
 
+\* Amortized complexity.
+
 | | **`inplace_vector`<br>`vector`** | **`inplace_deque`<br>`deque`** | **`forward_list`** | **`list`** |
 | :--: | :--: | :--: | :--: | :--: |
 | **`empty`** | `empty` | `empty` | `empty` | `empty` |
@@ -43,41 +45,19 @@ The class designs are primarily based on [MSVC STL](https://github.com/microsoft
 
 ### Search Trees
 
-| | **`binary_search_tree`** | **`red_black_tree`** | **`avl_tree`** | **`b_tree`** |
-| :--: | :--: | :--: | :--: | :--: |
-| **`empty`** | `empty` | | | |
-| **`size`** | `size` | | | |
-| **`clear`** | `clear` | | | |
-| **`begin`** | `begin` | | | |
-| **`end`** | `end` | | | |
-| **`rbegin`** | `rbegin` | | | |
-| **`rend`** | `rend` | | | |
-| **`front`** | `front` | | | |
-| **`back`** | `back` | | | |
-| **`lower_bound`** | `lower_bound` | | | |
-| **`upper_bound`** | `upper_bound` | | | |
-| **`equal_range`** | `equal_range` | | | |
-| **`find`** | `find` | | | |
-| **`contains`** | `contains` | | | |
-| **`count`** | `count` | | | |
-| **`insert`** | `insert` | | | |
-| **`erase`** | `erase` | | | |
-| **`operator==`** | `operator==` | | | |
-| **`operator<=>`** | `operator<=>` | | | |
+![](./img/trees.svg)
+
+\* Amortized complexity.
+
+Member functions: `empty`, `size`, `max_size`, `clear`, `begin`, `end`, `cbegin`, `cend`, `rbegin`, `rend`, `crbegin`, `crend`, `lower_bound`, `upper_bound`, `equal_range`, `find`, `contains`, `count`, `insert`, `erase`, `swap`, `operator==`, `operator<=>`.
 
 ### Addressable Heaps
 
-| | **`binary_heap`** |
-| :--: | :--: |
-| **`empty`** | `empty` |
-| **`size`** | `size` |
-| **`clear`** | `clear` |
-| **`top`** | `top` |
-| **`push`** | `push` |
-| **`pop`** | `pop` |
-| **`merge`** | `merge` |
-| **`assign`** | `assign` |
-| **`erase`** | `erase` |
+![](./img/heaps.svg)
+
+\* Amortized complexity.
+
+Member functions: `empty`, `size`, `clear`, `top`, `push`, `pop`, `merge`, `assign`, `erase`.
 
 ## Algorithms
 
