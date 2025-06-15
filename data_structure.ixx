@@ -1471,11 +1471,18 @@ namespace plastic {
         node_t* _head;
         std::size_t _size;
 
-        constexpr void _insert_after(node_t* pos, std::size_t count) noexcept {
+        template <class... Args>
+        constexpr node_t* _insert_after(node_t* pos, std::size_t count, const Args&... args) noexcept {
             _size += count;
             while (count-- != 0) {
-                pos->next = new node_t{ {}, pos->next };
+                if constexpr (sizeof...(Args) == 0) {
+                    pos = pos->next = new node_t{ {}, pos->next };
+                }
+                else {
+                    pos = pos->next = new node_t{ args..., pos->next };
+                }
             }
+            return pos;
         }
 
         template <class... Args>
@@ -1483,12 +1490,8 @@ namespace plastic {
             if (new_size <= _size) {
                 erase_after(std::next(end(), new_size), end());
             }
-
-            if constexpr (sizeof...(Args) == 0) {
-                _insert_after(std::next(end(), _size)._ptr, new_size - _size);
-            }
             else {
-                insert_after(std::next(end(), _size), new_size - _size, args...);
+                _insert_after(std::next(end(), _size)._ptr, new_size - _size, args...);
             }
         }
 
@@ -1676,12 +1679,7 @@ namespace plastic {
         }
 
         constexpr iterator insert_after(const_iterator pos, size_type count, const_reference value) noexcept {
-            node_t* i{ pos.base()._ptr };
-            _size += count;
-            while (count-- != 0) {
-                i = i->next = new node_t{ value, i->next };
-            }
-            return i;
+            return _insert_after(pos.base()._ptr, count, value);
         }
 
         template <std::input_iterator It>
@@ -1738,13 +1736,20 @@ namespace plastic {
         node_t* _head;
         std::size_t _size;
 
-        constexpr void _insert(node_t* pos, std::size_t count) noexcept {
+        template <class... Args>
+        constexpr node_t* _insert(node_t* pos, std::size_t count, const Args&... args) noexcept {
             pos = pos->prev;
             _size += count;
             while (count-- != 0) {
-                pos = pos->next = new node_t{ {}, pos, pos->next };
+                if constexpr (sizeof...(Args) == 0) {
+                    pos = pos->next = new node_t{ {}, pos, pos->next };
+                }
+                else {
+                    pos = pos->next = new node_t{ args..., pos, pos->next };
+                }
             }
             pos->next->prev = pos;
+            return pos;
         }
 
         template <class... Args>
@@ -1753,14 +1758,9 @@ namespace plastic {
                 while (_size != new_size) {
                     pop_back();
                 }
-                return;
-            }
-
-            if constexpr (sizeof...(Args) == 0) {
-                _insert(_head, new_size - _size);
             }
             else {
-                insert(end(), new_size - _size, args...);
+                _insert(_head, new_size - _size, args...);
             }
         }
 
@@ -1836,6 +1836,7 @@ namespace plastic {
 
         explicit constexpr list(size_type size) noexcept :
             list() {
+
             _insert(_head, size);
         }
 
@@ -2000,13 +2001,7 @@ namespace plastic {
         }
 
         constexpr iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
-            node_t* i{ pos.base()._ptr->prev };
-            _size += count;
-            while (count-- != 0) {
-                i = i->next = new node_t{ value, i, i->next };
-            }
-            i->next->prev = i;
-            return i;
+            return _insert(pos.base()._ptr, count, value);
         }
 
         template <std::input_iterator It>
