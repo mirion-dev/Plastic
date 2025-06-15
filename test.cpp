@@ -545,9 +545,9 @@ public:
     }
 
     TEST_METHOD(list) {
-        ASSERT(false);
-        plastic::list<int> a, b(4, 4), c{ 3, 2, 1 };
-        ASSERT(format(a) == "[]");
+        plastic::list<int> a(3), b(4, 4), c{ 3, 2, 1 }, x;
+        ASSERT(format(x) == "[]");
+        ASSERT(format(a) == "[0, 0, 0]");
         ASSERT(format(b) == "[4, 4, 4, 4]");
         ASSERT(format(c) == "[3, 2, 1]");
 
@@ -555,55 +555,94 @@ public:
         ASSERT(format(c.rbegin(), c.rend()) == "[1, 2, 3]");
         ASSERT(format(c.crbegin(), c.crend()) == "[1, 2, 3]");
 
-        c = c; // NOLINT
+        x = c;
+        ASSERT(format(x) == "[3, 2, 1]");
+        c = std::move(x);
         ASSERT(format(c) == "[3, 2, 1]");
-        c = b;
-        ASSERT(format(c) == "[4, 4, 4, 4]");
+        x = {};
+        ASSERT(format(x) == "[]");
 
-        ASSERT(a.empty() == true);
+        ASSERT(x.empty() == true);
+        ASSERT(a.empty() == false);
         ASSERT(b.empty() == false);
+        ASSERT(c.empty() == false);
 
-        ASSERT(a.size() == 0);
+        ASSERT(x.size() == 0);
+        ASSERT(a.size() == 3);
         ASSERT(b.size() == 4);
+        ASSERT(c.size() == 3);
 
-        c.clear();
-        ASSERT(format(c) == "[]");
+        ASSERT(x.max_size() == std::numeric_limits<std::size_t>::max());
 
-        c.resize(2);
-        ASSERT(format(c) == "[0, 0]");
-        c.resize(1);
-        ASSERT(format(c) == "[0]");
-        c.resize(5, 1);
-        ASSERT(format(c) == "[0, 1, 1, 1, 1]");
+        x = c;
+        x.clear();
+        ASSERT(format(x) == "[]");
 
+        x = c;
+        x.resize(2);
+        ASSERT(format(x) == "[3, 2]");
+        x.resize(3);
+        ASSERT(format(x) == "[3, 2, 0]");
+        x.resize(5, 1);
+        ASSERT(format(x) == "[3, 2, 0, 1, 1]");
+
+        ASSERT(x.front() == 3);
+        ASSERT(a.front() == 0);
         ASSERT(b.front() == 4);
-        ASSERT(c.front() == 0);
+        ASSERT(c.front() == 3);
 
+        ASSERT(x.back() == 1);
+        ASSERT(a.back() == 0);
         ASSERT(b.back() == 4);
         ASSERT(c.back() == 1);
 
-        c.push_back(2);
-        ASSERT(format(c) == "[0, 1, 1, 1, 1, 2]");
+        x = { 3, 2, 0, 1, 1 };
+        x.push_back(1);
+        ASSERT(format(x) == "[3, 2, 0, 1, 1, 1]");
+        x.push_front(1);
+        ASSERT(format(x) == "[1, 3, 2, 0, 1, 1, 1]");
+        x.push_back(2);
+        ASSERT(format(x) == "[1, 3, 2, 0, 1, 1, 1, 2]");
+        x.push_front(2);
+        ASSERT(format(x) == "[2, 1, 3, 2, 0, 1, 1, 1, 2]");
+        x.push_back(3);
+        ASSERT(format(x) == "[2, 1, 3, 2, 0, 1, 1, 1, 2, 3]");
+        x.push_front(3);
+        ASSERT(format(x) == "[3, 2, 1, 3, 2, 0, 1, 1, 1, 2, 3]");
 
-        c.pop_back();
-        c.pop_back();
-        ASSERT(format(c) == "[0, 1, 1, 1]");
+        x.pop_back();
+        ASSERT(format(x) == "[3, 2, 1, 3, 2, 0, 1, 1, 1, 2]");
+        x.pop_front();
+        ASSERT(format(x) == "[2, 1, 3, 2, 0, 1, 1, 1, 2]");
+        x.pop_back();
+        ASSERT(format(x) == "[2, 1, 3, 2, 0, 1, 1, 1]");
+        x.pop_front();
+        ASSERT(format(x) == "[1, 3, 2, 0, 1, 1, 1]");
+        x.pop_back();
+        ASSERT(format(x) == "[1, 3, 2, 0, 1, 1]");
+        x.pop_front();
+        ASSERT(format(x) == "[3, 2, 0, 1, 1]");
 
-        c.insert(std::next(c.begin(), 2), 3, 2);
-        ASSERT(format(c) == "[0, 1, 2, 2, 2, 1, 1]");
-        c.insert(std::next(c.begin(), 3), { 3, 4, 5 });
-        ASSERT(format(c) == "[0, 1, 2, 3, 4, 5, 2, 2, 1, 1]");
+        x.insert(std::next(x.begin(), 2), 1);
+        ASSERT(format(x) == "[3, 2, 1, 0, 1, 1]");
+        x.insert(--x.end(), 2, 2);
+        ASSERT(format(x) == "[3, 2, 1, 0, 1, 2, 2, 1]");
+        x.insert(std::next(x.begin(), 5), { 2, 3, 2 });
+        ASSERT(format(x) == "[3, 2, 1, 0, 1, 2, 3, 2, 2, 2, 1]");
 
-        c.erase(std::next(c.begin(), 5));
-        ASSERT(format(c) == "[0, 1, 2, 3, 4, 2, 2, 1, 1]");
-        c.erase(std::next(c.begin(), 5), std::prev(c.end()));
-        ASSERT(format(c) == "[0, 1, 2, 3, 4, 1]");
+        x.erase(++x.begin());
+        ASSERT(format(x) == "[3, 1, 0, 1, 2, 3, 2, 2, 2, 1]");
+        x.erase(std::next(x.begin(), 2), std::prev(x.end(), 2));
+        ASSERT(format(x) == "[3, 1, 2, 1]");
 
-        plastic::list d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
+        plastic::list<int> d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
         ASSERT(d == d); // NOLINT
         ASSERT(d != e);
+        ASSERT(e != d);
         ASSERT(d < e);
+        ASSERT(e > d);
         ASSERT(d <= f);
+        ASSERT(f >= d);
     }
 
     TEST_METHOD(binary_search_tree) {

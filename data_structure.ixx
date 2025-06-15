@@ -1739,10 +1739,12 @@ namespace plastic {
         std::size_t _size;
 
         constexpr void _insert(node_t* pos, std::size_t count) noexcept {
+            pos = pos->prev;
             _size += count;
             while (count-- != 0) {
-                pos->prev = new node_t{ {}, pos->prev, pos };
+                pos = pos->next = new node_t{ {}, pos, pos->next };
             }
+            pos->next->prev = pos;
         }
 
         template <class... Args>
