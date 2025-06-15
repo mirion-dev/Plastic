@@ -1738,18 +1738,18 @@ namespace plastic {
 
         template <class... Args>
         constexpr node_t* _insert(node_t* pos, std::size_t count, const Args&... args) noexcept {
-            pos = pos->prev;
+            node_t *prev{ pos->prev }, *i{ prev };
             _size += count;
             while (count-- != 0) {
                 if constexpr (sizeof...(Args) == 0) {
-                    pos = pos->next = new node_t{ {}, pos, pos->next };
+                    i = i->next = new node_t{ {}, i, i->next };
                 }
                 else {
-                    pos = pos->next = new node_t{ args..., pos, pos->next };
+                    i = i->next = new node_t{ args..., i, i->next };
                 }
             }
-            pos->next->prev = pos;
-            return pos;
+            i->next->prev = i;
+            return prev->next;
         }
 
         template <class... Args>
@@ -2006,13 +2006,13 @@ namespace plastic {
 
         template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
-            node_t* i{ pos.base()._ptr->prev };
+            node_t *prev{ pos.base()._ptr->prev }, *i{ prev };
             while (first != last) {
                 i = i->next = new node_t{ *first++, i, i->next };
                 ++_size;
             }
             i->next->prev = i;
-            return i;
+            return prev->next;
         }
 
         constexpr iterator insert(const_iterator pos, std::initializer_list<T> list) noexcept {
