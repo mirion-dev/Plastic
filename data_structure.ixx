@@ -704,7 +704,7 @@ namespace plastic {
                 return _ptr;
             }
 
-            constexpr reference operator[](std::size_t index) const noexcept {
+            constexpr reference operator[](difference_type index) const noexcept {
                 return *(*this + index);
             }
 
@@ -1834,7 +1834,7 @@ namespace plastic {
 
         explicit constexpr list(size_type size) noexcept :
             list() {
-            _insert(end(), size);
+            _insert(_head, size);
         }
 
         constexpr list(size_type size, const T& value) noexcept :
