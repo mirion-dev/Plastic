@@ -2055,9 +2055,9 @@ namespace plastic {
 // search trees (incompleted)
 namespace plastic {
 
-    export template <class T, class Cmp = std::less<T>>
+    export template <class T, class Pr = std::less<T>>
     class binary_search_tree {
-        static constexpr Cmp _cmp{};
+        static constexpr Pr _pred;
 
         struct node {
             node* parent;
@@ -2288,7 +2288,7 @@ namespace plastic {
             node* bound{ _head };
             node* i{ _head->parent };
             while (!i->is_head) {
-                if (!_cmp(i->value, value)) {
+                if (!_pred(i->value, value)) {
                     bound = i;
                     i = i->left;
                 }
@@ -2303,7 +2303,7 @@ namespace plastic {
             node* bound{ _head };
             node* i{ _head->parent };
             while (!i->is_head) {
-                if (_cmp(value, i->value)) {
+                if (_pred(value, i->value)) {
                     bound = i;
                     i = i->left;
                 }
@@ -2320,12 +2320,12 @@ namespace plastic {
 
         const_iterator find(const T& value) const noexcept {
             node* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !_cmp(bound->value, value) ? bound : _head;
+            return !bound->is_head && !_pred(bound->value, value) ? bound : _head;
         }
 
         bool contains(const T& value) const noexcept {
             node* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !_cmp(bound->value, value);
+            return !bound->is_head && !_pred(bound->value, value);
         }
 
         std::size_t count(const T& value) const noexcept {
@@ -2339,7 +2339,7 @@ namespace plastic {
             node* i{ _head->parent };
             while (!i->is_head) {
                 parent = i;
-                is_left = _cmp(value, i->value);
+                is_left = _pred(value, i->value);
                 i = is_left ? i->left : i->right;
             }
 
@@ -2470,9 +2470,9 @@ namespace plastic {
     template <class It>
     explicit binary_search_tree(It, It) -> binary_search_tree<std::iter_value_t<It>>;
 
-    export template <class T, class Cmp = std::less<T>>
+    export template <class T, class Pr = std::less<T>>
     class red_black_tree {
-        static constexpr Cmp _cmp{};
+        static constexpr Pr _pred;
 
         struct node {
             enum class color {
@@ -2510,7 +2510,7 @@ namespace plastic {
                     return { current, parent };
                 }
                 last = p;
-                p = _cmp(value, current->value) ? &current->left : &current->right;
+                p = _pred(value, current->value) ? &current->left : &current->right;
             }
         }
 
@@ -2770,9 +2770,9 @@ namespace plastic {
     template <class It>
     explicit red_black_tree(It, It) -> red_black_tree<std::iter_value_t<It>>;
 
-    export template <class T, class Cmp = std::less<T>>
+    export template <class T, class Pr = std::less<T>>
     class avl_tree {
-        static constexpr Cmp _cmp{};
+        static constexpr Pr _pred;
 
         struct node {
             T value;
@@ -2805,7 +2805,7 @@ namespace plastic {
                     return { current, parent };
                 }
                 last = p;
-                p = _cmp(value, current->value) ? &current->left : &current->right;
+                p = _pred(value, current->value) ? &current->left : &current->right;
             }
         }
 
@@ -3074,9 +3074,9 @@ namespace plastic {
     template <class It>
     explicit avl_tree(It, It) -> avl_tree<std::iter_value_t<It>>;
 
-    export template <class T, std::size_t N = 5, class Cmp = std::less<T>>
+    export template <class T, std::size_t N = 5, class Pr = std::less<T>>
     class b_tree {
-        static constexpr Cmp _cmp{};
+        static constexpr Pr _pred;
         static constexpr std::size_t _min_size{ N - 1 };
         static constexpr std::size_t _max_size{ 2 * N - 1 };
 
@@ -3100,17 +3100,17 @@ namespace plastic {
 // addressable heaps
 namespace plastic {
 
-    export template <class T, class Cmp = std::less<T>>
+    export template <class T, class Pr = std::less<T>>
     class binary_heap {
-        static constexpr Cmp _cmp{};
+        static constexpr Pr _pred;
 
-        vector<T> _data{};
+        vector<T> _data;
 
         void _sift_up(std::size_t index) noexcept {
             T value{ std::move(_data[index]) };
             while (index != 0) {
                 std::size_t parent{ (index - 1) / 2 };
-                if (!_cmp(_data[parent], value)) {
+                if (!_pred(_data[parent], value)) {
                     break;
                 }
                 _data[index] = std::move(_data[parent]);
@@ -3126,10 +3126,10 @@ namespace plastic {
                 if (child >= _data.size()) {
                     break;
                 }
-                if (child + 1 < _data.size() && _cmp(_data[child], _data[child + 1])) {
+                if (child + 1 < _data.size() && _pred(_data[child], _data[child + 1])) {
                     ++child;
                 }
-                if (!_cmp(value, _data[child])) {
+                if (!_pred(value, _data[child])) {
                     break;
                 }
                 _data[index] = std::move(_data[child]);
