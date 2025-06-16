@@ -673,10 +673,14 @@ namespace plastic {
         using const_reference = const T&;
 
         class iterator {
-            friend class inplace_deque;
+            friend inplace_deque;
 
             T* _ptr{};
             inplace_deque* _cont{};
+
+            constexpr iterator(T* ptr, inplace_deque* cont) noexcept :
+                _ptr{ ptr },
+                _cont{ cont } {}
 
             constexpr std::ptrdiff_t _offset() const noexcept {
                 std::ptrdiff_t diff{ _cont->_first - _ptr };
@@ -691,10 +695,6 @@ namespace plastic {
             using iterator_category = std::random_access_iterator_tag;
 
             constexpr iterator() noexcept = default;
-
-            constexpr iterator(T* ptr, inplace_deque* cont) noexcept :
-                _ptr{ ptr },
-                _cont{ cont } {}
 
             constexpr reference operator*() const noexcept {
                 return *_ptr;
@@ -1503,9 +1503,12 @@ namespace plastic {
         using const_reference = const T&;
 
         class iterator {
-            friend class forward_list;
+            friend forward_list;
 
             node* _ptr{};
+
+            constexpr iterator(node* ptr) noexcept :
+                _ptr{ ptr } {}
 
         public:
             using difference_type = std::ptrdiff_t;
@@ -1515,9 +1518,6 @@ namespace plastic {
             using iterator_category = std::forward_iterator_tag;
 
             constexpr iterator() noexcept = default;
-
-            constexpr iterator(node* ptr) noexcept :
-                _ptr{ ptr } {}
 
             constexpr reference operator*() const noexcept {
                 return _ptr->value;
@@ -1772,9 +1772,12 @@ namespace plastic {
         using const_reference = const T&;
 
         class iterator {
-            friend class list;
+            friend list;
 
             node* _ptr{};
+
+            constexpr iterator(node* ptr) noexcept :
+                _ptr{ ptr } {}
 
         public:
             using difference_type = std::ptrdiff_t;
@@ -1784,9 +1787,6 @@ namespace plastic {
             using iterator_category = std::bidirectional_iterator_tag;
 
             constexpr iterator() noexcept = default;
-
-            constexpr iterator(node* ptr) noexcept :
-                _ptr{ ptr } {}
 
             constexpr reference operator*() const noexcept {
                 return _ptr->value;
