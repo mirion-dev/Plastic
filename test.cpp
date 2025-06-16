@@ -5,13 +5,11 @@
 import std;
 import plastic;
 
-template <class T>
-std::string format(const T& arg) {
+std::string format(const auto& arg) {
     return std::format("{}", arg);
 }
 
-template <std::contiguous_iterator It>
-std::string format(It first, std::size_t size) {
+std::string format(std::contiguous_iterator auto first, std::size_t size) {
     return format(std::span{ first, size });
 }
 
@@ -22,9 +20,13 @@ std::string format(It first, It last) {
 
 template <class T, class Cmp>
 std::string format(const plastic::binary_heap<T, Cmp>& heap) {
-    std::vector<T> temp(heap.data(), heap.data() + heap.size());
-    std::ranges::sort(temp, Cmp{});
-    return format(temp);
+    auto copy{ heap };
+    std::vector<T> temp;
+    while (!copy.empty()) {
+        temp.push_back(copy.top());
+        copy.pop();
+    }
+    return format(temp.rbegin(), temp.rend());
 }
 
 TEST_CLASS(data_structure) {

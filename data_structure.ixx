@@ -1463,23 +1463,23 @@ namespace plastic {
 
     export template <class T>
     class forward_list {
-        struct node_t {
+        struct node {
             T value;
-            node_t* next;
+            node* next;
         };
 
-        node_t* _head;
+        node* _head;
         std::size_t _size;
 
         template <class... Args>
-        constexpr node_t* _insert_after(node_t* pos, std::size_t count, const Args&... args) noexcept {
+        constexpr node* _insert_after(node* pos, std::size_t count, const Args&... args) noexcept {
             _size += count;
             while (count-- != 0) {
                 if constexpr (sizeof...(Args) == 0) {
-                    pos = pos->next = new node_t{ {}, pos->next };
+                    pos = pos->next = new node{ {}, pos->next };
                 }
                 else {
-                    pos = pos->next = new node_t{ args..., pos->next };
+                    pos = pos->next = new node{ args..., pos->next };
                 }
             }
             return pos;
@@ -1505,7 +1505,7 @@ namespace plastic {
         class iterator {
             friend class forward_list;
 
-            node_t* _ptr{};
+            node* _ptr{};
 
         public:
             using difference_type = std::ptrdiff_t;
@@ -1516,7 +1516,7 @@ namespace plastic {
 
             constexpr iterator() noexcept = default;
 
-            constexpr iterator(node_t* ptr) noexcept :
+            constexpr iterator(node* ptr) noexcept :
                 _ptr{ ptr } {}
 
             constexpr reference operator*() const noexcept {
@@ -1546,7 +1546,7 @@ namespace plastic {
         using const_iterator = std::const_iterator<iterator>;
 
         constexpr forward_list() noexcept :
-            _head{ new node_t },
+            _head{ new node },
             _size{} {
 
             _head->next = _head;
@@ -1665,7 +1665,7 @@ namespace plastic {
         }
 
         constexpr void push_front(const_reference value) noexcept {
-            _head->next = new node_t{ value, _head->next };
+            _head->next = new node{ value, _head->next };
             ++_size;
         }
 
@@ -1684,9 +1684,9 @@ namespace plastic {
 
         template <std::input_iterator It>
         constexpr iterator insert_after(const_iterator pos, It first, It last) noexcept {
-            node_t* i{ pos.base()._ptr };
+            node* i{ pos.base()._ptr };
             while (first != last) {
-                i = i->next = new node_t{ *first++, i->next };
+                i = i->next = new node{ *first++, i->next };
                 ++_size;
             }
             return i;
@@ -1697,14 +1697,14 @@ namespace plastic {
         }
 
         constexpr iterator erase_after(const_iterator pos) noexcept {
-            node_t* i{ pos.base()._ptr };
+            node* i{ pos.base()._ptr };
             delete std::exchange(i->next, i->next->next);
             --_size;
             return i->next;
         }
 
         constexpr iterator erase_after(const_iterator first, const_iterator last) noexcept {
-            node_t *i{ first.base()._ptr }, *j{ last.base()._ptr };
+            node *i{ first.base()._ptr }, *j{ last.base()._ptr };
             i = std::exchange(i->next, j);
             while (i != j) {
                 delete std::exchange(i, i->next);
@@ -1727,25 +1727,25 @@ namespace plastic {
 
     export template <class T>
     class list {
-        struct node_t {
+        struct node {
             T value;
-            node_t* prev;
-            node_t* next;
+            node* prev;
+            node* next;
         };
 
-        node_t* _head;
+        node* _head;
         std::size_t _size;
 
         template <class... Args>
-        constexpr node_t* _insert(node_t* pos, std::size_t count, const Args&... args) noexcept {
-            node_t *prev{ pos->prev }, *i{ prev };
+        constexpr node* _insert(node* pos, std::size_t count, const Args&... args) noexcept {
+            node *prev{ pos->prev }, *i{ prev };
             _size += count;
             while (count-- != 0) {
                 if constexpr (sizeof...(Args) == 0) {
-                    i = i->next = new node_t{ {}, i, i->next };
+                    i = i->next = new node{ {}, i, i->next };
                 }
                 else {
-                    i = i->next = new node_t{ args..., i, i->next };
+                    i = i->next = new node{ args..., i, i->next };
                 }
             }
             i->next->prev = i;
@@ -1774,7 +1774,7 @@ namespace plastic {
         class iterator {
             friend class list;
 
-            node_t* _ptr{};
+            node* _ptr{};
 
         public:
             using difference_type = std::ptrdiff_t;
@@ -1785,7 +1785,7 @@ namespace plastic {
 
             constexpr iterator() noexcept = default;
 
-            constexpr iterator(node_t* ptr) noexcept :
+            constexpr iterator(node* ptr) noexcept :
                 _ptr{ ptr } {}
 
             constexpr reference operator*() const noexcept {
@@ -1828,7 +1828,7 @@ namespace plastic {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
         constexpr list() noexcept :
-            _head{ new node_t },
+            _head{ new node },
             _size{} {
 
             _head->prev = _head->next = _head;
@@ -1977,7 +1977,7 @@ namespace plastic {
         }
 
         constexpr void push_front(const_reference value) noexcept {
-            _head->next->next->prev = _head->next = new node_t{ value, _head, _head->next };
+            _head->next->next->prev = _head->next = new node{ value, _head, _head->next };
             ++_size;
         }
 
@@ -1987,7 +1987,7 @@ namespace plastic {
         }
 
         constexpr void push_back(const_reference value) noexcept {
-            _head->prev->prev->next = _head->prev = new node_t{ value, _head->prev, _head };
+            _head->prev->prev->next = _head->prev = new node{ value, _head->prev, _head };
             ++_size;
         }
 
@@ -2006,9 +2006,9 @@ namespace plastic {
 
         template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
-            node_t *prev{ pos.base()._ptr->prev }, *i{ prev };
+            node *prev{ pos.base()._ptr->prev }, *i{ prev };
             while (first != last) {
-                i = i->next = new node_t{ *first++, i, i->next };
+                i = i->next = new node{ *first++, i, i->next };
                 ++_size;
             }
             i->next->prev = i;
@@ -2020,7 +2020,7 @@ namespace plastic {
         }
 
         constexpr iterator erase(const_iterator pos) noexcept {
-            node_t* i{ pos.base()._ptr->prev };
+            node* i{ pos.base()._ptr->prev };
             delete std::exchange(i->next, i->next->next);
             --_size;
             i->next->prev = i;
@@ -2028,7 +2028,7 @@ namespace plastic {
         }
 
         constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
-            node_t *i{ first.base()._ptr }, *j{ last.base()._ptr };
+            node *i{ first.base()._ptr }, *j{ last.base()._ptr };
             i->prev->next = j;
             j->prev = i->prev;
             while (i != j) {
