@@ -74,7 +74,6 @@
         <Intrinsic Name="size" Expression="_data.size()"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
-            <ExpandedItem>_data</ExpandedItem>
         </Expand>
     </Type>
 

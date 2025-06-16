@@ -3104,114 +3104,169 @@ namespace plastic {
     class binary_heap {
         static constexpr Pr _pred;
 
-        vector<T> _data;
+        struct node {
+            T value;
+            std::size_t index;
+        };
 
-        void _sift_up(std::size_t index) noexcept {
-            T value{ std::move(_data[index]) };
+        vector<node*> _data;
+
+        constexpr void _set_node(std::size_t index, node* ptr) noexcept {
+            _data[index] = ptr;
+            _data[index]->index = index;
+        }
+
+        constexpr void _sift_up(std::size_t index) noexcept {
+            node* ptr{ _data[index] };
             while (index != 0) {
-                std::size_t parent{ (index - 1) / 2 };
-                if (!_pred(_data[parent], value)) {
+                std::size_t parent{ index - 1 >> 1 };
+                if (!_pred(_data[parent]->value, ptr->value)) {
                     break;
                 }
-                _data[index] = std::move(_data[parent]);
+                _set_node(index, _data[parent]);
                 index = parent;
             }
-            _data[index] = std::move(value);
+            _set_node(index, ptr);
         }
 
-        void _sift_down(std::size_t index) noexcept {
-            T value{ std::move(_data[index]) };
+        constexpr void _sift_down(std::size_t index) noexcept {
+            node* ptr{ _data[index] };
             while (true) {
-                std::size_t child{ index * 2 + 1 };
-                if (child >= _data.size()) {
+                std::size_t child{ (index << 1) + 1 };
+                if (child >= size()) {
                     break;
                 }
-                if (child + 1 < _data.size() && _pred(_data[child], _data[child + 1])) {
+                if (child + 1 < size() && _pred(_data[child]->value, _data[child + 1]->value)) {
                     ++child;
                 }
-                if (!_pred(value, _data[child])) {
+                if (!_pred(ptr->value, _data[child]->value)) {
                     break;
                 }
-                _data[index] = std::move(_data[child]);
+                _set_node(index, _data[child]);
                 index = child;
             }
-            _data[index] = std::move(value);
+            _set_node(index, ptr);
         }
 
-        void _sift_up_down(std::size_t index) noexcept {
+        constexpr void _sift_up_down(std::size_t index) noexcept {
             _sift_up(index);
             _sift_down(index);
         }
 
-        void _make_heap() noexcept {
-            std::size_t i{ _data.size() / 2 };
+        constexpr void _make_heap() noexcept {
+            std::size_t i{ size() >> 1 };
             while (i-- != 0) {
                 _sift_down(i);
             }
         }
 
     public:
-        explicit binary_heap() noexcept = default;
+        using difference_type = std::ptrdiff_t;
+        using size_type = std::size_t;
+        using value_type = T;
+        using reference = T&;
+        using const_reference = const T&;
+
+        class handle {
+            friend binary_heap;
+
+            node* _ptr{};
+
+            constexpr handle(node* ptr) noexcept :
+                _ptr{ ptr } {}
+
+        public:
+            using value_type = T;
+            using pointer = const T*;
+            using reference = const T&;
+
+            constexpr handle() noexcept = default;
+
+            constexpr reference operator*() const noexcept {
+                return _ptr->value;
+            }
+
+            constexpr pointer operator->() const noexcept {
+                return &_ptr->value;
+            }
+
+            friend constexpr bool operator==(handle left, handle right) noexcept {
+                return left._ptr == right._ptr;
+            }
+        };
+
+        constexpr binary_heap() noexcept = default;
 
         template <std::input_iterator It>
-        explicit binary_heap(It first, It last) noexcept :
-            _data(first, last) {
+        constexpr binary_heap(It first, It last) noexcept :
+            _data(std::distance(first, last)) {
 
+            std::size_t index{};
+            for (auto& i : _data) {
+                i = new node{ *first++, index++ };
+            }
             _make_heap();
         }
 
-        explicit binary_heap(std::initializer_list<T> list) noexcept :
+        constexpr binary_heap(std::initializer_list<T> list) noexcept :
             binary_heap(list.begin(), list.end()) {}
 
-        bool empty() const noexcept {
+        constexpr bool empty() const noexcept {
             return _data.empty();
         }
 
-        std::size_t size() const noexcept {
+        constexpr size_type size() const noexcept {
             return _data.size();
         }
 
-        void clear() noexcept {
+        constexpr void clear() noexcept {
+            for (auto& i : _data) {
+                delete i;
+            }
             return _data.clear();
         }
 
-        const T& top() const noexcept {
+        constexpr handle top_handle() const noexcept {
             assert(!_data.empty());
             return _data.front();
         }
 
-        // only for test purposes
-        auto data(this auto&& self) noexcept {
-            return self._data.data();
-        }
-
-        void push(const T& value) noexcept {
-            _data.push_back(value);
-            _sift_up(_data.size() - 1);
-        }
-
-        void pop() noexcept {
+        constexpr const_reference top() const noexcept {
             assert(!_data.empty());
-            _data.front() = std::move(_data.back());
+            return _data.front()->value;
+        }
+
+        constexpr handle push(const_reference value) noexcept {
+            _data.push_back(new node{ value, size() - 1 });
+            _sift_up(size() - 1);
+            return _data.back();
+        }
+
+        constexpr void pop() noexcept {
+            assert(!_data.empty());
+            delete _data.front();
+            _set_node(0, _data.back());
             _data.pop_back();
             _sift_down(0);
         }
 
-        void merge(const binary_heap& other) noexcept {
+        constexpr void merge(const binary_heap& other) noexcept {
             _data.insert(_data.end(), other._data.begin(), other._data.end());
             _make_heap();
         }
 
-        void assign(T* ptr, const T& value) noexcept {
-            *ptr = value;
-            _sift_up_down(ptr - _data.data());
+        constexpr void update(handle pos, const_reference value) noexcept {
+            pos._ptr->value = value;
+            _sift_up_down(pos._ptr->index);
         }
 
-        void erase(T* ptr) noexcept {
-            *ptr = std::move(_data.back());
+        constexpr void erase(handle pos) noexcept {
+            std::size_t index{ pos._ptr->index };
+            delete pos._ptr;
+            _set_node(index, _data.back());
             _data.pop_back();
             if (!_data.empty()) {
-                _sift_up_down(ptr - _data.data());
+                _sift_up_down(index);
             }
         }
     };
