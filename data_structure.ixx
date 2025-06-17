@@ -3044,7 +3044,7 @@ namespace plastic {
 
         vector<node*> _data;
 
-        constexpr void _set_node(std::size_t index, node* ptr) noexcept {
+        constexpr void _set(std::size_t index, node* ptr) noexcept {
             _data[index] = ptr;
             _data[index]->index = index;
         }
@@ -3056,10 +3056,10 @@ namespace plastic {
                 if (!_pred(_data[parent]->value, ptr->value)) {
                     break;
                 }
-                _set_node(index, _data[parent]);
+                _set(index, _data[parent]);
                 index = parent;
             }
-            _set_node(index, ptr);
+            _set(index, ptr);
         }
 
         constexpr void _sift_down(std::size_t index) noexcept {
@@ -3075,10 +3075,10 @@ namespace plastic {
                 if (!_pred(ptr->value, _data[child]->value)) {
                     break;
                 }
-                _set_node(index, _data[child]);
+                _set(index, _data[child]);
                 index = child;
             }
-            _set_node(index, ptr);
+            _set(index, ptr);
         }
 
         constexpr void _sift_up_down(std::size_t index) noexcept {
@@ -3176,7 +3176,7 @@ namespace plastic {
         constexpr void pop() noexcept {
             assert(!_data.empty());
             delete _data.front();
-            _set_node(0, _data.back());
+            _set(0, _data.back());
             _data.pop_back();
             _sift_down(0);
         }
@@ -3194,7 +3194,7 @@ namespace plastic {
         constexpr void erase(handle pos) noexcept {
             std::size_t index{ pos._ptr->index };
             delete pos._ptr;
-            _set_node(index, _data.back());
+            _set(index, _data.back());
             _data.pop_back();
             if (!_data.empty()) {
                 _sift_up_down(index);
