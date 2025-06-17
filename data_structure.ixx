@@ -1164,6 +1164,7 @@ namespace plastic {
                 }
                 plastic::construct(new_middle, new_last, args...);
             }
+            _first = new_first;
             _last = new_last;
         }
 
