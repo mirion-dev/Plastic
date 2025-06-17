@@ -3158,8 +3158,12 @@ namespace plastic {
             return _data.size();
         }
 
+        static constexpr size_type max_size() noexcept {
+            return std::numeric_limits<size_type>::max();
+        }
+
         constexpr void clear() noexcept {
-            for (auto& i : _data) {
+            for (node* i : _data) {
                 delete i;
             }
             return _data.clear();

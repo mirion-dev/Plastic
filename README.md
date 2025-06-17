@@ -57,7 +57,7 @@ Member functions: `empty`, `size`, `max_size`, `clear`, `begin`, `end`, `cbegin`
 
 \* Amortized complexity.
 
-Member functions: `empty`, `size`, `clear`, `top_handle`, `top`, `push`, `pop`, `merge`, `update`, `erase`.
+Member functions: `empty`, `size`, `max_size`, `clear`, `top_handle`, `top`, `push`, `pop`, `merge`, `update`, `erase`.
 
 ## Algorithms
 
