@@ -248,28 +248,18 @@ namespace plastic {
         constexpr iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
             assert(size() + count <= N);
             T* i{ pos.base() };
-            if (count == 0) {
-                return i;
-            }
-
-            std::fill(i, std::move_backward(i, _last, _last + count), value);
-            _last += count;
-
+            T* new_last{ _last + count };
+            std::fill(i, std::move_backward(i, _last, new_last), value);
+            _last = new_last;
             return i;
         }
 
         template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
             T* i{ pos.base() };
-            if (first == last) {
-                return i;
-            }
-
-            std::ptrdiff_t count{ std::distance(first, last) };
-            assert(size() + count <= N);
-            std::copy_backward(first, last, std::move_backward(i, _last, _last + count));
-            _last += count;
-
+            T* new_last{ std::uninitialized_copy(first, last, _last) };
+            std::rotate(i, _last, new_last);
+            _last = new_last;
             return i;
         }
 
@@ -287,14 +277,9 @@ namespace plastic {
 
         constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
             T *i{ first.base() }, *s{ last.base() };
-            if (i == s) {
-                return i;
-            }
-
             T* new_last{ std::move(s, _last, i) };
             std::destroy(new_last, _last);
             _last = new_last;
-
             return i;
         }
 
@@ -381,10 +366,10 @@ namespace plastic {
         }
 
         template <std::input_iterator It>
-        constexpr vector(It first, It last) noexcept :
-            vector(uninitialized, std::distance(first, last)) {
-
-            std::uninitialized_copy(first, last, _begin);
+        constexpr vector(It first, It last) noexcept {
+            while (first != last) {
+                push_back(*first++);
+            }
         }
 
         constexpr vector(std::initializer_list<T> list) noexcept :
@@ -561,10 +546,6 @@ namespace plastic {
 
         constexpr iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
             T* i{ pos.base() };
-            if (count == 0) {
-                return i;
-            }
-
             if (_end - _last < static_cast<std::ptrdiff_t>(count)) {
                 std::ptrdiff_t offset{ i - _begin };
                 _extend(count);
@@ -573,27 +554,17 @@ namespace plastic {
 
             std::fill(i, std::move_backward(i, _last, _last + count), value);
             _last += count;
-
             return i;
         }
 
         template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
             T* i{ pos.base() };
-            if (first == last) {
-                return i;
+            std::ptrdiff_t offset1{ i - _begin }, offset2{ _last - _begin };
+            while (first != last) {
+                push_back(*first++);
             }
-
-            std::ptrdiff_t count{ std::distance(first, last) };
-            if (_end - _last < count) {
-                std::ptrdiff_t offset{ i - _begin };
-                _extend(count);
-                i = _begin + offset;
-            }
-
-            std::copy_backward(first, last, std::move_backward(i, _last, _last + count));
-            _last += count;
-
+            std::rotate(_begin + offset1, _begin + offset2, _last);
             return i;
         }
 
@@ -611,14 +582,9 @@ namespace plastic {
 
         constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
             T *i{ first.base() }, *s{ last.base() };
-            if (i == s) {
-                return i;
-            }
-
             T* new_last{ std::move(s, _last, i) };
             std::destroy(new_last, _last);
             _last = new_last;
-
             return i;
         }
 
@@ -1026,28 +992,18 @@ namespace plastic {
         constexpr iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
             assert(size() + count <= N);
             iterator i{ pos.base() };
-            if (count == 0) {
-                return i;
-            }
-
-            std::fill(i, std::move_backward(i, end(), end() + count), value);
-            _last = (end() + count)._ptr;
-
+            iterator new_last{ end() + count };
+            std::fill(i, std::move_backward(i, end(), new_last), value);
+            _last = new_last._ptr;
             return i;
         }
 
         template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
             iterator i{ pos.base() };
-            if (first == last) {
-                return i;
-            }
-
-            std::ptrdiff_t count{ std::distance(first, last) };
-            assert(size() + count <= N);
-            std::copy_backward(first, last, std::move_backward(i, end(), end() + count));
-            _last = (end() + count)._ptr;
-
+            iterator new_last{ std::uninitialized_copy(first, last, end()) };
+            std::rotate(i, end(), new_last);
+            _last = new_last._ptr;
             return i;
         }
 
@@ -1065,14 +1021,9 @@ namespace plastic {
 
         constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
             iterator i{ first.base() }, s{ last.base() };
-            if (i == s) {
-                return i;
-            }
-
-            T* new_last{ std::move(s, end(), i)._ptr };
-            std::destroy(new_last, _last);
-            _last = new_last;
-
+            iterator new_last{ std::move(s, end(), i) };
+            std::destroy(new_last, end());
+            _last = new_last._ptr;
             return i;
         }
 
@@ -1196,10 +1147,10 @@ namespace plastic {
         }
 
         template <std::input_iterator It>
-        constexpr deque(It first, It last) noexcept :
-            deque(uninitialized, std::distance(first, last)) {
-
-            std::uninitialized_copy(first, last, _first);
+        constexpr deque(It first, It last) noexcept {
+            while (first != last) {
+                push_back(*first++);
+            }
         }
 
         constexpr deque(std::initializer_list<T> list) noexcept :
@@ -1389,10 +1340,6 @@ namespace plastic {
 
         constexpr iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
             T* i{ pos.base() };
-            if (count == 0) {
-                return i;
-            }
-
             if (_end - _last < static_cast<std::ptrdiff_t>(count)) {
                 std::ptrdiff_t offset{ i - _begin };
                 _extend(count, 0);
@@ -1401,27 +1348,17 @@ namespace plastic {
 
             std::fill(i, std::move_backward(i, _last, _last + count), value);
             _last += count;
-
             return i;
         }
 
         template <std::input_iterator It>
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
             T* i{ pos.base() };
-            if (first == last) {
-                return i;
+            std::ptrdiff_t offset1{ i - _first }, offset2{ _last - _first };
+            while (first != last) {
+                push_back(*first++);
             }
-
-            std::ptrdiff_t count{ std::distance(first, last) };
-            if (_end - _last < count) {
-                std::ptrdiff_t offset{ i - _begin };
-                _extend(count, 0);
-                i = _begin + offset;
-            }
-
-            std::copy_backward(first, last, std::move_backward(i, _last, _last + count));
-            _last += count;
-
+            std::rotate(_first + offset1, _first + offset2, _last);
             return i;
         }
 
@@ -1439,14 +1376,9 @@ namespace plastic {
 
         constexpr iterator erase(const_iterator first, const_iterator last) noexcept {
             T *i{ first.base() }, *s{ last.base() };
-            if (i == s) {
-                return i;
-            }
-
             T* new_last{ std::move(s, _last, i) };
             std::destroy(new_last, _last);
             _last = new_last;
-
             return i;
         }
 
@@ -3199,12 +3131,10 @@ namespace plastic {
         constexpr binary_heap() noexcept = default;
 
         template <std::input_iterator It>
-        constexpr binary_heap(It first, It last) noexcept :
-            _data(std::distance(first, last)) {
-
+        constexpr binary_heap(It first, It last) noexcept {
             std::size_t index{};
-            for (auto& i : _data) {
-                i = new node{ *first++, index++ };
+            while (first != last) {
+                _data.push_back(new node{ *first++, index++ });
             }
             _make_heap();
         }
