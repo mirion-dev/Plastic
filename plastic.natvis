@@ -70,13 +70,6 @@
         </Expand>
     </Type>
 
-    <Type Name="plastic::binary_heap&lt;*&gt;">
-        <Intrinsic Name="size" Expression="_data.size()"/>
-        <DisplayString>{{ size={size()} }}</DisplayString>
-        <Expand>
-        </Expand>
-    </Type>
-
     <Type Name="plastic::binary_search_tree&lt;*&gt;">
         <Intrinsic Name="size" Expression="_size"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
@@ -88,6 +81,17 @@
                 <RightPointer>right</RightPointer>
                 <ValueNode Condition="!is_head">value</ValueNode>
             </TreeItems>
+        </Expand>
+    </Type>
+
+    <Type Name="plastic::binary_heap&lt;*&gt;">
+        <Intrinsic Name="size" Expression="_data.size()"/>
+        <DisplayString>{{ size={size()} }}</DisplayString>
+        <Expand>
+            <IndexListItems>
+                <Size>size()</Size>
+                <ValueNode>_data._begin[$i]->value</ValueNode>
+            </IndexListItems>
         </Expand>
     </Type>
 
