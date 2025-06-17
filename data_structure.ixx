@@ -368,7 +368,8 @@ namespace plastic {
         template <std::input_iterator It>
         constexpr vector(It first, It last) noexcept {
             while (first != last) {
-                push_back(*first++);
+                push_back(*first);
+                ++first;
             }
         }
 
@@ -562,7 +563,8 @@ namespace plastic {
             T* i{ pos.base() };
             std::ptrdiff_t offset1{ i - _begin }, offset2{ _last - _begin };
             while (first != last) {
-                push_back(*first++);
+                push_back(*first);
+                ++first;
             }
             std::rotate(_begin + offset1, _begin + offset2, _last);
             return i;
@@ -1149,7 +1151,8 @@ namespace plastic {
         template <std::input_iterator It>
         constexpr deque(It first, It last) noexcept {
             while (first != last) {
-                push_back(*first++);
+                push_back(*first);
+                ++first;
             }
         }
 
@@ -1356,7 +1359,8 @@ namespace plastic {
             T* i{ pos.base() };
             std::ptrdiff_t offset1{ i - _first }, offset2{ _last - _first };
             while (first != last) {
-                push_back(*first++);
+                push_back(*first);
+                ++first;
             }
             std::rotate(_first + offset1, _first + offset2, _last);
             return i;
@@ -1619,7 +1623,8 @@ namespace plastic {
         constexpr iterator insert_after(const_iterator pos, It first, It last) noexcept {
             node* i{ pos.base()._ptr };
             while (first != last) {
-                i = i->next = new node{ *first++, i->next };
+                i = i->next = new node{ *first, i->next };
+                ++first;
                 ++_size;
             }
             return i;
@@ -1941,7 +1946,8 @@ namespace plastic {
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
             node *prev{ pos.base()._ptr->prev }, *i{ prev };
             while (first != last) {
-                i = i->next = new node{ *first++, i, i->next };
+                i = i->next = new node{ *first, i, i->next };
+                ++first;
                 ++_size;
             }
             i->next->prev = i;
@@ -2302,7 +2308,8 @@ namespace plastic {
         template <std::input_iterator It>
         void insert(It first, It last) noexcept {
             while (first != last) {
-                insert(*first++);
+                insert(*first);
+                ++first;
             }
         }
 
@@ -3134,7 +3141,8 @@ namespace plastic {
         constexpr binary_heap(It first, It last) noexcept {
             std::size_t index{};
             while (first != last) {
-                _data.push_back(new node{ *first++, index++ });
+                _data.push_back(new node{ *first, index++ });
+                ++first;
             }
             _make_heap();
         }
