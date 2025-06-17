@@ -1996,8 +1996,6 @@ namespace plastic {
 
     export template <class T, class Pr = std::less<T>>
     class binary_search_tree {
-        static constexpr Pr _pred;
-
         struct node {
             node* parent;
             node* left;
@@ -2038,6 +2036,7 @@ namespace plastic {
             }
         };
 
+        Pr _pred;
         node* _head;
         std::size_t _size;
 
@@ -2412,8 +2411,6 @@ namespace plastic {
 
     export template <class T, class Pr = std::less<T>>
     class red_black_tree {
-        static constexpr Pr _pred;
-
         struct node {
             enum class color {
                 red,
@@ -2428,6 +2425,7 @@ namespace plastic {
             node* right;
         };
 
+        Pr _pred;
         node* _root;
         std::size_t _size;
 
@@ -2712,8 +2710,6 @@ namespace plastic {
 
     export template <class T, class Pr = std::less<T>>
     class avl_tree {
-        static constexpr Pr _pred;
-
         struct node {
             T value;
             std::size_t count;
@@ -2723,6 +2719,7 @@ namespace plastic {
             node* right;
         };
 
+        Pr _pred;
         node* _root;
         std::size_t _size;
 
@@ -3016,7 +3013,6 @@ namespace plastic {
 
     export template <class T, std::size_t N = 5, class Pr = std::less<T>>
     class b_tree {
-        static constexpr Pr _pred;
         static constexpr std::size_t _min_size{ N - 1 };
         static constexpr std::size_t _max_size{ 2 * N - 1 };
 
@@ -3026,6 +3022,7 @@ namespace plastic {
             std::size_t size;
         };
 
+        Pr _pred;
         node* _root;
         std::size_t _size;
 
@@ -3042,13 +3039,12 @@ namespace plastic {
 
     export template <class T, class Pr = std::less<T>>
     class binary_heap {
-        static constexpr Pr _pred;
-
         struct node {
             T value;
             std::size_t index;
         };
 
+        Pr _pred;
         vector<node*> _data;
 
         constexpr void _set(std::size_t index, node* ptr) noexcept {
