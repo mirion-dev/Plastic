@@ -3084,7 +3084,7 @@ namespace plastic {
             _set(index, ptr);
         }
 
-        constexpr void _sift_up_down(std::size_t index) noexcept {
+        constexpr void _sift(std::size_t index) noexcept {
             _sift_up(index);
             _sift_down(index);
         }
@@ -3166,27 +3166,30 @@ namespace plastic {
         }
 
         constexpr handle top_handle() const noexcept {
-            assert(!_data.empty());
+            assert(!empty());
             return _data.front();
         }
 
         constexpr const_reference top() const noexcept {
-            assert(!_data.empty());
+            assert(!empty());
             return _data.front()->value;
         }
 
         constexpr handle push(const_reference value) noexcept {
-            _data.push_back(new node{ value, size() - 1 });
+            auto ptr{ new node{ value, size() } };
+            _data.push_back(ptr);
             _sift_up(size() - 1);
-            return _data.back();
+            return ptr;
         }
 
         constexpr void pop() noexcept {
-            assert(!_data.empty());
+            assert(!empty());
             delete _data.front();
             _set(0, _data.back());
             _data.pop_back();
+            if (!empty()) {
             _sift_down(0);
+        }
         }
 
         constexpr void merge(const binary_heap& other) noexcept {
@@ -3196,7 +3199,7 @@ namespace plastic {
 
         constexpr void update(handle pos, const_reference value) noexcept {
             pos._ptr->value = value;
-            _sift_up_down(pos._ptr->index);
+            _sift(pos._ptr->index);
         }
 
         constexpr void erase(handle pos) noexcept {
@@ -3204,8 +3207,8 @@ namespace plastic {
             delete pos._ptr;
             _set(index, _data.back());
             _data.pop_back();
-            if (!_data.empty()) {
-                _sift_up_down(index);
+            if (!empty()) {
+                _sift(index);
             }
         }
     };
