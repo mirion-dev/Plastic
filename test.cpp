@@ -18,8 +18,8 @@ std::string format(It first, It last) {
     return format(std::ranges::subrange{ first, last });
 }
 
-template <class T, class Cmp>
-std::string format(const plastic::binary_heap<T, Cmp>& heap) {
+template <class T, class Pr>
+std::string format(const plastic::binary_heap<T, Pr>& heap) {
     auto copy{ heap };
     std::vector<T> temp;
     while (!copy.empty()) {
@@ -719,45 +719,71 @@ public:
     }
 
     TEST_METHOD(binary_heap) {
-        ASSERT(false);
-        plastic::binary_heap<int> a, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 };
-        ASSERT(format(a) == "[]");
+        plastic::binary_heap<int> a{ 0, 0, 0 }, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 },x;
+        ASSERT(format(x) == "[]");
+        ASSERT(format(a) == "[0, 0, 0]");
         ASSERT(format(b) == "[4, 4, 4, 4]");
         ASSERT(format(c) == "[1, 2, 3]");
 
-        c = c; // NOLINT
+        x = c;
+        ASSERT(format(x) == "[1, 2, 3]");
+        c = std::move(x);
         ASSERT(format(c) == "[1, 2, 3]");
-        c = b;
-        ASSERT(format(c) == "[4, 4, 4, 4]");
+        x = {};
+        ASSERT(format(x) == "[]");
 
-        ASSERT(a.empty() == true);
+        ASSERT(x.empty() == true);
+        ASSERT(a.empty() == false);
         ASSERT(b.empty() == false);
+        ASSERT(c.empty() == false);
 
-        ASSERT(a.size() == 0);
+        ASSERT(x.size() == 0);
+        ASSERT(a.size() == 3);
         ASSERT(b.size() == 4);
+        ASSERT(c.size() == 3);
 
-        c.clear();
-        ASSERT(format(c) == "[]");
+        ASSERT(x.max_size() == std::numeric_limits<std::size_t>::max());
 
+        x = c;
+        x.clear();
+        ASSERT(format(x) == "[]");
+
+        ASSERT(a.top() == 0);
         ASSERT(b.top() == 4);
+        ASSERT(c.top() == 3);
 
-        c.push(4);
-        c.push(6);
-        c.push(2);
-        c.push(8);
-        ASSERT(format(c) == "[2, 4, 6, 8]");
+        x = { 3, 2, 0, 1, 1 };
+        ASSERT(format(x) == "[0, 1, 1, 2, 3]");
+        auto h1{ x.push(0) };
+        ASSERT(format(x) == "[0, 0, 1, 1, 2, 3]");
+        x.push(4);
+        ASSERT(format(x) == "[0, 0, 1, 1, 2, 3, 4]");
+        x.push(3);
+        ASSERT(format(x) == "[0, 0, 1, 1, 2, 3, 3, 4]");
+        auto h2{ x.push(1) };
+        ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 3, 4]");
 
-        c.pop();
-        ASSERT(format(c) == "[2, 4, 6]");
+        x.pop();
+        ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 3]");
+        x.pop();
+        ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3]");
+        x.pop();
+        ASSERT(format(x) == "[0, 0, 1, 1, 1, 2]");
 
-        c.merge(plastic::binary_heap{ 3, 1, 7 });
-        ASSERT(format(c) == "[1, 2, 3, 4, 6, 7]");
+        x.merge({ 3, 1, 4 });
+        ASSERT(format(x) == "[0, 0, 1, 1, 1, 1, 2, 3, 4]");
 
-        c.assign(c.data(), 5);
-        ASSERT(format(c) == "[1, 2, 3, 4, 5, 6]");
+        x.update(h1, 5);
+        ASSERT(format(x) == "[0, 1, 1, 1, 1, 2, 3, 4, 5]");
+        x.update(h2, 0);
+        ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 4, 5]");
+        x.update(h1, 3);
+        ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 3, 4]");
 
-        c.erase(c.data());
-        ASSERT(format(c) == "[1, 2, 3, 4, 5]");
+        x.erase(h1);
+        ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 4]");
+        x.erase(h2);
+        ASSERT(format(x) == "[0, 1, 1, 1, 2, 3, 4]");
     }
 
 };
