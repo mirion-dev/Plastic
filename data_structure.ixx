@@ -3143,6 +3143,41 @@ namespace plastic {
             _make_heap();
         }
 
+        constexpr binary_heap(const binary_heap& other) noexcept :
+            _data(other.size()) {
+
+            for (std::size_t i{}, n{ size() }; i != n; ++i) {
+                _data[i] = new node{ *other._data[i] };
+            }
+        }
+
+        constexpr binary_heap(binary_heap&& other) noexcept {
+            swap(other);
+        }
+
+        constexpr ~binary_heap() noexcept {
+            clear();
+        }
+
+        constexpr binary_heap& operator=(const binary_heap& other) noexcept {
+            binary_heap temp(other);
+            swap(temp);
+            return *this;
+        }
+
+        constexpr binary_heap& operator=(binary_heap&& other) noexcept {
+            swap(other);
+            return *this;
+        }
+
+        constexpr void swap(binary_heap& other) noexcept {
+            std::swap(_data, other._data);
+        }
+
+        friend constexpr void swap(binary_heap& left, binary_heap& right) noexcept {
+            left.swap(right);
+        }
+
         constexpr binary_heap(std::initializer_list<T> list) noexcept :
             binary_heap(list.begin(), list.end()) {}
 
@@ -3188,12 +3223,15 @@ namespace plastic {
             _set(0, _data.back());
             _data.pop_back();
             if (!empty()) {
-            _sift_down(0);
-        }
+                _sift_down(0);
+            }
         }
 
         constexpr void merge(const binary_heap& other) noexcept {
-            _data.insert(_data.end(), other._data.begin(), other._data.end());
+            _data.insert(_data.end(), other.size(), {});
+            for (std::size_t i{}, n{ other.size() }, m{ size() }; i != n; ++i) {
+                _data[m + i] = new node{ *other._data[i] };
+            }
             _make_heap();
         }
 
