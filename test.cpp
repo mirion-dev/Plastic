@@ -752,6 +752,10 @@ public:
         ASSERT(b.top() == 4);
         ASSERT(c.top() == 3);
 
+        ASSERT(*a.top_handle() == 0);
+        ASSERT(*b.top_handle() == 4);
+        ASSERT(*c.top_handle() == 3);
+
         x = { 3, 2, 0, 1, 1 };
         ASSERT(format(x) == "[0, 1, 1, 2, 3]");
         auto h1{ x.push(0) };
@@ -777,7 +781,7 @@ public:
         ASSERT(format(x) == "[0, 1, 1, 1, 1, 2, 3, 4, 5]");
         x.update(h2, 0);
         ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 4, 5]");
-        x.update(h1, 3);
+        x.update(x.top_handle(), 3);
         ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 3, 4]");
 
         x.erase(h1);

@@ -86,8 +86,10 @@
 
     <Type Name="plastic::binary_heap&lt;*&gt;">
         <Intrinsic Name="size" Expression="_data.size()"/>
+        <Intrinsic Name="pred" Expression="_pred"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
+            <Item Name="[comparator]">pred()</Item>
             <IndexListItems>
                 <Size>size()</Size>
                 <ValueNode>_data._begin[$i]->value</ValueNode>
