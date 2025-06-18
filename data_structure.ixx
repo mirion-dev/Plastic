@@ -2482,6 +2482,7 @@ namespace plastic {
                 _data.push_back(new node{ index++, *first });
                 ++first;
             }
+
             _make_heap();
         }
 
@@ -2545,12 +2546,12 @@ namespace plastic {
 
         handle top_handle() const noexcept {
             assert(!empty());
-            return _data.front();
+            return _data[0];
         }
 
         const_reference top() const noexcept {
             assert(!empty());
-            return _data.front()->value;
+            return _data[0]->value;
         }
 
         handle push(const_reference value) noexcept {
@@ -2563,7 +2564,7 @@ namespace plastic {
 
         void pop() noexcept {
             assert(!empty());
-            delete _data.front();
+            delete _data[0];
             if (size() == 1) {
                 _data.pop_back();
             }
@@ -2576,17 +2577,21 @@ namespace plastic {
 
         void merge(const binary_heap& other) noexcept {
             _data.reserve(size() + other.size());
+
             std::size_t index{ size() };
             for (node* i : other._data) {
                 _data.push_back(new node{ index++, i->value });
             }
+
             _make_heap();
         }
 
         void update(handle pos, const_reference new_value) noexcept {
-            auto [index, value]{ *pos._ptr };
+            std::size_t index{ pos._ptr->index };
+            assert(index < size());
+            bool is_greater{ _pred(pos._ptr->value, new_value) };
             pos._ptr->value = new_value;
-            if (_pred(value, new_value)) {
+            if (is_greater) {
                 _sift_up(index);
             }
             else {
@@ -2595,22 +2600,22 @@ namespace plastic {
         }
 
         void erase(handle pos) noexcept {
-            auto [index, value]{ *pos._ptr };
-            delete pos._ptr;
+            std::size_t index{ pos._ptr->index };
+            assert(index < size());
             if (index == size() - 1) {
                 _data.pop_back();
             }
             else {
-                const T& new_value{ _data.back()->value };
                 _set(index, _data.back());
                 _data.pop_back();
-                if (_pred(value, new_value)) {
+                if (_pred(pos._ptr->value, _data[index]->value)) {
                     _sift_up(index);
                 }
                 else {
                     _sift_down(index);
                 }
             }
+            delete pos._ptr;
         }
     };
 
