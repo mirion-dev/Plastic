@@ -25,11 +25,11 @@ template <class Hp>
         heap.pop();
     }
 std::string format(const Hp& heap) {
-    auto copy{ heap };
+    auto clone{ heap };
     std::vector<typename Hp::value_type> temp;
-    while (!copy.empty()) {
-        temp.push_back(copy.top());
-        copy.pop();
+    while (!clone.empty()) {
+        temp.push_back(clone.top());
+        clone.pop();
     }
     return format(temp | std::views::reverse);
 }

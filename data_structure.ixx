@@ -2486,6 +2486,9 @@ namespace plastic {
             _make_heap();
         }
 
+        binary_heap(std::initializer_list<T> list) noexcept :
+            binary_heap(list.begin(), list.end()) {}
+
         binary_heap(const binary_heap& other) noexcept :
             _data(other.size()) {
 
@@ -2521,9 +2524,6 @@ namespace plastic {
         friend void swap(binary_heap& left, binary_heap& right) noexcept {
             left.swap(right);
         }
-
-        binary_heap(std::initializer_list<T> list) noexcept :
-            binary_heap(list.begin(), list.end()) {}
 
         bool empty() const noexcept {
             return _data.empty();
