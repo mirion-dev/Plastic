@@ -2001,7 +2001,7 @@ namespace plastic {
             node* left;
             node* right;
             T value;
-            bool is_head;
+            unsigned char is_head;
 
             node* leftmost() noexcept {
                 node* i{ this };
