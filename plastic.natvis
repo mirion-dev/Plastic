@@ -72,8 +72,10 @@
 
     <Type Name="plastic::binary_search_tree&lt;*&gt;">
         <Intrinsic Name="size" Expression="_size"/>
+        <Intrinsic Name="pred" Expression="_pred"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
+            <Item Name="[comparator]">pred()</Item>
             <TreeItems>
                 <Size>size()</Size>
                 <HeadPointer>_head->parent</HeadPointer>
