@@ -2417,26 +2417,26 @@ namespace plastic {
         Pr _pred;
         vector<node*> _data;
 
-        void _set(std::size_t index, node* ptr) noexcept {
-            _data[index] = ptr;
+        void _set(std::size_t index, node* new_node) noexcept {
+            _data[index] = new_node;
             _data[index]->index = index;
         }
 
         void _sift_up(std::size_t index) noexcept {
-            node* ptr{ _data[index] };
+            node* temp{ _data[index] };
             while (index != 0) {
                 std::size_t parent{ index - 1 >> 1 };
-                if (!_pred(_data[parent]->value, ptr->value)) {
+                if (!_pred(_data[parent]->value, temp->value)) {
                     break;
                 }
                 _set(index, _data[parent]);
                 index = parent;
             }
-            _set(index, ptr);
+            _set(index, temp);
         }
 
         void _sift_down(std::size_t index) noexcept {
-            node* ptr{ _data[index] };
+            node* temp{ _data[index] };
             while (true) {
                 std::size_t child{ (index << 1) + 1 };
                 if (child >= size()) {
@@ -2445,13 +2445,13 @@ namespace plastic {
                 if (child + 1 < size() && _pred(_data[child]->value, _data[child + 1]->value)) {
                     ++child;
                 }
-                if (!_pred(ptr->value, _data[child]->value)) {
+                if (!_pred(temp->value, _data[child]->value)) {
                     break;
                 }
                 _set(index, _data[child]);
                 index = child;
             }
-            _set(index, ptr);
+            _set(index, temp);
         }
 
         void _make_heap() noexcept {
@@ -2580,10 +2580,10 @@ namespace plastic {
 
         handle push(const_reference value) noexcept {
             std::size_t index{ size() };
-            auto ptr{ new node{ index, value } };
-            _data.push_back(ptr);
+            auto new_node{ new node{ index, value } };
+            _data.push_back(new_node);
             _sift_up(index);
-            return ptr;
+            return new_node;
         }
 
         void pop() noexcept {
