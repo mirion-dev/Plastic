@@ -2022,7 +2022,7 @@ namespace plastic {
                 if (is_head) {
                     return head;
                 }
-                return new node{ this, left->clone(head), right->clone(head), value, false };
+                return new node{ this, left->clone(head), right->clone(head), false, value };
             }
         };
 
@@ -2031,10 +2031,19 @@ namespace plastic {
         std::size_t _size;
 
     public:
-        class iterator {
-            friend class binary_search_tree;
+        using difference_type = std::ptrdiff_t;
+        using size_type = std::size_t;
+        using value_type = T;
+        using reference = T&;
+        using const_reference = const T&;
 
-            node* _ptr;
+        class iterator {
+            friend binary_search_tree;
+
+            node* _ptr{};
+
+            iterator(node* ptr) noexcept :
+                _ptr{ ptr } {}
 
         public:
             using difference_type = std::ptrdiff_t;
@@ -2043,8 +2052,7 @@ namespace plastic {
             using reference = const T&;
             using iterator_category = std::bidirectional_iterator_tag;
 
-            iterator(node* ptr = {}) noexcept :
-                _ptr{ ptr } {}
+            iterator() noexcept = default;
 
             reference operator*() const noexcept {
                 return _ptr->value;
@@ -2124,11 +2132,13 @@ namespace plastic {
         binary_search_tree(const binary_search_tree& other) noexcept :
             binary_search_tree() {
 
-            if (other._size != 0) {
-                _head->parent = other._head->clone(_head);
-                _head->left = _head->parent->leftmost();
-                _head->right = _head->parent->rightmost();
-            }
+            _head->parent = other._head->clone(_head);
+            _head->left = _head->parent->leftmost();
+            _head->right = _head->parent->rightmost();
+        }
+
+        binary_search_tree(binary_search_tree&& other) noexcept {
+            swap(other);
         }
 
         ~binary_search_tree() noexcept {
@@ -2137,23 +2147,36 @@ namespace plastic {
         }
 
         binary_search_tree& operator=(const binary_search_tree& other) noexcept {
-            if (this == &other) {
-                return *this;
-            }
-
-            binary_search_tree temp{ other };
-            std::swap(_head, temp._head);
-            std::swap(_size, temp._size);
-
+            binary_search_tree temp(other);
+            swap(temp);
             return *this;
+        }
+
+        binary_search_tree& operator=(binary_search_tree&& other) noexcept {
+            swap(other);
+            return *this;
+        }
+
+        void swap(binary_search_tree& other) noexcept {
+            std::swap(_pred, other._pred);
+            std::swap(_head, other._head);
+            std::swap(_size, other._size);
+        }
+
+        friend void swap(binary_search_tree& left, binary_search_tree& right) noexcept {
+            left.swap(right);
         }
 
         bool empty() const noexcept {
             return _size == 0;
         }
 
-        std::size_t size() const noexcept {
+        size_type size() const noexcept {
             return _size;
+        }
+
+        static size_type max_size() noexcept {
+            return std::numeric_limits<size_type>::max();
         }
 
         void clear() noexcept {
@@ -2169,30 +2192,30 @@ namespace plastic {
         }
 
         const_iterator cbegin() const noexcept {
-            return _head->right;
+            return begin();
         }
 
         const_iterator cend() const noexcept {
-            return _head;
+            return end();
         }
 
         const_reverse_iterator rbegin() const noexcept {
-            return reverse_iterator{ _head };
+            return reverse_iterator{ end() };
         }
 
         const_reverse_iterator rend() const noexcept {
-            return reverse_iterator{ _head->right };
+            return reverse_iterator{ begin() };
         }
 
         const_reverse_iterator crbegin() const noexcept {
-            return reverse_iterator{ _head };
+            return rbegin();
         }
 
         const_reverse_iterator crend() const noexcept {
-            return reverse_iterator{ _head->right };
+            return rend();
         }
 
-        const_iterator lower_bound(const T& value) const noexcept {
+        const_iterator lower_bound(const_reference value) const noexcept {
             node* bound{ _head };
             node* i{ _head->parent };
             while (!i->is_head) {
@@ -2207,7 +2230,7 @@ namespace plastic {
             return bound;
         }
 
-        const_iterator upper_bound(const T& value) const noexcept {
+        const_iterator upper_bound(const_reference value) const noexcept {
             node* bound{ _head };
             node* i{ _head->parent };
             while (!i->is_head) {
@@ -2222,26 +2245,26 @@ namespace plastic {
             return bound;
         }
 
-        std::pair<const_iterator, const_iterator> equal_range(const T& value) const noexcept {
+        std::pair<const_iterator, const_iterator> equal_range(const_reference value) const noexcept {
             return { lower_bound(value), upper_bound(value) };
         }
 
-        const_iterator find(const T& value) const noexcept {
+        const_iterator find(const_reference value) const noexcept {
             node* bound{ lower_bound(value)._ptr };
             return !bound->is_head && !_pred(bound->value, value) ? bound : _head;
         }
 
-        bool contains(const T& value) const noexcept {
+        bool contains(const_reference value) const noexcept {
             node* bound{ lower_bound(value)._ptr };
             return !bound->is_head && !_pred(bound->value, value);
         }
 
-        std::size_t count(const T& value) const noexcept {
+        size_type count(const_reference value) const noexcept {
             auto [first, last]{ equal_range(value) };
             return std::distance(first, last);
         }
 
-        iterator insert(const T& value) noexcept {
+        iterator insert(const_reference value) noexcept {
             node* parent{ _head };
             bool is_left{};
             node* i{ _head->parent };
@@ -2286,8 +2309,8 @@ namespace plastic {
             insert(list.begin(), list.end());
         }
 
-        iterator erase(iterator pos) noexcept {
-            node* erased{ (pos++)._ptr };
+        iterator erase(const_iterator pos) noexcept {
+            node* erased{ pos++._ptr };
 
             if (erased->left->is_head || erased->right->is_head) {
                 node* parent{ erased->parent };
@@ -2350,14 +2373,14 @@ namespace plastic {
             return pos;
         }
 
-        iterator erase(iterator first, iterator last) noexcept {
+        iterator erase(const_iterator first, const_iterator last) noexcept {
             while (first != last) {
                 erase(first++);
             }
             return last;
         }
 
-        std::size_t erase(const T& value) noexcept {
+        size_type erase(const_reference value) noexcept {
             std::size_t count{};
             auto [first, last]{ equal_range(value) };
             while (first != last) {
