@@ -3250,7 +3250,7 @@ namespace plastic {
         constexpr void erase(handle pos) noexcept {
             auto [value, index]{ *pos._ptr };
             delete pos._ptr;
-            if (size() == 1) {
+            if (index == size() - 1) {
                 _data.pop_back();
             }
             else {
