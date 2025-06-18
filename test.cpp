@@ -18,15 +18,20 @@ std::string format(It first, It last) {
     return format(std::ranges::subrange{ first, last });
 }
 
-template <class T, class Pr>
-std::string format(const plastic::binary_heap<T, Pr>& heap) {
+template <class Hp>
+    requires requires(Hp heap) {
+        heap.empty();
+        heap.top();
+        heap.pop();
+    }
+std::string format(const Hp& heap) {
     auto copy{ heap };
-    std::vector<T> temp;
+    std::vector<typename Hp::value_type> temp;
     while (!copy.empty()) {
         temp.push_back(copy.top());
         copy.pop();
     }
-    return format(temp.rbegin(), temp.rend());
+    return format(temp | std::views::reverse);
 }
 
 TEST_CLASS(data_structure) {
@@ -719,7 +724,7 @@ public:
     }
 
     TEST_METHOD(binary_heap) {
-        plastic::binary_heap<int> a{ 0, 0, 0 }, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 },x;
+        plastic::binary_heap<int> a{ 0, 0, 0 }, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 }, x;
         ASSERT(format(x) == "[]");
         ASSERT(format(a) == "[0, 0, 0]");
         ASSERT(format(b) == "[4, 4, 4, 4]");
