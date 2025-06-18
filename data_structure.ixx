@@ -2518,6 +2518,7 @@ namespace plastic {
         }
 
         void swap(binary_heap& other) noexcept {
+            std::swap(_pred, other._pred);
             std::swap(_data, other._data);
         }
 
