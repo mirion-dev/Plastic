@@ -3084,11 +3084,6 @@ namespace plastic {
             _set(index, ptr);
         }
 
-        constexpr void _sift(std::size_t index) noexcept {
-            _sift_up(index);
-            _sift_down(index);
-        }
-
         constexpr void _make_heap() noexcept {
             std::size_t i{ size() >> 1 };
             while (i-- != 0) {
@@ -3146,8 +3141,9 @@ namespace plastic {
         constexpr binary_heap(const binary_heap& other) noexcept :
             _data(other.size()) {
 
-            for (std::size_t i{}, n{ size() }; i != n; ++i) {
-                _data[i] = new node{ *other._data[i] };
+            auto i{ _data.begin() };
+            for (node* j : other._data) {
+                *i++ = new node{ *j };
             }
         }
 
@@ -3211,42 +3207,62 @@ namespace plastic {
         }
 
         constexpr handle push(const_reference value) noexcept {
-            auto ptr{ new node{ value, size() } };
+            std::size_t index{ size() };
+            auto ptr{ new node{ value, index } };
             _data.push_back(ptr);
-            _sift_up(size() - 1);
+            _sift_up(index);
             return ptr;
         }
 
         constexpr void pop() noexcept {
             assert(!empty());
             delete _data.front();
-            _set(0, _data.back());
-            _data.pop_back();
-            if (!empty()) {
+            if (size() == 1) {
+                _data.pop_back();
+            }
+            else {
+                _set(0, _data.back());
+                _data.pop_back();
                 _sift_down(0);
             }
         }
 
         constexpr void merge(const binary_heap& other) noexcept {
-            _data.insert(_data.end(), other.size(), {});
-            for (std::size_t i{}, n{ other.size() }, m{ size() }; i != n; ++i) {
-                _data[m + i] = new node{ *other._data[i] };
+            _data.reserve(size() + other.size());
+            std::size_t index{ size() };
+            for (node* i : other._data) {
+                _data.push_back(new node{ i->value, index++ });
             }
             _make_heap();
         }
 
-        constexpr void update(handle pos, const_reference value) noexcept {
-            pos._ptr->value = value;
-            _sift(pos._ptr->index);
+        constexpr void update(handle pos, const_reference new_value) noexcept {
+            auto [value, index]{ *pos._ptr };
+            pos._ptr->value = new_value;
+            if (_pred(value, new_value)) {
+                _sift_up(index);
+            }
+            else {
+                _sift_down(index);
+            }
         }
 
         constexpr void erase(handle pos) noexcept {
-            std::size_t index{ pos._ptr->index };
+            auto [value, index]{ *pos._ptr };
             delete pos._ptr;
-            _set(index, _data.back());
-            _data.pop_back();
-            if (!empty()) {
-                _sift(index);
+            if (size() == 1) {
+                _data.pop_back();
+            }
+            else {
+                const T& new_value{ _data.back()->value };
+                _set(index, _data.back());
+                _data.pop_back();
+                if (_pred(value, new_value)) {
+                    _sift_up(index);
+                }
+                else {
+                    _sift_down(index);
+                }
             }
         }
     };
