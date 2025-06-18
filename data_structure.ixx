@@ -1401,8 +1401,8 @@ namespace plastic {
     export template <class T>
     class forward_list {
         struct node {
-            T value;
             node* next;
+            T value;
         };
 
         node* _head;
@@ -1412,12 +1412,7 @@ namespace plastic {
         constexpr node* _insert_after(node* pos, std::size_t count, const Args&... args) noexcept {
             _size += count;
             while (count-- != 0) {
-                if constexpr (sizeof...(Args) == 0) {
-                    pos = pos->next = new node{ {}, pos->next };
-                }
-                else {
-                    pos = pos->next = new node{ args..., pos->next };
-                }
+                pos = pos->next = new node{ pos->next, args... };
             }
             return pos;
         }
@@ -1602,7 +1597,7 @@ namespace plastic {
         }
 
         constexpr void push_front(const_reference value) noexcept {
-            _head->next = new node{ value, _head->next };
+            _head->next = new node{ _head->next, value };
             ++_size;
         }
 
@@ -1623,7 +1618,7 @@ namespace plastic {
         constexpr iterator insert_after(const_iterator pos, It first, It last) noexcept {
             node* i{ pos.base()._ptr };
             while (first != last) {
-                i = i->next = new node{ *first, i->next };
+                i = i->next = new node{ i->next, * first };
                 ++first;
                 ++_size;
             }
@@ -1666,9 +1661,9 @@ namespace plastic {
     export template <class T>
     class list {
         struct node {
-            T value;
             node* prev;
             node* next;
+            T value;
         };
 
         node* _head;
@@ -1679,12 +1674,7 @@ namespace plastic {
             node *prev{ pos->prev }, *i{ prev };
             _size += count;
             while (count-- != 0) {
-                if constexpr (sizeof...(Args) == 0) {
-                    i = i->next = new node{ {}, i, i->next };
-                }
-                else {
-                    i = i->next = new node{ args..., i, i->next };
-                }
+                i = i->next = new node{ i, i->next, args... };
             }
             i->next->prev = i;
             return prev->next;
@@ -1915,7 +1905,7 @@ namespace plastic {
         }
 
         constexpr void push_front(const_reference value) noexcept {
-            _head->next->next->prev = _head->next = new node{ value, _head, _head->next };
+            _head->next->next->prev = _head->next = new node{ _head, _head->next, value };
             ++_size;
         }
 
@@ -1925,7 +1915,7 @@ namespace plastic {
         }
 
         constexpr void push_back(const_reference value) noexcept {
-            _head->prev->prev->next = _head->prev = new node{ value, _head->prev, _head };
+            _head->prev->prev->next = _head->prev = new node{ _head->prev, _head, value };
             ++_size;
         }
 
@@ -1946,7 +1936,7 @@ namespace plastic {
         constexpr iterator insert(const_iterator pos, It first, It last) noexcept {
             node *prev{ pos.base()._ptr->prev }, *i{ prev };
             while (first != last) {
-                i = i->next = new node{ *first, i, i->next };
+                i = i->next = new node{ i, i->next, *first };
                 ++first;
                 ++_size;
             }
@@ -2397,8 +2387,8 @@ namespace plastic {
     export template <class T, class Pr = std::less<T>>
     class binary_heap {
         struct node {
-            T value;
             std::size_t index;
+            T value;
         };
 
         Pr _pred;
@@ -2489,7 +2479,7 @@ namespace plastic {
         constexpr binary_heap(It first, It last) noexcept {
             std::size_t index{};
             while (first != last) {
-                _data.push_back(new node{ *first, index++ });
+                _data.push_back(new node{ index++, *first });
                 ++first;
             }
             _make_heap();
@@ -2565,7 +2555,7 @@ namespace plastic {
 
         constexpr handle push(const_reference value) noexcept {
             std::size_t index{ size() };
-            auto ptr{ new node{ value, index } };
+            auto ptr{ new node{ index, value } };
             _data.push_back(ptr);
             _sift_up(index);
             return ptr;
@@ -2588,13 +2578,13 @@ namespace plastic {
             _data.reserve(size() + other.size());
             std::size_t index{ size() };
             for (node* i : other._data) {
-                _data.push_back(new node{ i->value, index++ });
+                _data.push_back(new node{ index++, i->value });
             }
             _make_heap();
         }
 
         constexpr void update(handle pos, const_reference new_value) noexcept {
-            auto [value, index]{ *pos._ptr };
+            auto [index, value]{ *pos._ptr };
             pos._ptr->value = new_value;
             if (_pred(value, new_value)) {
                 _sift_up(index);
@@ -2605,7 +2595,7 @@ namespace plastic {
         }
 
         constexpr void erase(handle pos) noexcept {
-            auto [value, index]{ *pos._ptr };
+            auto [index, value]{ *pos._ptr };
             delete pos._ptr;
             if (index == size() - 1) {
                 _data.pop_back();
