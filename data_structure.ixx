@@ -2202,26 +2202,6 @@ namespace plastic {
             return reverse_iterator{ _head->right };
         }
 
-        const T& front() const noexcept {
-            assert(!empty());
-            return _head->right->value;
-        }
-
-        const T& back() const noexcept {
-            assert(!empty());
-            return _head->left->value;
-        }
-
-        // only for test purposes
-        node* data() noexcept {
-            return _head;
-        }
-
-        // only for test purposes
-        const node* data() const noexcept {
-            return _head;
-        }
-
         const_iterator lower_bound(const T& value) const noexcept {
             node* bound{ _head };
             node* i{ _head->parent };
