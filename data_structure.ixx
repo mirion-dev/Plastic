@@ -2540,7 +2540,7 @@ namespace plastic {
             for (node* i : _data) {
                 delete i;
             }
-            return _data.clear();
+            _data.clear();
         }
 
         handle top_handle() const noexcept {
