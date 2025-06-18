@@ -153,16 +153,16 @@ namespace plastic {
             return const_cast<T*>(_data);
         }
 
-        const_iterator cbegin() const noexcept {
-            return begin();
-        }
-
         iterator end() noexcept {
             return _last;
         }
 
         const_iterator end() const noexcept {
             return _last;
+        }
+
+        const_iterator cbegin() const noexcept {
+            return begin();
         }
 
         const_iterator cend() const noexcept {
@@ -177,10 +177,6 @@ namespace plastic {
             return const_reverse_iterator{ end() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
-            return const_reverse_iterator{ end() };
-        }
-
         reverse_iterator rend() noexcept {
             return reverse_iterator{ begin() };
         }
@@ -189,8 +185,12 @@ namespace plastic {
             return const_reverse_iterator{ begin() };
         }
 
+        const_reverse_iterator crbegin() const noexcept {
+            return rbegin();
+        }
+
         const_reverse_iterator crend() const noexcept {
-            return const_reverse_iterator{ begin() };
+            return rend();
         }
 
         reference operator[](size_type index) noexcept {
@@ -451,16 +451,16 @@ namespace plastic {
             return _begin;
         }
 
-        const_iterator cbegin() const noexcept {
-            return begin();
-        }
-
         iterator end() noexcept {
             return _last;
         }
 
         const_iterator end() const noexcept {
             return _last;
+        }
+
+        const_iterator cbegin() const noexcept {
+            return begin();
         }
 
         const_iterator cend() const noexcept {
@@ -475,10 +475,6 @@ namespace plastic {
             return const_reverse_iterator{ end() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
-            return const_reverse_iterator{ end() };
-        }
-
         reverse_iterator rend() noexcept {
             return reverse_iterator{ begin() };
         }
@@ -487,8 +483,12 @@ namespace plastic {
             return const_reverse_iterator{ begin() };
         }
 
+        const_reverse_iterator crbegin() const noexcept {
+            return rbegin();
+        }
+
         const_reverse_iterator crend() const noexcept {
-            return const_reverse_iterator{ begin() };
+            return rend();
         }
 
         reference operator[](size_type index) noexcept {
@@ -873,16 +873,16 @@ namespace plastic {
             return iterator{ _first, const_cast<inplace_deque*>(this) };
         }
 
-        const_iterator cbegin() const noexcept {
-            return begin();
-        }
-
         iterator end() noexcept {
             return { _last, this };
         }
 
         const_iterator end() const noexcept {
             return iterator{ _last, const_cast<inplace_deque*>(this) };
+        }
+
+        const_iterator cbegin() const noexcept {
+            return begin();
         }
 
         const_iterator cend() const noexcept {
@@ -897,10 +897,6 @@ namespace plastic {
             return const_reverse_iterator{ end() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
-            return const_reverse_iterator{ end() };
-        }
-
         reverse_iterator rend() noexcept {
             return reverse_iterator{ begin() };
         }
@@ -909,8 +905,12 @@ namespace plastic {
             return const_reverse_iterator{ begin() };
         }
 
+        const_reverse_iterator crbegin() const noexcept {
+            return rbegin();
+        }
+
         const_reverse_iterator crend() const noexcept {
-            return const_reverse_iterator{ begin() };
+            return rend();
         }
 
         reference operator[](size_type index) noexcept {
@@ -1235,16 +1235,16 @@ namespace plastic {
             return _first;
         }
 
-        const_iterator cbegin() const noexcept {
-            return begin();
-        }
-
         iterator end() noexcept {
             return _last;
         }
 
         const_iterator end() const noexcept {
             return _last;
+        }
+
+        const_iterator cbegin() const noexcept {
+            return begin();
         }
 
         const_iterator cend() const noexcept {
@@ -1259,10 +1259,6 @@ namespace plastic {
             return const_reverse_iterator{ end() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
-            return const_reverse_iterator{ end() };
-        }
-
         reverse_iterator rend() noexcept {
             return reverse_iterator{ begin() };
         }
@@ -1271,8 +1267,12 @@ namespace plastic {
             return const_reverse_iterator{ begin() };
         }
 
+        const_reverse_iterator crbegin() const noexcept {
+            return rbegin();
+        }
+
         const_reverse_iterator crend() const noexcept {
-            return const_reverse_iterator{ begin() };
+            return rend();
         }
 
         reference operator[](size_type index) noexcept {
@@ -1570,16 +1570,16 @@ namespace plastic {
             return iterator{ _head->next };
         }
 
-        const_iterator cbegin() const noexcept {
-            return begin();
-        }
-
         iterator end() noexcept {
             return _head;
         }
 
         const_iterator end() const noexcept {
             return iterator{ _head };
+        }
+
+        const_iterator cbegin() const noexcept {
+            return begin();
         }
 
         const_iterator cend() const noexcept {
@@ -1844,16 +1844,16 @@ namespace plastic {
             return iterator{ _head->next };
         }
 
-        const_iterator cbegin() const noexcept {
-            return begin();
-        }
-
         iterator end() noexcept {
             return _head;
         }
 
         const_iterator end() const noexcept {
             return iterator{ _head };
+        }
+
+        const_iterator cbegin() const noexcept {
+            return begin();
         }
 
         const_iterator cend() const noexcept {
@@ -1868,10 +1868,6 @@ namespace plastic {
             return const_reverse_iterator{ end() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
-            return const_reverse_iterator{ end() };
-        }
-
         reverse_iterator rend() noexcept {
             return reverse_iterator{ begin() };
         }
@@ -1880,8 +1876,12 @@ namespace plastic {
             return const_reverse_iterator{ begin() };
         }
 
+        const_reverse_iterator crbegin() const noexcept {
+            return rbegin();
+        }
+
         const_reverse_iterator crend() const noexcept {
-            return const_reverse_iterator{ begin() };
+            return rend();
         }
 
         reference front() noexcept {
