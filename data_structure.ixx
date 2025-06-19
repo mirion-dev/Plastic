@@ -2315,6 +2315,7 @@ namespace plastic {
 
         iterator erase(const_iterator pos) noexcept {
             node* erased{ pos++._ptr };
+            assert(erased != _head);
             if (erased->left->is_head || erased->right->is_head) {
                 node* parent{ erased->parent };
                 node* replaced{ erased->left->is_head ? erased->right : erased->left };
