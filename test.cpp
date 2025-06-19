@@ -36,7 +36,7 @@ std::string format(const Hp& heap) {
 
 template<class Tr>
 void test_search_tree() {
-    Tr a{ 0, 0, 0 }, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 }, x;
+    Tr a{ 0, 0, 0 }, b{ 4, 4, 4, 4 }, c{ 2, 3, 1 }, x;
     ASSERT(format(x) == "[]");
     ASSERT(format(a) == "[0, 0, 0]");
     ASSERT(format(b) == "[4, 4, 4, 4]");

@@ -2009,20 +2009,25 @@ namespace plastic {
                 return i;
             }
 
-            void free() const noexcept {
-                if (is_head) {
-                    return;
-                }
-                left->free();
-                right->free();
-                delete this;
-            }
-
-            node* clone(node* head) noexcept {
+            node* clone(node* head, node* parent) noexcept {
                 if (is_head) {
                     return head;
                 }
-                return new node{ this, left->clone(head), right->clone(head), false, value };
+
+                auto tree{ new node{ parent, {}, {}, false, value } };
+                tree->left = left->clone(head, tree);
+                tree->right = right->clone(head, tree);
+                return tree;
+            }
+
+            void free() noexcept {
+                if (is_head) {
+                    return;
+                }
+
+                left->free();
+                right->free();
+                delete this;
             }
         };
 
@@ -2067,15 +2072,14 @@ namespace plastic {
             }
 
             iterator& operator++() noexcept {
-                if (_ptr->right->is_head) {
-                    node* old_ptr;
-                    do {
-                        old_ptr = _ptr;
-                        _ptr = _ptr->parent;
-                    } while (!_ptr->is_head && _ptr->right == old_ptr);
+                if (!_ptr->right->is_head) {
+                    _ptr = _ptr->right->leftmost();
                 }
                 else {
-                    _ptr = _ptr->right->leftmost();
+                    node* old_ptr;
+                    do {
+                        old_ptr = std::exchange(_ptr, _ptr->parent);
+                    } while (!_ptr->is_head && _ptr->right == old_ptr);
                 }
                 return *this;
             }
@@ -2087,15 +2091,14 @@ namespace plastic {
             }
 
             iterator& operator--() noexcept {
-                if (_ptr->left->is_head) {
-                    node* old_ptr;
-                    do {
-                        old_ptr = _ptr;
-                        _ptr = _ptr->parent;
-                    } while (!_ptr->is_head && _ptr->left == old_ptr);
+                if (!_ptr->left->is_head) {
+                    _ptr = _ptr->left->rightmost();
                 }
                 else {
-                    _ptr = _ptr->left->rightmost();
+                    node* old_ptr;
+                    do {
+                        old_ptr = std::exchange(_ptr, _ptr->parent);
+                    } while (!_ptr->is_head && _ptr->left == old_ptr);
                 }
                 return *this;
             }
@@ -2132,9 +2135,13 @@ namespace plastic {
         binary_search_tree(const binary_search_tree& other) noexcept :
             binary_search_tree() {
 
-            _head->parent = other._head->clone(_head);
-            _head->left = _head->parent->leftmost();
-            _head->right = _head->parent->rightmost();
+            _pred = other._pred;
+            _size = other._size;
+
+            node* tree{ other._head->parent->clone(_head, _head) };
+            _head->parent = tree;
+            _head->left = tree->rightmost();
+            _head->right = tree->leftmost();
         }
 
         binary_search_tree(binary_search_tree&& other) noexcept {
@@ -2181,6 +2188,8 @@ namespace plastic {
 
         void clear() noexcept {
             _head->parent->free();
+            _head->parent = _head->left = _head->right = _head;
+            _size = 0;
         }
 
         const_iterator begin() const noexcept {
@@ -2216,8 +2225,7 @@ namespace plastic {
         }
 
         const_iterator lower_bound(const_reference value) const noexcept {
-            node* bound{ _head };
-            node* i{ _head->parent };
+            node *bound{ _head }, *i{ _head->parent };
             while (!i->is_head) {
                 if (!_pred(i->value, value)) {
                     bound = i;
@@ -2231,8 +2239,7 @@ namespace plastic {
         }
 
         const_iterator upper_bound(const_reference value) const noexcept {
-            node* bound{ _head };
-            node* i{ _head->parent };
+            node *bound{ _head }, *i{ _head->parent };
             while (!i->is_head) {
                 if (_pred(value, i->value)) {
                     bound = i;
@@ -2265,21 +2272,18 @@ namespace plastic {
         }
 
         iterator insert(const_reference value) noexcept {
-            node* parent{ _head };
+            node *parent{ _head }, *i{ _head->parent };
             bool is_left{};
-            node* i{ _head->parent };
             while (!i->is_head) {
                 parent = i;
                 is_left = _pred(value, i->value);
                 i = is_left ? i->left : i->right;
             }
 
-            node* new_node{ new node{ parent, _head, _head, false, value } };
-
+            auto new_node{ new node{ parent, _head, _head, false, value } };
             if (parent->is_head) {
                 _head->parent = new_node;
             }
-
             if (is_left) {
                 parent->left = new_node;
                 if (parent == _head->right) {
@@ -2292,8 +2296,8 @@ namespace plastic {
                     _head->left = new_node;
                 }
             }
-            ++_size;
 
+            ++_size;
             return new_node;
         }
 
@@ -2311,7 +2315,6 @@ namespace plastic {
 
         iterator erase(const_iterator pos) noexcept {
             node* erased{ pos++._ptr };
-
             if (erased->left->is_head || erased->right->is_head) {
                 node* parent{ erased->parent };
                 node* replaced{ erased->left->is_head ? erased->right : erased->left };
@@ -2369,7 +2372,6 @@ namespace plastic {
 
             delete erased;
             --_size;
-
             return pos;
         }
 
@@ -2513,6 +2515,7 @@ namespace plastic {
             binary_heap(list.begin(), list.end()) {}
 
         binary_heap(const binary_heap& other) noexcept :
+            _pred{ other._pred },
             _data(other.size()) {
 
             auto i{ _data.begin() };
