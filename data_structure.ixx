@@ -2315,12 +2315,50 @@ namespace plastic {
 
         iterator erase(const_iterator pos) noexcept {
             node* erased{ pos++._ptr };
+            assert(erased != _head);
             if (erased->left->is_head || erased->right->is_head) {
                 node* parent{ erased->parent };
                 node* replaced{ erased->left->is_head ? erased->right : erased->left };
 
+                if (erased == _head->parent) {
+                    _head->parent = replaced;
+                }
+                else if (erased == parent->left) {
+                    parent->left = replaced;
+                }
+                else {
+                    parent->right = replaced;
+                }
                 if (!replaced->is_head) {
                     replaced->parent = parent;
+                }
+
+                if (erased == _head->right) {
+                    _head->right = replaced->is_head ? parent : replaced->leftmost();
+                }
+                if (erased == _head->left) {
+                    _head->left = replaced->is_head ? parent : replaced->rightmost();
+                }
+            }
+            else {
+                node* parent{ erased->parent };
+                node* left{ erased->left };
+                node* right{ erased->right };
+                node* replaced{ pos._ptr };
+                node* replaced_parent{ replaced->parent };
+                node* replaced_right{ replaced->right };
+
+                replaced->left = left;
+                left->parent = replaced;
+
+                if (replaced != right) {
+                    replaced_parent->left = replaced_right;
+                    if (!replaced_right->is_head) {
+                        replaced_right->parent = replaced_parent;
+                    }
+
+                    replaced->right = right;
+                    right->parent = replaced;
                 }
 
                 if (erased == _head->parent) {
@@ -2332,42 +2370,7 @@ namespace plastic {
                 else {
                     parent->right = replaced;
                 }
-
-                if (erased == _head->right) {
-                    _head->right = replaced->is_head ? parent : replaced->rightmost();
-                }
-                if (erased == _head->left) {
-                    _head->left = replaced->is_head ? parent : replaced->leftmost();
-                }
-            }
-            else {
-                node* replaced{ pos._ptr };
-                node* replaced_parent{ replaced->parent };
-                node* replaced_child{ replaced->right };
-
-                erased->left->parent = replaced;
-                replaced->left = erased->left;
-
-                if (replaced != erased->right) {
-                    if (!replaced_child->is_head) {
-                        replaced_child->parent = replaced_parent;
-                    }
-                    replaced_parent->left = replaced_child;
-                    replaced->right = erased->right;
-                    erased->right->parent = replaced;
-                }
-
-                if (erased == _head->parent) {
-                    _head->parent = replaced;
-                }
-                else if (erased == erased->parent->left) {
-                    erased->parent->left = replaced;
-                }
-                else {
-                    erased->parent->right = replaced;
-                }
-
-                replaced->parent = erased->parent;
+                replaced->parent = parent;
             }
 
             delete erased;
