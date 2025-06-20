@@ -2035,6 +2035,7 @@ namespace plastic {
         using value_type = T;
         using reference = T&;
         using const_reference = const T&;
+        using comparator = Pr;
 
         class iterator {
             friend binary_search_tree;
@@ -2507,6 +2508,7 @@ namespace plastic {
         using value_type = T;
         using reference = T&;
         using const_reference = const T&;
+        using comparator = Pr;
 
         class iterator {
             friend red_black_tree;
@@ -2942,6 +2944,7 @@ namespace plastic {
         using value_type = T;
         using reference = T&;
         using const_reference = const T&;
+        using comparator = Pr;
 
         class handle {
             friend binary_heap;
