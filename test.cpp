@@ -818,6 +818,10 @@ public:
         test_search_tree<plastic::binary_search_tree<int>>();
     }
 
+    TEST_METHOD(red_black_tree) {
+        test_search_tree<plastic::red_black_tree<int>>();
+    }
+
     TEST_METHOD(binary_heap) {
         test_addressable_heap<plastic::binary_heap<int>>();
     }

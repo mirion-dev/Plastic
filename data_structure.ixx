@@ -2320,6 +2320,480 @@ namespace plastic {
                 node* parent{ erased->parent };
                 node* replaced{ erased->left->is_head ? erased->right : erased->left };
 
+                if (parent->is_head) {
+                    _head->parent = replaced;
+                }
+                else if (erased == parent->left) {
+                    parent->left = replaced;
+                }
+                else {
+                    parent->right = replaced;
+                }
+                if (!replaced->is_head) {
+                    replaced->parent = parent;
+                }
+
+                if (erased == _head->right) {
+                    _head->right = replaced->is_head ? parent : replaced->leftmost();
+                }
+                if (erased == _head->left) {
+                    _head->left = replaced->is_head ? parent : replaced->rightmost();
+                }
+            }
+            else {
+                node* parent{ erased->parent };
+                node* left{ erased->left };
+                node* right{ erased->right };
+                node* replaced{ pos._ptr };
+                node* replaced_parent{ replaced->parent };
+                node* replaced_right{ replaced->right };
+
+                replaced->left = left;
+                left->parent = replaced;
+
+                if (replaced != right) {
+                    replaced_parent->left = replaced_right;
+                    if (!replaced_right->is_head) {
+                        replaced_right->parent = replaced_parent;
+                    }
+
+                    replaced->right = right;
+                    right->parent = replaced;
+                }
+
+                if (parent->is_head) {
+                    _head->parent = replaced;
+                }
+                else if (erased == parent->left) {
+                    parent->left = replaced;
+                }
+                else {
+                    parent->right = replaced;
+                }
+                replaced->parent = parent;
+            }
+
+            delete erased;
+            --_size;
+            return pos;
+        }
+
+        iterator erase(const_iterator first, const_iterator last) noexcept {
+            while (first != last) {
+                erase(first++);
+            }
+            return last;
+        }
+
+        size_type erase(const_reference value) noexcept {
+            std::size_t count{};
+            auto [first, last]{ equal_range(value) };
+            while (first != last) {
+                erase(first++);
+                ++count;
+            }
+            return count;
+        }
+
+        friend bool operator==(const binary_search_tree& left, const binary_search_tree& right) noexcept {
+            return std::equal(left.begin(), left.end(), right.begin(), right.end());
+        }
+
+        friend auto operator<=>(const binary_search_tree& left, const binary_search_tree& right) noexcept {
+            return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
+        }
+    };
+
+    template <class It>
+    binary_search_tree(It, It) -> binary_search_tree<std::iter_value_t<It>>;
+
+    export template <class T, class Pr = std::less<T>>
+    class red_black_tree {
+        struct node {
+            node* parent;
+            node* left;
+            node* right;
+            unsigned char is_head;
+            unsigned char is_red;
+            T value;
+
+            node* leftmost() noexcept {
+                node* i{ this };
+                while (!i->left->is_head) {
+                    i = i->left;
+                }
+                return i;
+            }
+
+            node* rightmost() noexcept {
+                node* i{ this };
+                while (!i->right->is_head) {
+                    i = i->right;
+                }
+                return i;
+            }
+
+            node* clone(node* head, node* parent) noexcept {
+                if (is_head) {
+                    return head;
+                }
+
+                auto tree{ new node{ parent, {}, {}, false, is_red, value } };
+                tree->left = left->clone(head, tree);
+                tree->right = right->clone(head, tree);
+                return tree;
+            }
+
+            void free() noexcept {
+                if (is_head) {
+                    return;
+                }
+
+                left->free();
+                right->free();
+                delete this;
+            }
+
+            void left_rotate() noexcept {
+                node* replaced{ right };
+                node* replaced_left{ replaced->left };
+
+                right = replaced_left;
+                if (!replaced_left->is_head) {
+                    replaced_left->parent = this;
+                }
+
+                if (parent->is_head) {
+                    parent->parent = replaced;
+                }
+                else if (this == parent->left) {
+                    parent->left = replaced;
+                }
+                else {
+                    parent->right = replaced;
+                }
+                replaced->parent = parent;
+
+                replaced->left = this;
+                parent = replaced;
+            }
+
+            void right_rotate() noexcept {
+                node* replaced{ left };
+                node* replaced_right{ replaced->right };
+
+                left = replaced_right;
+                if (!replaced_right->is_head) {
+                    replaced_right->parent = this;
+                }
+
+                if (parent->is_head) {
+                    parent->parent = replaced;
+                }
+                else if (this == parent->left) {
+                    parent->left = replaced;
+                }
+                else {
+                    parent->right = replaced;
+                }
+                replaced->parent = parent;
+
+                replaced->right = this;
+                parent = replaced;
+            }
+        };
+
+        Pr _pred;
+        node* _head;
+        std::size_t _size;
+
+    public:
+        using difference_type = std::ptrdiff_t;
+        using size_type = std::size_t;
+        using value_type = T;
+        using reference = T&;
+        using const_reference = const T&;
+
+        class iterator {
+            friend red_black_tree;
+
+            node* _ptr{};
+
+            iterator(node* ptr) noexcept :
+                _ptr{ ptr } {}
+
+        public:
+            using difference_type = std::ptrdiff_t;
+            using value_type = T;
+            using pointer = const T*;
+            using reference = const T&;
+            using iterator_category = std::bidirectional_iterator_tag;
+
+            iterator() noexcept = default;
+
+            reference operator*() const noexcept {
+                return _ptr->value;
+            }
+
+            pointer operator->() const noexcept {
+                return &_ptr->value;
+            }
+
+            friend bool operator==(iterator left, iterator right) noexcept {
+                return left._ptr == right._ptr;
+            }
+
+            iterator& operator++() noexcept {
+                if (!_ptr->right->is_head) {
+                    _ptr = _ptr->right->leftmost();
+                }
+                else {
+                    node* old_ptr;
+                    do {
+                        old_ptr = std::exchange(_ptr, _ptr->parent);
+                    } while (!_ptr->is_head && _ptr->right == old_ptr);
+                }
+                return *this;
+            }
+
+            iterator operator++(int) noexcept {
+                iterator temp{ *this };
+                ++*this;
+                return temp;
+            }
+
+            iterator& operator--() noexcept {
+                if (!_ptr->left->is_head) {
+                    _ptr = _ptr->left->rightmost();
+                }
+                else {
+                    node* old_ptr;
+                    do {
+                        old_ptr = std::exchange(_ptr, _ptr->parent);
+                    } while (!_ptr->is_head && _ptr->left == old_ptr);
+                }
+                return *this;
+            }
+
+            iterator operator--(int) noexcept {
+                iterator temp{ *this };
+                --*this;
+                return temp;
+            }
+        };
+
+        using const_iterator = iterator;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = reverse_iterator;
+
+        red_black_tree() noexcept :
+            _head{ new node },
+            _size{} {
+
+            _head->parent = _head->left = _head->right = _head;
+            _head->is_head = true;
+        }
+
+        template <std::input_iterator It>
+        red_black_tree(It first, It last) noexcept :
+            red_black_tree() {
+
+            insert(first, last);
+        }
+
+        red_black_tree(std::initializer_list<T> list) noexcept :
+            red_black_tree(list.begin(), list.end()) {}
+
+        red_black_tree(const red_black_tree& other) noexcept :
+            red_black_tree() {
+
+            _pred = other._pred;
+            _size = other._size;
+
+            node* tree{ other._head->parent->clone(_head, _head) };
+            _head->parent = tree;
+            _head->left = tree->rightmost();
+            _head->right = tree->leftmost();
+        }
+
+        red_black_tree(red_black_tree&& other) noexcept {
+            swap(other);
+        }
+
+        ~red_black_tree() noexcept {
+            clear();
+            delete _head;
+        }
+
+        red_black_tree& operator=(const red_black_tree& other) noexcept {
+            red_black_tree temp(other);
+            swap(temp);
+            return *this;
+        }
+
+        red_black_tree& operator=(red_black_tree&& other) noexcept {
+            swap(other);
+            return *this;
+        }
+
+        void swap(red_black_tree& other) noexcept {
+            std::swap(_pred, other._pred);
+            std::swap(_head, other._head);
+            std::swap(_size, other._size);
+        }
+
+        friend void swap(red_black_tree& left, red_black_tree& right) noexcept {
+            left.swap(right);
+        }
+
+        bool empty() const noexcept {
+            return _size == 0;
+        }
+
+        size_type size() const noexcept {
+            return _size;
+        }
+
+        static size_type max_size() noexcept {
+            return std::numeric_limits<size_type>::max();
+        }
+
+        void clear() noexcept {
+            _head->parent->free();
+            _head->parent = _head->left = _head->right = _head;
+            _size = 0;
+        }
+
+        const_iterator begin() const noexcept {
+            return _head->right;
+        }
+
+        const_iterator end() const noexcept {
+            return _head;
+        }
+
+        const_iterator cbegin() const noexcept {
+            return begin();
+        }
+
+        const_iterator cend() const noexcept {
+            return end();
+        }
+
+        const_reverse_iterator rbegin() const noexcept {
+            return reverse_iterator{ end() };
+        }
+
+        const_reverse_iterator rend() const noexcept {
+            return reverse_iterator{ begin() };
+        }
+
+        const_reverse_iterator crbegin() const noexcept {
+            return rbegin();
+        }
+
+        const_reverse_iterator crend() const noexcept {
+            return rend();
+        }
+
+        const_iterator lower_bound(const_reference value) const noexcept {
+            node *bound{ _head }, *i{ _head->parent };
+            while (!i->is_head) {
+                if (!_pred(i->value, value)) {
+                    bound = i;
+                    i = i->left;
+                }
+                else {
+                    i = i->right;
+                }
+            }
+            return bound;
+        }
+
+        const_iterator upper_bound(const_reference value) const noexcept {
+            node *bound{ _head }, *i{ _head->parent };
+            while (!i->is_head) {
+                if (_pred(value, i->value)) {
+                    bound = i;
+                    i = i->left;
+                }
+                else {
+                    i = i->right;
+                }
+            }
+            return bound;
+        }
+
+        std::pair<const_iterator, const_iterator> equal_range(const_reference value) const noexcept {
+            return { lower_bound(value), upper_bound(value) };
+        }
+
+        const_iterator find(const_reference value) const noexcept {
+            node* bound{ lower_bound(value)._ptr };
+            return !bound->is_head && !_pred(bound->value, value) ? bound : _head;
+        }
+
+        bool contains(const_reference value) const noexcept {
+            node* bound{ lower_bound(value)._ptr };
+            return !bound->is_head && !_pred(bound->value, value);
+        }
+
+        size_type count(const_reference value) const noexcept {
+            auto [first, last]{ equal_range(value) };
+            return std::distance(first, last);
+        }
+
+        iterator insert(const_reference value) noexcept {
+            node *parent{ _head }, *i{ _head->parent };
+            bool is_left{};
+            while (!i->is_head) {
+                parent = i;
+                is_left = _pred(value, i->value);
+                i = is_left ? i->left : i->right;
+            }
+
+            auto new_node{ new node{ parent, _head, _head, false, false, value } };
+            if (parent->is_head) {
+                _head->parent = new_node;
+            }
+            if (is_left) {
+                parent->left = new_node;
+                if (parent == _head->right) {
+                    _head->right = new_node;
+                }
+            }
+            else {
+                parent->right = new_node;
+                if (parent == _head->left) {
+                    _head->left = new_node;
+                }
+            }
+
+            // TODO
+
+            ++_size;
+            return new_node;
+        }
+
+        template <std::input_iterator It>
+        void insert(It first, It last) noexcept {
+            while (first != last) {
+                insert(*first);
+                ++first;
+            }
+        }
+
+        void insert(std::initializer_list<T> list) noexcept {
+            insert(list.begin(), list.end());
+        }
+
+        iterator erase(const_iterator pos) noexcept {
+            node* erased{ pos++._ptr };
+            assert(erased != _head);
+            if (erased->left->is_head || erased->right->is_head) {
+                node* parent{ erased->parent };
+                node* replaced{ erased->left->is_head ? erased->right : erased->left };
+
                 if (erased == _head->parent) {
                     _head->parent = replaced;
                 }
@@ -2373,6 +2847,8 @@ namespace plastic {
                 replaced->parent = parent;
             }
 
+            // TODO
+
             delete erased;
             --_size;
             return pos;
@@ -2395,17 +2871,17 @@ namespace plastic {
             return count;
         }
 
-        friend bool operator==(const binary_search_tree& left, const binary_search_tree& right) noexcept {
+        friend bool operator==(const red_black_tree& left, const red_black_tree& right) noexcept {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const binary_search_tree& left, const binary_search_tree& right) noexcept {
+        friend auto operator<=>(const red_black_tree& left, const red_black_tree& right) noexcept {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
 
     template <class It>
-    binary_search_tree(It, It) -> binary_search_tree<std::iter_value_t<It>>;
+    red_black_tree(It, It) -> red_black_tree<std::iter_value_t<It>>;
 
 }
 
