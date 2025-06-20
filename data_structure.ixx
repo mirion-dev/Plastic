@@ -601,7 +601,7 @@ namespace plastic {
     };
 
     template <class It>
-    explicit vector(It, It) -> vector<std::iter_value_t<It>>;
+    vector(It, It) -> vector<std::iter_value_t<It>>;
 
     export template <class T, std::size_t N>
     class inplace_deque {
@@ -1396,7 +1396,7 @@ namespace plastic {
     };
 
     template <class It>
-    explicit deque(It, It) -> deque<std::iter_value_t<It>>;
+    deque(It, It) -> deque<std::iter_value_t<It>>;
 
     export template <class T>
     class forward_list {
@@ -1656,7 +1656,7 @@ namespace plastic {
     };
 
     template <class It>
-    explicit forward_list(It, It) -> forward_list<std::iter_value_t<It>>;
+    forward_list(It, It) -> forward_list<std::iter_value_t<It>>;
 
     export template <class T>
     class list {
@@ -1977,7 +1977,7 @@ namespace plastic {
     };
 
     template <class It>
-    explicit list(It, It) -> list<std::iter_value_t<It>>;
+    list(It, It) -> list<std::iter_value_t<It>>;
 
 }
 
@@ -2405,7 +2405,7 @@ namespace plastic {
     };
 
     template <class It>
-    explicit binary_search_tree(It, It) -> binary_search_tree<std::iter_value_t<It>>;
+    binary_search_tree(It, It) -> binary_search_tree<std::iter_value_t<It>>;
 
 }
 
@@ -2650,6 +2650,6 @@ namespace plastic {
     };
 
     template <class It>
-    explicit binary_heap(It, It) -> binary_heap<std::iter_value_t<It>>;
+    binary_heap(It, It) -> binary_heap<std::iter_value_t<It>>;
 
 }
