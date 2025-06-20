@@ -6,13 +6,12 @@ export module plastic:data_structure;
 
 import std;
 
-// for internal implementation
+// linear structures
 namespace plastic {
 
     struct uninitialized_t {} uninitialized;
 
     template <class It, class... Args>
-        requires (sizeof...(Args) <= 1)
     void construct(It first, It last, const Args&... args) {
         if constexpr (sizeof...(Args) == 0) {
             std::uninitialized_value_construct(first, last);
@@ -21,11 +20,6 @@ namespace plastic {
             std::uninitialized_fill(first, last, args...);
         }
     }
-
-}
-
-// linear structures
-namespace plastic {
 
     export template <class T, std::size_t N>
     class inplace_vector {
