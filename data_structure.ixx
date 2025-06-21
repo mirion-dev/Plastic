@@ -1987,6 +1987,16 @@ namespace plastic {
         // <other metadata>;
         // T value;
 
+        void free() noexcept {
+            if (is_head) {
+                return;
+            }
+
+            left->free();
+            right->free();
+            delete static_cast<Nd*>(this);
+        }
+
         Nd* leftmost() noexcept {
             auto i{ static_cast<Nd*>(this) };
             while (!i->left->is_head) {
@@ -2003,14 +2013,54 @@ namespace plastic {
             return i;
         }
 
-        void free() noexcept {
-            if (is_head) {
-                return;
+        void left_rotate() noexcept {
+            Nd* parent{ this->parent };
+            Nd* replaced{ this->right };
+            Nd* replaced_left{ replaced->left };
+
+            this->right = replaced_left;
+            if (!replaced_left->is_head) {
+                replaced_left->parent = this;
             }
 
-            left->free();
-            right->free();
-            delete static_cast<Nd*>(this);
+            if (parent->is_head) {
+                parent->parent = replaced;
+            }
+            else if (this == parent->left) {
+                parent->left = replaced;
+            }
+            else {
+                parent->right = replaced;
+            }
+            replaced->parent = this->parent;
+
+            replaced->left = this;
+            this->parent = replaced;
+        }
+
+        void right_rotate() noexcept {
+            Nd* parent{ this->parent };
+            Nd* replaced{ this->left };
+            Nd* replaced_right{ replaced->right };
+
+            this->left = replaced_right;
+            if (!replaced_right->is_head) {
+                replaced_right->parent = this;
+            }
+
+            if (parent->is_head) {
+                parent->parent = replaced;
+            }
+            else if (this == parent->left) {
+                parent->left = replaced;
+            }
+            else {
+                parent->right = replaced;
+            }
+            replaced->parent = this->parent;
+
+            replaced->right = this;
+            this->parent = replaced;
         }
     };
 
@@ -2455,56 +2505,6 @@ namespace plastic {
             tree->left = this->left->clone(head, tree);
             tree->right = this->right->clone(head, tree);
             return tree;
-        }
-
-        void left_rotate() noexcept {
-            Nd* parent{ this->parent };
-            Nd* replaced{ this->right };
-            Nd* replaced_left{ replaced->left };
-
-            this->right = replaced_left;
-            if (!replaced_left->is_head) {
-                replaced_left->parent = this;
-            }
-
-            if (parent->is_head) {
-                parent->parent = replaced;
-            }
-            else if (this == parent->left) {
-                parent->left = replaced;
-            }
-            else {
-                parent->right = replaced;
-            }
-            replaced->parent = this->parent;
-
-            replaced->left = this;
-            this->parent = replaced;
-        }
-
-        void right_rotate() noexcept {
-            Nd* parent{ this->parent };
-            Nd* replaced{ this->left };
-            Nd* replaced_right{ replaced->right };
-
-            this->left = replaced_right;
-            if (!replaced_right->is_head) {
-                replaced_right->parent = this;
-            }
-
-            if (parent->is_head) {
-                parent->parent = replaced;
-            }
-            else if (this == parent->left) {
-                parent->left = replaced;
-            }
-            else {
-                parent->right = replaced;
-            }
-            replaced->parent = this->parent;
-
-            replaced->right = this;
-            this->parent = replaced;
         }
     };
 
