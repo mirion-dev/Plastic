@@ -2515,9 +2515,13 @@ namespace plastic {
 
         friend base;
 
-        void _insert_rebalance(Nd* inserted) noexcept {}
+        void _insert_rebalance(Nd* inserted) noexcept {
+            // TODO
+        }
 
-        void _erase_rebalance(Nd* erased) noexcept {}
+        void _erase_rebalance(Nd* erased) noexcept {
+            // TODO
+        }
 
     public:
         using base::base;
@@ -2535,6 +2539,59 @@ namespace plastic {
 
     template <class It>
     red_black_tree(It, It) -> red_black_tree<std::iter_value_t<It>>;
+
+    template <class T>
+    struct avl_tree_node : basic_binary_search_tree_node<avl_tree_node<T>> {
+    private:
+        using Nd = avl_tree_node;
+
+    public:
+        unsigned char factor;
+        T value;
+
+        Nd* clone(Nd* head, Nd* parent) noexcept {
+            if (this->is_head) {
+                return head;
+            }
+
+            auto tree{ new Nd{ parent, {}, {}, false, factor, value } };
+            tree->left = this->left->clone(head, tree);
+            tree->right = this->right->clone(head, tree);
+            return tree;
+        }
+    };
+
+    export template <class T, class Pr = std::less<T>>
+    class avl_tree : public basic_binary_search_tree<avl_tree_node<T>, Pr> {
+        using Nd = avl_tree_node<T>;
+        using base = basic_binary_search_tree<Nd, Pr>;
+
+        friend base;
+
+        void _insert_rebalance(Nd* inserted) noexcept {
+            // TODO
+        }
+
+        void _erase_rebalance(Nd* erased) noexcept {
+            // TODO
+        }
+
+    public:
+        using base::base;
+
+        template <std::input_iterator It>
+        avl_tree(It first, It last) noexcept :
+            avl_tree() {
+
+            this->insert(first, last);
+        }
+
+        avl_tree(std::initializer_list<T> list) noexcept :
+            avl_tree(list.begin(), list.end()) {}
+    };
+
+    template <class It>
+    avl_tree(It, It) -> avl_tree<std::iter_value_t<It>>;
 
 }
 
