@@ -1983,7 +1983,9 @@ namespace plastic {
         Nd* parent;
         Nd* left;
         Nd* right;
-        unsigned char is_head;
+        unsigned char is_head; // `sizeof(bool)` is unspecified
+        // <other metadata>;
+        // T value;
 
         Nd* leftmost() noexcept {
             auto i{ static_cast<Nd*>(this) };
@@ -2012,10 +2014,12 @@ namespace plastic {
         }
     };
 
-    template <class T, class Pr, class Nd>
+    template <class Nd, class Pr>
     class basic_binary_search_tree {
+        using T = decltype(Nd::value);
+
         Pr _pred;
-        Nd* _head;
+        Nd* _head; // `parent` is the root, `left` is the maximum and `right` is the minimum
         std::size_t _size;
 
     public:
@@ -2387,16 +2391,18 @@ namespace plastic {
 
     template <class T>
     struct binary_search_tree_node : basic_binary_search_tree_node<binary_search_tree_node<T>> {
-        using node = binary_search_tree_node;
+    private:
+        using Nd = binary_search_tree_node;
 
+    public:
         T value;
 
-        node* clone(node* head, node* parent) noexcept {
+        Nd* clone(Nd* head, Nd* parent) noexcept {
             if (this->is_head) {
                 return head;
             }
 
-            auto tree{ new node{ parent, {}, {}, false, value } };
+            auto tree{ new Nd{ parent, {}, {}, false, value } };
             tree->left = this->left->clone(head, tree);
             tree->right = this->right->clone(head, tree);
             return tree;
@@ -2404,15 +2410,15 @@ namespace plastic {
     };
 
     export template <class T, class Pr = std::less<T>>
-    class binary_search_tree : public basic_binary_search_tree<T, Pr, binary_search_tree_node<T>> {
-        using node = binary_search_tree_node<T>;
-        using base = basic_binary_search_tree<T, Pr, node>;
+    class binary_search_tree : public basic_binary_search_tree<binary_search_tree_node<T>, Pr> {
+        using Nd = binary_search_tree_node<T>;
+        using base = basic_binary_search_tree<Nd, Pr>;
 
         friend base;
 
-        void _insert_rebalance(node* inserted) noexcept {}
+        void _insert_rebalance(Nd* inserted) noexcept {}
 
-        void _erase_rebalance(node* erased) noexcept {}
+        void _erase_rebalance(Nd* erased) noexcept {}
 
     public:
         using base::base;
@@ -2421,7 +2427,7 @@ namespace plastic {
         binary_search_tree(It first, It last) noexcept :
             binary_search_tree() {
 
-            base::insert(first, last);
+            this->insert(first, last);
         }
 
         binary_search_tree(std::initializer_list<T> list) noexcept :
@@ -2433,26 +2439,28 @@ namespace plastic {
 
     template <class T>
     struct red_black_tree_node : basic_binary_search_tree_node<red_black_tree_node<T>> {
-        using node = red_black_tree_node;
+    private:
+        using Nd = red_black_tree_node;
 
+    public:
         unsigned char is_red;
         T value;
 
-        node* clone(node* head, node* parent) noexcept {
+        Nd* clone(Nd* head, Nd* parent) noexcept {
             if (this->is_head) {
                 return head;
             }
 
-            auto tree{ new node{ parent, {}, {}, false, is_red, value } };
+            auto tree{ new Nd{ parent, {}, {}, false, is_red, value } };
             tree->left = this->left->clone(head, tree);
             tree->right = this->right->clone(head, tree);
             return tree;
         }
 
         void left_rotate() noexcept {
-            node* parent{ this->parent };
-            node* replaced{ this->right };
-            node* replaced_left{ replaced->left };
+            Nd* parent{ this->parent };
+            Nd* replaced{ this->right };
+            Nd* replaced_left{ replaced->left };
 
             this->right = replaced_left;
             if (!replaced_left->is_head) {
@@ -2475,9 +2483,9 @@ namespace plastic {
         }
 
         void right_rotate() noexcept {
-            node* parent{ this->parent };
-            node* replaced{ this->left };
-            node* replaced_right{ replaced->right };
+            Nd* parent{ this->parent };
+            Nd* replaced{ this->left };
+            Nd* replaced_right{ replaced->right };
 
             this->left = replaced_right;
             if (!replaced_right->is_head) {
@@ -2501,15 +2509,15 @@ namespace plastic {
     };
 
     export template <class T, class Pr = std::less<T>>
-    class red_black_tree : public basic_binary_search_tree<T, Pr, red_black_tree_node<T>> {
-        using node = red_black_tree_node<T>;
-        using base = basic_binary_search_tree<T, Pr, node>;
+    class red_black_tree : public basic_binary_search_tree<red_black_tree_node<T>, Pr> {
+        using Nd = red_black_tree_node<T>;
+        using base = basic_binary_search_tree<Nd, Pr>;
 
         friend base;
 
-        void _insert_rebalance(node* inserted) noexcept {}
+        void _insert_rebalance(Nd* inserted) noexcept {}
 
-        void _erase_rebalance(node* erased) noexcept {}
+        void _erase_rebalance(Nd* erased) noexcept {}
 
     public:
         using base::base;
@@ -2518,7 +2526,7 @@ namespace plastic {
         red_black_tree(It first, It last) noexcept :
             red_black_tree() {
 
-            base::insert(first, last);
+            this->insert(first, last);
         }
 
         red_black_tree(std::initializer_list<T> list) noexcept :
