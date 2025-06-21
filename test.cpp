@@ -819,7 +819,13 @@ public:
     }
 
     TEST_METHOD(red_black_tree) {
+        ASSERT(false);
         test_search_tree<plastic::red_black_tree<int>>();
+    }
+
+    TEST_METHOD(avl_tree) {
+        ASSERT(false);
+        test_search_tree<plastic::avl_tree<int>>();
     }
 
     TEST_METHOD(binary_heap) {
