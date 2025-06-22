@@ -1980,6 +1980,12 @@ namespace plastic {
 
     template <class Nd>
     struct basic_binary_search_tree_node {
+    private:
+        Nd* _this() noexcept {
+            return static_cast<Nd*>(this);
+        }
+
+    public:
         Nd* parent;
         Nd* left;
         Nd* right;
@@ -1994,11 +2000,11 @@ namespace plastic {
 
             left->free();
             right->free();
-            delete static_cast<Nd*>(this);
+            delete _this();
         }
 
         Nd* leftmost() noexcept {
-            auto i{ static_cast<Nd*>(this) };
+            auto i{ _this() };
             while (!i->left->is_head) {
                 i = i->left;
             }
@@ -2006,7 +2012,7 @@ namespace plastic {
         }
 
         Nd* rightmost() noexcept {
-            auto i{ static_cast<Nd*>(this) };
+            auto i{ _this() };
             while (!i->right->is_head) {
                 i = i->right;
             }
@@ -2014,53 +2020,51 @@ namespace plastic {
         }
 
         void left_rotate() noexcept {
-            Nd* parent{ this->parent };
-            Nd* replaced{ this->right };
+            Nd* replaced{ right };
             Nd* replaced_left{ replaced->left };
 
-            this->right = replaced_left;
+            right = replaced_left;
             if (!replaced_left->is_head) {
-                replaced_left->parent = this;
+                replaced_left->parent = _this();
             }
 
             if (parent->is_head) {
                 parent->parent = replaced;
             }
-            else if (this == parent->left) {
+            else if (_this() == parent->left) {
                 parent->left = replaced;
             }
             else {
                 parent->right = replaced;
             }
-            replaced->parent = this->parent;
+            replaced->parent = parent;
 
-            replaced->left = this;
-            this->parent = replaced;
+            replaced->left = _this();
+            parent = replaced;
         }
 
         void right_rotate() noexcept {
-            Nd* parent{ this->parent };
-            Nd* replaced{ this->left };
+            Nd* replaced{ left };
             Nd* replaced_right{ replaced->right };
 
-            this->left = replaced_right;
+            left = replaced_right;
             if (!replaced_right->is_head) {
-                replaced_right->parent = this;
+                replaced_right->parent = _this();
             }
 
             if (parent->is_head) {
                 parent->parent = replaced;
             }
-            else if (this == parent->left) {
+            else if (_this() == parent->left) {
                 parent->left = replaced;
             }
             else {
                 parent->right = replaced;
             }
-            replaced->parent = this->parent;
+            replaced->parent = parent;
 
-            replaced->right = this;
-            this->parent = replaced;
+            replaced->right = _this();
+            parent = replaced;
         }
     };
 
@@ -2156,8 +2160,7 @@ namespace plastic {
             _head{ new Nd },
             _size{} {
 
-            _head->parent = _head->left = _head->right = _head;
-            _head->is_head = true;
+            _head->construct_head();
         }
 
         basic_binary_search_tree(const basic_binary_search_tree& other) noexcept :
@@ -2309,10 +2312,7 @@ namespace plastic {
             }
 
             auto new_node{ new Nd };
-            new_node->parent = parent;
-            new_node->left = new_node->right = self._head;
-            new_node->is_head = false;
-            std::construct_at(&new_node->value, value);
+            new_node->construct(self._head, parent, value);
 
             if (parent->is_head) {
                 parent->parent = new_node;
@@ -2457,6 +2457,18 @@ namespace plastic {
             tree->right = this->right->clone(head, tree);
             return tree;
         }
+
+        void construct_head() noexcept {
+            this->parent = this->left = this->right = this;
+            this->is_head = true;
+        }
+
+        void construct(Nd* head, Nd* parent, const T& value) noexcept {
+            this->parent = parent;
+            this->left = this->right = head;
+            this->is_head = false;
+            std::construct_at(&this->value, value);
+        }
     };
 
     export template <class T, class Pr = std::less<T>>
@@ -2506,6 +2518,20 @@ namespace plastic {
             tree->right = this->right->clone(head, tree);
             return tree;
         }
+
+        void construct_head() noexcept {
+            this->parent = this->left = this->right = this;
+            this->is_head = true;
+            this->is_red = false;
+        }
+
+        void construct(Nd* head, Nd* parent, const T& value) noexcept {
+            this->parent = parent;
+            this->left = this->right = head;
+            this->is_head = false;
+            this->is_red = true;
+            std::construct_at(&this->value, value);
+        }
     };
 
     export template <class T, class Pr = std::less<T>>
@@ -2546,7 +2572,7 @@ namespace plastic {
         using Nd = avl_tree_node;
 
     public:
-        unsigned char factor;
+        signed char factor;
         T value;
 
         Nd* clone(Nd* head, Nd* parent) noexcept {
@@ -2558,6 +2584,20 @@ namespace plastic {
             tree->left = this->left->clone(head, tree);
             tree->right = this->right->clone(head, tree);
             return tree;
+        }
+
+        void construct_head() noexcept {
+            this->parent = this->left = this->right = this;
+            this->is_head = true;
+            this->factor = 0;
+        }
+
+        void construct(Nd* head, Nd* parent, const T& value) noexcept {
+            this->parent = parent;
+            this->left = this->right = head;
+            this->is_head = false;
+            this->factor = 0;
+            std::construct_at(&this->value, value);
         }
     };
 
