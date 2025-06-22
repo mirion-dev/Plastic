@@ -2351,9 +2351,13 @@ namespace plastic {
         iterator erase(this auto&& self, const_iterator pos) noexcept {
             Nd* erased{ pos++._ptr };
             assert(erased != self._head);
-            if (erased->left->is_head || erased->right->is_head) {
+
                 Nd* parent{ erased->parent };
-                Nd* replaced{ erased->left->is_head ? erased->right : erased->left };
+            Nd* left{ erased->left };
+            Nd* right{ erased->right };
+            Nd* replaced;
+            if (left->is_head || right->is_head) {
+                replaced = left->is_head ? right : left;
 
                 if (parent->is_head) {
                     parent->parent = replaced;
@@ -2376,10 +2380,7 @@ namespace plastic {
                 }
             }
             else {
-                Nd* parent{ erased->parent };
-                Nd* left{ erased->left };
-                Nd* right{ erased->right };
-                Nd* replaced{ pos._ptr };
+                replaced = pos._ptr;
                 Nd* replaced_parent{ replaced->parent };
                 Nd* replaced_right{ replaced->right };
 
@@ -2408,7 +2409,7 @@ namespace plastic {
                 replaced->parent = parent;
             }
 
-            self._erase_rebalance(erased);
+            self._erase_rebalance(erased, replaced);
             delete erased;
             --self._size;
             return pos;
@@ -2477,7 +2478,7 @@ namespace plastic {
 
         void _insert_rebalance(Nd* inserted) noexcept {}
 
-        void _erase_rebalance(Nd* erased) noexcept {}
+        void _erase_rebalance(Nd* replaced, Nd* erased) noexcept {}
 
     public:
         using base::base;
@@ -2578,7 +2579,7 @@ namespace plastic {
             this->_head->parent->is_red = false;
         }
 
-        void _erase_rebalance(Nd* erased) noexcept {
+        void _erase_rebalance(Nd* replaced, Nd* erased) noexcept {
             // TODO
         }
 
@@ -2640,7 +2641,7 @@ namespace plastic {
             // TODO
         }
 
-        void _erase_rebalance(Nd* erased) noexcept {
+        void _erase_rebalance(Nd* replaced, Nd* erased) noexcept {
             // TODO
         }
 
