@@ -2452,9 +2452,8 @@ namespace plastic {
                 return head;
             }
 
-            auto tree{ new Nd{ parent, {}, {}, false, value } };
-            tree->left = this->left->clone(head, tree);
-            tree->right = this->right->clone(head, tree);
+            auto tree{ new Nd };
+            new(tree) Nd{ parent, this->left->clone(head, tree), this->right->clone(head, tree), false, value };
             return tree;
         }
 
@@ -2464,10 +2463,7 @@ namespace plastic {
         }
 
         void construct(Nd* head, Nd* parent, const T& value) noexcept {
-            this->parent = parent;
-            this->left = this->right = head;
-            this->is_head = false;
-            std::construct_at(&this->value, value);
+            new(this) Nd{ parent, head, head, false, value };
         }
     };
 
@@ -2513,9 +2509,8 @@ namespace plastic {
                 return head;
             }
 
-            auto tree{ new Nd{ parent, {}, {}, false, is_red, value } };
-            tree->left = this->left->clone(head, tree);
-            tree->right = this->right->clone(head, tree);
+            auto tree{ new Nd };
+            new(tree) Nd{ parent, this->left->clone(head, tree), this->right->clone(head, tree), false, is_red, value };
             return tree;
         }
 
@@ -2526,11 +2521,7 @@ namespace plastic {
         }
 
         void construct(Nd* head, Nd* parent, const T& value) noexcept {
-            this->parent = parent;
-            this->left = this->right = head;
-            this->is_head = false;
-            this->is_red = true;
-            std::construct_at(&this->value, value);
+            new(this) Nd{ parent, head, head, false, true, value };
         }
     };
 
@@ -2580,9 +2571,8 @@ namespace plastic {
                 return head;
             }
 
-            auto tree{ new Nd{ parent, {}, {}, false, factor, value } };
-            tree->left = this->left->clone(head, tree);
-            tree->right = this->right->clone(head, tree);
+            auto tree{ new Nd };
+            new(tree) Nd{ parent, this->left->clone(head, tree), this->right->clone(head, tree), false, factor, value };
             return tree;
         }
 
@@ -2593,11 +2583,7 @@ namespace plastic {
         }
 
         void construct(Nd* head, Nd* parent, const T& value) noexcept {
-            this->parent = parent;
-            this->left = this->right = head;
-            this->is_head = false;
-            this->factor = 0;
-            std::construct_at(&this->value, value);
+            new(this) Nd{ parent, head, head, false, 0, value };
         }
     };
 
