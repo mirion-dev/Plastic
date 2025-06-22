@@ -2072,6 +2072,7 @@ namespace plastic {
     class basic_binary_search_tree {
         using T = decltype(Nd::value);
 
+    protected:
         Pr _pred;
         Nd* _head; // `parent` is the root, `left` is the maximum and `right` is the minimum
         std::size_t _size;
@@ -2533,7 +2534,48 @@ namespace plastic {
         friend base;
 
         void _insert_rebalance(Nd* inserted) noexcept {
-            // TODO
+            Nd* i{ inserted };
+            while (i->parent->is_red) {
+                Nd* parent{ i->parent };
+                Nd* grandparent{ parent->parent };
+                if (parent == grandparent->left) {
+                    Nd* uncle{ grandparent->right };
+                    if (!uncle->is_red) {
+                        if (i == parent->right) {
+                            i = parent;
+                            i->left_rotate();
+                        }
+
+                        i->parent->is_red = false;
+                        i->parent->parent->is_red = true;
+                        i->parent->parent->right_rotate();
+                        break;
+                    }
+
+                        parent->is_red = uncle->is_red = false;
+                    grandparent->is_red = true;
+                        i = grandparent;
+                    }
+                    else {
+                    Nd* uncle{ grandparent->left };
+                    if (!uncle->is_red) {
+                        if (i == parent->left) {
+                            i = parent;
+                            i->right_rotate();
+                        }
+
+                        i->parent->is_red = false;
+                        i->parent->parent->is_red = true;
+                        i->parent->parent->left_rotate();
+                        break;
+                    }
+
+                    parent->is_red = uncle->is_red = false;
+                    parent->parent->is_red = true;
+                    i = grandparent;
+                }
+            }
+            this->_head->parent->is_red = false;
         }
 
         void _erase_rebalance(Nd* erased) noexcept {
