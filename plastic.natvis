@@ -2,18 +2,18 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
     <Type Name="plastic::inplace_vector&lt;*,*&gt;">
-        <Intrinsic Name="size" Expression="size_t(_last - _data)"/>
-        <Intrinsic Name="capacity" Expression="$T2"/>
+        <Intrinsic Name="size" Expression="(size_t)(_last - _data)"/>
+        <Intrinsic Name="capacity" Expression="(size_t)$T2"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
-            <ExpandedItem>+_data, [size()]</ExpandedItem>
+            <ExpandedItem>($T1*)_data, [size()]</ExpandedItem>
         </Expand>
     </Type>
 
     <Type Name="plastic::vector&lt;*&gt;">
-        <Intrinsic Name="size" Expression="size_t(_last - _begin)"/>
-        <Intrinsic Name="capacity" Expression="size_t(_end - _begin)"/>
+        <Intrinsic Name="size" Expression="(size_t)(_last - _begin)"/>
+        <Intrinsic Name="capacity" Expression="(size_t)(_end - _begin)"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
@@ -22,8 +22,8 @@
     </Type>
 
     <Type Name="plastic::inplace_deque&lt;*,*&gt;">
-        <Intrinsic Name="size" Expression="_first &lt;= _last ? _last - _first : $T2 + 1 - (_first - _last)"/>
-        <Intrinsic Name="capacity" Expression="$T2"/>
+        <Intrinsic Name="size" Expression="(size_t)(_first &lt;= _last ? _last - _first : $T2 + 1 - (_first - _last))"/>
+        <Intrinsic Name="capacity" Expression="(size_t)$T2"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
@@ -35,8 +35,8 @@
     </Type>
 
     <Type Name="plastic::deque&lt;*&gt;">
-        <Intrinsic Name="size" Expression="size_t(_last - _first)"/>
-        <Intrinsic Name="capacity" Expression="size_t(_end - _begin)"/>
+        <Intrinsic Name="size" Expression="(size_t)(_last - _first)"/>
+        <Intrinsic Name="capacity" Expression="(size_t)(_end - _begin)"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
@@ -70,7 +70,7 @@
         </Expand>
     </Type>
 
-    <Type Name="plastic::binary_search_tree&lt;*&gt;">
+    <Type Name="plastic::basic_binary_search_tree&lt;*&gt;">
         <Intrinsic Name="size" Expression="_size"/>
         <Intrinsic Name="pred" Expression="_pred"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
