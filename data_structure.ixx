@@ -2352,7 +2352,7 @@ namespace plastic {
             Nd* erased{ pos++._ptr };
             assert(erased != self._head);
 
-                Nd* parent{ erased->parent };
+            Nd* parent{ erased->parent };
             Nd* left{ erased->left };
             Nd* right{ erased->right };
             Nd* replaced;
@@ -2409,7 +2409,7 @@ namespace plastic {
                 replaced->parent = parent;
             }
 
-            self._erase_rebalance(erased, replaced);
+            self._erase_rebalance(replaced, erased);
             delete erased;
             --self._size;
             return pos;
@@ -2539,8 +2539,9 @@ namespace plastic {
             while (i->parent->is_red) {
                 Nd* parent{ i->parent };
                 Nd* grandparent{ parent->parent };
+                Nd* uncle;
                 if (parent == grandparent->left) {
-                    Nd* uncle{ grandparent->right };
+                    uncle = grandparent->right;
                     if (!uncle->is_red) {
                         if (i == parent->right) {
                             i = parent;
@@ -2552,13 +2553,9 @@ namespace plastic {
                         i->parent->parent->right_rotate();
                         break;
                     }
-
-                        parent->is_red = uncle->is_red = false;
-                    grandparent->is_red = true;
-                        i = grandparent;
-                    }
-                    else {
-                    Nd* uncle{ grandparent->left };
+                }
+                else {
+                    uncle = grandparent->left;
                     if (!uncle->is_red) {
                         if (i == parent->left) {
                             i = parent;
@@ -2570,17 +2567,81 @@ namespace plastic {
                         i->parent->parent->left_rotate();
                         break;
                     }
-
-                    parent->is_red = uncle->is_red = false;
-                    parent->parent->is_red = true;
-                    i = grandparent;
                 }
+
+                parent->is_red = uncle->is_red = false;
+                grandparent->is_red = true;
+                i = grandparent;
             }
+
             this->_head->parent->is_red = false;
         }
 
         void _erase_rebalance(Nd* replaced, Nd* erased) noexcept {
-            // TODO
+            std::swap(replaced->is_red, erased->is_red);
+
+            Nd* i{ replaced };
+            if (i->is_red) {
+                return;
+            }
+
+            while (!i->parent->is_head && !i->is_red) {
+                Nd* parent{ i->parent };
+                Nd* brother;
+                if (i == parent->left) {
+                    brother = parent->right;
+                    if (brother->is_red) {
+                        brother->is_red = false;
+                        parent->is_red = true;
+                        parent->left_rotate();
+                        brother = parent->right;
+                    }
+
+                    if (brother->left->is_red || brother->right->is_red) {
+                        if (!brother->right->is_red) {
+                            brother->left->is_red = false;
+                            brother->is_red = true;
+                            brother->right_rotate();
+                            brother = parent->right;
+                        }
+
+                        brother->is_red = parent->is_red;
+                        parent->is_red = false;
+                        brother->right->is_red = false;
+                        parent->left_rotate();
+                        break;
+                    }
+                }
+                else {
+                    brother = parent->left;
+                    if (brother->is_red) {
+                        brother->is_red = false;
+                        parent->is_red = true;
+                        parent->right_rotate();
+                        brother = parent->left;
+                    }
+
+                    if (brother->right->is_red || brother->left->is_red) {
+                        if (!brother->left->is_red) {
+                            brother->right->is_red = false;
+                            brother->is_red = true;
+                            brother->left_rotate();
+                            brother = parent->left;
+                        }
+
+                        brother->is_red = parent->is_red;
+                        parent->is_red = false;
+                        brother->left->is_red = false;
+                        parent->right_rotate();
+                        break;
+                    }
+                }
+
+                brother->is_red = true;
+                i = parent;
+            }
+
+            i->is_red = false;
         }
 
     public:
