@@ -26,7 +26,7 @@ namespace plastic {
 
     template <class Fn>
     class flipped {
-        Fn _fn;
+        Fn _;
 
     public:
         template <class T, class U>
