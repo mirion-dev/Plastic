@@ -34,7 +34,7 @@ std::string format(const Hp& heap) {
     return format(temp | std::views::reverse);
 }
 
-template<class Tr>
+template <class Tr>
 void test_search_tree() {
     Tr a{ 0, 0, 0 }, b{ 4, 4, 4, 4 }, c{ 2, 3, 1 }, x;
     ASSERT(format(x) == "[]");
@@ -123,7 +123,7 @@ void test_search_tree() {
     ASSERT(f >= d);
 }
 
-template<class Hp>
+template <class Hp>
 void test_addressable_heap() {
     Hp a{ 0, 0, 0 }, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 }, x;
     ASSERT(format(x) == "[]");
@@ -1047,7 +1047,14 @@ public:
         ASSERT(format(x) == "[6, 6, 6, 6, 18]");
         plastic::transform(a.begin(), a.end(), b.begin(), b.end(), x.begin(), [](int x, int y) { return y - x; });
         ASSERT(format(x) == "[1, 1, 1, 1, 1]");
-        plastic::transform(a.begin(), a.end(), d.begin(), d.end(), x.begin(), [](int x, int y) { return y * 2 - x - 1; });
+        plastic::transform(
+            a.begin(),
+            a.end(),
+            d.begin(),
+            d.end(),
+            x.begin(),
+            [](int x, int y) { return y * 2 - x - 1; }
+        );
         ASSERT(format(x) == "[8, 6, 4, 2, 1]");
 
         x = { 0, 0, 0, 0, 0 };
@@ -1552,7 +1559,16 @@ public:
         ASSERT(plastic::lexicographical_compare(e.begin(), e.end(), a.begin(), a.end()) == true);
         ASSERT(plastic::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end()) == true);
         ASSERT(plastic::lexicographical_compare(b.begin(), b.end(), a.begin(), a.end()) == false);
-        ASSERT(plastic::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), {}, [](int x) { return x * 3; }) == false);
+        ASSERT(
+            plastic::lexicographical_compare(
+                a.begin(),
+                a.end(),
+                b.begin(),
+                b.end(),
+                {},
+                [](int x) { return x * 3; }
+            ) == false
+        );
     }
 
     TEST_METHOD(permutation) {

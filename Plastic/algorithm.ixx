@@ -6,6 +6,8 @@ export module plastic:algorithm;
 
 import std;
 
+// @formatter:cpp_max_line_length 0
+
 // introduced in C++26, but not yet implemented in MSVC
 namespace std {
     template <std::indirectly_readable It, std::indirectly_regular_unary_invocable<It> Pj>
@@ -41,7 +43,9 @@ namespace plastic {
     using fold_right_result_t = std::decay_t<std::invoke_result_t<Fn&, std::iter_reference_t<It>, T>>;
 
     struct satisfy_value {};
+
     struct satisfy_predicate {};
+
     struct satisfy_negated_predicate {};
 
     template <class Sat, class T, class UPr>
