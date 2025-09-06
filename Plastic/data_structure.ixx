@@ -6,8 +6,9 @@ export module plastic:data_structure;
 
 import std;
 
-// linear structures
 namespace plastic {
+
+#pragma region linear structures
 
     struct uninitialized_t {} uninitialized;
 
@@ -1973,10 +1974,9 @@ namespace plastic {
     template <class It>
     list(It, It) -> list<std::iter_value_t<It>>;
 
-}
+#pragma endregion
 
-// search trees
-namespace plastic {
+#pragma region search trees
 
     template <class Nd>
     struct basic_binary_search_tree_node {
@@ -2723,10 +2723,9 @@ namespace plastic {
     template <class It>
     avl_tree(It, It) -> avl_tree<std::iter_value_t<It>>;
 
-}
+#pragma endregion
 
-// addressable heaps
-namespace plastic {
+#pragma region addressable heaps
 
     export template <class T, class Pr = std::less<T>>
     class binary_heap {
@@ -2968,5 +2967,7 @@ namespace plastic {
 
     template <class It>
     binary_heap(It, It) -> binary_heap<std::iter_value_t<It>>;
+
+#pragma endregion
 
 }

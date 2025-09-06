@@ -12,8 +12,9 @@ namespace std {
     using projected_value_t = std::remove_cvref_t<std::invoke_result_t<Pj&, std::iter_value_t<It>&>>;
 }
 
-// for internal implementation
 namespace plastic {
+
+#pragma region for internal implementation
 
     template <class Fn, class T, class It, class U>
     concept indirectly_binary_left_foldable_impl = std::movable<T> && std::movable<U> && std::convertible_to<T, U> && std::invocable<Fn&, U, std::iter_reference_t<It>> && std::assignable_from<U&, std::invoke_result_t<Fn&, U, std::iter_reference_t<It>>>;
@@ -57,10 +58,9 @@ namespace plastic {
         }
     }
 
-}
+#pragma endregion
 
-// comparison operations
-namespace plastic {
+#pragma region comparison operations
 
     export template <std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
@@ -86,10 +86,9 @@ namespace plastic {
         return false;
     }
 
-}
+#pragma endregion
 
-// non-modifying sequence operations
-namespace plastic {
+#pragma region non-modifying sequence operations
 
     export template <std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirectly_unary_invocable<std::projected<It, Pj>> Fn>
     std::ranges::in_fun_result<It, Fn> for_each(It first, Se last, Fn func, Pj proj = {}) {
@@ -387,10 +386,9 @@ namespace plastic {
         return plastic::equal(first1, last1, first2, last2, pred, proj1, proj2);
     }
 
-}
+#pragma endregion
 
-// fold operations
-namespace plastic {
+#pragma region fold operations
 
     export template <std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
     std::ranges::in_value_result<It, fold_left_result_t<Fn, T, It>> fold_left_with_iter(It first, Se last, T init, Fn func) {
@@ -473,10 +471,9 @@ namespace plastic {
         return opt;
     }
 
-}
+#pragma endregion
 
-// modifying sequence operations
-namespace plastic {
+#pragma region modifying sequence operations
 
     export template <std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out>
         requires std::indirectly_copyable<It, Out>
@@ -926,10 +923,9 @@ namespace plastic {
         return { first, ++output };
     }
 
-}
+#pragma endregion
 
-// partitioning operations
-namespace plastic {
+#pragma region partitioning operations
 
     export template <std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
     bool is_partitioned(It first, Se last, Pr pred, Pj proj = {}) {
@@ -1010,10 +1006,9 @@ namespace plastic {
         return first;
     }
 
-}
+#pragma endregion
 
-// binary search operations
-namespace plastic {
+#pragma region binary search operations
 
     export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>, std::indirect_strict_weak_order<const T*, std::projected<It, Pj>> Pr = std::ranges::less>
     It lower_bound(It first, Se last, const T& value, Pr pred = {}, Pj proj = {}) {
@@ -1060,10 +1055,9 @@ namespace plastic {
         return { plastic::lower_bound(first, last, value, pred, proj), plastic::upper_bound(first, last, value, pred, proj) };
     }
 
-}
+#pragma endregion
 
-// heap operations
-namespace plastic {
+#pragma region heap operations
 
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
     It is_heap_until(It first, Se last, Pr pred = {}, Pj proj = {}) {
@@ -1167,10 +1161,9 @@ namespace plastic {
         return r_last;
     }
 
-}
+#pragma endregion
 
-// merge operations
-namespace plastic {
+#pragma region merge operations
 
     export template <std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, std::weakly_incrementable Out, class Pr = std::ranges::less, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
@@ -1209,10 +1202,9 @@ namespace plastic {
         return j;
     }
 
-}
+#pragma endregion
 
-// sorting operations
-namespace plastic {
+#pragma region sorting operations
 
     export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
     It is_sorted_until(It first, Se last, Pr pred = {}, Pj proj = {}) {
@@ -1399,10 +1391,9 @@ namespace plastic {
         return r_last;
     }
 
-}
+#pragma endregion
 
-// set operations
-namespace plastic {
+#pragma region set operations
 
     export template <std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_strict_weak_order<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::less>
     bool includes(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
@@ -1491,10 +1482,9 @@ namespace plastic {
         return { res.in, first2, res.out };
     }
 
-}
+#pragma endregion
 
-// minimum/maximum operations
-namespace plastic {
+#pragma region minimum/maximum operations
 
     export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
     It max_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
@@ -1596,10 +1586,9 @@ namespace plastic {
         return value;
     }
 
-}
+#pragma endregion
 
-// permutation operations
-namespace plastic {
+#pragma region permutation operations
 
     export template <std::forward_iterator It1, std::sentinel_for<It1> Se1, std::forward_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_equivalence_relation<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::equal_to>
     bool is_permutation(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
@@ -1673,5 +1662,7 @@ namespace plastic {
 
         return { r_last, true };
     }
+
+#pragma endregion
 
 }
