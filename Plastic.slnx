@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x86" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="Plastic/Plastic.vcxproj" Id="e81917d8-7437-a691-f7e7-d135d73a7ef5" />
+</Solution>

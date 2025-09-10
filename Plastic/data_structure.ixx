@@ -1040,7 +1040,7 @@ namespace plastic {
         T* _first{};
         T* _last{};
 
-        deque(uninitialized_t, std::size_t size) noexcept:
+        deque(uninitialized_t, std::size_t size) noexcept :
             _begin{ new T[size] },
             _end{ _begin + size },
             _first{ _begin },
@@ -2476,9 +2476,9 @@ namespace plastic {
 
         friend base;
 
-        void _insert_rebalance(Nd* inserted) noexcept {}
+        static void _insert_rebalance(Nd* inserted) noexcept {}
 
-        void _erase_rebalance(Nd* replaced, Nd* erased) noexcept {}
+        static void _erase_rebalance(Nd* replaced, Nd* erased) noexcept {}
 
     public:
         using base::base;

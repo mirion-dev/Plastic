@@ -817,7 +817,7 @@ namespace plastic {
     Out sample(It first, Se last, Out output, std::iter_difference_t<It> count, Gen&& gen) {
         using Diff = std::iter_difference_t<It>;
         using Distr = std::uniform_int_distribution<Diff>;
-        using Param = typename Distr::param_type;
+        using Param = Distr::param_type;
 
         Distr distr;
         if constexpr (std::forward_iterator<It>) {
@@ -860,7 +860,7 @@ namespace plastic {
     It shuffle(It first, Se last, Gen&& gen) {
         using Diff = std::iter_difference_t<It>;
         using Distr = std::uniform_int_distribution<Diff>;
-        using Param = typename Distr::param_type;
+        using Param = Distr::param_type;
 
         Distr distr;
         Diff size{ last - first };
