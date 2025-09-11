@@ -160,9 +160,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\tests\test.cpp" />
+    <ClCompile Include="addressable_heap.ixx" />
     <ClCompile Include="algorithm.ixx" />
-    <ClCompile Include="data_structure.ixx" />
+    <ClCompile Include="linear_structure.ixx" />
     <ClCompile Include="plastic.ixx" />
+    <ClCompile Include="search_tree.ixx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

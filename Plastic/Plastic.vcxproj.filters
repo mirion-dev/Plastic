@@ -2,9 +2,11 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="algorithm.ixx" />
-    <ClCompile Include="data_structure.ixx" />
     <ClCompile Include="plastic.ixx" />
     <ClCompile Include="..\tests\test.cpp" />
+    <ClCompile Include="linear_structure.ixx" />
+    <ClCompile Include="search_tree.ixx" />
+    <ClCompile Include="addressable_heap.ixx" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="debugger\plastic.natvis" />
