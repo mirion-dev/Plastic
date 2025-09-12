@@ -70,9 +70,10 @@ namespace plastic {
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     bool equal(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first2 != last2) {
-            if (first1 == last1 || !pred(proj1(*first1++), proj2(*first2++))) {
+            if (first1 == last1 || !pred(proj1(*first1), proj2(*first2))) {
                 return false;
             }
+            ++first1, ++first2;
         }
         return first1 == last1;
     }
@@ -83,9 +84,10 @@ namespace plastic {
             if (first1 == last1 || pred(proj1(*first1), proj2(*first2))) {
                 return true;
             }
-            if (pred(proj2(*first2++), proj1(*first1++))) {
+            if (pred(proj2(*first2), proj1(*first1))) {
                 return false;
             }
+            ++first1, ++first2;
         }
         return false;
     }
