@@ -8,7 +8,7 @@ The class designs are primarily based on [MSVC STL](https://github.com/microsoft
 
 ### Linear Structures
 
-![](./images/linear.svg)
+![](./images/linear_structure.svg)
 
 \* Amortized complexity.
 
@@ -45,7 +45,7 @@ The class designs are primarily based on [MSVC STL](https://github.com/microsoft
 
 ### Search Trees
 
-![](./images/trees.svg)
+![](./images/search_tree.svg)
 
 \* Amortized complexity.
 
@@ -53,7 +53,7 @@ Member functions: `empty`, `size`, `max_size`, `clear`, `begin`, `end`, `cbegin`
 
 ### Addressable Heaps
 
-![](./images/heaps.svg)
+![](./images/addressable_heap.svg)
 
 \* Amortized complexity.
 

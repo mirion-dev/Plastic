@@ -1,6 +1,7 @@
 #import "@preview/cetz:0.4.0": *
+#import "common.typ": *
 
-#set page(width: auto, height: auto, margin: 1em)
+#show: init
 
 #let diag = canvas.with(length: 1em)
 #let frame = draw.rect.with(stroke: .5pt)
@@ -68,13 +69,7 @@
     arrow((0, .7), (-.75, .7), (-.75, 1.3), (5.75, 1.3), (5.75, .7), (5, .7))
 })
 
-#let O1 = grid.cell(fill: lime.lighten(50%), $O(1)$)
-#let O1a = grid.cell(fill: lime.lighten(50%), $O(1)^*$)
-#let On = grid.cell(fill: red.lighten(50%), $O(n)$)
-
 #grid(
-    align: center + horizon,
-    inset: (left: 1em, right: 1em, top: .5em, bottom: .5em),
     columns: 12,
     column-gutter: (-1em, 0em, 0em, 0em, 1em, 0em, 0em, 1em, 0em, 0em, 1em),
     grid.cell(rowspan: 3)[*Structure*],

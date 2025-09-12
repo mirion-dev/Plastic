@@ -1,12 +1,8 @@
-#set page(width: auto, height: auto, margin: 1em)
+#import "common.typ": *
 
-#let O1a = grid.cell(fill: lime.lighten(50%), $O(1)^*$)
-#let Ologn = grid.cell(fill: yellow.lighten(50%), $O(log n)$)
-#let On = grid.cell(fill: red.lighten(50%), $O(n)$)
+#show: init
 
 #grid(
-    align: center + horizon,
-    inset: (left: 1em, right: 1em, top: .5em, bottom: .5em),
     columns: 5,
     grid.cell(rowspan: 2)[*Structure*],
     grid.cell(colspan: 4)[*Time Complexity*],
