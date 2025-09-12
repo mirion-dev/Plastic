@@ -105,27 +105,30 @@ namespace plastic {
     export template <std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirectly_unary_invocable<std::projected<It, Pj>> Fn>
     std::ranges::in_fun_result<It, Fn> for_each(It first, Se last, Fn func, Pj proj = {}) {
         while (first != last) {
-            std::invoke(func, std::invoke(proj, *first++));
+            std::invoke(func, std::invoke(proj, *first));
+            ++first;
         }
-        return { first, func };
+        return { std::move(first), std::move(func) };
     }
 
     export template <std::input_iterator It, class Pj = std::identity, std::indirectly_unary_invocable<std::projected<It, Pj>> Fn>
     std::ranges::in_fun_result<It, Fn> for_each_n(It first, std::iter_difference_t<It> count, Fn func, Pj proj = {}) {
         assert(count >= 0);
         while (count-- != 0) {
-            std::invoke(func, std::invoke(proj, *first++));
+            std::invoke(func, std::invoke(proj, *first));
+            ++first;
         }
-        return { first, func };
+        return { std::move(first), std::move(func) };
     }
 
     template <class Sat, class It, class Se, class TPr, class Pj>
     std::iter_difference_t<It> count_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
         std::iter_difference_t<It> count{};
         while (first != last) {
-            if (plastic::satisfy<Sat>(std::invoke(proj, *first++), value_or_pred)) {
+            if (plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred)) {
                 ++count;
             }
+            ++first;
         }
         return count;
     }
@@ -150,7 +153,7 @@ namespace plastic {
             }
             ++first1, ++first2;
         }
-        return { first1, first2 };
+        return { std::move(first1), std::move(first2) };
     }
 
     template <class Sat, class It, class Se, class TPr, class Pj>
@@ -195,23 +198,52 @@ namespace plastic {
         return plastic::find_if(first, last, pred, proj) == last;
     }
 
+    template <class Sat, class It, class Se, class TPr, class Pj>
+    std::ranges::subrange<It> find_last_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
+        It i{ plastic::find_impl<Sat>(first, last, value_or_pred, proj) };
+        if (i == last) {
+            return { i, i };
+        }
+
+        while (true) {
+            It j{ plastic::find_impl<Sat>(std::ranges::next(i), last, value_or_pred, proj) };
+            if (j == last) {
+                return { std::move(i), std::move(first) };
+            }
+            i = j;
+        }
+    }
+
+    export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>>
+        requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
+    std::ranges::subrange<It> find_last(It first, Se last, const T& value, Pj proj = {}) {
+        return plastic::find_last_impl<satisfy_value>(first, last, value, proj);
+    }
+
+    export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
+    std::ranges::subrange<It> find_last_if(It first, Se last, Pr pred, Pj proj = {}) {
+        return plastic::find_last_impl<satisfy_predicate>(first, last, pred, proj);
+    }
+
+    export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
+    std::ranges::subrange<It> find_last_if_not(It first, Se last, Pr pred, Pj proj = {}) {
+        return plastic::find_last_impl<satisfy_negated_predicate>(first, last, pred, proj);
+    }
+
     export template <std::forward_iterator It1, std::sentinel_for<It1> Se1, std::forward_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     std::ranges::subrange<It1> search(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (true) {
             It1 i{ first1 };
             It2 j{ first2 };
-            while (true) {
+            do {
                 if (j == last2) {
-                    return { first1, i };
+                    return { std::move(first1), std::move(i) };
                 }
                 if (i == last1) {
                     return { i, i };
                 }
-                if (!std::invoke(pred, std::invoke(proj1, *i++), std::invoke(proj2, *j++))) {
-                    break;
-                }
-            };
+            } while (std::invoke(pred, std::invoke(proj1, *i++), std::invoke(proj2, *j++)));
             ++first1;
         }
     }
@@ -232,53 +264,17 @@ namespace plastic {
             It i{ first };
             auto n{ count };
             ++i, --n;
-
-            while (true) {
+            do {
                 if (n-- == 0) {
-                    return { first, i };
+                    return { std::move(first), std::move(i) };
                 }
                 if (i == last) {
                     return { i, i };
                 }
-                if (!std::invoke(pred, std::invoke(proj, *i++), value)) {
-                    break;
-                }
-            };
+            } while (std::invoke(pred, std::invoke(proj, *i++), value));
             first = i;
         }
         return { first, first };
-    }
-
-    template <class Sat, class It, class Se, class TPr, class Pj>
-    std::ranges::subrange<It> find_last_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
-        It i{ plastic::find_impl<Sat>(first, last, value_or_pred, proj) };
-        if (i == last) {
-            return { i, i };
-        }
-
-        while (true) {
-            It j{ plastic::find_impl<Sat>(std::ranges::next(i), last, value_or_pred, proj) };
-            if (j == last) {
-                return { i, first };
-            }
-            i = j;
-        }
-    }
-
-    export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>>
-        requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
-    std::ranges::subrange<It> find_last(It first, Se last, const T& value, Pj proj = {}) {
-        return plastic::find_last_impl<satisfy_value>(first, last, value, proj);
-    }
-
-    export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
-    std::ranges::subrange<It> find_last_if(It first, Se last, Pr pred, Pj proj = {}) {
-        return plastic::find_last_impl<satisfy_predicate>(first, last, pred, proj);
-    }
-
-    export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
-    std::ranges::subrange<It> find_last_if_not(It first, Se last, Pr pred, Pj proj = {}) {
-        return plastic::find_last_impl<satisfy_negated_predicate>(first, last, pred, proj);
     }
 
     export template <std::forward_iterator It1, std::sentinel_for<It1> Se1, std::forward_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
@@ -326,10 +322,9 @@ namespace plastic {
 
         It i{ first };
         while (++i != last) {
-            if (std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *i))) {
+            if (std::invoke(pred, std::invoke(proj, *first++), std::invoke(proj, *i))) {
                 return first;
             }
-            ++first;
         }
         return i;
     }
@@ -392,7 +387,12 @@ namespace plastic {
             first1 = std::ranges::next(first1, size1 - size2, last1);
         }
         else {
-            first1 = std::ranges::next(first1, (last2 - first2) - (last1 - first1), last1);
+            std::iter_difference_t<It1> size1{ last1 - first1 }, size2{ last2 - first2 };
+            if (size1 < size2) {
+                return false;
+            }
+
+            first1 = std::ranges::next(first1, size2 - size1, last1);
         }
 
         return plastic::equal(first1, last1, first2, last2, pred, proj1, proj2);
