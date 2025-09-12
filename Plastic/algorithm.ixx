@@ -55,10 +55,10 @@ namespace plastic {
             return given == value_or_pred;
         }
         else if constexpr (std::same_as<Sat, satisfy_predicate>) {
-            return value_or_pred(given);
+            return std::invoke(value_or_pred, given);
         }
         else {
-            return !value_or_pred(given);
+            return !std::invoke(value_or_pred, given);
         }
     }
 
@@ -76,7 +76,7 @@ namespace plastic {
         }
 
         while (first2 != last2) {
-            if (first1 == last1 || !pred(proj1(*first1), proj2(*first2))) {
+            if (first1 == last1 || !std::invoke(pred, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
                 return false;
             }
             ++first1, ++first2;
@@ -87,10 +87,10 @@ namespace plastic {
     export template <std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_strict_weak_order<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::less>
     bool lexicographical_compare(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first2 != last2) {
-            if (first1 == last1 || pred(proj1(*first1), proj2(*first2))) {
+            if (first1 == last1 || std::invoke(pred, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
                 return true;
             }
-            if (pred(proj2(*first2), proj1(*first1))) {
+            if (std::invoke(pred, std::invoke(proj2, *first2), std::invoke(proj1, *first1))) {
                 return false;
             }
             ++first1, ++first2;
@@ -105,7 +105,7 @@ namespace plastic {
     export template <std::input_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirectly_unary_invocable<std::projected<It, Pj>> Fn>
     std::ranges::in_fun_result<It, Fn> for_each(It first, Se last, Fn func, Pj proj = {}) {
         while (first != last) {
-            func(proj(*first++));
+            std::invoke(func, std::invoke(proj, *first++));
         }
         return { first, func };
     }
@@ -114,7 +114,7 @@ namespace plastic {
     std::ranges::in_fun_result<It, Fn> for_each_n(It first, std::iter_difference_t<It> count, Fn func, Pj proj = {}) {
         assert(count >= 0);
         while (count-- != 0) {
-            func(proj(*first++));
+            std::invoke(func, std::invoke(proj, *first++));
         }
         return { first, func };
     }
@@ -123,7 +123,7 @@ namespace plastic {
     std::iter_difference_t<It> count_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
         std::iter_difference_t<It> count{};
         while (first != last) {
-            if (plastic::satisfy<Sat>(proj(*first++), value_or_pred)) {
+            if (plastic::satisfy<Sat>(std::invoke(proj, *first++), value_or_pred)) {
                 ++count;
             }
         }
@@ -145,7 +145,7 @@ namespace plastic {
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     std::ranges::in_in_result<It1, It2> mismatch(It1 first1, S1 last1, It2 first2, S2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (!pred(proj1(*first1), proj2(*first2))) {
+            if (!std::invoke(pred, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
                 break;
             }
             ++first1, ++first2;
@@ -156,7 +156,7 @@ namespace plastic {
     template <class Sat, class It, class Se, class TPr, class Pj>
     It find_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
         while (first != last) {
-            if (plastic::satisfy<Sat>(proj(*first), value_or_pred)) {
+            if (plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred)) {
                 break;
             }
             ++first;
@@ -208,7 +208,7 @@ namespace plastic {
                 if (i == last1) {
                     return { i, i };
                 }
-                if (!pred(proj1(*i++), proj2(*j++))) {
+                if (!std::invoke(pred, std::invoke(proj1, *i++), std::invoke(proj2, *j++))) {
                     break;
                 }
             };
@@ -224,7 +224,7 @@ namespace plastic {
         }
 
         while (first != last) {
-            if (!pred(proj(*first), value)) {
+            if (!std::invoke(pred, std::invoke(proj, *first), value)) {
                 ++first;
                 continue;
             }
@@ -240,7 +240,7 @@ namespace plastic {
                 if (i == last) {
                     return { i, i };
                 }
-                if (!pred(proj(*i++), value)) {
+                if (!std::invoke(pred, std::invoke(proj, *i++), value)) {
                     break;
                 }
             };
@@ -309,7 +309,7 @@ namespace plastic {
         while (first1 != last1) {
             It2 i{ first2 };
             while (i != last2) {
-                if (pred(proj1(*first1), proj2(*i++))) {
+                if (std::invoke(pred, std::invoke(proj1, *first1), std::invoke(proj2, *i++))) {
                     return first1;
                 }
             }
@@ -326,7 +326,7 @@ namespace plastic {
 
         It i{ first };
         while (++i != last) {
-            if (pred(proj(*first), proj(*i))) {
+            if (std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *i))) {
                 return first;
             }
             ++first;
@@ -500,7 +500,7 @@ namespace plastic {
         requires std::indirectly_copyable<It, Out>
     std::ranges::in_out_result<It, Out> copy_if(It first, Se last, Out output, Pr pred, Pj proj = {}) {
         while (first != last) {
-            if (pred(proj(*first))) {
+            if (std::invoke(pred, std::invoke(proj, *first))) {
                 *output++ = *first;
             }
             ++first;
@@ -578,7 +578,7 @@ namespace plastic {
         requires std::indirectly_writable<Out, std::indirect_result_t<Fn&, std::projected<It, Pj>>>
     std::ranges::in_out_result<It, Out> transform(It first, Se last, Out output, Fn func, Pj proj = {}) {
         while (first != last) {
-            *output++ = func(proj(*first++));
+            *output++ = std::invoke(func, std::invoke(proj, *first++));
         }
         return { first, output };
     }
@@ -587,7 +587,7 @@ namespace plastic {
         requires std::indirectly_writable<Out, std::indirect_result_t<Fn&, std::projected<It1, Pj1>, std::projected<It2, Pj2>>>
     std::ranges::in_in_out_result<It1, It2, Out> transform(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Fn func, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            *output++ = func(proj1(*first1++), proj2(*first2++));
+            *output++ = std::invoke(func, std::invoke(proj1, *first1++), std::invoke(proj2, *first2++));
         }
         return { first1, first2, output };
     }
@@ -596,7 +596,7 @@ namespace plastic {
         requires std::invocable<Fn&> && std::indirectly_writable<Out, std::invoke_result_t<Fn&>>
     Out generate(Out first, Se last, Fn func) {
         while (first != last) {
-            *first++ = func();
+            *first++ = std::invoke(func);
         }
         return first;
     }
@@ -609,7 +609,7 @@ namespace plastic {
         }
 
         while (count-- != 0) {
-            *first++ = func();
+            *first++ = std::invoke(func);
         }
 
         return first;
@@ -624,7 +624,7 @@ namespace plastic {
 
         It i{ first };
         while (++i != last) {
-            if (!plastic::satisfy<Sat>(proj(*i), value_or_pred)) {
+            if (!plastic::satisfy<Sat>(std::invoke(proj, *i), value_or_pred)) {
                 *first++ = std::move(*i);
             }
         }
@@ -646,7 +646,7 @@ namespace plastic {
     template <class Sat, class It, class Se, class Out, class TPr, class Pj>
     std::ranges::in_out_result<It, Out> remove_copy_impl(It first, Se last, Out output, const TPr& value_or_pred, Pj proj) {
         while (first != last) {
-            if (!plastic::satisfy<Sat>(proj(*first), value_or_pred)) {
+            if (!plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred)) {
                 *output++ = *first;
             }
             ++first;
@@ -669,7 +669,7 @@ namespace plastic {
     template <class Sat, class It, class Se, class TPr, class U, class Pj>
     It replace_impl(It first, Se last, const TPr& value_or_pred, const U& value, Pj proj) {
         while (first != last) {
-            if (plastic::satisfy<Sat>(proj(*first), value_or_pred)) {
+            if (plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred)) {
                 *first = value;
             }
             ++first;
@@ -692,7 +692,7 @@ namespace plastic {
     export template <class Sat, class It, class Se, class Out, class TPr, class U, class Pj>
     std::ranges::in_out_result<It, Out> replace_copy_impl(It first, Se last, Out output, const TPr& value_or_pred, const U& value, Pj proj) {
         while (first != last) {
-            *output++ = plastic::satisfy<Sat>(proj(*first), value_or_pred) ? value : *first;
+            *output++ = plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred) ? value : *first;
             ++first;
         }
         return { first, output };
@@ -888,7 +888,7 @@ namespace plastic {
 
         It i{ first };
         while (++i != last) {
-            if (!pred(proj(*first), proj(*i))) {
+            if (!std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *i))) {
                 *++first = std::move(*i);
             }
         }
@@ -908,7 +908,7 @@ namespace plastic {
             It i{ first };
             *output = *first;
             while (++first != last) {
-                if (!pred(proj(*i), proj(*first))) {
+                if (!std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *first))) {
                     i = first;
                     *++output = *first;
                 }
@@ -917,7 +917,7 @@ namespace plastic {
         else if constexpr (std::input_iterator<Out> && std::same_as<std::iter_value_t<It>, std::iter_value_t<Out>>) {
             *output = *first;
             while (++first != last) {
-                if (!pred(proj(*output), proj(*first))) {
+                if (!std::invoke(pred, std::invoke(proj, *output), std::invoke(proj, *first))) {
                     *++output = *first;
                 }
             }
@@ -926,7 +926,7 @@ namespace plastic {
             auto value{ *first };
             *output = value;
             while (++first != last) {
-                if (!pred(proj(value), proj(*first))) {
+                if (!std::invoke(pred, std::invoke(proj, value), std::invoke(proj, *first))) {
                     *++output = value = *first;
                 }
             }
@@ -953,7 +953,7 @@ namespace plastic {
 
         It i{ first };
         while (++i != last) {
-            if (pred(proj(*i))) {
+            if (std::invoke(pred, std::invoke(proj, *i))) {
                 std::swap(*first++, *i);
             }
         }
@@ -965,7 +965,7 @@ namespace plastic {
         requires std::indirectly_copyable<It, Out1> && std::indirectly_copyable<It, Out2>
     std::ranges::in_out_out_result<It, Out1, Out2> partition_copy(It first, Se last, Out1 output_true, Out2 output_false, Pr pred, Pj proj = {}) {
         while (first != last) {
-            (pred(proj(*first++)) ? *output_true++ : *output_false++) = *first;
+            (std::invoke(pred, std::invoke(proj, *first)) ? *output_true++ : *output_false++) = *first++;
         }
         return { first, output_true, output_false };
     }
@@ -983,7 +983,7 @@ namespace plastic {
             if (first == --r_last) {
                 return { first, r_last };
             }
-        } while (!pred(proj(*r_last)));
+        } while (!std::invoke(pred, std::invoke(proj, *r_last)));
 
         auto buf{ new std::iter_value_t<It>[std::ranges::distance(first, r_last) + 1] };
         It i{ first };
@@ -991,7 +991,7 @@ namespace plastic {
 
         *j++ = std::move(*i++);
         while (i != r_last) {
-            (pred(proj(*i++)) ? *first++ : *j++) = std::move(*i);
+            (std::invoke(pred, std::invoke(proj, *i)) ? *first++ : *j++) = std::move(*i++);
         }
         *first++ = std::move(*r_last);
 
@@ -1007,7 +1007,7 @@ namespace plastic {
         while (size != 0) {
             auto half{ size >> 1 };
             It i{ std::ranges::next(first, half) };
-            if (pred(proj(*i))) {
+            if (std::invoke(pred, std::invoke(proj, *i))) {
                 first = ++i;
                 size -= half + 1;
             }
@@ -1028,7 +1028,7 @@ namespace plastic {
         while (size != 0) {
             auto half{ size >> 1 };
             It i{ std::ranges::next(first, half) };
-            if (pred(proj(*i), proj(value))) {
+            if (std::invoke(pred, std::invoke(proj, *i), value)) {
                 first = ++i;
                 size -= half + 1;
             }
@@ -1045,7 +1045,7 @@ namespace plastic {
         while (size != 0) {
             auto half{ size >> 1 };
             It i{ std::ranges::next(first, half) };
-            if (!pred(proj(value), proj(*i))) {
+            if (!std::invoke(pred, value, std::invoke(proj, *i))) {
                 first = ++i;
                 size -= half + 1;
             }
@@ -1059,7 +1059,7 @@ namespace plastic {
     export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>, std::indirect_strict_weak_order<const T*, std::projected<It, Pj>> Pr = std::ranges::less>
     bool binary_search(It first, Se last, const T& value, Pr pred = {}, Pj proj = {}) {
         first = plastic::lower_bound(first, last, value, pred, proj);
-        return first != last && !pred(proj(value), proj(*first));
+        return first != last && !std::invoke(pred, value, std::invoke(proj, *first));
     }
 
     export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, class T = std::projected_value_t<It, Pj>, std::indirect_strict_weak_order<const T*, std::projected<It, Pj>> Pr = std::ranges::less>
@@ -1079,7 +1079,7 @@ namespace plastic {
 
         std::iter_difference_t<It> size{ last - first }, i{ 1 };
         while (i != size) {
-            if (pred(proj(first[(i - 1) >> 1]), proj(first[i]))) {
+            if (std::invoke(pred, std::invoke(proj, first[(i - 1) >> 1]), std::invoke(proj, first[i]))) {
                 break;
             }
             ++i;
@@ -1098,7 +1098,7 @@ namespace plastic {
         auto value{ std::move(first[index]) };
         while (index != 0) {
             auto parent{ (index - 1) >> 1 };
-            if (!pred(proj(first[parent]), proj(value))) {
+            if (!std::invoke(pred, std::invoke(proj, first[parent]), std::invoke(proj, value))) {
                 break;
             }
             first[index] = std::move(first[parent]);
@@ -1115,10 +1115,10 @@ namespace plastic {
             if (child >= size) {
                 break;
             }
-            if (child + 1 < size && pred(proj(first[child]), proj(first[child + 1]))) {
+            if (child + 1 < size && std::invoke(pred, std::invoke(proj, first[child]), std::invoke(proj, first[child + 1]))) {
                 ++child;
             }
-            if (!pred(proj(value), proj(first[child]))) {
+            if (!std::invoke(pred, std::invoke(proj, value), std::invoke(proj, first[child]))) {
                 break;
             }
             first[index] = std::move(first[child]);
@@ -1181,7 +1181,7 @@ namespace plastic {
         requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
     std::ranges::in_in_out_result<It1, It2, Out> merge(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            *output++ = !pred(proj2(*first2), proj1(*first1)) ? *first1++ : *first2++;
+            *output++ = !std::invoke(pred, std::invoke(proj2, *first2), std::invoke(proj1, *first1)) ? *first1++ : *first2++;
         }
 
         if (first1 == last1) {
@@ -1199,7 +1199,7 @@ namespace plastic {
         It i{ first }, j{ middle };
         auto k{ buf };
         while (i != middle && j != last) {
-            *k++ = !pred(proj(*j), proj(*i)) ? std::move(*i++) : std::move(*j++);
+            *k++ = !std::invoke(pred, std::invoke(proj, *j), std::invoke(proj, *i)) ? std::move(*i++) : std::move(*j++);
         }
 
         if (i == middle) {
@@ -1226,7 +1226,7 @@ namespace plastic {
 
         It i{ first };
         while (++i != last) {
-            if (pred(proj(*i), proj(*first++))) {
+            if (std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *first++))) {
                 break;
             }
         }
@@ -1250,7 +1250,7 @@ namespace plastic {
             auto value{ std::move(*i) };
             It hole{ i }, prev{ i };
             while (prev != first) {
-                if (!pred(proj(value), proj(*--prev))) {
+                if (!std::invoke(pred, std::invoke(proj, value), std::invoke(proj, *--prev))) {
                     break;
                 }
                 *hole-- = std::move(*prev);
@@ -1264,12 +1264,12 @@ namespace plastic {
     template <class It, class Pr, class Pj>
     It median_partition(It first, It last, Pr pred, Pj proj) {
         auto a{ *first }, b{ first[last - first >> 1] }, c{ *std::ranges::prev(last) };
-        if (pred(proj(a), proj(b))) {
+        if (std::invoke(pred, std::invoke(proj, a), std::invoke(proj, b))) {
             std::swap(a, b);
         }
-        if (pred(proj(b), proj(c))) {
+        if (std::invoke(pred, std::invoke(proj, b), std::invoke(proj, c))) {
             std::swap(b, c);
-            if (pred(proj(a), proj(b))) {
+            if (std::invoke(pred, std::invoke(proj, a), std::invoke(proj, b))) {
                 std::swap(a, b);
             }
         }
@@ -1278,7 +1278,7 @@ namespace plastic {
             if (first == last) {
                 return first;
             }
-            if (!pred(proj(*first), proj(b))) {
+            if (!std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, b))) {
                 break;
             }
             ++first;
@@ -1286,7 +1286,7 @@ namespace plastic {
 
         It i{ first };
         while (++i != last) {
-            if (pred(proj(*i), proj(b))) {
+            if (std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, b))) {
                 std::swap(*first++, *i);
             }
         }
@@ -1328,7 +1328,7 @@ namespace plastic {
         It i{ middle };
         auto size{ middle - first };
         while (i != last) {
-            if (pred(proj(*i), proj(*first))) {
+            if (std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *first))) {
                 std::swap(*i, *first);
                 plastic::sift_down(first, 0, size, pred, proj);
             }
@@ -1349,7 +1349,7 @@ namespace plastic {
         auto size{ i - first2 };
         plastic::make_heap(first2, i, pred, proj2);
         while (first1 != last1) {
-            if (pred(proj1(*first1), proj2(*first2))) {
+            if (std::invoke(pred, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
                 *first2 = *first1;
                 plastic::sift_down(first2, 0, size, pred, proj2);
             }
@@ -1370,7 +1370,7 @@ namespace plastic {
         It middle{ first + (last - first >> 1) };
         merge_sort(first, middle, pred, proj);
         merge_sort(middle, last, pred, proj);
-        if (pred(proj(*middle), proj(*std::ranges::prev(middle)))) {
+        if (std::invoke(pred, std::invoke(proj, *middle), std::invoke(proj, *std::ranges::prev(middle)))) {
             plastic::inplace_merge(first, middle, last, pred, proj);
         }
     }
@@ -1410,10 +1410,10 @@ namespace plastic {
     export template <std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_strict_weak_order<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::less>
     bool includes(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (pred(proj2(*first2), proj1(*first1))) {
+            if (std::invoke(pred, std::invoke(proj2, *first2), std::invoke(proj1, *first1))) {
                 return false;
             }
-            if (!pred(proj1(*first1++), proj2(*first2))) {
+            if (!std::invoke(pred, std::invoke(proj1, *first1++), std::invoke(proj2, *first2))) {
                 ++first2;
             }
         }
@@ -1424,10 +1424,10 @@ namespace plastic {
         requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
     std::ranges::in_out_result<It1, Out> set_difference(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (pred(proj1(*first1), proj2(*first2))) {
+            if (std::invoke(pred, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
                 *output++ = *first1++;
             }
-            else if (!pred(proj2(*first2++), proj1(*first1))) {
+            else if (!std::invoke(pred, std::invoke(proj2, *first2++), std::invoke(proj1, *first1))) {
                 ++first1;
             }
         }
@@ -1438,10 +1438,10 @@ namespace plastic {
         requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
     std::ranges::in_in_out_result<It1, It2, Out> set_intersection(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (pred(proj1(*first1), proj2(*first2))) {
+            if (std::invoke(pred, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
                 ++first1;
             }
-            else if (!pred(proj2(*first2++), proj1(*first1))) {
+            else if (!std::invoke(pred, std::invoke(proj2, *first2++), std::invoke(proj1, *first1))) {
                 *output++ = *first1++;
             }
         }
@@ -1452,10 +1452,10 @@ namespace plastic {
         requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
     std::ranges::in_in_out_result<It1, It2, Out> set_symmetric_difference(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (pred(proj1(*first1), proj2(*first2))) {
+            if (std::invoke(pred, std::invoke(proj1, *first1), std::invoke(proj2, *first2))) {
                 *output++ = *first1++;
             }
-            else if (pred(proj2(*first2), proj1(*first1))) {
+            else if (std::invoke(pred, std::invoke(proj2, *first2), std::invoke(proj1, *first1))) {
                 *output++ = *first2++;
             }
             else {
@@ -1475,12 +1475,12 @@ namespace plastic {
         requires std::mergeable<It1, It2, Out, Pr, Pj1, Pj2>
     std::ranges::in_in_out_result<It1, It2, Out> set_union(It1 first1, Se1 last1, It2 first2, Se2 last2, Out output, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         while (first1 != last1 && first2 != last2) {
-            if (pred(proj2(*first2), proj1(*first1))) {
+            if (std::invoke(pred, std::invoke(proj2, *first2), std::invoke(proj1, *first1))) {
                 *output++ = *first2++;
             }
             else {
                 *output++ = *first1;
-                if (!pred(proj1(*first1++), proj2(*first2))) {
+                if (!std::invoke(pred, std::invoke(proj1, *first1++), std::invoke(proj2, *first2))) {
                     ++first2;
                 }
             }
@@ -1506,7 +1506,7 @@ namespace plastic {
 
         It i{ first };
         while (++first != last) {
-            if (pred(proj(*i), proj(*first))) {
+            if (std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *first))) {
                 i = first;
             }
         }
@@ -1522,7 +1522,7 @@ namespace plastic {
 
         It i{ first };
         while (++first != last) {
-            if (pred(proj(*first), proj(*i))) {
+            if (std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *i))) {
                 i = first;
             }
         }
@@ -1538,10 +1538,10 @@ namespace plastic {
 
         It min{ first }, max{ first };
         while (++first != last) {
-            if (pred(proj(*first), proj(*min))) {
+            if (std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *min))) {
                 min = first;
             }
-            else if (!pred(proj(*first), proj(*max))) {
+            else if (!std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *max))) {
                 max = first;
             }
         }
@@ -1551,7 +1551,7 @@ namespace plastic {
 
     export template <class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
     const T& max(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
-        return pred(proj(a), proj(b)) ? b : a;
+        return std::invoke(pred, std::invoke(proj, a), std::invoke(proj, b)) ? b : a;
     }
 
     export template <std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
@@ -1562,7 +1562,7 @@ namespace plastic {
 
     export template <class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
     const T& min(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
-        return pred(proj(b), proj(a)) ? b : a;
+        return std::invoke(pred, std::invoke(proj, b), std::invoke(proj, a)) ? b : a;
     }
 
     export template <std::copyable T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
@@ -1573,7 +1573,7 @@ namespace plastic {
 
     export template <class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
     std::ranges::minmax_result<const T&> minmax(const T& a, const T& b, Pr pred = {}, Pj proj = {}) {
-        if (pred(proj(b), proj(a))) {
+        if (std::invoke(pred, std::invoke(proj, b), std::invoke(proj, a))) {
             return { b, a };
         }
         return { a, b };
@@ -1588,11 +1588,11 @@ namespace plastic {
 
     export template <class T, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less>
     const T& clamp(const T& value, const T& lowest, const T& highest, Pr pred = {}, Pj proj = {}) {
-        assert(!pred(proj(highest), proj(lowest)));
-        if (pred(proj(value), proj(lowest))) {
+        assert(!std::invoke(pred, std::invoke(proj, highest), std::invoke(proj, lowest)));
+        if (std::invoke(pred, std::invoke(proj, value), std::invoke(proj, lowest))) {
             return lowest;
         }
-        if (pred(proj(highest), proj(value))) {
+        if (std::invoke(pred, std::invoke(proj, highest), std::invoke(proj, value))) {
             return highest;
         }
         return value;
@@ -1637,7 +1637,7 @@ namespace plastic {
             return { first, false };
         }
 
-        while (!pred(proj(*--i), proj(*--j))) {
+        while (!std::invoke(pred, std::invoke(proj, *--i), std::invoke(proj, *--j))) {
             if (i == first) {
                 plastic::reverse(first, r_last);
                 return { r_last, false };
@@ -1645,7 +1645,7 @@ namespace plastic {
         }
 
         j = r_last;
-        while (!pred(proj(*i), proj(*--j))) {}
+        while (!std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *--j))) {}
         std::swap(*i, *j);
         plastic::reverse(++i, r_last);
 
@@ -1660,7 +1660,7 @@ namespace plastic {
             return { first, false };
         }
 
-        while (!pred(proj(*--j), proj(*--i))) {
+        while (!std::invoke(pred, std::invoke(proj, *--j), std::invoke(proj, *--i))) {
             if (i == first) {
                 plastic::reverse(first, r_last);
                 return { r_last, false };
@@ -1668,7 +1668,7 @@ namespace plastic {
         }
 
         j = r_last;
-        while (!pred(proj(*--j), proj(*i))) {}
+        while (!std::invoke(pred, std::invoke(proj, *--j), std::invoke(proj, *i))) {}
         std::swap(*i, *j);
         plastic::reverse(++i, r_last);
 
