@@ -5,7 +5,6 @@ module;
 export module plastic:addressable_heap;
 
 import std;
-import :linear_structure;
 
 namespace plastic {
 
@@ -17,7 +16,7 @@ namespace plastic {
         };
 
         Pr _pred;
-        vector<node*> _data;
+        std::vector<node*> _data;
 
         void _set(std::size_t index, node* new_node) noexcept {
             _data[index] = new_node;
