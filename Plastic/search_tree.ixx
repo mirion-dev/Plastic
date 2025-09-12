@@ -11,7 +11,7 @@ namespace plastic {
     template <class Nd>
     struct basic_binary_search_tree_node {
     private:
-        Nd* _this() noexcept {
+        Nd* _this() {
             return static_cast<Nd*>(this);
         }
 
@@ -23,7 +23,7 @@ namespace plastic {
         // <other metadata>;
         // T value;
 
-        void free() noexcept {
+        void free() {
             if (is_head) {
                 return;
             }
@@ -33,7 +33,7 @@ namespace plastic {
             delete _this();
         }
 
-        Nd* leftmost() noexcept {
+        Nd* leftmost() {
             auto i{ _this() };
             while (!i->left->is_head) {
                 i = i->left;
@@ -41,7 +41,7 @@ namespace plastic {
             return i;
         }
 
-        Nd* rightmost() noexcept {
+        Nd* rightmost() {
             auto i{ _this() };
             while (!i->right->is_head) {
                 i = i->right;
@@ -49,7 +49,7 @@ namespace plastic {
             return i;
         }
 
-        void left_rotate() noexcept {
+        void left_rotate() {
             Nd* replaced{ right };
             Nd* replaced_left{ replaced->left };
 
@@ -73,7 +73,7 @@ namespace plastic {
             parent = replaced;
         }
 
-        void right_rotate() noexcept {
+        void right_rotate() {
             Nd* replaced{ left };
             Nd* replaced_right{ replaced->right };
 
@@ -120,7 +120,7 @@ namespace plastic {
 
             Nd* _ptr{};
 
-            iterator(Nd* ptr) noexcept :
+            iterator(Nd* ptr) :
                 _ptr{ ptr } {}
 
         public:
@@ -130,21 +130,21 @@ namespace plastic {
             using reference = const T&;
             using iterator_category = std::bidirectional_iterator_tag;
 
-            iterator() noexcept = default;
+            iterator() = default;
 
-            reference operator*() const noexcept {
+            reference operator*() const {
                 return _ptr->value;
             }
 
-            pointer operator->() const noexcept {
+            pointer operator->() const {
                 return &_ptr->value;
             }
 
-            friend bool operator==(iterator left, iterator right) noexcept {
+            friend bool operator==(iterator left, iterator right) {
                 return left._ptr == right._ptr;
             }
 
-            iterator& operator++() noexcept {
+            iterator& operator++() {
                 if (!_ptr->right->is_head) {
                     _ptr = _ptr->right->leftmost();
                 }
@@ -157,13 +157,13 @@ namespace plastic {
                 return *this;
             }
 
-            iterator operator++(int) noexcept {
+            iterator operator++(int) {
                 iterator temp{ *this };
                 ++*this;
                 return temp;
             }
 
-            iterator& operator--() noexcept {
+            iterator& operator--() {
                 if (!_ptr->left->is_head) {
                     _ptr = _ptr->left->rightmost();
                 }
@@ -176,7 +176,7 @@ namespace plastic {
                 return *this;
             }
 
-            iterator operator--(int) noexcept {
+            iterator operator--(int) {
                 iterator temp{ *this };
                 --*this;
                 return temp;
@@ -187,14 +187,14 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = reverse_iterator;
 
-        basic_binary_search_tree() noexcept :
+        basic_binary_search_tree() :
             _head{ new Nd },
             _size{} {
 
             _head->construct_head();
         }
 
-        basic_binary_search_tree(const basic_binary_search_tree& other) noexcept :
+        basic_binary_search_tree(const basic_binary_search_tree& other) :
             basic_binary_search_tree() {
 
             _pred = other._pred;
@@ -206,87 +206,87 @@ namespace plastic {
             _head->right = tree->leftmost();
         }
 
-        basic_binary_search_tree(basic_binary_search_tree&& other) noexcept {
+        basic_binary_search_tree(basic_binary_search_tree&& other) {
             swap(other);
         }
 
-        ~basic_binary_search_tree() noexcept {
+        ~basic_binary_search_tree() {
             clear();
             delete _head;
         }
 
-        basic_binary_search_tree& operator=(const basic_binary_search_tree& other) noexcept {
+        basic_binary_search_tree& operator=(const basic_binary_search_tree& other) {
             basic_binary_search_tree temp(other);
             swap(temp);
             return *this;
         }
 
-        basic_binary_search_tree& operator=(basic_binary_search_tree&& other) noexcept {
+        basic_binary_search_tree& operator=(basic_binary_search_tree&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(basic_binary_search_tree& other) noexcept {
+        void swap(basic_binary_search_tree& other) {
             std::swap(_pred, other._pred);
             std::swap(_head, other._head);
             std::swap(_size, other._size);
         }
 
-        friend void swap(basic_binary_search_tree& left, basic_binary_search_tree& right) noexcept {
+        friend void swap(basic_binary_search_tree& left, basic_binary_search_tree& right) {
             left.swap(right);
         }
 
-        bool empty() const noexcept {
+        bool empty() const {
             return _size == 0;
         }
 
-        size_type size() const noexcept {
+        size_type size() const {
             return _size;
         }
 
-        static size_type max_size() noexcept {
+        static size_type max_size() {
             return std::numeric_limits<size_type>::max();
         }
 
-        void clear() noexcept {
+        void clear() {
             _head->parent->free();
             _head->parent = _head->left = _head->right = _head;
             _size = 0;
         }
 
-        const_iterator begin() const noexcept {
+        const_iterator begin() const {
             return _head->right;
         }
 
-        const_iterator end() const noexcept {
+        const_iterator end() const {
             return _head;
         }
 
-        const_iterator cbegin() const noexcept {
+        const_iterator cbegin() const {
             return begin();
         }
 
-        const_iterator cend() const noexcept {
+        const_iterator cend() const {
             return end();
         }
 
-        const_reverse_iterator rbegin() const noexcept {
+        const_reverse_iterator rbegin() const {
             return reverse_iterator{ end() };
         }
 
-        const_reverse_iterator rend() const noexcept {
+        const_reverse_iterator rend() const {
             return reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
+        const_reverse_iterator crbegin() const {
             return rbegin();
         }
 
-        const_reverse_iterator crend() const noexcept {
+        const_reverse_iterator crend() const {
             return rend();
         }
 
-        const_iterator lower_bound(const_reference value) const noexcept {
+        const_iterator lower_bound(const_reference value) const {
             Nd *bound{ _head }, *i{ _head->parent };
             while (!i->is_head) {
                 if (!_pred(i->value, value)) {
@@ -300,7 +300,7 @@ namespace plastic {
             return bound;
         }
 
-        const_iterator upper_bound(const_reference value) const noexcept {
+        const_iterator upper_bound(const_reference value) const {
             Nd *bound{ _head }, *i{ _head->parent };
             while (!i->is_head) {
                 if (_pred(value, i->value)) {
@@ -314,26 +314,26 @@ namespace plastic {
             return bound;
         }
 
-        std::pair<const_iterator, const_iterator> equal_range(const_reference value) const noexcept {
+        std::pair<const_iterator, const_iterator> equal_range(const_reference value) const {
             return { lower_bound(value), upper_bound(value) };
         }
 
-        const_iterator find(const_reference value) const noexcept {
+        const_iterator find(const_reference value) const {
             Nd* bound{ lower_bound(value)._ptr };
             return !bound->is_head && !_pred(bound->value, value) ? bound : _head;
         }
 
-        bool contains(const_reference value) const noexcept {
+        bool contains(const_reference value) const {
             Nd* bound{ lower_bound(value)._ptr };
             return !bound->is_head && !_pred(bound->value, value);
         }
 
-        size_type count(const_reference value) const noexcept {
+        size_type count(const_reference value) const {
             auto [first, last]{ equal_range(value) };
             return std::distance(first, last);
         }
 
-        iterator insert(this auto&& self, const_reference value) noexcept {
+        iterator insert(this auto&& self, const_reference value) {
             Nd *parent{ self._head }, *i{ self._head->parent };
             bool is_left{};
             while (!i->is_head) {
@@ -367,18 +367,18 @@ namespace plastic {
         }
 
         template <std::input_iterator It>
-        void insert(this auto&& self, It first, It last) noexcept {
+        void insert(this auto&& self, It first, It last) {
             while (first != last) {
                 self.insert(*first);
                 ++first;
             }
         }
 
-        void insert(this auto&& self, std::initializer_list<T> list) noexcept {
+        void insert(this auto&& self, std::initializer_list<T> list) {
             self.insert(list.begin(), list.end());
         }
 
-        iterator erase(this auto&& self, const_iterator pos) noexcept {
+        iterator erase(this auto&& self, const_iterator pos) {
             Nd* erased{ pos++._ptr };
             assert(erased != self._head);
 
@@ -445,14 +445,14 @@ namespace plastic {
             return pos;
         }
 
-        iterator erase(this auto&& self, const_iterator first, const_iterator last) noexcept {
+        iterator erase(this auto&& self, const_iterator first, const_iterator last) {
             while (first != last) {
                 self.erase(first++);
             }
             return last;
         }
 
-        size_type erase(this auto&& self, const_reference value) noexcept {
+        size_type erase(this auto&& self, const_reference value) {
             std::size_t count{};
             auto [first, last]{ self.equal_range(value) };
             while (first != last) {
@@ -462,11 +462,11 @@ namespace plastic {
             return count;
         }
 
-        friend bool operator==(const basic_binary_search_tree& left, const basic_binary_search_tree& right) noexcept {
+        friend bool operator==(const basic_binary_search_tree& left, const basic_binary_search_tree& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const basic_binary_search_tree& left, const basic_binary_search_tree& right) noexcept {
+        friend auto operator<=>(const basic_binary_search_tree& left, const basic_binary_search_tree& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
@@ -479,7 +479,7 @@ namespace plastic {
     public:
         T value;
 
-        Nd* clone(Nd* head, Nd* parent) noexcept {
+        Nd* clone(Nd* head, Nd* parent) {
             if (this->is_head) {
                 return head;
             }
@@ -489,12 +489,12 @@ namespace plastic {
             return tree;
         }
 
-        void construct_head() noexcept {
+        void construct_head() {
             this->parent = this->left = this->right = this;
             this->is_head = true;
         }
 
-        void construct(Nd* head, Nd* parent, const T& value) noexcept {
+        void construct(Nd* head, Nd* parent, const T& value) {
             new(this) Nd{ parent, head, head, false, value };
         }
     };
@@ -506,21 +506,21 @@ namespace plastic {
 
         friend base;
 
-        static void _insert_rebalance(Nd* inserted) noexcept {}
+        static void _insert_rebalance(Nd* inserted) {}
 
-        static void _erase_rebalance(Nd* replaced, Nd* erased) noexcept {}
+        static void _erase_rebalance(Nd* replaced, Nd* erased) {}
 
     public:
         using base::base;
 
         template <std::input_iterator It>
-        binary_search_tree(It first, It last) noexcept :
+        binary_search_tree(It first, It last) :
             binary_search_tree() {
 
             this->insert(first, last);
         }
 
-        binary_search_tree(std::initializer_list<T> list) noexcept :
+        binary_search_tree(std::initializer_list<T> list) :
             binary_search_tree(list.begin(), list.end()) {}
     };
 
@@ -536,7 +536,7 @@ namespace plastic {
         unsigned char is_red;
         T value;
 
-        Nd* clone(Nd* head, Nd* parent) noexcept {
+        Nd* clone(Nd* head, Nd* parent) {
             if (this->is_head) {
                 return head;
             }
@@ -546,13 +546,13 @@ namespace plastic {
             return tree;
         }
 
-        void construct_head() noexcept {
+        void construct_head() {
             this->parent = this->left = this->right = this;
             this->is_head = true;
             this->is_red = false;
         }
 
-        void construct(Nd* head, Nd* parent, const T& value) noexcept {
+        void construct(Nd* head, Nd* parent, const T& value) {
             new(this) Nd{ parent, head, head, false, true, value };
         }
     };
@@ -564,7 +564,7 @@ namespace plastic {
 
         friend base;
 
-        void _insert_rebalance(Nd* inserted) noexcept {
+        void _insert_rebalance(Nd* inserted) {
             Nd* i{ inserted };
             while (i->parent->is_red) {
                 Nd* parent{ i->parent };
@@ -607,7 +607,7 @@ namespace plastic {
             this->_head->parent->is_red = false;
         }
 
-        void _erase_rebalance(Nd* replaced, Nd* erased) noexcept {
+        void _erase_rebalance(Nd* replaced, Nd* erased) {
             std::swap(replaced->is_red, erased->is_red);
 
             Nd* i{ replaced };
@@ -678,13 +678,13 @@ namespace plastic {
         using base::base;
 
         template <std::input_iterator It>
-        red_black_tree(It first, It last) noexcept :
+        red_black_tree(It first, It last) :
             red_black_tree() {
 
             this->insert(first, last);
         }
 
-        red_black_tree(std::initializer_list<T> list) noexcept :
+        red_black_tree(std::initializer_list<T> list) :
             red_black_tree(list.begin(), list.end()) {}
     };
 
@@ -700,7 +700,7 @@ namespace plastic {
         signed char factor;
         T value;
 
-        Nd* clone(Nd* head, Nd* parent) noexcept {
+        Nd* clone(Nd* head, Nd* parent) {
             if (this->is_head) {
                 return head;
             }
@@ -710,13 +710,13 @@ namespace plastic {
             return tree;
         }
 
-        void construct_head() noexcept {
+        void construct_head() {
             this->parent = this->left = this->right = this;
             this->is_head = true;
             this->factor = 0;
         }
 
-        void construct(Nd* head, Nd* parent, const T& value) noexcept {
+        void construct(Nd* head, Nd* parent, const T& value) {
             new(this) Nd{ parent, head, head, false, 0, value };
         }
     };
@@ -728,11 +728,11 @@ namespace plastic {
 
         friend base;
 
-        void _insert_rebalance(Nd* inserted) noexcept {
+        void _insert_rebalance(Nd* inserted) {
             // TODO
         }
 
-        void _erase_rebalance(Nd* replaced, Nd* erased) noexcept {
+        void _erase_rebalance(Nd* replaced, Nd* erased) {
             // TODO
         }
 
@@ -740,13 +740,13 @@ namespace plastic {
         using base::base;
 
         template <std::input_iterator It>
-        avl_tree(It first, It last) noexcept :
+        avl_tree(It first, It last) :
             avl_tree() {
 
             this->insert(first, last);
         }
 
-        avl_tree(std::initializer_list<T> list) noexcept :
+        avl_tree(std::initializer_list<T> list) :
             avl_tree(list.begin(), list.end()) {}
     };
 

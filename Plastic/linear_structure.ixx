@@ -26,7 +26,7 @@ namespace plastic {
         T* _last{ _data };
 
         template <class... Args>
-        void _resize(std::size_t new_size, const Args&... args) noexcept {
+        void _resize(std::size_t new_size, const Args&... args) {
             T* new_last{ _data + new_size };
             if (new_size <= size()) {
                 std::destroy(new_last, _last);
@@ -50,48 +50,48 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        inplace_vector() noexcept = default;
+        inplace_vector() = default;
 
-        explicit inplace_vector(size_type size) noexcept {
+        explicit inplace_vector(size_type size) {
             assert(size <= N);
             _last = _data + size;
             plastic::construct(_data, _last);
         }
 
-        inplace_vector(size_type size, const_reference value) noexcept {
+        inplace_vector(size_type size, const_reference value) {
             assert(size <= N);
             _last = _data + size;
             plastic::construct(_data, _last, value);
         }
 
         template <std::input_iterator It>
-        inplace_vector(It first, It last) noexcept :
+        inplace_vector(It first, It last) :
             _last{ std::uninitialized_copy(first, last, _data) } {}
 
-        inplace_vector(std::initializer_list<T> list) noexcept {
+        inplace_vector(std::initializer_list<T> list) {
             assert(list.size() <= N);
             _last = std::uninitialized_copy(list.begin(), list.end(), _data);
         }
 
-        inplace_vector(const inplace_vector& other) noexcept :
+        inplace_vector(const inplace_vector& other) :
             inplace_vector(const_cast<T*>(other._data), other._last) {}
 
-        inplace_vector(inplace_vector&& other) noexcept {
+        inplace_vector(inplace_vector&& other) {
             swap(other);
         }
 
-        inplace_vector& operator=(const inplace_vector& other) noexcept {
+        inplace_vector& operator=(const inplace_vector& other) {
             inplace_vector temp(other);
             swap(temp);
             return *this;
         }
 
-        inplace_vector& operator=(inplace_vector&& other) noexcept {
+        inplace_vector& operator=(inplace_vector&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(inplace_vector& other) noexcept {
+        void swap(inplace_vector& other) {
             std::swap(_data, other._data);
 
             std::ptrdiff_t offset{ _last - _data };
@@ -99,146 +99,146 @@ namespace plastic {
             other._last = other._data + offset;
         }
 
-        friend void swap(inplace_vector& left, inplace_vector& right) noexcept {
+        friend void swap(inplace_vector& left, inplace_vector& right) {
             left.swap(right);
         }
 
-        bool empty() const noexcept {
+        bool empty() const {
             return _data == _last;
         }
 
-        size_type size() const noexcept {
+        size_type size() const {
             return _last - _data;
         }
 
-        static size_type max_size() noexcept {
+        static size_type max_size() {
             return N;
         }
 
-        void clear() noexcept {
+        void clear() {
             std::destroy(_data, _last);
             _last = _data;
         }
 
-        void resize(size_type new_size) noexcept {
+        void resize(size_type new_size) {
             assert(new_size <= N);
             _resize(new_size);
         }
 
-        void resize(size_type new_size, const_reference value) noexcept {
+        void resize(size_type new_size, const_reference value) {
             assert(new_size <= N);
             _resize(new_size, value);
         }
 
-        static size_type capacity() noexcept {
+        static size_type capacity() {
             return N;
         }
 
-        static void reserve(size_type new_capacity) noexcept {
+        static void reserve(size_type new_capacity) {
             assert(new_capacity <= N);
         }
 
-        iterator begin() noexcept {
+        iterator begin() {
             return _data;
         }
 
-        const_iterator begin() const noexcept {
+        const_iterator begin() const {
             return const_cast<T*>(_data);
         }
 
-        iterator end() noexcept {
+        iterator end() {
             return _last;
         }
 
-        const_iterator end() const noexcept {
+        const_iterator end() const {
             return _last;
         }
 
-        const_iterator cbegin() const noexcept {
+        const_iterator cbegin() const {
             return begin();
         }
 
-        const_iterator cend() const noexcept {
+        const_iterator cend() const {
             return end();
         }
 
-        reverse_iterator rbegin() noexcept {
+        reverse_iterator rbegin() {
             return reverse_iterator{ end() };
         }
 
-        const_reverse_iterator rbegin() const noexcept {
+        const_reverse_iterator rbegin() const {
             return const_reverse_iterator{ end() };
         }
 
-        reverse_iterator rend() noexcept {
+        reverse_iterator rend() {
             return reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator rend() const noexcept {
+        const_reverse_iterator rend() const {
             return const_reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
+        const_reverse_iterator crbegin() const {
             return rbegin();
         }
 
-        const_reverse_iterator crend() const noexcept {
+        const_reverse_iterator crend() const {
             return rend();
         }
 
-        reference operator[](size_type index) noexcept {
+        reference operator[](size_type index) {
             assert(index < size());
             return _data[index];
         }
 
-        const_reference operator[](size_type index) const noexcept {
+        const_reference operator[](size_type index) const {
             assert(index < size());
             return _data[index];
         }
 
-        reference front() noexcept {
+        reference front() {
             assert(!empty());
             return *_data;
         }
 
-        const_reference front() const noexcept {
+        const_reference front() const {
             assert(!empty());
             return *_data;
         }
 
-        reference back() noexcept {
+        reference back() {
             assert(!empty());
             return _last[-1];
         }
 
-        const_reference back() const noexcept {
+        const_reference back() const {
             assert(!empty());
             return _last[-1];
         }
 
-        pointer data() noexcept {
+        pointer data() {
             return _data;
         }
 
-        const_pointer data() const noexcept {
+        const_pointer data() const {
             return _data;
         }
 
-        void push_back(const_reference value) noexcept {
+        void push_back(const_reference value) {
             assert(size() != N);
             std::construct_at(_last++, value);
         }
 
-        void pop_back() noexcept {
+        void pop_back() {
             assert(!empty());
             std::destroy_at(--_last);
         }
 
-        iterator insert(const_iterator pos, const_reference value) noexcept {
+        iterator insert(const_iterator pos, const_reference value) {
             return insert(pos, 1, value);
         }
 
-        iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
+        iterator insert(const_iterator pos, size_type count, const_reference value) {
             assert(size() + count <= N);
             T* i{ pos.base() };
             T* new_last{ _last + count };
@@ -248,7 +248,7 @@ namespace plastic {
         }
 
         template <std::input_iterator It>
-        iterator insert(const_iterator pos, It first, It last) noexcept {
+        iterator insert(const_iterator pos, It first, It last) {
             T* i{ pos.base() };
             T* new_last{ std::uninitialized_copy(first, last, _last) };
             std::rotate(i, _last, new_last);
@@ -256,11 +256,11 @@ namespace plastic {
             return i;
         }
 
-        iterator insert(const_iterator pos, std::initializer_list<T> list) noexcept {
+        iterator insert(const_iterator pos, std::initializer_list<T> list) {
             return insert(pos, list.begin(), list.end());
         }
 
-        iterator erase(const_iterator pos) noexcept {
+        iterator erase(const_iterator pos) {
             T* i{ pos.base() };
             assert(i != _last);
             _last = std::move(i + 1, _last, i);
@@ -268,7 +268,7 @@ namespace plastic {
             return i;
         }
 
-        iterator erase(const_iterator first, const_iterator last) noexcept {
+        iterator erase(const_iterator first, const_iterator last) {
             T *i{ first.base() }, *s{ last.base() };
             T* new_last{ std::move(s, _last, i) };
             std::destroy(new_last, _last);
@@ -276,11 +276,11 @@ namespace plastic {
             return i;
         }
 
-        friend bool operator==(const inplace_vector& left, const inplace_vector& right) noexcept {
+        friend bool operator==(const inplace_vector& left, const inplace_vector& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const inplace_vector& left, const inplace_vector& right) noexcept {
+        friend auto operator<=>(const inplace_vector& left, const inplace_vector& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
 
@@ -292,12 +292,12 @@ namespace plastic {
         T* _last{};
         T* _end{};
 
-        vector(uninitialized_t, std::size_t size) noexcept :
+        vector(uninitialized_t, std::size_t size) :
             _begin{ new T[size] },
             _last{ _begin + size },
             _end{ _last } {}
 
-        void _reallocate(std::size_t new_capacity) noexcept {
+        void _reallocate(std::size_t new_capacity) {
             T* new_begin{ new T[new_capacity] };
             T* new_last{ std::uninitialized_move(_begin, _last, new_begin) };
             T* new_end{ new_begin + new_capacity };
@@ -308,12 +308,12 @@ namespace plastic {
             _end = new_end;
         }
 
-        void _extend(std::size_t size) noexcept {
+        void _extend(std::size_t size) {
             _reallocate(capacity() + std::max(capacity() >> 1, size));
         }
 
         template <class... Args>
-        void _resize(std::size_t new_size, const Args&... args) noexcept {
+        void _resize(std::size_t new_size, const Args&... args) {
             if (new_size > capacity()) {
                 _reallocate(new_size);
                 plastic::construct(_last, _end, args...);
@@ -344,201 +344,201 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        vector() noexcept = default;
+        vector() = default;
 
-        explicit vector(size_type size) noexcept :
+        explicit vector(size_type size) :
             vector(uninitialized, size) {
 
             plastic::construct(_begin, _last);
         }
 
-        vector(size_type size, const_reference value) noexcept :
+        vector(size_type size, const_reference value) :
             vector(uninitialized, size) {
 
             plastic::construct(_begin, _last, value);
         }
 
         template <std::input_iterator It>
-        vector(It first, It last) noexcept {
+        vector(It first, It last) {
             while (first != last) {
                 push_back(*first);
                 ++first;
             }
         }
 
-        vector(std::initializer_list<T> list) noexcept :
+        vector(std::initializer_list<T> list) :
             vector(list.begin(), list.end()) {}
 
-        vector(const vector& other) noexcept :
+        vector(const vector& other) :
             vector(other._begin, other._last) {}
 
-        vector(vector&& other) noexcept {
+        vector(vector&& other) {
             swap(other);
         }
 
-        ~vector() noexcept {
+        ~vector() {
             delete[] _begin;
         }
 
-        vector& operator=(const vector& other) noexcept {
+        vector& operator=(const vector& other) {
             vector temp(other);
             swap(temp);
             return *this;
         }
 
-        vector& operator=(vector&& other) noexcept {
+        vector& operator=(vector&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(vector& other) noexcept {
+        void swap(vector& other) {
             std::swap(_begin, other._begin);
             std::swap(_last, other._last);
             std::swap(_end, other._end);
         }
 
-        friend void swap(vector& left, vector& right) noexcept {
+        friend void swap(vector& left, vector& right) {
             left.swap(right);
         }
 
-        bool empty() const noexcept {
+        bool empty() const {
             return _begin == _last;
         }
 
-        size_type size() const noexcept {
+        size_type size() const {
             return _last - _begin;
         }
 
-        static size_type max_size() noexcept {
+        static size_type max_size() {
             return std::numeric_limits<size_type>::max();
         }
 
-        void clear() noexcept {
+        void clear() {
             std::destroy(_begin, _last);
             _last = _begin;
         }
 
-        void resize(size_type new_size) noexcept {
+        void resize(size_type new_size) {
             _resize(new_size);
         }
 
-        void resize(size_type new_size, const_reference value) noexcept {
+        void resize(size_type new_size, const_reference value) {
             _resize(new_size, value);
         }
 
-        size_type capacity() const noexcept {
+        size_type capacity() const {
             return _end - _begin;
         }
 
-        void reserve(size_type new_capacity) noexcept {
+        void reserve(size_type new_capacity) {
             if (new_capacity > capacity()) {
                 _reallocate(new_capacity);
             }
         }
 
-        iterator begin() noexcept {
+        iterator begin() {
             return _begin;
         }
 
-        const_iterator begin() const noexcept {
+        const_iterator begin() const {
             return _begin;
         }
 
-        iterator end() noexcept {
+        iterator end() {
             return _last;
         }
 
-        const_iterator end() const noexcept {
+        const_iterator end() const {
             return _last;
         }
 
-        const_iterator cbegin() const noexcept {
+        const_iterator cbegin() const {
             return begin();
         }
 
-        const_iterator cend() const noexcept {
+        const_iterator cend() const {
             return end();
         }
 
-        reverse_iterator rbegin() noexcept {
+        reverse_iterator rbegin() {
             return reverse_iterator{ end() };
         }
 
-        const_reverse_iterator rbegin() const noexcept {
+        const_reverse_iterator rbegin() const {
             return const_reverse_iterator{ end() };
         }
 
-        reverse_iterator rend() noexcept {
+        reverse_iterator rend() {
             return reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator rend() const noexcept {
+        const_reverse_iterator rend() const {
             return const_reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
+        const_reverse_iterator crbegin() const {
             return rbegin();
         }
 
-        const_reverse_iterator crend() const noexcept {
+        const_reverse_iterator crend() const {
             return rend();
         }
 
-        reference operator[](size_type index) noexcept {
+        reference operator[](size_type index) {
             assert(index < size());
             return _begin[index];
         }
 
-        const_reference operator[](size_type index) const noexcept {
+        const_reference operator[](size_type index) const {
             assert(index < size());
             return _begin[index];
         }
 
-        reference front() noexcept {
+        reference front() {
             assert(!empty());
             return *_begin;
         }
 
-        const_reference front() const noexcept {
+        const_reference front() const {
             assert(!empty());
             return *_begin;
         }
 
-        reference back() noexcept {
+        reference back() {
             assert(!empty());
             return _last[-1];
         }
 
-        const_reference back() const noexcept {
+        const_reference back() const {
             assert(!empty());
             return _last[-1];
         }
 
-        pointer data() noexcept {
+        pointer data() {
             return _begin;
         }
 
-        const_pointer data() const noexcept {
+        const_pointer data() const {
             return _begin;
         }
 
-        void push_back(const_reference value) noexcept {
+        void push_back(const_reference value) {
             if (_last == _end) {
                 _extend(1);
             }
             std::construct_at(_last++, value);
         }
 
-        void pop_back() noexcept {
+        void pop_back() {
             assert(!empty());
             std::destroy_at(--_last);
         }
 
-        iterator insert(const_iterator pos, const_reference value) noexcept {
+        iterator insert(const_iterator pos, const_reference value) {
             return insert(pos, 1, value);
         }
 
-        iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
+        iterator insert(const_iterator pos, size_type count, const_reference value) {
             T* i{ pos.base() };
             if (_end - _last < static_cast<std::ptrdiff_t>(count)) {
                 std::ptrdiff_t offset{ i - _begin };
@@ -552,7 +552,7 @@ namespace plastic {
         }
 
         template <std::input_iterator It>
-        iterator insert(const_iterator pos, It first, It last) noexcept {
+        iterator insert(const_iterator pos, It first, It last) {
             T* i{ pos.base() };
             std::ptrdiff_t offset1{ i - _begin }, offset2{ _last - _begin };
             while (first != last) {
@@ -563,11 +563,11 @@ namespace plastic {
             return i;
         }
 
-        iterator insert(const_iterator pos, std::initializer_list<T> list) noexcept {
+        iterator insert(const_iterator pos, std::initializer_list<T> list) {
             return insert(pos, list.begin(), list.end());
         }
 
-        iterator erase(const_iterator pos) noexcept {
+        iterator erase(const_iterator pos) {
             T* i{ pos.base() };
             assert(i != _last);
             _last = std::move(i + 1, _last, i);
@@ -575,7 +575,7 @@ namespace plastic {
             return i;
         }
 
-        iterator erase(const_iterator first, const_iterator last) noexcept {
+        iterator erase(const_iterator first, const_iterator last) {
             T *i{ first.base() }, *s{ last.base() };
             T* new_last{ std::move(s, _last, i) };
             std::destroy(new_last, _last);
@@ -583,11 +583,11 @@ namespace plastic {
             return i;
         }
 
-        friend bool operator==(const vector& left, const vector& right) noexcept {
+        friend bool operator==(const vector& left, const vector& right) {
             return std::equal(left._begin, left._last, right._begin, right._last);
         }
 
-        friend auto operator<=>(const vector& left, const vector& right) noexcept {
+        friend auto operator<=>(const vector& left, const vector& right) {
             return std::lexicographical_compare_three_way(left._begin, left._last, right._begin, right._last);
         }
 
@@ -603,7 +603,7 @@ namespace plastic {
         T* _last{ _data };
 
         template <class... Args>
-        void _resize(std::size_t new_size, const Args&... args) noexcept {
+        void _resize(std::size_t new_size, const Args&... args) {
             T* new_last{ (begin() + new_size)._ptr };
             if (new_size <= size()) {
                 if (new_last <= _last) {
@@ -639,11 +639,11 @@ namespace plastic {
             T* _ptr{};
             inplace_deque* _cont{};
 
-            iterator(T* ptr, inplace_deque* cont) noexcept :
+            iterator(T* ptr, inplace_deque* cont) :
                 _ptr{ ptr },
                 _cont{ cont } {}
 
-            std::ptrdiff_t _offset() const noexcept {
+            std::ptrdiff_t _offset() const {
                 std::ptrdiff_t diff{ _cont->_first - _ptr };
                 return diff >= 0 ? diff : diff + N + 1;
             }
@@ -655,29 +655,29 @@ namespace plastic {
             using reference = T&;
             using iterator_category = std::random_access_iterator_tag;
 
-            iterator() noexcept = default;
+            iterator() = default;
 
-            reference operator*() const noexcept {
+            reference operator*() const {
                 return *_ptr;
             }
 
-            pointer operator->() const noexcept {
+            pointer operator->() const {
                 return _ptr;
             }
 
-            reference operator[](difference_type index) const noexcept {
+            reference operator[](difference_type index) const {
                 return *(*this + index);
             }
 
-            friend bool operator==(iterator left, iterator right) noexcept {
+            friend bool operator==(iterator left, iterator right) {
                 return left._ptr == right._ptr;
             }
 
-            friend auto operator<=>(iterator left, iterator right) noexcept {
+            friend auto operator<=>(iterator left, iterator right) {
                 return left._offset() <=> right._offset();
             }
 
-            iterator& operator+=(difference_type diff) noexcept {
+            iterator& operator+=(difference_type diff) {
                 if (_cont->_data + N - _ptr < diff) {
                     _ptr += diff - N - 1;
                 }
@@ -690,27 +690,27 @@ namespace plastic {
                 return *this;
             }
 
-            iterator& operator-=(difference_type diff) noexcept {
+            iterator& operator-=(difference_type diff) {
                 return *this += -diff;
             }
 
-            friend iterator operator+(iterator iter, difference_type diff) noexcept {
+            friend iterator operator+(iterator iter, difference_type diff) {
                 return iter += diff;
             }
 
-            friend iterator operator+(difference_type diff, iterator iter) noexcept {
+            friend iterator operator+(difference_type diff, iterator iter) {
                 return iter += diff;
             }
 
-            friend iterator operator-(iterator iter, difference_type diff) noexcept {
+            friend iterator operator-(iterator iter, difference_type diff) {
                 return iter -= diff;
             }
 
-            friend difference_type operator-(iterator left, iterator right) noexcept {
+            friend difference_type operator-(iterator left, iterator right) {
                 return left._offset() - right._offset();
             }
 
-            iterator& operator++() noexcept {
+            iterator& operator++() {
                 if (_ptr == _cont->_data + N) {
                     _ptr = _cont->_data;
                 }
@@ -720,13 +720,13 @@ namespace plastic {
                 return *this;
             }
 
-            iterator operator++(int) noexcept {
+            iterator operator++(int) {
                 iterator temp{ *this };
                 ++*this;
                 return temp;
             }
 
-            iterator& operator--() noexcept {
+            iterator& operator--() {
                 if (_ptr == _cont->_data) {
                     _ptr = _cont->_data + N;
                 }
@@ -736,7 +736,7 @@ namespace plastic {
                 return *this;
             }
 
-            iterator operator--(int) noexcept {
+            iterator operator--(int) {
                 iterator temp{ *this };
                 --*this;
                 return temp;
@@ -747,30 +747,30 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        inplace_deque() noexcept = default;
+        inplace_deque() = default;
 
-        explicit inplace_deque(size_type size) noexcept {
+        explicit inplace_deque(size_type size) {
             assert(size <= N);
             _last = _data + size;
             plastic::construct(_data, _last);
         }
 
-        inplace_deque(size_type size, const_reference value) noexcept {
+        inplace_deque(size_type size, const_reference value) {
             assert(size <= N);
             _last = _data + size;
             plastic::construct(_data, _last, value);
         }
 
         template <std::input_iterator It>
-        inplace_deque(It first, It last) noexcept :
+        inplace_deque(It first, It last) :
             _last{ std::uninitialized_copy(first, last, _data) } {}
 
-        inplace_deque(std::initializer_list<T> list) noexcept {
+        inplace_deque(std::initializer_list<T> list) {
             assert(list.size() <= N);
             _last = std::uninitialized_copy(list.begin(), list.end(), _data);
         }
 
-        inplace_deque(const inplace_deque& other) noexcept {
+        inplace_deque(const inplace_deque& other) {
             if (other._first <= other._last) {
                 _last = std::uninitialized_copy(other._first, other._last, _data);
             }
@@ -787,22 +787,22 @@ namespace plastic {
             }
         }
 
-        inplace_deque(inplace_deque&& other) noexcept {
+        inplace_deque(inplace_deque&& other) {
             swap(other);
         }
 
-        inplace_deque& operator=(const inplace_deque& other) noexcept {
+        inplace_deque& operator=(const inplace_deque& other) {
             inplace_deque temp(other);
             swap(temp);
             return *this;
         }
 
-        inplace_deque& operator=(inplace_deque&& other) noexcept {
+        inplace_deque& operator=(inplace_deque&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(inplace_deque& other) noexcept {
+        void swap(inplace_deque& other) {
             std::swap(_data, other._data);
 
             std::ptrdiff_t first_offset{ _first - _data }, last_offset{ _last - _data };
@@ -812,24 +812,24 @@ namespace plastic {
             other._last = other._data + last_offset;
         }
 
-        friend void swap(inplace_deque& left, inplace_deque& right) noexcept {
+        friend void swap(inplace_deque& left, inplace_deque& right) {
             left.swap(right);
         }
 
-        bool empty() const noexcept {
+        bool empty() const {
             return _first == _last;
         }
 
-        size_type size() const noexcept {
+        size_type size() const {
             std::ptrdiff_t diff{ _last - _first };
             return diff >= 0 ? diff : diff + N + 1;
         }
 
-        static size_type max_size() noexcept {
+        static size_type max_size() {
             return N;
         }
 
-        void clear() noexcept {
+        void clear() {
             if (_first <= _last) {
                 std::destroy(_first, _last);
             }
@@ -840,103 +840,103 @@ namespace plastic {
             _first = _last = _data;
         }
 
-        void resize(size_type new_size) noexcept {
+        void resize(size_type new_size) {
             assert(new_size <= N);
             _resize(new_size);
         }
 
-        void resize(size_type new_size, const_reference value) noexcept {
+        void resize(size_type new_size, const_reference value) {
             assert(new_size <= N);
             _resize(new_size, value);
         }
 
-        static size_type capacity() noexcept {
+        static size_type capacity() {
             return N;
         }
 
-        static void reserve(size_type new_capacity) noexcept {
+        static void reserve(size_type new_capacity) {
             assert(new_capacity <= N);
         }
 
-        iterator begin() noexcept {
+        iterator begin() {
             return { _first, this };
         }
 
-        const_iterator begin() const noexcept {
+        const_iterator begin() const {
             return iterator{ _first, const_cast<inplace_deque*>(this) };
         }
 
-        iterator end() noexcept {
+        iterator end() {
             return { _last, this };
         }
 
-        const_iterator end() const noexcept {
+        const_iterator end() const {
             return iterator{ _last, const_cast<inplace_deque*>(this) };
         }
 
-        const_iterator cbegin() const noexcept {
+        const_iterator cbegin() const {
             return begin();
         }
 
-        const_iterator cend() const noexcept {
+        const_iterator cend() const {
             return end();
         }
 
-        reverse_iterator rbegin() noexcept {
+        reverse_iterator rbegin() {
             return reverse_iterator{ end() };
         }
 
-        const_reverse_iterator rbegin() const noexcept {
+        const_reverse_iterator rbegin() const {
             return const_reverse_iterator{ end() };
         }
 
-        reverse_iterator rend() noexcept {
+        reverse_iterator rend() {
             return reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator rend() const noexcept {
+        const_reverse_iterator rend() const {
             return const_reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
+        const_reverse_iterator crbegin() const {
             return rbegin();
         }
 
-        const_reverse_iterator crend() const noexcept {
+        const_reverse_iterator crend() const {
             return rend();
         }
 
-        reference operator[](size_type index) noexcept {
+        reference operator[](size_type index) {
             assert(index < size());
             return begin()[index];
         }
 
-        const_reference operator[](size_type index) const noexcept {
+        const_reference operator[](size_type index) const {
             assert(index < size());
             return begin()[index];
         }
 
-        reference front() noexcept {
+        reference front() {
             assert(!empty());
             return *_first;
         }
 
-        const_reference front() const noexcept {
+        const_reference front() const {
             assert(!empty());
             return *_first;
         }
 
-        reference back() noexcept {
+        reference back() {
             assert(!empty());
             return *--end();
         }
 
-        const_reference back() const noexcept {
+        const_reference back() const {
             assert(!empty());
             return *--end();
         }
 
-        void push_front(const_reference value) noexcept {
+        void push_front(const_reference value) {
             assert(size() != N);
             if (_first == _data) {
                 _first = _data + N;
@@ -947,7 +947,7 @@ namespace plastic {
             }
         }
 
-        void pop_front() noexcept {
+        void pop_front() {
             assert(!empty());
             if (_first == _data + N) {
                 std::destroy_at(_first);
@@ -958,7 +958,7 @@ namespace plastic {
             }
         }
 
-        void push_back(const_reference value) noexcept {
+        void push_back(const_reference value) {
             assert(size() != N);
             if (_last == _data + N) {
                 std::construct_at(_last, value);
@@ -969,7 +969,7 @@ namespace plastic {
             }
         }
 
-        void pop_back() noexcept {
+        void pop_back() {
             assert(!empty());
             if (_last == _data) {
                 _last = _data + N;
@@ -980,11 +980,11 @@ namespace plastic {
             }
         }
 
-        iterator insert(const_iterator pos, const_reference value) noexcept {
+        iterator insert(const_iterator pos, const_reference value) {
             return insert(pos, 1, value);
         }
 
-        iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
+        iterator insert(const_iterator pos, size_type count, const_reference value) {
             assert(size() + count <= N);
             iterator i{ pos.base() };
             iterator new_last{ end() + count };
@@ -994,7 +994,7 @@ namespace plastic {
         }
 
         template <std::input_iterator It>
-        iterator insert(const_iterator pos, It first, It last) noexcept {
+        iterator insert(const_iterator pos, It first, It last) {
             iterator i{ pos.base() };
             iterator new_last{ std::uninitialized_copy(first, last, end()) };
             std::rotate(i, end(), new_last);
@@ -1002,11 +1002,11 @@ namespace plastic {
             return i;
         }
 
-        iterator insert(const_iterator pos, std::initializer_list<T> list) noexcept {
+        iterator insert(const_iterator pos, std::initializer_list<T> list) {
             return insert(pos, list.begin(), list.end());
         }
 
-        iterator erase(const_iterator pos) noexcept {
+        iterator erase(const_iterator pos) {
             iterator i{ pos.base() };
             assert(i != end());
             _last = std::move(i + 1, end(), i)._ptr;
@@ -1014,7 +1014,7 @@ namespace plastic {
             return i;
         }
 
-        iterator erase(const_iterator first, const_iterator last) noexcept {
+        iterator erase(const_iterator first, const_iterator last) {
             iterator i{ first.base() }, s{ last.base() };
             iterator new_last{ std::move(s, end(), i) };
             std::destroy(new_last, end());
@@ -1022,11 +1022,11 @@ namespace plastic {
             return i;
         }
 
-        friend bool operator==(const inplace_deque& left, const inplace_deque& right) noexcept {
+        friend bool operator==(const inplace_deque& left, const inplace_deque& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const inplace_deque& left, const inplace_deque& right) noexcept {
+        friend auto operator<=>(const inplace_deque& left, const inplace_deque& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
@@ -1038,13 +1038,13 @@ namespace plastic {
         T* _first{};
         T* _last{};
 
-        deque(uninitialized_t, std::size_t size) noexcept :
+        deque(uninitialized_t, std::size_t size) :
             _begin{ new T[size] },
             _end{ _begin + size },
             _first{ _begin },
             _last{ _end } {}
 
-        void _reallocate(std::size_t new_capacity, std::ptrdiff_t offset) noexcept {
+        void _reallocate(std::size_t new_capacity, std::ptrdiff_t offset) {
             T* new_begin{ new T[new_capacity] };
             T* new_end{ new_begin + new_capacity };
             T* new_first{ new_begin + offset };
@@ -1057,14 +1057,14 @@ namespace plastic {
             _last = new_last;
         }
 
-        void _extend(std::size_t size, std::ptrdiff_t offset) noexcept {
+        void _extend(std::size_t size, std::ptrdiff_t offset) {
             std::size_t new_capacity{ capacity() + std::max(capacity(), size) };
             std::size_t new_size{ this->size() + size };
             _reallocate(new_capacity, (new_capacity - new_size >> 1) + offset);
         }
 
         template <class... Args>
-        void _resize(std::size_t new_size, const Args&... args) noexcept {
+        void _resize(std::size_t new_size, const Args&... args) {
             if (new_size > capacity()) {
                 _reallocate(new_size, 0);
                 plastic::construct(_last, _end, args...);
@@ -1127,214 +1127,214 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        deque() noexcept = default;
+        deque() = default;
 
-        explicit deque(size_type size) noexcept :
+        explicit deque(size_type size) :
             deque(uninitialized, size) {
 
             plastic::construct(_first, _last);
         }
 
-        deque(size_type size, const_reference value) noexcept :
+        deque(size_type size, const_reference value) :
             deque(uninitialized, size) {
 
             plastic::construct(_first, _last, value);
         }
 
         template <std::input_iterator It>
-        deque(It first, It last) noexcept {
+        deque(It first, It last) {
             while (first != last) {
                 push_back(*first);
                 ++first;
             }
         }
 
-        deque(std::initializer_list<T> list) noexcept :
+        deque(std::initializer_list<T> list) :
             deque(list.begin(), list.end()) {}
 
-        deque(const deque& other) noexcept :
+        deque(const deque& other) :
             deque(other._first, other._last) {}
 
-        deque(deque&& other) noexcept {
+        deque(deque&& other) {
             swap(other);
         }
 
-        ~deque() noexcept {
+        ~deque() {
             delete[] _begin;
         }
 
-        deque& operator=(const deque& other) noexcept {
+        deque& operator=(const deque& other) {
             deque temp{ other };
             swap(temp);
             return *this;
         }
 
-        deque& operator=(deque&& other) noexcept {
+        deque& operator=(deque&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(deque& other) noexcept {
+        void swap(deque& other) {
             std::swap(_begin, other._begin);
             std::swap(_end, other._end);
             std::swap(_first, other._first);
             std::swap(_last, other._last);
         }
 
-        friend void swap(deque& left, deque& right) noexcept {
+        friend void swap(deque& left, deque& right) {
             left.swap(right);
         }
 
-        bool empty() const noexcept {
+        bool empty() const {
             return _first == _last;
         }
 
-        size_type size() const noexcept {
+        size_type size() const {
             return _last - _first;
         }
 
-        static size_type max_size() noexcept {
+        static size_type max_size() {
             return std::numeric_limits<size_type>::max();
         }
 
-        void clear() noexcept {
+        void clear() {
             std::destroy(_first, _last);
             _first = _last = _begin + (size() >> 1);
         }
 
-        void resize(size_type new_size) noexcept {
+        void resize(size_type new_size) {
             _resize(new_size);
         }
 
-        void resize(size_type new_size, const_reference value) noexcept {
+        void resize(size_type new_size, const_reference value) {
             _resize(new_size, value);
         }
 
-        size_type capacity() const noexcept {
+        size_type capacity() const {
             return _end - _begin;
         }
 
-        void reserve(size_type new_capacity) noexcept {
+        void reserve(size_type new_capacity) {
             if (new_capacity > capacity()) {
                 _reallocate(new_capacity, capacity() - size() >> 1);
             }
         }
 
-        iterator begin() noexcept {
+        iterator begin() {
             return _first;
         }
 
-        const_iterator begin() const noexcept {
+        const_iterator begin() const {
             return _first;
         }
 
-        iterator end() noexcept {
+        iterator end() {
             return _last;
         }
 
-        const_iterator end() const noexcept {
+        const_iterator end() const {
             return _last;
         }
 
-        const_iterator cbegin() const noexcept {
+        const_iterator cbegin() const {
             return begin();
         }
 
-        const_iterator cend() const noexcept {
+        const_iterator cend() const {
             return end();
         }
 
-        reverse_iterator rbegin() noexcept {
+        reverse_iterator rbegin() {
             return reverse_iterator{ end() };
         }
 
-        const_reverse_iterator rbegin() const noexcept {
+        const_reverse_iterator rbegin() const {
             return const_reverse_iterator{ end() };
         }
 
-        reverse_iterator rend() noexcept {
+        reverse_iterator rend() {
             return reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator rend() const noexcept {
+        const_reverse_iterator rend() const {
             return const_reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
+        const_reverse_iterator crbegin() const {
             return rbegin();
         }
 
-        const_reverse_iterator crend() const noexcept {
+        const_reverse_iterator crend() const {
             return rend();
         }
 
-        reference operator[](size_type index) noexcept {
+        reference operator[](size_type index) {
             assert(index < size());
             return _first[index];
         }
 
-        const_reference operator[](size_type index) const noexcept {
+        const_reference operator[](size_type index) const {
             assert(index < size());
             return _first[index];
         }
 
-        reference front() noexcept {
+        reference front() {
             assert(!empty());
             return *_first;
         }
 
-        const_reference front() const noexcept {
+        const_reference front() const {
             assert(!empty());
             return *_first;
         }
 
-        reference back() noexcept {
+        reference back() {
             assert(!empty());
             return _last[-1];
         }
 
-        const_reference back() const noexcept {
+        const_reference back() const {
             assert(!empty());
             return _last[-1];
         }
 
-        pointer data() noexcept {
+        pointer data() {
             return _first;
         }
 
-        const_pointer data() const noexcept {
+        const_pointer data() const {
             return _first;
         }
 
-        void push_front(const_reference value) noexcept {
+        void push_front(const_reference value) {
             if (_first == _begin) {
                 _extend(1, 1);
             }
             std::construct_at(--_first, value);
         }
 
-        void pop_front() noexcept {
+        void pop_front() {
             assert(!empty());
             std::destroy_at(_first++);
         }
 
-        void push_back(const_reference value) noexcept {
+        void push_back(const_reference value) {
             if (_last == _end) {
                 _extend(1, 0);
             }
             std::construct_at(_last++, value);
         }
 
-        void pop_back() noexcept {
+        void pop_back() {
             assert(!empty());
             std::destroy_at(--_last);
         }
 
-        iterator insert(const_iterator pos, const_reference value) noexcept {
+        iterator insert(const_iterator pos, const_reference value) {
             return insert(pos, 1, value);
         }
 
-        iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
+        iterator insert(const_iterator pos, size_type count, const_reference value) {
             T* i{ pos.base() };
             if (_end - _last < static_cast<std::ptrdiff_t>(count)) {
                 std::ptrdiff_t offset{ i - _begin };
@@ -1348,7 +1348,7 @@ namespace plastic {
         }
 
         template <std::input_iterator It>
-        iterator insert(const_iterator pos, It first, It last) noexcept {
+        iterator insert(const_iterator pos, It first, It last) {
             T* i{ pos.base() };
             std::ptrdiff_t offset1{ i - _first }, offset2{ _last - _first };
             while (first != last) {
@@ -1359,11 +1359,11 @@ namespace plastic {
             return i;
         }
 
-        iterator insert(const_iterator pos, std::initializer_list<T> list) noexcept {
+        iterator insert(const_iterator pos, std::initializer_list<T> list) {
             return insert(pos, list.begin(), list.end());
         }
 
-        iterator erase(const_iterator pos) noexcept {
+        iterator erase(const_iterator pos) {
             T* i{ pos.base() };
             assert(i != _last);
             _last = std::move(i + 1, _last, i);
@@ -1371,7 +1371,7 @@ namespace plastic {
             return i;
         }
 
-        iterator erase(const_iterator first, const_iterator last) noexcept {
+        iterator erase(const_iterator first, const_iterator last) {
             T *i{ first.base() }, *s{ last.base() };
             T* new_last{ std::move(s, _last, i) };
             std::destroy(new_last, _last);
@@ -1379,11 +1379,11 @@ namespace plastic {
             return i;
         }
 
-        friend bool operator==(const deque& left, const deque& right) noexcept {
+        friend bool operator==(const deque& left, const deque& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const deque& left, const deque& right) noexcept {
+        friend auto operator<=>(const deque& left, const deque& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
@@ -1402,7 +1402,7 @@ namespace plastic {
         std::size_t _size;
 
         template <class... Args>
-        node* _insert_after(node* pos, std::size_t count, const Args&... args) noexcept {
+        node* _insert_after(node* pos, std::size_t count, const Args&... args) {
             _size += count;
             while (count-- != 0) {
                 pos = pos->next = new node{ pos->next, args... };
@@ -1411,7 +1411,7 @@ namespace plastic {
         }
 
         template <class... Args>
-        void _resize(std::size_t new_size, const Args&... args) noexcept {
+        void _resize(std::size_t new_size, const Args&... args) {
             if (new_size <= _size) {
                 erase_after(std::next(end(), new_size), end());
             }
@@ -1432,7 +1432,7 @@ namespace plastic {
 
             node* _ptr{};
 
-            iterator(node* ptr) noexcept :
+            iterator(node* ptr) :
                 _ptr{ ptr } {}
 
         public:
@@ -1442,26 +1442,26 @@ namespace plastic {
             using reference = T&;
             using iterator_category = std::forward_iterator_tag;
 
-            iterator() noexcept = default;
+            iterator() = default;
 
-            reference operator*() const noexcept {
+            reference operator*() const {
                 return _ptr->value;
             }
 
-            pointer operator->() const noexcept {
+            pointer operator->() const {
                 return &_ptr->value;
             }
 
-            friend bool operator==(iterator left, iterator right) noexcept {
+            friend bool operator==(iterator left, iterator right) {
                 return left._ptr == right._ptr;
             }
 
-            iterator& operator++() noexcept {
+            iterator& operator++() {
                 _ptr = _ptr->next;
                 return *this;
             }
 
-            iterator operator++(int) noexcept {
+            iterator operator++(int) {
                 iterator temp{ *this };
                 ++*this;
                 return temp;
@@ -1470,145 +1470,145 @@ namespace plastic {
 
         using const_iterator = std::const_iterator<iterator>;
 
-        forward_list() noexcept :
+        forward_list() :
             _head{ new node },
             _size{} {
 
             _head->next = _head;
         }
 
-        explicit forward_list(size_type size) noexcept :
+        explicit forward_list(size_type size) :
             forward_list() {
 
             _insert_after(_head, size);
         }
 
-        forward_list(size_type size, const_reference value) noexcept :
+        forward_list(size_type size, const_reference value) :
             forward_list() {
 
             insert_after(end(), size, value);
         }
 
         template <std::input_iterator It>
-        forward_list(It first, It last) noexcept :
+        forward_list(It first, It last) :
             forward_list() {
 
             insert_after(end(), first, last);
         }
 
-        forward_list(std::initializer_list<T> list) noexcept :
+        forward_list(std::initializer_list<T> list) :
             forward_list(list.begin(), list.end()) {}
 
-        forward_list(const forward_list& other) noexcept :
+        forward_list(const forward_list& other) :
             forward_list(other.begin(), other.end()) {}
 
-        forward_list(forward_list&& other) noexcept {
+        forward_list(forward_list&& other) {
             swap(other);
         }
 
-        ~forward_list() noexcept {
+        ~forward_list() {
             clear();
             delete _head;
         }
 
-        forward_list& operator=(const forward_list& other) noexcept {
+        forward_list& operator=(const forward_list& other) {
             forward_list temp{ other };
             swap(temp);
             return *this;
         }
 
-        forward_list& operator=(forward_list&& other) noexcept {
+        forward_list& operator=(forward_list&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(forward_list& other) noexcept {
+        void swap(forward_list& other) {
             std::swap(_head, other._head);
             std::swap(_size, other._size);
         }
 
-        friend void swap(forward_list& left, forward_list& right) noexcept {
+        friend void swap(forward_list& left, forward_list& right) {
             left.swap(right);
         }
 
-        bool empty() const noexcept {
+        bool empty() const {
             return _size == 0;
         }
 
-        size_type size() const noexcept {
+        size_type size() const {
             return _size;
         }
 
-        static size_type max_size() noexcept {
+        static size_type max_size() {
             return std::numeric_limits<size_type>::max();
         }
 
-        void clear() noexcept {
+        void clear() {
             erase_after(end(), end());
         }
 
-        void resize(size_type new_size) noexcept {
+        void resize(size_type new_size) {
             _resize(new_size);
         }
 
-        void resize(size_type new_size, const_reference value) noexcept {
+        void resize(size_type new_size, const_reference value) {
             _resize(new_size, value);
         }
 
-        iterator begin() noexcept {
+        iterator begin() {
             return _head->next;
         }
 
-        const_iterator begin() const noexcept {
+        const_iterator begin() const {
             return iterator{ _head->next };
         }
 
-        iterator end() noexcept {
+        iterator end() {
             return _head;
         }
 
-        const_iterator end() const noexcept {
+        const_iterator end() const {
             return iterator{ _head };
         }
 
-        const_iterator cbegin() const noexcept {
+        const_iterator cbegin() const {
             return begin();
         }
 
-        const_iterator cend() const noexcept {
+        const_iterator cend() const {
             return end();
         }
 
-        reference front() noexcept {
+        reference front() {
             assert(!empty());
             return _head->next->value;
         }
 
-        const_reference front() const noexcept {
+        const_reference front() const {
             assert(!empty());
             return _head->next->value;
         }
 
-        void push_front(const_reference value) noexcept {
+        void push_front(const_reference value) {
             _head->next = new node{ _head->next, value };
             ++_size;
         }
 
-        void pop_front() noexcept {
+        void pop_front() {
             assert(!empty());
             erase_after(end());
         }
 
-        iterator insert_after(const_iterator pos, const_reference value) noexcept {
+        iterator insert_after(const_iterator pos, const_reference value) {
             return insert_after(pos, 1, value);
         }
 
-        iterator insert_after(const_iterator pos, size_type count, const_reference value) noexcept {
+        iterator insert_after(const_iterator pos, size_type count, const_reference value) {
             return _insert_after(pos.base()._ptr, count, value);
         }
 
         template <std::input_iterator It>
-        iterator insert_after(const_iterator pos, It first, It last) noexcept {
+        iterator insert_after(const_iterator pos, It first, It last) {
             node* i{ pos.base()._ptr };
             while (first != last) {
                 i = i->next = new node{ i->next, *first };
@@ -1618,18 +1618,18 @@ namespace plastic {
             return i;
         }
 
-        iterator insert_after(const_iterator pos, std::initializer_list<T> list) noexcept {
+        iterator insert_after(const_iterator pos, std::initializer_list<T> list) {
             return insert_after(pos, list.begin(), list.end());
         }
 
-        iterator erase_after(const_iterator pos) noexcept {
+        iterator erase_after(const_iterator pos) {
             node* i{ pos.base()._ptr };
             delete std::exchange(i->next, i->next->next);
             --_size;
             return i->next;
         }
 
-        iterator erase_after(const_iterator first, const_iterator last) noexcept {
+        iterator erase_after(const_iterator first, const_iterator last) {
             node *i{ first.base()._ptr }, *j{ last.base()._ptr };
             i = std::exchange(i->next, j);
             while (i != j) {
@@ -1639,11 +1639,11 @@ namespace plastic {
             return i;
         }
 
-        friend bool operator==(const forward_list& left, const forward_list& right) noexcept {
+        friend bool operator==(const forward_list& left, const forward_list& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const forward_list& left, const forward_list& right) noexcept {
+        friend auto operator<=>(const forward_list& left, const forward_list& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
@@ -1663,7 +1663,7 @@ namespace plastic {
         std::size_t _size;
 
         template <class... Args>
-        node* _insert(node* pos, std::size_t count, const Args&... args) noexcept {
+        node* _insert(node* pos, std::size_t count, const Args&... args) {
             node *prev{ pos->prev }, *i{ prev };
             _size += count;
             while (count-- != 0) {
@@ -1674,7 +1674,7 @@ namespace plastic {
         }
 
         template <class... Args>
-        void _resize(std::size_t new_size, const Args&... args) noexcept {
+        void _resize(std::size_t new_size, const Args&... args) {
             if (new_size <= _size) {
                 while (_size != new_size) {
                     pop_back();
@@ -1697,7 +1697,7 @@ namespace plastic {
 
             node* _ptr{};
 
-            iterator(node* ptr) noexcept :
+            iterator(node* ptr) :
                 _ptr{ ptr } {}
 
         public:
@@ -1707,37 +1707,37 @@ namespace plastic {
             using reference = T&;
             using iterator_category = std::bidirectional_iterator_tag;
 
-            iterator() noexcept = default;
+            iterator() = default;
 
-            reference operator*() const noexcept {
+            reference operator*() const {
                 return _ptr->value;
             }
 
-            pointer operator->() const noexcept {
+            pointer operator->() const {
                 return &_ptr->value;
             }
 
-            friend bool operator==(iterator left, iterator right) noexcept {
+            friend bool operator==(iterator left, iterator right) {
                 return left._ptr == right._ptr;
             }
 
-            iterator& operator++() noexcept {
+            iterator& operator++() {
                 _ptr = _ptr->next;
                 return *this;
             }
 
-            iterator operator++(int) noexcept {
+            iterator operator++(int) {
                 iterator temp{ *this };
                 ++*this;
                 return temp;
             }
 
-            iterator& operator--() noexcept {
+            iterator& operator--() {
                 _ptr = _ptr->prev;
                 return *this;
             }
 
-            iterator operator--(int) noexcept {
+            iterator operator--(int) {
                 iterator temp{ *this };
                 --*this;
                 return temp;
@@ -1748,185 +1748,185 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        list() noexcept :
+        list() :
             _head{ new node },
             _size{} {
 
             _head->prev = _head->next = _head;
         }
 
-        explicit list(size_type size) noexcept :
+        explicit list(size_type size) :
             list() {
 
             _insert(_head, size);
         }
 
-        list(size_type size, const T& value) noexcept :
+        list(size_type size, const T& value) :
             list() {
 
             insert(end(), size, value);
         }
 
         template <std::input_iterator It>
-        list(It first, It last) noexcept :
+        list(It first, It last) :
             list() {
 
             insert(end(), first, last);
         }
 
-        list(std::initializer_list<T> list) noexcept :
+        list(std::initializer_list<T> list) :
             list(list.begin(), list.end()) {}
 
-        list(const list& other) noexcept :
+        list(const list& other) :
             list(other.begin(), other.end()) {}
 
-        list(list&& other) noexcept {
+        list(list&& other) {
             swap(other);
         }
 
-        ~list() noexcept {
+        ~list() {
             clear();
             delete _head;
         }
 
-        list& operator=(const list& other) noexcept {
+        list& operator=(const list& other) {
             list temp{ other };
             swap(temp);
             return *this;
         }
 
-        list& operator=(list&& other) noexcept {
+        list& operator=(list&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(list& other) noexcept {
+        void swap(list& other) {
             std::swap(_head, other._head);
             std::swap(_size, other._size);
         }
 
-        bool empty() const noexcept {
+        bool empty() const {
             return _size == 0;
         }
 
-        size_type size() const noexcept {
+        size_type size() const {
             return _size;
         }
 
-        static size_type max_size() noexcept {
+        static size_type max_size() {
             return std::numeric_limits<size_type>::max();
         }
 
-        void clear() noexcept {
+        void clear() {
             erase(begin(), end());
         }
 
-        void resize(size_type new_size) noexcept {
+        void resize(size_type new_size) {
             _resize(new_size);
         }
 
-        void resize(size_type new_size, const_reference value) noexcept {
+        void resize(size_type new_size, const_reference value) {
             _resize(new_size, value);
         }
 
-        iterator begin() noexcept {
+        iterator begin() {
             return _head->next;
         }
 
-        const_iterator begin() const noexcept {
+        const_iterator begin() const {
             return iterator{ _head->next };
         }
 
-        iterator end() noexcept {
+        iterator end() {
             return _head;
         }
 
-        const_iterator end() const noexcept {
+        const_iterator end() const {
             return iterator{ _head };
         }
 
-        const_iterator cbegin() const noexcept {
+        const_iterator cbegin() const {
             return begin();
         }
 
-        const_iterator cend() const noexcept {
+        const_iterator cend() const {
             return end();
         }
 
-        reverse_iterator rbegin() noexcept {
+        reverse_iterator rbegin() {
             return reverse_iterator{ end() };
         }
 
-        const_reverse_iterator rbegin() const noexcept {
+        const_reverse_iterator rbegin() const {
             return const_reverse_iterator{ end() };
         }
 
-        reverse_iterator rend() noexcept {
+        reverse_iterator rend() {
             return reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator rend() const noexcept {
+        const_reverse_iterator rend() const {
             return const_reverse_iterator{ begin() };
         }
 
-        const_reverse_iterator crbegin() const noexcept {
+        const_reverse_iterator crbegin() const {
             return rbegin();
         }
 
-        const_reverse_iterator crend() const noexcept {
+        const_reverse_iterator crend() const {
             return rend();
         }
 
-        reference front() noexcept {
+        reference front() {
             assert(!empty());
             return _head->next->value;
         }
 
-        const_reference front() const noexcept {
+        const_reference front() const {
             assert(!empty());
             return _head->next->value;
         }
 
-        reference back() noexcept {
+        reference back() {
             assert(!empty());
             return _head->prev->value;
         }
 
-        const_reference back() const noexcept {
+        const_reference back() const {
             assert(!empty());
             return _head->prev->value;
         }
 
-        void push_front(const_reference value) noexcept {
+        void push_front(const_reference value) {
             _head->next->next->prev = _head->next = new node{ _head, _head->next, value };
             ++_size;
         }
 
-        void pop_front() noexcept {
+        void pop_front() {
             assert(!empty());
             erase(begin());
         }
 
-        void push_back(const_reference value) noexcept {
+        void push_back(const_reference value) {
             _head->prev->prev->next = _head->prev = new node{ _head->prev, _head, value };
             ++_size;
         }
 
-        void pop_back() noexcept {
+        void pop_back() {
             assert(!empty());
             erase(--end());
         }
 
-        iterator insert(const_iterator pos, const_reference value) noexcept {
+        iterator insert(const_iterator pos, const_reference value) {
             return insert(pos, 1, value);
         }
 
-        iterator insert(const_iterator pos, size_type count, const_reference value) noexcept {
+        iterator insert(const_iterator pos, size_type count, const_reference value) {
             return _insert(pos.base()._ptr, count, value);
         }
 
         template <std::input_iterator It>
-        iterator insert(const_iterator pos, It first, It last) noexcept {
+        iterator insert(const_iterator pos, It first, It last) {
             node *prev{ pos.base()._ptr->prev }, *i{ prev };
             while (first != last) {
                 i = i->next = new node{ i, i->next, *first };
@@ -1937,11 +1937,11 @@ namespace plastic {
             return prev->next;
         }
 
-        iterator insert(const_iterator pos, std::initializer_list<T> list) noexcept {
+        iterator insert(const_iterator pos, std::initializer_list<T> list) {
             return insert(pos, list.begin(), list.end());
         }
 
-        iterator erase(const_iterator pos) noexcept {
+        iterator erase(const_iterator pos) {
             node* i{ pos.base()._ptr->prev };
             delete std::exchange(i->next, i->next->next);
             --_size;
@@ -1949,7 +1949,7 @@ namespace plastic {
             return i->next;
         }
 
-        iterator erase(const_iterator first, const_iterator last) noexcept {
+        iterator erase(const_iterator first, const_iterator last) {
             node *i{ first.base()._ptr }, *j{ last.base()._ptr };
             i->prev->next = j;
             j->prev = i->prev;
@@ -1960,11 +1960,11 @@ namespace plastic {
             return i;
         }
 
-        friend bool operator==(const list& left, const list& right) noexcept {
+        friend bool operator==(const list& left, const list& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const list& left, const list& right) noexcept {
+        friend auto operator<=>(const list& left, const list& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
