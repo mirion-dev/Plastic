@@ -839,7 +839,6 @@ namespace plastic {
                 }
                 ++first;
             }
-
             return output;
         }
         else {
@@ -960,7 +959,7 @@ namespace plastic {
         requires std::indirectly_copyable<It, Out1> && std::indirectly_copyable<It, Out2>
     std::ranges::in_out_out_result<It, Out1, Out2> partition_copy(It first, Se last, Out1 output_true, Out2 output_false, Pr pred, Pj proj = {}) {
         while (first != last) {
-            (std::invoke(pred, std::invoke(proj, *first)) ? *output_true++ : *output_false++) = *first++;
+            (std::invoke(pred, std::invoke(proj, *first++)) ? *output_true++ : *output_false++) = *first;
         }
         return { first, output_true, output_false };
     }
@@ -986,7 +985,7 @@ namespace plastic {
 
         *j++ = std::move(*i++);
         while (i != r_last) {
-            (std::invoke(pred, std::invoke(proj, *i)) ? *first++ : *j++) = std::move(*i++);
+            (std::invoke(pred, std::invoke(proj, *i++)) ? *first++ : *j++) = std::move(*i);
         }
         *first++ = std::move(*r_last);
 
