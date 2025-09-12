@@ -25,7 +25,7 @@ template <class Hp>
         heap.pop();
     }
 std::string format(const Hp& heap) {
-    auto clone{ heap };
+    Hp clone{ heap };
     std::vector<typename Hp::value_type> temp;
     while (!clone.empty()) {
         temp.push_back(clone.top());

@@ -946,16 +946,26 @@ namespace plastic {
         }
 
         if constexpr (std::bidirectional_iterator<It> && std::bidirectional_iterator<Se>) {
-            // TODO
-        }
-
-        It i{ first };
-        while (++i != last) {
-            if (std::invoke(pred, std::invoke(proj, *i))) {
+            It i{ last };
+            while (true) {
+                first = plastic::find_if_not(first, i, pred, proj);
+                do {
+                    if (first == i) {
+                        return { std::move(first), std::move(last) };
+                    }
+                } while (!std::invoke(pred, std::invoke(proj, *--i)));
                 std::swap(*first++, *i);
             }
         }
-        return { std::move(first), std::move(i) };
+        else {
+            It i{ first };
+            while (++i != last) {
+                if (std::invoke(pred, std::invoke(proj, *i))) {
+                    std::swap(*first++, *i);
+                }
+            }
+            return { std::move(first), std::move(last) };
+        }
     }
 
     export template <std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out1, std::weakly_incrementable Out2, class Pj = std::identity, std::indirect_unary_predicate<std::projected<It, Pj>> Pr>
