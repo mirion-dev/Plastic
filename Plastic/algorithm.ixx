@@ -69,6 +69,12 @@ namespace plastic {
     export template <std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2, class Pr = std::ranges::equal_to, class Pj1 = std::identity, class Pj2 = std::identity>
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     bool equal(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
+        if constexpr (std::sized_sentinel_for<Se1, It1> && std::sized_sentinel_for<Se2, It2>) {
+            if (last1 - first1 != last2 - first2) {
+                return false;
+            }
+        }
+
         while (first2 != last2) {
             if (first1 == last1 || !pred(proj1(*first1), proj2(*first2))) {
                 return false;
