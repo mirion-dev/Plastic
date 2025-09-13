@@ -1,4 +1,6 @@
-﻿#include <CppUnitTest.h>
+﻿// ReSharper disable CppIdenticalOperandsInBinaryExpression
+
+#include <CppUnitTest.h>
 
 #define ASSERT Microsoft::VisualStudio::CppUnitTestFramework::Assert::IsTrue
 
@@ -114,7 +116,7 @@ void test_search_tree() {
     ASSERT(format(x) == "[0, 3, 4, 5]");
 
     Tr d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
-    ASSERT(d == d); // NOLINT
+    ASSERT(d == d);
     ASSERT(d != e);
     ASSERT(e != d);
     ASSERT(d < e);
@@ -294,7 +296,7 @@ public:
         ASSERT(format(x) == "[3, 1, 2, 1]");
 
         plastic::inplace_vector<int, 12> d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
-        ASSERT(d == d); // NOLINT
+        ASSERT(d == d);
         ASSERT(d != e);
         ASSERT(e != d);
         ASSERT(d < e);
@@ -398,7 +400,7 @@ public:
         ASSERT(format(x) == "[3, 1, 2, 1]");
 
         plastic::vector d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
-        ASSERT(d == d); // NOLINT
+        ASSERT(d == d);
         ASSERT(d != e);
         ASSERT(e != d);
         ASSERT(d < e);
@@ -510,7 +512,7 @@ public:
         ASSERT(format(x) == "[3, 1, 2, 1]");
 
         plastic::inplace_deque<int, 12> d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
-        ASSERT(d == d); // NOLINT
+        ASSERT(d == d);
         ASSERT(d != e);
         ASSERT(e != d);
         ASSERT(d < e);
@@ -623,7 +625,7 @@ public:
         ASSERT(format(x) == "[3, 1, 2, 1]");
 
         plastic::deque<int> d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
-        ASSERT(d == d); // NOLINT
+        ASSERT(d == d);
         ASSERT(d != e);
         ASSERT(e != d);
         ASSERT(d < e);
@@ -704,7 +706,7 @@ public:
         ASSERT(format(x) == "[3, 1, 1, 1]");
 
         plastic::forward_list d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
-        ASSERT(d == d); // NOLINT
+        ASSERT(d == d);
         ASSERT(d != e);
         ASSERT(e != d);
         ASSERT(d < e);
@@ -805,7 +807,7 @@ public:
         ASSERT(format(x) == "[3, 1, 2, 1]");
 
         plastic::list<int> d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
-        ASSERT(d == d); // NOLINT
+        ASSERT(d == d);
         ASSERT(d != e);
         ASSERT(e != d);
         ASSERT(d < e);

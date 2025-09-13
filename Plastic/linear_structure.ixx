@@ -1,3 +1,5 @@
+// ReSharper disable CppSpecialFunctionWithoutNoexceptSpecification
+
 module;
 
 #include <cassert>

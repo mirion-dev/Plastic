@@ -1,12 +1,13 @@
-﻿module;
+﻿// ReSharper disable CppFunctionIsNotImplemented
+// @formatter:cpp_max_line_length 0
+
+module;
 
 #include <cassert>
 
 export module plastic:algorithm;
 
 import std;
-
-// @formatter:cpp_max_line_length 0
 
 // introduced in C++26, but not yet implemented in MSVC
 namespace std {
@@ -31,7 +32,7 @@ namespace plastic {
     public:
         template <class T, class U>
             requires std::invocable<Fn&, U, T>
-        std::invoke_result_t<Fn&, U, T> operator()(T&&, U&&); // NOLINT
+        std::invoke_result_t<Fn&, U, T> operator()(T&&, U&&);
     };
 
     template <class Fn, class T, class It>
