@@ -1,4 +1,4 @@
-﻿export module plastic;
+export module plastic;
 
 export import :algorithm;
 export import :linear_structure;
