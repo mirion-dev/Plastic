@@ -1,7 +1,4 @@
-﻿// ReSharper disable CppFunctionIsNotImplemented
-// @formatter:cpp_max_line_length 0
-
-module;
+﻿module;
 
 #include <cassert>
 

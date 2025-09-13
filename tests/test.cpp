@@ -1,5 +1,3 @@
-﻿// ReSharper disable CppIdenticalOperandsInBinaryExpression
-
 #include <CppUnitTest.h>
 
 #define ASSERT Microsoft::VisualStudio::CppUnitTestFramework::Assert::IsTrue
