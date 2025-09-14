@@ -312,6 +312,8 @@ namespace plastic {
         pointer _end{};
 
         void _reallocate(size_type new_capacity) {
+            new_capacity = std::max(new_capacity, capacity() + (capacity() >> 1));
+
             pointer new_begin{ _alloc.allocate(new_capacity) };
             pointer new_last{ std::uninitialized_move(_begin, _last, new_begin) };
             pointer new_end{ new_begin + new_capacity };
@@ -320,10 +322,6 @@ namespace plastic {
             _begin = new_begin;
             _last = new_last;
             _end = new_end;
-        }
-
-        void _extend(size_type size) {
-            _reallocate(capacity() + std::max(capacity() >> 1, size));
         }
 
         void _resize(size_type new_size, const auto&... args) {
@@ -524,7 +522,7 @@ namespace plastic {
 
         void push_back(const_reference value) {
             if (_last == _end) {
-                _extend(1);
+                _reallocate(size() + 1);
             }
             std::construct_at(_last++, value);
         }
@@ -541,7 +539,7 @@ namespace plastic {
         iterator insert(const_iterator pos, size_type count, const_reference value) {
             difference_type offset{ pos.base() - _begin };
             if (static_cast<size_type>(_end - _last) < count) {
-                _extend(count);
+                _reallocate(size() + count);
             }
 
             pointer i{ _begin + offset }, new_last{ _last + count };
@@ -552,10 +550,10 @@ namespace plastic {
 
         template <std::input_iterator It>
         iterator insert(const_iterator pos, It first, It last) {
-            difference_type offset1{ pos.base() - _begin }, offset2{ _last - _begin };
+            difference_type pos_offset{ pos.base() - _begin }, last_offset{ _last - _begin };
             std::copy(first, last, std::back_inserter(*this));
-            std::rotate(_begin + offset1, _begin + offset2, _last);
-            return _begin + offset1;
+            std::rotate(_begin + pos_offset, _begin + last_offset, _last);
+            return _begin + pos_offset;
         }
 
         iterator insert(const_iterator pos, std::initializer_list<T> list) {

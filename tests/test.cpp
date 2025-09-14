@@ -243,9 +243,9 @@ public:
         ASSERT(format(x) == "[3, 2, 0, 1, 1]");
 
         x.reserve(12);
-        ASSERT(x.capacity() == 12);
+        ASSERT(x.capacity() >= 12);
         x.reserve(6);
-        ASSERT(x.capacity() == 12);
+        ASSERT(x.capacity() >= 12);
 
         ASSERT(x[0] == 3);
         ASSERT(x[4] == 1);
@@ -347,9 +347,9 @@ public:
         ASSERT(format(x) == "[3, 2, 0, 1, 1]");
 
         x.reserve(10);
-        ASSERT(x.capacity() == 10);
+        ASSERT(x.capacity() >= 10);
         x.reserve(5);
-        ASSERT(x.capacity() == 10);
+        ASSERT(x.capacity() >= 10);
 
         ASSERT(x[0] == 3);
         ASSERT(x[4] == 1);
@@ -450,9 +450,9 @@ public:
         ASSERT(format(x) == "[3, 2, 0, 1, 1]");
 
         x.reserve(12);
-        ASSERT(x.capacity() == 12);
+        ASSERT(x.capacity() >= 12);
         x.reserve(6);
-        ASSERT(x.capacity() == 12);
+        ASSERT(x.capacity() >= 12);
 
         ASSERT(x[0] == 3);
         ASSERT(x[4] == 1);
@@ -563,9 +563,9 @@ public:
         ASSERT(format(x) == "[3, 2, 0, 1, 1]");
 
         x.reserve(12);
-        ASSERT(x.capacity() == 12);
+        ASSERT(x.capacity() >= 12);
         x.reserve(6);
-        ASSERT(x.capacity() == 12);
+        ASSERT(x.capacity() >= 12);
 
         ASSERT(x[0] == 3);
         ASSERT(x[4] == 1);
