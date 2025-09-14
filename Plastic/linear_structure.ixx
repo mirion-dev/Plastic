@@ -1384,33 +1384,6 @@ namespace plastic {
 
     export template <class T>
     class forward_list {
-        struct node {
-            node* next;
-            T value;
-        };
-
-        node* _head;
-        std::size_t _size;
-
-        template <class... Args>
-        node* _insert_after(node* pos, std::size_t count, const Args&... args) {
-            _size += count;
-            while (count-- != 0) {
-                pos = pos->next = new node{ pos->next, args... };
-            }
-            return pos;
-        }
-
-        template <class... Args>
-        void _resize(std::size_t new_size, const Args&... args) {
-            if (new_size <= _size) {
-                erase_after(std::next(end(), new_size), end());
-            }
-            else {
-                _insert_after(std::next(end(), _size)._ptr, new_size - _size, args...);
-            }
-        }
-
     public:
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
@@ -1418,12 +1391,22 @@ namespace plastic {
         using reference = T&;
         using const_reference = const T&;
 
+    private:
+        struct node_base {
+            node_base* next;
+        };
+
+        struct node : node_base {
+            value_type value;
+        };
+
+    public:
         class iterator {
             friend forward_list;
 
-            node* _ptr{};
+            node_base* _ptr{};
 
-            iterator(node* ptr) :
+            iterator(node_base* ptr) :
                 _ptr{ ptr } {}
 
         public:
@@ -1436,11 +1419,11 @@ namespace plastic {
             iterator() = default;
 
             reference operator*() const {
-                return _ptr->value;
+                return static_cast<node*>(_ptr)->value;
             }
 
             pointer operator->() const {
-                return &_ptr->value;
+                return &static_cast<node*>(_ptr)->value;
             }
 
             friend bool operator==(iterator left, iterator right) {
@@ -1461,9 +1444,30 @@ namespace plastic {
 
         using const_iterator = std::const_iterator<iterator>;
 
+    private:
+        node_base* _head;
+        size_type _size{};
+
+        node_base* _insert_after(node_base* pos, size_type count, const auto&... args) {
+            _size += count;
+            while (count-- != 0) {
+                pos = pos->next = new node{ pos->next, args... };
+            }
+            return pos;
+        }
+
+        void _resize(size_type new_size, const auto&... args) {
+            if (new_size <= _size) {
+                erase_after(std::next(before_begin(), new_size), end());
+            }
+            else {
+                _insert_after(std::next(before_begin(), _size)._ptr, new_size - _size, args...);
+            }
+        }
+
+    public:
         forward_list() :
-            _head{ new node },
-            _size{} {
+            _head{ new node_base } {
 
             _head->next = _head;
         }
@@ -1471,20 +1475,20 @@ namespace plastic {
         explicit forward_list(size_type size) :
             forward_list() {
 
-            _insert_after(_head, size);
+            insert_after(before_begin(), size, {});
         }
 
         forward_list(size_type size, const_reference value) :
             forward_list() {
 
-            insert_after(end(), size, value);
+            insert_after(before_begin(), size, value);
         }
 
         template <std::input_iterator It>
         forward_list(It first, It last) :
             forward_list() {
 
-            insert_after(end(), first, last);
+            insert_after(before_begin(), first, last);
         }
 
         forward_list(std::initializer_list<T> list) :
@@ -1493,7 +1497,9 @@ namespace plastic {
         forward_list(const forward_list& other) :
             forward_list(other.begin(), other.end()) {}
 
-        forward_list(forward_list&& other) {
+        forward_list(forward_list&& other) :
+            forward_list() {
+
             swap(other);
         }
 
@@ -1535,7 +1541,7 @@ namespace plastic {
         }
 
         void clear() {
-            erase_after(end(), end());
+            erase_after(before_begin(), end());
         }
 
         void resize(size_type new_size) {
@@ -1544,6 +1550,14 @@ namespace plastic {
 
         void resize(size_type new_size, const_reference value) {
             _resize(new_size, value);
+        }
+
+        iterator before_begin() {
+            return end();
+        }
+
+        const_iterator before_begin() const {
+            return end();
         }
 
         iterator begin() {
@@ -1562,6 +1576,10 @@ namespace plastic {
             return iterator{ _head };
         }
 
+        const_iterator cbefore_begin() const {
+            return before_begin();
+        }
+
         const_iterator cbegin() const {
             return begin();
         }
@@ -1572,12 +1590,12 @@ namespace plastic {
 
         reference front() {
             assert(!empty());
-            return _head->next->value;
+            return *begin();
         }
 
         const_reference front() const {
             assert(!empty());
-            return _head->next->value;
+            return *begin();
         }
 
         void push_front(const_reference value) {
@@ -1587,7 +1605,7 @@ namespace plastic {
 
         void pop_front() {
             assert(!empty());
-            erase_after(end());
+            erase_after(before_begin());
         }
 
         iterator insert_after(const_iterator pos, const_reference value) {
@@ -1600,11 +1618,10 @@ namespace plastic {
 
         template <std::input_iterator It>
         iterator insert_after(const_iterator pos, It first, It last) {
-            node* i{ pos.base()._ptr };
+            node_base* i{ pos.base()._ptr };
             while (first != last) {
                 i = i->next = new node{ i->next, *first };
-                ++first;
-                ++_size;
+                ++first, ++_size;
             }
             return i;
         }
@@ -1614,17 +1631,17 @@ namespace plastic {
         }
 
         iterator erase_after(const_iterator pos) {
-            node* i{ pos.base()._ptr };
-            delete std::exchange(i->next, i->next->next);
+            node_base* i{ pos.base()._ptr };
+            delete static_cast<node*>(std::exchange(i->next, i->next->next));
             --_size;
             return i->next;
         }
 
         iterator erase_after(const_iterator first, const_iterator last) {
-            node *i{ first.base()._ptr }, *j{ last.base()._ptr };
+            node_base *i{ first.base()._ptr }, *j{ last.base()._ptr };
             i = std::exchange(i->next, j);
             while (i != j) {
-                delete std::exchange(i, i->next);
+                delete static_cast<node*>(std::exchange(i, i->next));
                 --_size;
             }
             return i;
@@ -1644,38 +1661,6 @@ namespace plastic {
 
     export template <class T>
     class list {
-        struct node {
-            node* prev;
-            node* next;
-            T value;
-        };
-
-        node* _head;
-        std::size_t _size;
-
-        template <class... Args>
-        node* _insert(node* pos, std::size_t count, const Args&... args) {
-            node *prev{ pos->prev }, *i{ prev };
-            _size += count;
-            while (count-- != 0) {
-                i = i->next = new node{ i, i->next, args... };
-            }
-            i->next->prev = i;
-            return prev->next;
-        }
-
-        template <class... Args>
-        void _resize(std::size_t new_size, const Args&... args) {
-            if (new_size <= _size) {
-                while (_size != new_size) {
-                    pop_back();
-                }
-            }
-            else {
-                _insert(_head, new_size - _size, args...);
-            }
-        }
-
     public:
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
@@ -1683,12 +1668,23 @@ namespace plastic {
         using reference = T&;
         using const_reference = const T&;
 
+    private:
+        struct node_base {
+            node_base* prev;
+            node_base* next;
+        };
+
+        struct node : node_base {
+            value_type value;
+        };
+
+    public:
         class iterator {
             friend list;
 
-            node* _ptr{};
+            node_base* _ptr{};
 
-            iterator(node* ptr) :
+            iterator(node_base* ptr) :
                 _ptr{ ptr } {}
 
         public:
@@ -1701,11 +1697,11 @@ namespace plastic {
             iterator() = default;
 
             reference operator*() const {
-                return _ptr->value;
+                return static_cast<node*>(_ptr)->value;
             }
 
             pointer operator->() const {
-                return &_ptr->value;
+                return &static_cast<node*>(_ptr)->value;
             }
 
             friend bool operator==(iterator left, iterator right) {
@@ -1739,9 +1735,34 @@ namespace plastic {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
+    private:
+        node_base* _head;
+        size_type _size{};
+
+        node_base* _insert(node_base* pos, size_type count, const auto&... args) {
+            node_base *prev{ pos->prev }, *i{ prev };
+            _size += count;
+            while (count-- != 0) {
+                i = i->next = new node{ i, i->next, args... };
+            }
+            i->next->prev = i;
+            return prev->next;
+        }
+
+        void _resize(size_type new_size, const auto&... args) {
+            if (new_size <= _size) {
+                while (_size != new_size) {
+                    pop_back();
+                }
+            }
+            else {
+                _insert(_head, new_size - _size, args...);
+            }
+        }
+
+    public:
         list() :
-            _head{ new node },
-            _size{} {
+            _head{ new node_base } {
 
             _head->prev = _head->next = _head;
         }
@@ -1749,10 +1770,10 @@ namespace plastic {
         explicit list(size_type size) :
             list() {
 
-            _insert(_head, size);
+            insert(end(), size, {});
         }
 
-        list(size_type size, const T& value) :
+        list(size_type size, const_reference value) :
             list() {
 
             insert(end(), size, value);
@@ -1771,7 +1792,9 @@ namespace plastic {
         list(const list& other) :
             list(other.begin(), other.end()) {}
 
-        list(list&& other) {
+        list(list&& other) :
+            list() {
+
             swap(other);
         }
 
@@ -1794,6 +1817,10 @@ namespace plastic {
         void swap(list& other) {
             std::swap(_head, other._head);
             std::swap(_size, other._size);
+        }
+
+        friend void swap(list& left, list& right) {
+            left.swap(right);
         }
 
         bool empty() const {
@@ -1870,22 +1897,22 @@ namespace plastic {
 
         reference front() {
             assert(!empty());
-            return _head->next->value;
+            return *begin();
         }
 
         const_reference front() const {
             assert(!empty());
-            return _head->next->value;
+            return *begin();
         }
 
         reference back() {
             assert(!empty());
-            return _head->prev->value;
+            return *--end();
         }
 
         const_reference back() const {
             assert(!empty());
-            return _head->prev->value;
+            return *--end();
         }
 
         void push_front(const_reference value) {
@@ -1918,11 +1945,10 @@ namespace plastic {
 
         template <std::input_iterator It>
         iterator insert(const_iterator pos, It first, It last) {
-            node *prev{ pos.base()._ptr->prev }, *i{ prev };
+            node_base *prev{ pos.base()._ptr->prev }, *i{ prev };
             while (first != last) {
                 i = i->next = new node{ i, i->next, *first };
-                ++first;
-                ++_size;
+                ++first, ++_size;
             }
             i->next->prev = i;
             return prev->next;
@@ -1933,19 +1959,19 @@ namespace plastic {
         }
 
         iterator erase(const_iterator pos) {
-            node* i{ pos.base()._ptr->prev };
-            delete std::exchange(i->next, i->next->next);
+            node_base* i{ pos.base()._ptr->prev };
+            delete static_cast<node*>(std::exchange(i->next, i->next->next));
             --_size;
             i->next->prev = i;
             return i->next;
         }
 
         iterator erase(const_iterator first, const_iterator last) {
-            node *i{ first.base()._ptr }, *j{ last.base()._ptr };
+            node_base *i{ first.base()._ptr }, *j{ last.base()._ptr };
             i->prev->next = j;
             j->prev = i->prev;
             while (i != j) {
-                delete std::exchange(i, i->next);
+                delete static_cast<node*>(std::exchange(i, i->next));
                 --_size;
             }
             return i;
