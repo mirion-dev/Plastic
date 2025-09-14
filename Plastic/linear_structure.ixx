@@ -1052,12 +1052,13 @@ namespace plastic {
         pointer _first{};
         pointer _last{};
 
-        void _reallocate(size_type new_capacity) {
+        pointer _reallocate(size_type new_capacity, size_type right_reserved = {}, size_type left_reserved = {}) {
             new_capacity = std::max(new_capacity, capacity() << 1);
+            size_type new_size{ size() + left_reserved + right_reserved };
 
             pointer new_begin{ _alloc.allocate(new_capacity) };
             pointer new_end{ new_begin + new_capacity };
-            pointer new_first{ new_begin + (new_capacity - size() >> 1) };
+            pointer new_first{ new_begin + (new_capacity - new_size >> 1) + left_reserved };
             pointer new_last{ std::uninitialized_move(_first, _last, new_first) };
             _alloc.deallocate(_begin, capacity());
 
@@ -1065,12 +1066,13 @@ namespace plastic {
             _end = new_end;
             _first = new_first;
             _last = new_last;
+
+            return _first + new_size;
         }
 
         void _resize(size_type new_size, const auto&... args) {
             if (new_size > capacity()) {
-                _reallocate(new_size);
-                pointer new_last{ _first + new_size };
+                pointer new_last{ _reallocate(new_size, new_size - size()) };
                 plastic::construct(_last, new_last, args...);
                 _last = new_last;
                 return;
@@ -1303,7 +1305,7 @@ namespace plastic {
 
         void push_front(const_reference value) {
             if (_first == _begin) {
-                _reallocate(size() + 2);
+                _reallocate(size() + 1, 0, 1);
             }
             std::construct_at(--_first, value);
         }
@@ -1315,7 +1317,7 @@ namespace plastic {
 
         void push_back(const_reference value) {
             if (_last == _end) {
-                _reallocate(size() + 2);
+                _reallocate(size() + 1, 1);
             }
             std::construct_at(_last++, value);
         }
@@ -1332,7 +1334,7 @@ namespace plastic {
         iterator insert(const_iterator pos, size_type count, const_reference value) {
             difference_type offset{ pos.base() - _first };
             if (static_cast<size_type>(_end - _last) < count) {
-                _reallocate(size() + (count << 1));
+                _reallocate(size() + count, count);
             }
 
             pointer i{ _first + offset }, new_last{ _last + count };
