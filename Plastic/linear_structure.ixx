@@ -1081,7 +1081,7 @@ namespace plastic {
             pointer new_first{ _begin + (capacity() - new_size >> 1) }, new_last{ new_first + new_size };
             if (new_size <= size()) {
                 pointer middle{ _first + new_size };
-                if (_first <= new_first && _last <= new_first || _first > new_last && _last > new_last) {
+                if (_last <= new_first || _first >= new_last) {
                     std::uninitialized_move(_first, middle, new_first);
                     std::destroy(_first, _last);
                 }
@@ -1089,21 +1089,21 @@ namespace plastic {
                     std::move_backward(_first, middle, new_last);
                     std::destroy(_first, new_first);
                 }
-                else if (_first > new_first) {
+                else if (_first >= new_first) {
                     std::move(_first, middle, new_first);
                     std::destroy(new_last, _last);
                 }
                 else {
-                    std::move(_first, middle, new_first);
+                    std::move_backward(_first, middle, new_first);
                     std::destroy(_first, new_first);
                     std::destroy(new_last, _last);
                 }
             }
             else {
                 pointer new_middle{ new_first + size() };
-                if (_first <= new_first && _last <= new_first || _first > new_middle && _last > new_middle) {
+                if (_last <= new_first || _first >= new_middle) {
                     std::uninitialized_move(_first, _last, new_first);
-                    std::destroy(new_first, new_middle);
+                    std::destroy(_first, _last);
                 }
                 else if (_first <= new_first) {
                     std::move_backward(_first, _last, new_middle);
@@ -1111,7 +1111,7 @@ namespace plastic {
                 }
                 else {
                     std::move(_first, _last, new_first);
-                    std::destroy(new_middle, _last);
+                    std::destroy(std::max(new_middle, _first), _last);
                 }
                 plastic::construct(new_middle, new_last, args...);
             }
