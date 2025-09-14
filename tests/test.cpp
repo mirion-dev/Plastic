@@ -18,12 +18,14 @@ std::string format(It first, It last) {
     return format(std::ranges::subrange{ first, last });
 }
 
-template <class Hp>
-    requires requires(Hp heap) {
-        heap.empty();
-        heap.top();
-        heap.pop();
-    }
+template <class T>
+concept heap = requires(T heap) {
+    heap.empty();
+    heap.top();
+    heap.pop();
+};
+
+template <heap Hp>
 std::string format(const Hp& heap) {
     Hp clone{ heap };
     std::vector<typename Hp::value_type> temp;
@@ -123,7 +125,7 @@ void test_search_tree() {
     ASSERT(f >= d);
 }
 
-template <class Hp>
+template <heap Hp>
 void test_addressable_heap() {
     Hp a{ 0, 0, 0 }, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 }, x;
     ASSERT(format(x) == "[]");
