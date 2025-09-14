@@ -99,12 +99,16 @@ namespace plastic {
         }
 
         void swap(inplace_vector& other) {
-            std::swap(_data, other._data);
-
-            difference_type offset{ _last - _begin() };
-            _last = _begin() + (other._last - other._begin());
-            other._last = other._begin() + offset;
+            if (size() < other.size()) {
+                other.swap(*this);
+                return;
         }
+
+                pointer new_last{ std::swap_ranges(other._begin(), other._last, _begin()) };
+                other._last = std::uninitialized_move(new_last, _last, other._last);
+                std::destroy(new_last, _last);
+                _last = new_last;
+            }
 
         friend void swap(inplace_vector& left, inplace_vector& right) {
             left.swap(right);
