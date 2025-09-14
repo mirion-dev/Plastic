@@ -4,66 +4,58 @@ My implementations of common data structures and algorithms for study.
 
 ## Data Structures
 
-The class designs are primarily based on [MSVC STL](https://github.com/microsoft/STL), though not identical. For instance, the underlying structure of `deque` is implemented as a bidirectional dynamic array instead of blocks.
+The class designs are primarily based on the standard library, but not identical. For example, the underlying structure of `deque` is implemented as a bidirectional dynamic array instead of blocks.
 
-### Linear Structures
+| | **`inplace_vector`<br>`vector`** | **`inplace_deque`<br>`deque`** | **`forward_list`** | **`list`** | Search Tree | Addressable Heap |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` |
+| **`size`** | `size` | `size` | `size` | `size` | `size` | `size` |
+| **`max_size`** | `max_size` | `max_size` | `max_size` | `max_size` | `max_size` | `max_size` |
+| **`clear`** | `clear` | `clear` | `clear` | `clear` | `clear` | `clear` |
+| **`resize`** | `resize` | `resize` | `resize` | `resize` | | |
+| **`capacity`** | `capacity` | `capacity` | | | | |
+| **`reserve`** | `reserve` | `reserve` | | | | |
+| **`before_begin`** | | | `before_begin` | | | |
+| **`begin`** | `begin` | `begin` | `begin` | `begin` | `begin` | `top_handle` |
+| **`end`** | `end` | `end` | `end` | `end` | `end` | |
+| **`cbefore_begin`** | | | `cbefore_begin` | | | |
+| **`cbegin`** | `cbegin` | `cbegin` | `cbegin` | `cbegin` | `cbegin` | |
+| **`cend`** | `cend` | `cend` | `cend` | `cend` | `cend` | |
+| **`rbegin`** | `rbegin` | `rbegin` | | `rbegin` | `rbegin` | |
+| **`rend`** | `rend` | `rend` | | `rend` | `rend` | |
+| **`crbegin`** | `crbegin` | `crbegin` | | `crbegin` | `crbegin` | |
+| **`crend`** | `crend` | `crend` | | `crend` | `crend` | |
+| **`front`** | `front` | `front` | `front` | `front` | | `top` |
+| **`back`** | `back` | `back` | | `back` | | |
+| **`update`** | | | | | | `update` |
+| **`data`** | `data` | `deque::data` | | | | |
+| **`operator[]`** | `operator[]` | `operator[]` | | | | |
+| **`contains`** | | | | | `contains` | |
+| **`find`** | | | | | `find` | |
+| **`count`** | | | | | `count` | |
+| **`lower_bound`** | | | | | `lower_bound` | |
+| **`upper_bound`** | | | | | `upper_bound` | |
+| **`equal_range`** | | | | | `equal_range` | |
+| **`push_front`** | | `push_front` | `push_front` | `push_front` | | `push` |
+| **`pop_front`** | | `pop_front` | `pop_front` | `pop_front` | | `pop` |
+| **`push_back`** | `push_back` | `push_back` | | `push_back` | | |
+| **`pop_back`** | `pop_back` | `pop_back` | | `pop_back` | | |
+| **`insert`** | `insert` | `insert` | `insert_after` | `insert` | `insert` | |
+| **`erase`** | `erase` | `erase` | `erase_after` | `erase` | `erase` | `erase` |
+| **`swap`** | `swap` | `swap` | `swap` | `swap` | `swap` | `swap` |
+| **`merge`** | | | | | | `merge` |
+| **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` | `operator==` | |
+| **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | |
 
-![](./images/linear_structure.svg)
-
-\* Amortized complexity.
-
-| | **`inplace_vector`<br>`vector`** | **`inplace_deque`<br>`deque`** | **`forward_list`** | **`list`** |
-| :--: | :--: | :--: | :--: | :--: |
-| **`empty`** | `empty` | `empty` | `empty` | `empty` |
-| **`size`** | `size` | `size` | `size` | `size` |
-| **`max_size`** | `max_size` | `max_size` | `max_size` | `max_size` |
-| **`clear`** | `clear` | `clear` | `clear` | `clear` |
-| **`resize`** | `resize` | `resize` | `resize` | `resize` |
-| **`capacity`** | `capacity` | `capacity` | | |
-| **`reserve`** | `reserve` | `reserve` | | |
-| **`begin`** | `begin` | `begin` | `begin` | `begin` |
-| **`end`** | `end` | `end` | `end` | `end` |
-| **`cbegin`** | `cbegin` | `cbegin` | `cbegin` | `cbegin` |
-| **`cend`** | `cend` | `cend` | `cend` | `cend` |
-| **`rbegin`** | `rbegin` | `rbegin` | | `rbegin` |
-| **`rend`** | `rend` | `rend` | | `rend` |
-| **`crbegin`** | `crbegin` | `crbegin` | | `crbegin` |
-| **`crend`** | `crend` | `crend` | | `crend` |
-| **`front`** | `front` | `front` | `front` | `front` |
-| **`back`** | `back` | `back` | | `back` |
-| **`data`** | `data` | `deque::data` | | |
-| **`operator[]`** | `operator[]` | `operator[]` | | |
-| **`push_front`** | | `push_front` | `push_front` | `push_front` |
-| **`pop_front`** | | `pop_front` | `pop_front` | `pop_front` |
-| **`push_back`** | `push_back` | `push_back` | | `push_back` |
-| **`pop_back`** | `pop_back` | `pop_back` | | `pop_back` |
-| **`insert`** | `insert` | `insert` | `insert_after` | `insert` |
-| **`erase`** | `erase` | `erase` | `erase_after` | `erase` |
-| **`swap`** | `swap` | `swap` | `swap` | `swap` |
-| **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` |
-| **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` |
-
-### Search Trees
-
-![](./images/search_tree.svg)
-
-\* Amortized complexity.
-
-Member functions: `empty`, `size`, `max_size`, `clear`, `begin`, `end`, `cbegin`, `cend`, `rbegin`, `rend`, `crbegin`, `crend`, `lower_bound`, `upper_bound`, `equal_range`, `find`, `contains`, `count`, `insert`, `erase`, `swap`, `operator==`, `operator<=>`.
-
-### Addressable Heaps
-
-![](./images/addressable_heap.svg)
-
-\* Amortized complexity.
-
-Member functions: `empty`, `size`, `max_size`, `clear`, `top_handle`, `top`, `push`, `pop`, `merge`, `update`, `erase`, `swap`.
+<img src="./images/linear_structure.svg" width="100%" />
+<img src="./images/search_tree.svg" width="100%" />
+z<img src="./images/addressable_heap.svg" width="100%" />
 
 ## Algorithms
 
 Same as the [constrained algorithms](https://en.cppreference.com/w/cpp/header/algorithm#Function-like_entities_.28C.2B.2B20.29) in `<algorithm>`, but only meet the standard's minimum requirements.
 
-| **Group** | **Functions** |
+| **Category** | **Operations** |
 | -- | -- |
 | Non-modifying Sequence | `all_of`, `any_of`, `none_of`, `for_each`, `for_each_n`, `count`, `count_if`, `mismatch`, `find`, `find_if`, `find_if_not`, `find_end`, `find_first_of`, `adjacent_find`, `search`, `search_n`, `contains`, `contains_subrange`, `starts_with`, `ends_with` |
 | Fold | `fold_left`, `fold_left_first`, `fold_right`, `fold_right_last`, `fold_left_with_iter`, `fold_left_first_with_iter` |

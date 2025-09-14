@@ -4,6 +4,7 @@
 
 #grid(
     columns: 5,
+    grid.cell(colspan: 5)[*Search Tree*],
     grid.cell(rowspan: 2)[*Structure*],
     grid.cell(colspan: 4)[*Time Complexity*],
     [Iteration], [Insertion], [Deletion], [Search],

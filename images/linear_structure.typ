@@ -72,6 +72,7 @@
 #grid(
     columns: 12,
     column-gutter: (-1em, 0em, 0em, 0em, 1em, 0em, 0em, 1em, 0em, 0em, 1em),
+    grid.cell(colspan: 12)[*Linear Structure*],
     grid.cell(rowspan: 3)[*Structure*],
     grid.cell(rowspan: 3)[*Diagram*],
     grid.cell(colspan: 10)[*Time Complexity*],

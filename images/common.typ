@@ -1,7 +1,10 @@
 #let init = el => {
     set page(width: auto, height: auto, margin: 1em)
     set grid(align: center + horizon, inset: (left: 1em, right: 1em, top: .5em, bottom: .5em))
+
     el
+
+    align(right)[\* Amortized complexity.]
 }
 
 #let O1 = grid.cell(fill: lime.lighten(50%), $O(1)$)
