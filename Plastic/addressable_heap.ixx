@@ -10,83 +10,71 @@ namespace plastic {
 
     export template <class T, class Pr = std::less<T>>
     class binary_heap {
-        struct node {
-            std::size_t index;
-            T value;
-        };
-
-        Pr _pred;
-        std::vector<node*> _data;
-
-        void _set(std::size_t index, node* new_node) {
-            _data[index] = new_node;
-            _data[index]->index = index;
-        }
-
-        void _sift_up(std::size_t index) {
-            node* temp{ _data[index] };
-            while (index != 0) {
-                std::size_t parent{ index - 1 >> 1 };
-                if (!_pred(_data[parent]->value, temp->value)) {
-                    break;
-                }
-                _set(index, _data[parent]);
-                index = parent;
-            }
-            _set(index, temp);
-        }
-
-        void _sift_down(std::size_t index) {
-            node* temp{ _data[index] };
-            while (true) {
-                std::size_t child{ (index << 1) + 1 };
-                if (child >= size()) {
-                    break;
-                }
-                if (child + 1 < size() && _pred(_data[child]->value, _data[child + 1]->value)) {
-                    ++child;
-                }
-                if (!_pred(temp->value, _data[child]->value)) {
-                    break;
-                }
-                _set(index, _data[child]);
-                index = child;
-            }
-            _set(index, temp);
-        }
-
-        void _make_heap() {
-            std::size_t i{ size() >> 1 };
-            while (i-- != 0) {
-                _sift_down(i);
-            }
-        }
-
     public:
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
         using value_type = T;
-        using reference = T&;
+
+    private:
+        struct node {
+            size_type index;
+            value_type value;
+        };
+
+    public:
         using const_reference = const T&;
-        using comparator = Pr;
+
+        class reference {
+            friend class handle;
+
+            node* _ptr{};
+            binary_heap* _cont{};
+
+            reference(node* ptr, binary_heap* cont) :
+                _ptr{ ptr },
+                _cont{ cont } {}
+
+        public:
+            reference operator=(const value_type& other) {
+                bool is_greater{ _cont->_pred(_ptr->value, other) };
+                _ptr->value = other;
+                if (is_greater) {
+                    _cont->_sift_up(_ptr->index);
+                }
+                else {
+                    _cont->_sift_down(_ptr->index);
+                }
+                return *this;
+            }
+
+            operator const_reference() {
+                return _ptr->value;
+            }
+        };
+
+        using const_handle = const T*;
 
         class handle {
             friend binary_heap;
 
-            node* _ptr{};
-
-            handle(node* ptr) :
-                _ptr{ ptr } {}
-
         public:
             using value_type = T;
             using pointer = const T*;
-            using reference = const T&;
+            using reference = reference;
 
+        private:
+            node* _ptr{};
+            binary_heap* _cont{};
+
+            handle(node* ptr, binary_heap* cont) :
+                _ptr{ ptr },
+                _cont{ cont } {}
+
+        public:
             handle() = default;
 
             reference operator*() const {
-                return _ptr->value;
+                return { _ptr, _cont };
             }
 
             pointer operator->() const {
@@ -96,18 +84,72 @@ namespace plastic {
             friend bool operator==(handle left, handle right) {
                 return left._ptr == right._ptr;
             }
+
+            operator const_handle() {
+                return &_ptr->value;
+            }
         };
 
+        using comparator = Pr;
+
+    private:
+        Pr _pred;
+        std::vector<node*> _data;
+
+        void _set(size_type index, node* new_node) {
+            _data[index] = new_node;
+            _data[index]->index = index;
+        }
+
+        void _sift_up(size_type index) {
+            node* ptr{ _data[index] };
+            while (index != 0) {
+                size_type parent{ index - 1 >> 1 };
+                if (!_pred(_data[parent]->value, ptr->value)) {
+                    break;
+                }
+                _set(index, _data[parent]);
+                index = parent;
+            }
+            _set(index, ptr);
+        }
+
+        void _sift_down(size_type index) {
+            node* ptr{ _data[index] };
+            while (true) {
+                size_type child{ (index << 1) + 1 };
+                if (child >= size()) {
+                    break;
+                }
+                if (child + 1 < size() && _pred(_data[child]->value, _data[child + 1]->value)) {
+                    ++child;
+                }
+                if (!_pred(ptr->value, _data[child]->value)) {
+                    break;
+                }
+                _set(index, _data[child]);
+                index = child;
+            }
+            _set(index, ptr);
+        }
+
+        void _make_heap() {
+            size_type i{ size() >> 1 };
+            while (i-- != 0) {
+                _sift_down(i);
+            }
+        }
+
+    public:
         binary_heap() = default;
 
         template <std::input_iterator It>
         binary_heap(It first, It last) {
-            std::size_t index{};
+            size_type index{};
             while (first != last) {
                 _data.push_back(new node{ index++, *first });
                 ++first;
             }
-
             _make_heap();
         }
 
@@ -119,8 +161,8 @@ namespace plastic {
             _data(other.size()) {
 
             auto i{ _data.begin() };
-            for (node* j : other._data) {
-                *i++ = new node{ *j };
+            for (node* ptr : other._data) {
+                *i++ = new node{ *ptr };
             }
         }
 
@@ -165,33 +207,43 @@ namespace plastic {
         }
 
         void clear() {
-            for (node* i : _data) {
-                delete i;
+            for (node* ptr : _data) {
+                delete ptr;
             }
             _data.clear();
         }
 
-        handle top_handle() const {
+        handle apex() {
             assert(!empty());
-            return _data[0];
+            return { _data.front(), this };
+        }
+
+        const_handle apex() const {
+            assert(!empty());
+            return &_data.front()->value;
+        }
+
+        reference top() {
+            assert(!empty());
+            return *apex();
         }
 
         const_reference top() const {
             assert(!empty());
-            return _data[0]->value;
+            return _data.front()->value;
         }
 
         handle push(const_reference value) {
-            std::size_t index{ size() };
+            size_type index{ size() };
             auto new_node{ new node{ index, value } };
             _data.push_back(new_node);
             _sift_up(index);
-            return new_node;
+            return { new_node, this };
         }
 
         void pop() {
             assert(!empty());
-            delete _data[0];
+            delete _data.front();
             if (size() == 1) {
                 _data.pop_back();
             }
@@ -203,31 +255,18 @@ namespace plastic {
         }
 
         void merge(const binary_heap& other) {
-            _data.reserve(size() + other.size());
+            size_type index{ size() };
+            _data.resize(size() + other.size());
 
-            std::size_t index{ size() };
-            for (node* i : other._data) {
-                _data.push_back(new node{ index++, i->value });
+            auto i{ _data.begin() + index };
+            for (node* ptr : other._data) {
+                *i++ = new node{ index++, ptr->value };
             }
-
             _make_heap();
         }
 
-        void update(handle pos, const_reference new_value) {
-            std::size_t index{ pos._ptr->index };
-            assert(index < size());
-            bool is_greater{ _pred(pos._ptr->value, new_value) };
-            pos._ptr->value = new_value;
-            if (is_greater) {
-                _sift_up(index);
-            }
-            else {
-                _sift_down(index);
-            }
-        }
-
         void erase(handle pos) {
-            std::size_t index{ pos._ptr->index };
+            size_type index{ pos._ptr->index };
             assert(index < size());
             if (index == size() - 1) {
                 _data.pop_back();

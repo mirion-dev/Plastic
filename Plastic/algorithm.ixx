@@ -1101,7 +1101,7 @@ namespace plastic {
     void sift_up(It first, std::iter_difference_t<It> index, Pr pred, Pj proj) {
         auto value{ std::move(first[index]) };
         while (index != 0) {
-            auto parent{ (index - 1) >> 1 };
+            auto parent{ index - 1 >> 1 };
             if (!std::invoke(pred, std::invoke(proj, first[parent]), std::invoke(proj, value))) {
                 break;
             }

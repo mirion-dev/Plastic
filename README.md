@@ -16,7 +16,7 @@ The class designs are primarily based on the standard library, but not identical
 | **`capacity`** | `capacity` | `capacity` | | | | |
 | **`reserve`** | `reserve` | `reserve` | | | | |
 | **`before_begin`** | | | `before_begin` | | | |
-| **`begin`** | `begin` | `begin` | `begin` | `begin` | `begin` | `top_handle` |
+| **`begin`** | `begin` | `begin` | `begin` | `begin` | `begin` | `apex` |
 | **`end`** | `end` | `end` | `end` | `end` | `end` | |
 | **`cbefore_begin`** | | | `cbefore_begin` | | | |
 | **`cbegin`** | `cbegin` | `cbegin` | `cbegin` | `cbegin` | `cbegin` | |
@@ -27,7 +27,6 @@ The class designs are primarily based on the standard library, but not identical
 | **`crend`** | `crend` | `crend` | | `crend` | `crend` | |
 | **`front`** | `front` | `front` | `front` | `front` | | `top` |
 | **`back`** | `back` | `back` | | `back` | | |
-| **`update`** | | | | | | `update` |
 | **`data`** | `data` | `deque::data` | | | | |
 | **`operator[]`** | `operator[]` | `operator[]` | | | | |
 | **`contains`** | | | | | `contains` | |
@@ -36,11 +35,11 @@ The class designs are primarily based on the standard library, but not identical
 | **`lower_bound`** | | | | | `lower_bound` | |
 | **`upper_bound`** | | | | | `upper_bound` | |
 | **`equal_range`** | | | | | `equal_range` | |
-| **`push_front`** | | `push_front` | `push_front` | `push_front` | | `push` |
+| **`push_front`** | | `push_front` | `push_front` | `push_front` | | |
 | **`pop_front`** | | `pop_front` | `pop_front` | `pop_front` | | `pop` |
 | **`push_back`** | `push_back` | `push_back` | | `push_back` | | |
 | **`pop_back`** | `pop_back` | `pop_back` | | `pop_back` | | |
-| **`insert`** | `insert` | `insert` | `insert_after` | `insert` | `insert` | |
+| **`insert`** | `insert` | `insert` | `insert_after` | `insert` | `insert` | `push` |
 | **`erase`** | `erase` | `erase` | `erase_after` | `erase` | `erase` | `erase` |
 | **`swap`** | `swap` | `swap` | `swap` | `swap` | `swap` | `swap` |
 | **`merge`** | | | | | | `merge` |

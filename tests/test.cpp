@@ -156,13 +156,13 @@ void test_addressable_heap() {
     x.clear();
     ASSERT(format(x) == "[]");
 
+    ASSERT(*a.apex() == 0);
+    ASSERT(*b.apex() == 4);
+    ASSERT(*c.apex() == 3);
+
     ASSERT(a.top() == 0);
     ASSERT(b.top() == 4);
     ASSERT(c.top() == 3);
-
-    ASSERT(*a.top_handle() == 0);
-    ASSERT(*b.top_handle() == 4);
-    ASSERT(*c.top_handle() == 3);
 
     x = { 3, 2, 0, 1, 1 };
     ASSERT(format(x) == "[0, 1, 1, 2, 3]");
@@ -185,11 +185,11 @@ void test_addressable_heap() {
     x.merge({ 3, 1, 4 });
     ASSERT(format(x) == "[0, 0, 1, 1, 1, 1, 2, 3, 4]");
 
-    x.update(h1, 5);
+    *h1 = 5;
     ASSERT(format(x) == "[0, 1, 1, 1, 1, 2, 3, 4, 5]");
-    x.update(h2, 0);
+    *h2 = 0;
     ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 4, 5]");
-    x.update(x.top_handle(), 3);
+    *x.apex() = 3;
     ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 3, 4]");
 
     x.erase(h1);
