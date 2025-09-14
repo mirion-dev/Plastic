@@ -14,6 +14,8 @@ namespace plastic {
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
         using value_type = T;
+        using pointer = T*;
+        using const_pointer = const T*;
 
     private:
         struct node {
@@ -27,15 +29,19 @@ namespace plastic {
         class reference {
             friend class handle;
 
-            node* _ptr{};
-            binary_heap* _cont{};
+            node* _ptr;
+            binary_heap* _cont;
 
             reference(node* ptr, binary_heap* cont) :
                 _ptr{ ptr },
                 _cont{ cont } {}
 
         public:
-            reference operator=(const value_type& other) {
+            operator const_reference() const {
+                return _ptr->value;
+            }
+
+            reference operator=(const value_type& other) const {
                 bool is_greater{ _cont->_pred(_ptr->value, other) };
                 _ptr->value = other;
                 if (is_greater) {
@@ -46,23 +52,13 @@ namespace plastic {
                 }
                 return *this;
             }
-
-            operator const_reference() {
-                return _ptr->value;
-            }
         };
 
-        using const_handle = const T*;
+        using const_handle = const_pointer;
 
         class handle {
             friend binary_heap;
 
-        public:
-            using value_type = T;
-            using pointer = const T*;
-            using reference = reference;
-
-        private:
             node* _ptr{};
             binary_heap* _cont{};
 
@@ -73,20 +69,12 @@ namespace plastic {
         public:
             handle() = default;
 
+            operator const_handle() const {
+                return &_ptr->value;
+            }
+
             reference operator*() const {
                 return { _ptr, _cont };
-            }
-
-            pointer operator->() const {
-                return &_ptr->value;
-            }
-
-            friend bool operator==(handle left, handle right) {
-                return left._ptr == right._ptr;
-            }
-
-            operator const_handle() {
-                return &_ptr->value;
             }
         };
 
