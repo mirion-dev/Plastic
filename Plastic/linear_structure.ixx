@@ -1404,11 +1404,6 @@ namespace plastic {
         class iterator {
             friend forward_list;
 
-            node_base* _ptr{};
-
-            iterator(node_base* ptr) :
-                _ptr{ ptr } {}
-
         public:
             using difference_type = std::ptrdiff_t;
             using value_type = T;
@@ -1416,6 +1411,13 @@ namespace plastic {
             using reference = T&;
             using iterator_category = std::forward_iterator_tag;
 
+        private:
+            node_base* _ptr{};
+
+            iterator(node_base* ptr) :
+                _ptr{ ptr } {}
+
+        public:
             iterator() = default;
 
             reference operator*() const {
@@ -1682,11 +1684,6 @@ namespace plastic {
         class iterator {
             friend list;
 
-            node_base* _ptr{};
-
-            iterator(node_base* ptr) :
-                _ptr{ ptr } {}
-
         public:
             using difference_type = std::ptrdiff_t;
             using value_type = T;
@@ -1694,6 +1691,13 @@ namespace plastic {
             using reference = T&;
             using iterator_category = std::bidirectional_iterator_tag;
 
+        private:
+            node_base* _ptr{};
+
+            iterator(node_base* ptr) :
+                _ptr{ ptr } {}
+
+        public:
             iterator() = default;
 
             reference operator*() const {
