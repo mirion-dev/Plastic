@@ -190,11 +190,6 @@ namespace plastic {
         node_base* _head{ new node_base };
         size_type _size{};
 
-    private:
-        void _insert_rebalance(node_base* inserted) {}
-
-        void _erase_rebalance(node_base* replaced, node_base* erased) {}
-
     public:
         tree_base() = default;
 
@@ -518,6 +513,12 @@ namespace plastic {
 
         friend base;
 
+        using typename base::node_base;
+
+        void _insert_rebalance(node_base* inserted) {}
+
+        void _erase_rebalance(node_base* replaced, node_base* erased) {}
+
     public:
         using base::base;
         using typename base::value_type;
@@ -561,9 +562,9 @@ namespace plastic {
                 }
 
                 auto tree{ new node{ head, parent, value } };
-                tree->is_red = this->is_red;
                 tree->left = static_cast<node*>(this->left)->clone(head, tree);
                 tree->right = static_cast<node*>(this->right)->clone(head, tree);
+                tree->is_red = this->is_red;
                 return tree;
             }
         };
@@ -729,9 +730,9 @@ namespace plastic {
                 }
 
                 auto tree{ new node{ head, parent, value } };
-                tree->factor = this->factor;
                 tree->left = static_cast<node*>(this->left)->clone(head, tree);
                 tree->right = static_cast<node*>(this->right)->clone(head, tree);
+                tree->factor = this->factor;
                 return tree;
             }
         };
