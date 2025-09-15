@@ -9,19 +9,17 @@ import std;
 namespace plastic {
 
     template <class Nd>
-    struct basic_binary_search_tree_node {
+    struct node_base {
     private:
         Nd* _this() {
             return static_cast<Nd*>(this);
         }
 
     public:
-        Nd* parent;
-        Nd* left;
-        Nd* right;
-        unsigned char is_head; // `sizeof(bool)` is unspecified
-        // <other metadata>;
-        // T value;
+        Nd* parent{ _this() };
+        Nd* left{ _this() };
+        Nd* right{ _this() };
+        unsigned char is_head{ true };
 
         void free() {
             if (is_head) {
@@ -34,7 +32,7 @@ namespace plastic {
         }
 
         Nd* leftmost() {
-            auto i{ _this() };
+            Nd* i{ _this() };
             while (!i->left->is_head) {
                 i = i->left;
             }
@@ -42,7 +40,7 @@ namespace plastic {
         }
 
         Nd* rightmost() {
-            auto i{ _this() };
+            Nd* i{ _this() };
             while (!i->right->is_head) {
                 i = i->right;
             }
@@ -98,14 +96,14 @@ namespace plastic {
         }
     };
 
-    template <class Nd, class Pr>
-    class basic_binary_search_tree {
-        using T = decltype(Nd::value);
+    template <class Tr>
+    class tree_base {
+        using T = Tr::value_type;
+        using Pr = Tr::comparator;
 
     protected:
-        Pr _pred;
-        Nd* _head; // `parent` is the root, `left` is the maximum and `right` is the minimum
-        std::size_t _size;
+        using node_base = Tr::node_base;
+        using node = Tr::node;
 
     public:
         using difference_type = std::ptrdiff_t;
@@ -113,14 +111,13 @@ namespace plastic {
         using value_type = T;
         using reference = T&;
         using const_reference = const T&;
-        using comparator = Pr;
 
         class iterator {
-            friend basic_binary_search_tree;
+            friend tree_base;
 
-            Nd* _ptr{};
+            node_base* _ptr{};
 
-            iterator(Nd* ptr) :
+            iterator(node_base* ptr) :
                 _ptr{ ptr } {}
 
         public:
@@ -133,11 +130,11 @@ namespace plastic {
             iterator() = default;
 
             reference operator*() const {
-                return _ptr->value;
+                return static_cast<node*>(_ptr)->value;
             }
 
             pointer operator->() const {
-                return &_ptr->value;
+                return &static_cast<node*>(_ptr)->value;
             }
 
             friend bool operator==(iterator left, iterator right) {
@@ -149,7 +146,7 @@ namespace plastic {
                     _ptr = _ptr->right->leftmost();
                 }
                 else {
-                    Nd* old_ptr;
+                    node_base* old_ptr;
                     do {
                         old_ptr = std::exchange(_ptr, _ptr->parent);
                     } while (!_ptr->is_head && _ptr->right == old_ptr);
@@ -168,7 +165,7 @@ namespace plastic {
                     _ptr = _ptr->left->rightmost();
                 }
                 else {
-                    Nd* old_ptr;
+                    node_base* old_ptr;
                     do {
                         old_ptr = std::exchange(_ptr, _ptr->parent);
                     } while (!_ptr->is_head && _ptr->left == old_ptr);
@@ -186,53 +183,58 @@ namespace plastic {
         using const_iterator = iterator;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = reverse_iterator;
+        using comparator = Pr;
 
-        basic_binary_search_tree() :
-            _head{ new Nd },
-            _size{} {
+    protected:
+        comparator _pred;
+        node_base* _head{ new node_base };
+        size_type _size{};
 
-            _head->construct_head();
-        }
+    private:
+        void _insert_rebalance(node_base* inserted) {}
 
-        basic_binary_search_tree(const basic_binary_search_tree& other) :
-            basic_binary_search_tree() {
+        void _erase_rebalance(node_base* replaced, node_base* erased) {}
 
+    public:
+        tree_base() = default;
+
+        tree_base(const tree_base& other) {
             _pred = other._pred;
             _size = other._size;
 
-            Nd* tree{ other._head->parent->clone(_head, _head) };
+            node_base* tree{ static_cast<node*>(other._head->parent)->clone(_head, _head) };
             _head->parent = tree;
             _head->left = tree->rightmost();
             _head->right = tree->leftmost();
         }
 
-        basic_binary_search_tree(basic_binary_search_tree&& other) {
+        tree_base(tree_base&& other) {
             swap(other);
         }
 
-        ~basic_binary_search_tree() {
+        ~tree_base() {
             clear();
             delete _head;
         }
 
-        basic_binary_search_tree& operator=(const basic_binary_search_tree& other) {
-            basic_binary_search_tree temp(other);
+        tree_base& operator=(const tree_base& other) {
+            tree_base temp(other);
             swap(temp);
             return *this;
         }
 
-        basic_binary_search_tree& operator=(basic_binary_search_tree&& other) {
+        tree_base& operator=(tree_base&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(basic_binary_search_tree& other) {
+        void swap(tree_base& other) {
             std::swap(_pred, other._pred);
             std::swap(_head, other._head);
             std::swap(_size, other._size);
         }
 
-        friend void swap(basic_binary_search_tree& left, basic_binary_search_tree& right) {
+        friend void swap(tree_base& left, tree_base& right) {
             left.swap(right);
         }
 
@@ -287,9 +289,9 @@ namespace plastic {
         }
 
         const_iterator lower_bound(const_reference value) const {
-            Nd *bound{ _head }, *i{ _head->parent };
+            node_base *bound{ _head }, *i{ _head->parent };
             while (!i->is_head) {
-                if (!_pred(i->value, value)) {
+                if (!_pred(static_cast<node*>(i)->value, value)) {
                     bound = i;
                     i = i->left;
                 }
@@ -301,9 +303,9 @@ namespace plastic {
         }
 
         const_iterator upper_bound(const_reference value) const {
-            Nd *bound{ _head }, *i{ _head->parent };
+            node_base *bound{ _head }, *i{ _head->parent };
             while (!i->is_head) {
-                if (_pred(value, i->value)) {
+                if (_pred(value, static_cast<node*>(i)->value)) {
                     bound = i;
                     i = i->left;
                 }
@@ -319,13 +321,13 @@ namespace plastic {
         }
 
         const_iterator find(const_reference value) const {
-            Nd* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !_pred(bound->value, value) ? bound : _head;
+            node_base* bound{ lower_bound(value)._ptr };
+            return !bound->is_head && !_pred(static_cast<node*>(bound)->value, value) ? bound : _head;
         }
 
         bool contains(const_reference value) const {
-            Nd* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !_pred(bound->value, value);
+            node_base* bound{ lower_bound(value)._ptr };
+            return !bound->is_head && !_pred(static_cast<node*>(bound)->value, value);
         }
 
         size_type count(const_reference value) const {
@@ -334,17 +336,15 @@ namespace plastic {
         }
 
         iterator insert(this auto&& self, const_reference value) {
-            Nd *parent{ self._head }, *i{ self._head->parent };
+            node_base *parent{ self._head }, *i{ self._head->parent };
             bool is_left{};
             while (!i->is_head) {
                 parent = i;
-                is_left = self._pred(value, i->value);
+                is_left = self._pred(value, static_cast<node*>(i)->value);
                 i = is_left ? i->left : i->right;
             }
 
-            auto new_node{ new Nd };
-            new_node->construct(self._head, parent, value);
-
+            auto new_node{ new node{ self._head, parent, value } };
             if (parent->is_head) {
                 parent->parent = new_node;
             }
@@ -374,18 +374,18 @@ namespace plastic {
             }
         }
 
-        void insert(this auto&& self, std::initializer_list<T> list) {
+        void insert(this auto&& self, std::initializer_list<value_type> list) {
             self.insert(list.begin(), list.end());
         }
 
         iterator erase(this auto&& self, const_iterator pos) {
-            Nd* erased{ pos++._ptr };
+            node_base* erased{ pos++._ptr };
             assert(erased != self._head);
 
-            Nd* parent{ erased->parent };
-            Nd* left{ erased->left };
-            Nd* right{ erased->right };
-            Nd* replaced;
+            node_base* parent{ erased->parent };
+            node_base* left{ erased->left };
+            node_base* right{ erased->right };
+            node_base* replaced;
             if (left->is_head || right->is_head) {
                 replaced = left->is_head ? right : left;
 
@@ -411,8 +411,8 @@ namespace plastic {
             }
             else {
                 replaced = pos._ptr;
-                Nd* replaced_parent{ replaced->parent };
-                Nd* replaced_right{ replaced->right };
+                node_base* replaced_parent{ replaced->parent };
+                node_base* replaced_right{ replaced->right };
 
                 replaced->left = left;
                 left->parent = replaced;
@@ -453,7 +453,7 @@ namespace plastic {
         }
 
         size_type erase(this auto&& self, const_reference value) {
-            std::size_t count{};
+            size_type count{};
             auto [first, last]{ self.equal_range(value) };
             while (first != last) {
                 self.erase(first++);
@@ -462,114 +462,119 @@ namespace plastic {
             return count;
         }
 
-        friend bool operator==(const basic_binary_search_tree& left, const basic_binary_search_tree& right) {
+        friend bool operator==(const tree_base& left, const tree_base& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const basic_binary_search_tree& left, const basic_binary_search_tree& right) {
+        friend auto operator<=>(const tree_base& left, const tree_base& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
 
-    template <class T>
-    struct binary_search_tree_node : basic_binary_search_tree_node<binary_search_tree_node<T>> {
-    private:
-        using Nd = binary_search_tree_node;
+    template <class T, class Pr>
+    struct binary_search_tree_traits {
+        using value_type = T;
+        using comparator = Pr;
 
-    public:
-        T value;
+        struct node_base : plastic::node_base<node_base> {};
 
-        Nd* clone(Nd* head, Nd* parent) {
-            if (this->is_head) {
-                return head;
+        struct node : node_base {
+            value_type value;
+
+            node() = default;
+
+            node(node_base* head, node_base* parent, const value_type& value) :
+                value{ value } {
+
+                this->parent = parent;
+                this->left = this->right = head;
+                this->is_head = false;
             }
 
-            auto tree{ new Nd };
-            new(tree) Nd{ parent, this->left->clone(head, tree), this->right->clone(head, tree), false, value };
-            return tree;
-        }
+            node_base* clone(node_base* head, node_base* parent) {
+                if (this->is_head) {
+                    return head;
+                }
 
-        void construct_head() {
-            this->parent = this->left = this->right = this;
-            this->is_head = true;
-        }
-
-        void construct(Nd* head, Nd* parent, const T& value) {
-            new(this) Nd{ parent, head, head, false, value };
-        }
+                auto tree{ new node{ head, parent, value } };
+                tree->left = static_cast<node*>(this->left)->clone(head, tree);
+                tree->right = static_cast<node*>(this->right)->clone(head, tree);
+                return tree;
+            }
+        };
     };
 
     export template <class T, class Pr = std::less<T>>
-    class binary_search_tree : public basic_binary_search_tree<binary_search_tree_node<T>, Pr> {
-        using Nd = binary_search_tree_node<T>;
-        using base = basic_binary_search_tree<Nd, Pr>;
+    class binary_search_tree : public tree_base<binary_search_tree_traits<T, Pr>> {
+        using base = tree_base<binary_search_tree_traits<T, Pr>>;
 
         friend base;
 
-        static void _insert_rebalance(Nd* inserted) {}
-
-        static void _erase_rebalance(Nd* replaced, Nd* erased) {}
-
     public:
         using base::base;
+        using typename base::value_type;
 
         template <std::input_iterator It>
-        binary_search_tree(It first, It last) :
-            binary_search_tree() {
-
+        binary_search_tree(It first, It last) {
             this->insert(first, last);
         }
 
-        binary_search_tree(std::initializer_list<T> list) :
+        binary_search_tree(std::initializer_list<value_type> list) :
             binary_search_tree(list.begin(), list.end()) {}
     };
 
     template <class It>
     binary_search_tree(It, It) -> binary_search_tree<std::iter_value_t<It>>;
 
-    template <class T>
-    struct red_black_tree_node : basic_binary_search_tree_node<red_black_tree_node<T>> {
-    private:
-        using Nd = red_black_tree_node;
+    template <class T, class Pr>
+    struct red_black_tree_traits {
+        using value_type = T;
+        using comparator = Pr;
 
-    public:
-        unsigned char is_red;
-        T value;
+        struct node_base : plastic::node_base<node_base> {
+            unsigned char is_red{ false };
+        };
 
-        Nd* clone(Nd* head, Nd* parent) {
-            if (this->is_head) {
-                return head;
+        struct node : node_base {
+            value_type value;
+
+            node(node_base* head, node_base* parent, const value_type& value) :
+                value{ value } {
+
+                this->parent = parent;
+                this->left = this->right = head;
+                this->is_head = false;
+                this->is_red = true;
             }
 
-            auto tree{ new Nd };
-            new(tree) Nd{ parent, this->left->clone(head, tree), this->right->clone(head, tree), false, is_red, value };
-            return tree;
-        }
+            node_base* clone(node_base* head, node_base* parent) {
+                if (this->is_head) {
+                    return head;
+                }
 
-        void construct_head() {
-            this->parent = this->left = this->right = this;
-            this->is_head = true;
-            this->is_red = false;
-        }
-
-        void construct(Nd* head, Nd* parent, const T& value) {
-            new(this) Nd{ parent, head, head, false, true, value };
-        }
+                auto tree{ new node{ head, parent, value } };
+                tree->is_red = this->is_red;
+                tree->left = static_cast<node*>(this->left)->clone(head, tree);
+                tree->right = static_cast<node*>(this->right)->clone(head, tree);
+                return tree;
+            }
+        };
     };
 
     export template <class T, class Pr = std::less<T>>
-    class red_black_tree : public basic_binary_search_tree<red_black_tree_node<T>, Pr> {
-        using Nd = red_black_tree_node<T>;
-        using base = basic_binary_search_tree<Nd, Pr>;
+    class red_black_tree : public tree_base<red_black_tree_traits<T, Pr>> {
+        using base = tree_base<red_black_tree_traits<T, Pr>>;
 
         friend base;
 
-        void _insert_rebalance(Nd* inserted) {
-            Nd* i{ inserted };
+        using typename base::node_base;
+
+        void _insert_rebalance(node_base* inserted) {
+            node_base* i{ inserted };
             while (i->parent->is_red) {
-                Nd* parent{ i->parent };
-                Nd* grandparent{ parent->parent };
-                Nd* uncle;
+                node_base* parent{ i->parent };
+                node_base* grandparent{ parent->parent };
+                node_base* uncle;
                 if (parent == grandparent->left) {
                     uncle = grandparent->right;
                     if (!uncle->is_red) {
@@ -607,17 +612,17 @@ namespace plastic {
             this->_head->parent->is_red = false;
         }
 
-        void _erase_rebalance(Nd* replaced, Nd* erased) {
+        void _erase_rebalance(node_base* replaced, node_base* erased) {
             std::swap(replaced->is_red, erased->is_red);
 
-            Nd* i{ replaced };
+            node_base* i{ replaced };
             if (i->is_red) {
                 return;
             }
 
             while (!i->parent->is_head && !i->is_red) {
-                Nd* parent{ i->parent };
-                Nd* brother;
+                node_base* parent{ i->parent };
+                node_base* brother;
                 if (i == parent->left) {
                     brother = parent->right;
                     if (brother->is_red) {
@@ -676,77 +681,80 @@ namespace plastic {
 
     public:
         using base::base;
+        using typename base::value_type;
 
         template <std::input_iterator It>
-        red_black_tree(It first, It last) :
-            red_black_tree() {
-
+        red_black_tree(It first, It last) {
             this->insert(first, last);
         }
 
-        red_black_tree(std::initializer_list<T> list) :
+        red_black_tree(std::initializer_list<value_type> list) :
             red_black_tree(list.begin(), list.end()) {}
     };
 
     template <class It>
     red_black_tree(It, It) -> red_black_tree<std::iter_value_t<It>>;
 
-    template <class T>
-    struct avl_tree_node : basic_binary_search_tree_node<avl_tree_node<T>> {
-    private:
-        using Nd = avl_tree_node;
+    template <class T, class Pr>
+    struct avl_tree_node_traits {
+        using value_type = T;
+        using comparator = Pr;
 
-    public:
-        signed char factor;
-        T value;
+        struct node_base : plastic::node_base<node_base> {
+            signed char factor{};
+        };
 
-        Nd* clone(Nd* head, Nd* parent) {
-            if (this->is_head) {
-                return head;
+        struct node : node_base {
+            value_type value;
+
+            node(node_base* head, node_base* parent, const value_type& value) :
+                value{ value } {
+
+                this->parent = parent;
+                this->left = this->right = head;
+                this->is_head = false;
             }
 
-            auto tree{ new Nd };
-            new(tree) Nd{ parent, this->left->clone(head, tree), this->right->clone(head, tree), false, factor, value };
-            return tree;
-        }
+            node_base* clone(node_base* head, node_base* parent) {
+                if (this->is_head) {
+                    return head;
+                }
 
-        void construct_head() {
-            this->parent = this->left = this->right = this;
-            this->is_head = true;
-            this->factor = 0;
-        }
-
-        void construct(Nd* head, Nd* parent, const T& value) {
-            new(this) Nd{ parent, head, head, false, 0, value };
-        }
+                auto tree{ new node{ head, parent, value } };
+                tree->factor = this->factor;
+                tree->left = static_cast<node*>(this->left)->clone(head, tree);
+                tree->right = static_cast<node*>(this->right)->clone(head, tree);
+                return tree;
+            }
+        };
     };
 
     export template <class T, class Pr = std::less<T>>
-    class avl_tree : public basic_binary_search_tree<avl_tree_node<T>, Pr> {
-        using Nd = avl_tree_node<T>;
-        using base = basic_binary_search_tree<Nd, Pr>;
+    class avl_tree : public tree_base<avl_tree_node_traits<T, Pr>> {
+        using base = tree_base<avl_tree_node_traits<T, Pr>>;
 
         friend base;
 
-        void _insert_rebalance(Nd* inserted) {
+        using typename base::node_base;
+
+        void _insert_rebalance(node_base* inserted) {
             // TODO
         }
 
-        void _erase_rebalance(Nd* replaced, Nd* erased) {
+        void _erase_rebalance(node_base* replaced, node_base* erased) {
             // TODO
         }
 
     public:
         using base::base;
+        using typename base::value_type;
 
         template <std::input_iterator It>
-        avl_tree(It first, It last) :
-            avl_tree() {
-
+        avl_tree(It first, It last) {
             this->insert(first, last);
         }
 
-        avl_tree(std::initializer_list<T> list) :
+        avl_tree(std::initializer_list<value_type> list) :
             avl_tree(list.begin(), list.end()) {}
     };
 
