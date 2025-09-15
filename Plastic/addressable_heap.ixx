@@ -81,7 +81,7 @@ namespace plastic {
         using comparator = Pr;
 
     private:
-        Pr _pred;
+        comparator _pred;
         std::vector<node*> _data;
 
         void _set(size_type index, node* new_node) {
@@ -141,7 +141,7 @@ namespace plastic {
             _make_heap();
         }
 
-        binary_heap(std::initializer_list<T> list) :
+        binary_heap(std::initializer_list<value_type> list) :
             binary_heap(list.begin(), list.end()) {}
 
         binary_heap(const binary_heap& other) :

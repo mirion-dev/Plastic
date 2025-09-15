@@ -75,7 +75,7 @@ namespace plastic {
         inplace_vector(It first, It last) :
             _last{ std::uninitialized_copy(first, last, _begin()) } {}
 
-        inplace_vector(std::initializer_list<T> list) {
+        inplace_vector(std::initializer_list<value_type> list) {
             assert(list.size() <= N);
             _last = std::uninitialized_copy(list.begin(), list.end(), _begin());
         }
@@ -265,7 +265,7 @@ namespace plastic {
             return i;
         }
 
-        iterator insert(const_iterator pos, std::initializer_list<T> list) {
+        iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
             return insert(pos, list.begin(), list.end());
         }
 
@@ -367,7 +367,7 @@ namespace plastic {
             std::copy(first, last, std::back_inserter(*this));
         }
 
-        vector(std::initializer_list<T> list) :
+        vector(std::initializer_list<value_type> list) :
             vector(list.begin(), list.end()) {}
 
         vector(const vector& other) :
@@ -560,7 +560,7 @@ namespace plastic {
             return _begin + pos_offset;
         }
 
-        iterator insert(const_iterator pos, std::initializer_list<T> list) {
+        iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
             return insert(pos, list.begin(), list.end());
         }
 
@@ -774,7 +774,7 @@ namespace plastic {
         inplace_deque(It first, It last) :
             _last{ std::uninitialized_copy(first, last, _begin()) } {}
 
-        inplace_deque(std::initializer_list<T> list) {
+        inplace_deque(std::initializer_list<value_type> list) {
             assert(list.size() <= N);
             _last = std::uninitialized_copy(list.begin(), list.end(), _begin());
         }
@@ -1002,7 +1002,7 @@ namespace plastic {
             return i;
         }
 
-        iterator insert(const_iterator pos, std::initializer_list<T> list) {
+        iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
             return insert(pos, list.begin(), list.end());
         }
 
@@ -1145,7 +1145,7 @@ namespace plastic {
             std::copy(first, last, std::back_inserter(*this));
         }
 
-        deque(std::initializer_list<T> list) :
+        deque(std::initializer_list<value_type> list) :
             deque(list.begin(), list.end()) {}
 
         deque(const deque& other) :
@@ -1351,7 +1351,7 @@ namespace plastic {
             return _first + pos_offset;
         }
 
-        iterator insert(const_iterator pos, std::initializer_list<T> list) {
+        iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
             return insert(pos, list.begin(), list.end());
         }
 
@@ -1495,7 +1495,7 @@ namespace plastic {
             insert_after(before_begin(), first, last);
         }
 
-        forward_list(std::initializer_list<T> list) :
+        forward_list(std::initializer_list<value_type> list) :
             forward_list(list.begin(), list.end()) {}
 
         forward_list(const forward_list& other) :
@@ -1630,7 +1630,7 @@ namespace plastic {
             return i;
         }
 
-        iterator insert_after(const_iterator pos, std::initializer_list<T> list) {
+        iterator insert_after(const_iterator pos, std::initializer_list<value_type> list) {
             return insert_after(pos, list.begin(), list.end());
         }
 
@@ -1794,7 +1794,7 @@ namespace plastic {
             insert(end(), first, last);
         }
 
-        list(std::initializer_list<T> list) :
+        list(std::initializer_list<value_type> list) :
             list(list.begin(), list.end()) {}
 
         list(const list& other) :
@@ -1962,7 +1962,7 @@ namespace plastic {
             return prev->next;
         }
 
-        iterator insert(const_iterator pos, std::initializer_list<T> list) {
+        iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
             return insert(pos, list.begin(), list.end());
         }
 

@@ -821,6 +821,7 @@ public:
     }
 
     TEST_METHOD(red_black_tree) {
+        ASSERT(false);
         test_search_tree<plastic::red_black_tree<int>>();
     }
 
