@@ -198,14 +198,16 @@ namespace plastic {
     public:
         tree_base() = default;
 
-        tree_base(const tree_base& other) {
-            _pred = other._pred;
-            _size = other._size;
+        tree_base(const tree_base& other) :
+            _pred{ other._pred },
+            _size{ other._size } {
 
-            node_base* tree{ static_cast<node*>(other._head->parent)->clone(_head, _head) };
-            _head->parent = tree;
-            _head->left = tree->rightmost();
-            _head->right = tree->leftmost();
+            if (_size != 0) {
+                node_base* tree{ static_cast<node*>(other._head->parent)->clone(_head, _head) };
+                _head->parent = tree;
+                _head->left = tree->rightmost();
+                _head->right = tree->leftmost();
+            }
         }
 
         tree_base(tree_base&& other) {
