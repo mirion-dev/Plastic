@@ -290,6 +290,14 @@ namespace plastic {
             return rend();
         }
 
+        const_reference front() const {
+            return *begin();
+        }
+
+        const_reference back() const {
+            return *--end();
+        }
+
         const_iterator lower_bound(const_reference value) const {
             node_base *bound{ _head }, *i{ _head->parent };
             while (!i->is_head) {
@@ -482,8 +490,6 @@ namespace plastic {
 
         struct node : node_base {
             value_type value;
-
-            node() = default;
 
             node(node_base* head, node_base* parent, const value_type& value) :
                 value{ value } {

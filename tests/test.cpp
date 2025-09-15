@@ -71,6 +71,14 @@ void test_search_tree() {
     x.clear();
     ASSERT(format(x) == "[]");
 
+    ASSERT(a.front() == 0);
+    ASSERT(b.front() == 4);
+    ASSERT(c.front() == 1);
+
+    ASSERT(a.back() == 0);
+    ASSERT(b.back() == 4);
+    ASSERT(c.back() == 3);
+
     x = { 1, 2, 2, 2, 3 };
     ASSERT(std::distance(x.begin(), x.lower_bound(1)) == 0);
     ASSERT(std::distance(x.begin(), x.lower_bound(2)) == 1);

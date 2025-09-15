@@ -25,8 +25,8 @@ The class designs are primarily based on the standard library, but not identical
 | **`rend`** | `rend` | `rend` | | `rend` | `rend` | |
 | **`crbegin`** | `crbegin` | `crbegin` | | `crbegin` | `crbegin` | |
 | **`crend`** | `crend` | `crend` | | `crend` | `crend` | |
-| **`front`** | `front` | `front` | `front` | `front` | | `top` |
-| **`back`** | `back` | `back` | | `back` | | |
+| **`front`** | `front` | `front` | `front` | `front` | `front` | `top` |
+| **`back`** | `back` | `back` | | `back` | `back` | |
 | **`data`** | `data` | `deque::data` | | | | |
 | **`operator[]`** | `operator[]` | `operator[]` | | | | |
 | **`contains`** | | | | | `contains` | |
