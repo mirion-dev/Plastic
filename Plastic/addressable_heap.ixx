@@ -218,7 +218,7 @@ namespace plastic {
 
         const_reference top() const {
             assert(!empty());
-            return _data.front()->value;
+            return *apex();
         }
 
         handle push(const_reference value) {
