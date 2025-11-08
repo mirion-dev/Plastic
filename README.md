@@ -46,9 +46,7 @@ The class designs are primarily based on the standard library, but not identical
 | **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` | `operator==` | |
 | **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | |
 
-![](./images/linear_structure.svg)
-![](./images/search_tree.svg)
-![](./images/addressable_heap.svg)
+![](./images/complexity.svg)
 
 ## Algorithms
 
