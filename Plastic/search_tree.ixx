@@ -111,14 +111,10 @@ namespace plastic {
                 value{ value } {}
 
             node_base* clone(node_base* head, node_base* parent) {
-                if (this->is_head) {
-                    return head;
-                }
-
                 auto tree{ new node{ *this } };
                 tree->parent = parent;
-                tree->left = static_cast<node*>(this->left)->clone(head, tree);
-                tree->right = static_cast<node*>(this->right)->clone(head, tree);
+                tree->left = tree->left->is_head ? head : static_cast<node*>(this->left)->clone(head, tree);
+                tree->right = tree->right->is_head ? head : static_cast<node*>(this->right)->clone(head, tree);
                 return tree;
             }
         };
