@@ -34,11 +34,11 @@ namespace plastic {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     private:
-        value_type _data[N];
-        pointer _last{ _data };
+        alignas(value_type) unsigned char _data[sizeof(value_type) * N];
+        pointer _last{ _begin() };
 
         pointer _begin() const {
-            return const_cast<pointer>(_data);
+            return std::launder(reinterpret_cast<pointer>(const_cast<unsigned char*>(_data)));
         }
 
         pointer _end() const {
@@ -650,10 +650,10 @@ namespace plastic {
             }
 
             iterator& operator+=(difference_type diff) {
-                if (_cont->_data + N - _ptr < diff) {
+                if (_cont->_begin() + N - _ptr < diff) {
                     _ptr += diff - N - 1;
                 }
-                else if (_ptr - _cont->_data < -diff) {
+                else if (_ptr - _cont->_begin() < -diff) {
                     _ptr += diff + N + 1;
                 }
                 else {
@@ -683,8 +683,8 @@ namespace plastic {
             }
 
             iterator& operator++() {
-                if (_ptr == _cont->_data + N) {
-                    _ptr = _cont->_data;
+                if (_ptr == _cont->_begin() + N) {
+                    _ptr = _cont->_begin();
                 }
                 else {
                     ++_ptr;
@@ -699,8 +699,8 @@ namespace plastic {
             }
 
             iterator& operator--() {
-                if (_ptr == _cont->_data) {
-                    _ptr = _cont->_data + N;
+                if (_ptr == _cont->_begin()) {
+                    _ptr = _cont->_begin() + N;
                 }
                 else {
                     --_ptr;
@@ -720,12 +720,12 @@ namespace plastic {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     private:
-        value_type _data[N + 1];
-        pointer _first{ _data };
-        pointer _last{ _data };
+        alignas(value_type) unsigned char _data[sizeof(value_type) * (N + 1)];
+        pointer _first{ _begin() };
+        pointer _last{ _begin() };
 
         pointer _begin() const {
-            return const_cast<pointer>(_data);
+            return std::launder(reinterpret_cast<pointer>(const_cast<unsigned char*>(_data)));
         }
 
         pointer _end() const {
