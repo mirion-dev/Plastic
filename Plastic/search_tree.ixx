@@ -9,7 +9,7 @@ import std;
 namespace plastic {
 
     template <class Nd>
-    struct node_base {
+    struct node_base_factory {
     private:
         Nd* _this() {
             return static_cast<Nd*>(this);
@@ -97,7 +97,7 @@ namespace plastic {
     };
 
     template <class Tr>
-    class tree_base {
+    class tree_factory {
         using T = Tr::value_type;
         using Pr = Tr::comparator;
 
@@ -113,7 +113,7 @@ namespace plastic {
         using const_reference = const T&;
 
         class iterator {
-            friend tree_base;
+            friend tree_factory;
 
             node_base* _ptr{};
 
@@ -191,9 +191,9 @@ namespace plastic {
         size_type _size{};
 
     public:
-        tree_base() = default;
+        tree_factory() = default;
 
-        tree_base(const tree_base& other) :
+        tree_factory(const tree_factory& other) :
             _pred{ other._pred },
             _size{ other._size } {
 
@@ -205,33 +205,33 @@ namespace plastic {
             }
         }
 
-        tree_base(tree_base&& other) {
+        tree_factory(tree_factory&& other) {
             swap(other);
         }
 
-        ~tree_base() {
+        ~tree_factory() {
             clear();
             delete _head;
         }
 
-        tree_base& operator=(const tree_base& other) {
-            tree_base temp(other);
+        tree_factory& operator=(const tree_factory& other) {
+            tree_factory temp(other);
             swap(temp);
             return *this;
         }
 
-        tree_base& operator=(tree_base&& other) {
+        tree_factory& operator=(tree_factory&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(tree_base& other) {
+        void swap(tree_factory& other) {
             std::swap(_pred, other._pred);
             std::swap(_head, other._head);
             std::swap(_size, other._size);
         }
 
-        friend void swap(tree_base& left, tree_base& right) {
+        friend void swap(tree_factory& left, tree_factory& right) {
             left.swap(right);
         }
 
@@ -467,11 +467,11 @@ namespace plastic {
             return count;
         }
 
-        friend bool operator==(const tree_base& left, const tree_base& right) {
+        friend bool operator==(const tree_factory& left, const tree_factory& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const tree_base& left, const tree_base& right) {
+        friend auto operator<=>(const tree_factory& left, const tree_factory& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
@@ -481,7 +481,7 @@ namespace plastic {
         using value_type = T;
         using comparator = Pr;
 
-        struct node_base : plastic::node_base<node_base> {};
+        struct node_base : node_base_factory<node_base> {};
 
         struct node : node_base {
             value_type value;
@@ -508,8 +508,8 @@ namespace plastic {
     };
 
     export template <class T, class Pr = std::less<T>>
-    class binary_search_tree : public tree_base<binary_search_tree_traits<T, Pr>> {
-        using base = tree_base<binary_search_tree_traits<T, Pr>>;
+    class binary_search_tree : public tree_factory<binary_search_tree_traits<T, Pr>> {
+        using base = tree_factory<binary_search_tree_traits<T, Pr>>;
 
         friend base;
 
@@ -540,7 +540,7 @@ namespace plastic {
         using value_type = T;
         using comparator = Pr;
 
-        struct node_base : plastic::node_base<node_base> {
+        struct node_base : node_base_factory<node_base> {
             unsigned char is_red{ false };
         };
 
@@ -571,8 +571,8 @@ namespace plastic {
     };
 
     export template <class T, class Pr = std::less<T>>
-    class red_black_tree : public tree_base<red_black_tree_traits<T, Pr>> {
-        using base = tree_base<red_black_tree_traits<T, Pr>>;
+    class red_black_tree : public tree_factory<red_black_tree_traits<T, Pr>> {
+        using base = tree_factory<red_black_tree_traits<T, Pr>>;
 
         friend base;
 
@@ -705,11 +705,11 @@ namespace plastic {
     red_black_tree(It, It) -> red_black_tree<std::iter_value_t<It>>;
 
     template <class T, class Pr>
-    struct avl_tree_node_traits {
+    struct avl_tree_traits {
         using value_type = T;
         using comparator = Pr;
 
-        struct node_base : plastic::node_base<node_base> {
+        struct node_base : node_base_factory<node_base> {
             signed char factor{};
         };
 
@@ -739,8 +739,8 @@ namespace plastic {
     };
 
     export template <class T, class Pr = std::less<T>>
-    class avl_tree : public tree_base<avl_tree_node_traits<T, Pr>> {
-        using base = tree_base<avl_tree_node_traits<T, Pr>>;
+    class avl_tree : public tree_factory<avl_tree_traits<T, Pr>> {
+        using base = tree_factory<avl_tree_traits<T, Pr>>;
 
         friend base;
 
