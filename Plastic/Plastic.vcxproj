@@ -159,7 +159,11 @@
     <Natvis Include="debugger\plastic.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\tests\test.cpp" />
+    <ClCompile Include="..\tests\addressable_heap.cpp" />
+    <ClCompile Include="..\tests\algorithm.cpp" />
+    <ClCompile Include="..\tests\linear_structure.cpp" />
+    <ClCompile Include="..\tests\search_tree.cpp" />
+    <ClCompile Include="..\tests\utils.ixx" />
     <ClCompile Include="addressable_heap.ixx" />
     <ClCompile Include="algorithm.ixx" />
     <ClCompile Include="linear_structure.ixx" />

@@ -3,12 +3,31 @@
   <ItemGroup>
     <ClCompile Include="algorithm.ixx" />
     <ClCompile Include="plastic.ixx" />
-    <ClCompile Include="..\tests\test.cpp" />
     <ClCompile Include="linear_structure.ixx" />
     <ClCompile Include="search_tree.ixx" />
     <ClCompile Include="addressable_heap.ixx" />
+    <ClCompile Include="..\tests\algorithm.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tests\utils.ixx">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tests\linear_structure.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tests\search_tree.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tests\addressable_heap.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="debugger\plastic.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="tests">
+      <UniqueIdentifier>{af17aaec-7145-47e4-9fb9-e461a96d43d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
