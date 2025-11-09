@@ -77,7 +77,7 @@
     line((0, 0), (0, 1.5))
     for x in (-1, 1) {
         line((0, 0), (x, -1))
-        curve((0, 1.5), (x, -1), (x, .5))
+        curve((0, 1.5), (x, -1), (x * -4.5, -3.5))
         cbox((x, -1), fill: if red-black { red } else { lime })
     }
     cbox((0, 0), fill: if red-black { black } else { lime })
