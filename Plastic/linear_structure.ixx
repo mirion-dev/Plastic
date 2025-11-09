@@ -1396,7 +1396,7 @@ namespace plastic {
 
     private:
         struct node_base {
-            node_base* next;
+            node_base* next{ this };
         };
 
         struct node : node_base {
@@ -1450,7 +1450,7 @@ namespace plastic {
         using const_iterator = std::const_iterator<iterator>;
 
     private:
-        node_base* _head;
+        node_base* _head{ new node_base };
         size_type _size{};
 
         node_base* _insert_after(node_base* pos, size_type count, const auto&... args) {
@@ -1471,28 +1471,18 @@ namespace plastic {
         }
 
     public:
-        forward_list() :
-            _head{ new node_base } {
+        forward_list() = default;
 
-            _head->next = _head;
-        }
-
-        explicit forward_list(size_type size) :
-            forward_list() {
-
+        explicit forward_list(size_type size) {
             insert_after(before_begin(), size, {});
         }
 
-        forward_list(size_type size, const_reference value) :
-            forward_list() {
-
+        forward_list(size_type size, const_reference value) {
             insert_after(before_begin(), size, value);
         }
 
         template <std::input_iterator It>
-        forward_list(It first, It last) :
-            forward_list() {
-
+        forward_list(It first, It last) {
             insert_after(before_begin(), first, last);
         }
 
@@ -1502,9 +1492,7 @@ namespace plastic {
         forward_list(const forward_list& other) :
             forward_list(other.begin(), other.end()) {}
 
-        forward_list(forward_list&& other) :
-            forward_list() {
-
+        forward_list(forward_list&& other) {
             swap(other);
         }
 
@@ -1677,8 +1665,8 @@ namespace plastic {
 
     private:
         struct node_base {
-            node_base* prev;
-            node_base* next;
+            node_base* prev{ this };
+            node_base* next{ this };
         };
 
         struct node : node_base {
@@ -1745,7 +1733,7 @@ namespace plastic {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     private:
-        node_base* _head;
+        node_base* _head{ new node_base };
         size_type _size{};
 
         node_base* _insert(node_base* pos, size_type count, const auto&... args) {
@@ -1770,28 +1758,18 @@ namespace plastic {
         }
 
     public:
-        list() :
-            _head{ new node_base } {
+        list() = default;
 
-            _head->prev = _head->next = _head;
-        }
-
-        explicit list(size_type size) :
-            list() {
-
+        explicit list(size_type size) {
             insert(end(), size, {});
         }
 
-        list(size_type size, const_reference value) :
-            list() {
-
+        list(size_type size, const_reference value) {
             insert(end(), size, value);
         }
 
         template <std::input_iterator It>
-        list(It first, It last) :
-            list() {
-
+        list(It first, It last) {
             insert(end(), first, last);
         }
 
@@ -1801,9 +1779,7 @@ namespace plastic {
         list(const list& other) :
             list(other.begin(), other.end()) {}
 
-        list(list&& other) :
-            list() {
-
+        list(list&& other) {
             swap(other);
         }
 
