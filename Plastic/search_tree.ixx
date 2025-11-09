@@ -26,7 +26,7 @@ namespace plastic {
             node_base* left{ this };
             node_base* right{ this };
             bool is_head{ true };
-            metadata meta{ is_head };
+            metadata meta;
 
             void free() {
                 if (is_head) {
@@ -483,9 +483,7 @@ namespace plastic {
         }
     };
 
-    struct binary_search_tree_metadata {
-        binary_search_tree_metadata(bool) {}
-    };
+    struct binary_search_tree_metadata {};
 
     export template <class T, class Pr = std::less<T>>
     class binary_search_tree : public tree<T, Pr, binary_search_tree_metadata> {
@@ -515,10 +513,7 @@ namespace plastic {
     binary_search_tree(It, It) -> binary_search_tree<std::iter_value_t<It>>;
 
     struct red_black_tree_metadata {
-        bool is_red{};
-
-        red_black_tree_metadata(bool is_head) :
-            is_red{ is_head } {}
+        bool is_red{ true };
     };
 
     export template <class T, class Pr = std::less<T>>
@@ -657,8 +652,6 @@ namespace plastic {
 
     struct avl_tree_metadata {
         signed char factor{};
-
-        avl_tree_metadata(bool) {}
     };
 
     export template <class T, class Pr = std::less<T>>
