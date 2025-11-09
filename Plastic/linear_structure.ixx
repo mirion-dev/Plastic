@@ -1631,9 +1631,9 @@ namespace plastic {
         }
 
         iterator erase_after(const_iterator first, const_iterator last) {
-            node_base *i{ first.base()._ptr }, *j{ last.base()._ptr };
-            i = std::exchange(i->next, j);
-            while (i != j) {
+            node_base *i{ first.base()._ptr }, *e{ last.base()._ptr };
+            i = std::exchange(i->next, e);
+            while (i != e) {
                 delete static_cast<node*>(std::exchange(i, i->next));
                 --_size;
             }
@@ -1952,10 +1952,10 @@ namespace plastic {
         }
 
         iterator erase(const_iterator first, const_iterator last) {
-            node_base *i{ first.base()._ptr }, *j{ last.base()._ptr };
-            i->prev->next = j;
-            j->prev = i->prev;
-            while (i != j) {
+            node_base *i{ first.base()._ptr }, *e{ last.base()._ptr };
+            i->prev->next = e;
+            e->prev = i->prev;
+            while (i != e) {
                 delete static_cast<node*>(std::exchange(i, i->next));
                 --_size;
             }

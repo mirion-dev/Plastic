@@ -16,6 +16,7 @@ namespace plastic {
         using value_type = T;
         using pointer = T*;
         using const_pointer = const T*;
+        using comparator = Pr;
 
     private:
         struct node {
@@ -77,8 +78,6 @@ namespace plastic {
                 return { _ptr, _cont };
             }
         };
-
-        using comparator = Pr;
 
     private:
         comparator _pred;
@@ -247,17 +246,6 @@ namespace plastic {
             }
         }
 
-        void merge(const binary_heap& other) {
-            size_type index{ size() };
-            _data.resize(size() + other.size());
-
-            auto i{ _data.begin() + index };
-            for (node* ptr : other._data) {
-                *i++ = new node{ index++, ptr->value };
-            }
-            _make_heap();
-        }
-
         void erase(handle pos) {
             size_type index{ pos._ptr->index };
             assert(index < size());
@@ -275,6 +263,17 @@ namespace plastic {
                 }
             }
             delete pos._ptr;
+        }
+
+        void merge(const binary_heap& other) {
+            size_type index{ size() };
+            _data.resize(size() + other.size());
+
+            auto i{ _data.begin() + index };
+            for (node* ptr : other._data) {
+                *i++ = new node{ index++, ptr->value };
+            }
+            _make_heap();
         }
     };
 
