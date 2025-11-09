@@ -991,7 +991,10 @@ namespace plastic {
             }
         } while (!std::invoke(pred, std::invoke(proj, *r_last)));
 
-        auto buf{ new std::iter_value_t<It>[std::ranges::distance(first, r_last) + 1] };
+        std::allocator<std::iter_value_t<It>> alloc;
+        std::size_t size{ static_cast<std::size_t>(std::ranges::distance(first, r_last)) + 1 };
+
+        auto buf{ alloc.allocate(size) };
         It i{ first };
         auto j{ buf };
 
@@ -1002,7 +1005,7 @@ namespace plastic {
         *first++ = std::move(*r_last);
 
         It temp{ plastic::move(buf, j, first).out };
-        delete[] buf;
+        alloc.deallocate(buf, size);
         return { std::move(first), std::move(temp) };
     }
 
@@ -1206,7 +1209,10 @@ namespace plastic {
     export template <std::bidirectional_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     It inplace_merge(It first, It middle, Se last, Pr pred = {}, Pj proj = {}) {
-        auto buf{ new std::iter_value_t<It>[std::ranges::distance(first, last)] };
+        std::allocator<std::iter_value_t<It>> alloc;
+        auto size{ static_cast<std::size_t>(std::ranges::distance(first, last)) };
+
+        auto buf{ alloc.allocate(size) };
         It i{ first }, j{ middle };
         auto k{ buf };
         while (i != middle && j != last) {
@@ -1220,7 +1226,7 @@ namespace plastic {
             plastic::move_backward(i, middle, j);
         }
         plastic::move(buf, k, first);
-        delete[] buf;
+        alloc.deallocate(buf, size);
 
         return j;
     }
