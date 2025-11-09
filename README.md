@@ -6,7 +6,7 @@ My implementations of common data structures and algorithms for study.
 
 The class designs are primarily based on the standard library, but not identical. For example, the underlying structure of `deque` is implemented as a bidirectional dynamic array instead of blocks.
 
-| | **`inplace_vector`<br>`vector`** | **`inplace_deque`<br>`deque`** | **`forward_list`** | **`list`** | Search Tree | Addressable Heap |
+| | **`inplace_vector`<br>`vector`** | **`inplace_deque`<br>`deque`** | **`forward_list`** | **`list`** | Search Trees | Addressable Heaps |
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` |
 | **`size`** | `size` | `size` | `size` | `size` | `size` | `size` |
