@@ -495,8 +495,8 @@ namespace plastic {
 
         using typename base::node_base;
 
-        void _insert_rebalance(node_base*) {}
-        void _erase_rebalance(node_base*, node_base*) {}
+        static void _insert_rebalance(node_base*) {}
+        static void _erase_rebalance(node_base*, node_base*) {}
 
     public:
         using base::base;
@@ -515,7 +515,7 @@ namespace plastic {
     binary_search_tree(It, It) -> binary_search_tree<std::iter_value_t<It>>;
 
     struct red_black_tree_metadata {
-        unsigned char is_red{ false };
+        unsigned char is_red{};
 
         red_black_tree_metadata(unsigned char is_head) :
             is_red{ is_head } {}
@@ -669,11 +669,11 @@ namespace plastic {
 
         using typename base::node_base;
 
-        void _insert_rebalance(node_base* inserted) {
+        static void _insert_rebalance(node_base* inserted) {
             // TODO
         }
 
-        void _erase_rebalance(node_base* replaced, node_base* erased) {
+        static void _erase_rebalance(node_base* replaced, node_base* erased) {
             // TODO
         }
 
