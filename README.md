@@ -42,7 +42,7 @@ The class designs are primarily based on the standard library, but not identical
 | **`insert`** | `insert` | `insert` | `insert_after` | `insert` | `insert` | `push` |
 | **`erase`** | `erase` | `erase` | `erase_after` | `erase` | `erase` | `erase` |
 | **`swap`** | `swap` | `swap` | `swap` | `swap` | `swap` | `swap` |
-| **`merge`** | | | | | | `merge` |
+| **`merge`** | | | | | `merge` | `merge` |
 | **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` | `operator==` | |
 | **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | |
 

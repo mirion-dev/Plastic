@@ -473,6 +473,11 @@ namespace plastic {
             return count;
         }
 
+        void merge(this auto&& self, tree& other) {
+            self.insert(other.begin(), other.end());
+            other.clear();
+        }
+
         friend bool operator==(const tree& left, const tree& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }

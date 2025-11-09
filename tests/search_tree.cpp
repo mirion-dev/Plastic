@@ -95,6 +95,13 @@ void test_search_tree() {
     x.erase(std::next(x.begin(), 2), std::prev(x.end(), 2));
     ASSERT(format(x) == "[0, 3, 4, 5]");
 
+    x.merge(a);
+    ASSERT(format(x) == "[0, 0, 0, 0, 3, 4, 5]");
+    ASSERT(format(a) == "[]");
+    x.merge(c);
+    ASSERT(format(x) == "[0, 0, 0, 0, 1, 2, 3, 3, 4, 5]");
+    ASSERT(format(c) == "[]");
+
     Tr d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
     ASSERT(d == d);
     ASSERT(d != e);
