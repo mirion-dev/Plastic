@@ -8,112 +8,124 @@ import std;
 
 namespace plastic {
 
-    template <class Nd>
-    struct node_base_factory {
-    private:
-        Nd* _this() {
-            return static_cast<Nd*>(this);
-        }
-
-    public:
-        Nd* parent{ _this() };
-        Nd* left{ _this() };
-        Nd* right{ _this() };
-        unsigned char is_head{ true };
-
-        void free() {
-            if (is_head) {
-                return;
-            }
-
-            left->free();
-            right->free();
-            delete _this();
-        }
-
-        Nd* leftmost() {
-            Nd* i{ _this() };
-            while (!i->left->is_head) {
-                i = i->left;
-            }
-            return i;
-        }
-
-        Nd* rightmost() {
-            Nd* i{ _this() };
-            while (!i->right->is_head) {
-                i = i->right;
-            }
-            return i;
-        }
-
-        void left_rotate() {
-            Nd* replaced{ right };
-            Nd* replaced_left{ replaced->left };
-
-            right = replaced_left;
-            if (!replaced_left->is_head) {
-                replaced_left->parent = _this();
-            }
-
-            if (parent->is_head) {
-                parent->parent = replaced;
-            }
-            else if (_this() == parent->left) {
-                parent->left = replaced;
-            }
-            else {
-                parent->right = replaced;
-            }
-            replaced->parent = parent;
-
-            replaced->left = _this();
-            parent = replaced;
-        }
-
-        void right_rotate() {
-            Nd* replaced{ left };
-            Nd* replaced_right{ replaced->right };
-
-            left = replaced_right;
-            if (!replaced_right->is_head) {
-                replaced_right->parent = _this();
-            }
-
-            if (parent->is_head) {
-                parent->parent = replaced;
-            }
-            else if (_this() == parent->left) {
-                parent->left = replaced;
-            }
-            else {
-                parent->right = replaced;
-            }
-            replaced->parent = parent;
-
-            replaced->right = _this();
-            parent = replaced;
-        }
-    };
-
-    template <class Tr>
-    class tree_factory {
-        using T = Tr::value_type;
-        using Pr = Tr::comparator;
-
-    protected:
-        using node_base = Tr::node_base;
-        using node = Tr::node;
-
+    template <class T, class Pr, class Me>
+    class tree {
     public:
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
         using value_type = T;
         using reference = T&;
         using const_reference = const T&;
+        using comparator = Pr;
 
+    protected:
+        using metadata = Me;
+
+        struct node_base {
+            node_base* parent{ this };
+            node_base* left{ this };
+            node_base* right{ this };
+            unsigned char is_head{ true };
+            metadata meta{ is_head };
+
+            void free() {
+                if (is_head) {
+                    return;
+                }
+
+                left->free();
+                right->free();
+                delete this;
+            }
+
+            node_base* leftmost() {
+                node_base* i{ this };
+                while (!i->left->is_head) {
+                    i = i->left;
+                }
+                return i;
+            }
+
+            node_base* rightmost() {
+                node_base* i{ this };
+                while (!i->right->is_head) {
+                    i = i->right;
+                }
+                return i;
+            }
+
+            void left_rotate() {
+                node_base* replaced{ right };
+                node_base* replaced_left{ replaced->left };
+
+                right = replaced_left;
+                if (!replaced_left->is_head) {
+                    replaced_left->parent = this;
+                }
+
+                if (parent->is_head) {
+                    parent->parent = replaced;
+                }
+                else if (this == parent->left) {
+                    parent->left = replaced;
+                }
+                else {
+                    parent->right = replaced;
+                }
+                replaced->parent = parent;
+
+                replaced->left = this;
+                parent = replaced;
+            }
+
+            void right_rotate() {
+                node_base* replaced{ left };
+                node_base* replaced_right{ replaced->right };
+
+                left = replaced_right;
+                if (!replaced_right->is_head) {
+                    replaced_right->parent = this;
+                }
+
+                if (parent->is_head) {
+                    parent->parent = replaced;
+                }
+                else if (this == parent->left) {
+                    parent->left = replaced;
+                }
+                else {
+                    parent->right = replaced;
+                }
+                replaced->parent = parent;
+
+                replaced->right = this;
+                parent = replaced;
+            }
+        };
+
+        struct node : node_base {
+            value_type value;
+
+            node(node_base* head, node_base* parent, const_reference value) :
+                node_base{ parent, head, head, false },
+                value{ value } {}
+
+            node_base* clone(node_base* head, node_base* parent) {
+                if (this->is_head) {
+                    return head;
+                }
+
+                auto tree{ new node{ *this } };
+                tree->parent = parent;
+                tree->left = static_cast<node*>(this->left)->clone(head, tree);
+                tree->right = static_cast<node*>(this->right)->clone(head, tree);
+                return tree;
+            }
+        };
+
+    public:
         class iterator {
-            friend tree_factory;
+            friend tree;
 
             node_base* _ptr{};
 
@@ -183,7 +195,6 @@ namespace plastic {
         using const_iterator = iterator;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = reverse_iterator;
-        using comparator = Pr;
 
     protected:
         comparator _pred;
@@ -191,9 +202,9 @@ namespace plastic {
         size_type _size{};
 
     public:
-        tree_factory() = default;
+        tree() = default;
 
-        tree_factory(const tree_factory& other) :
+        tree(const tree& other) :
             _pred{ other._pred },
             _size{ other._size } {
 
@@ -205,33 +216,33 @@ namespace plastic {
             }
         }
 
-        tree_factory(tree_factory&& other) {
+        tree(tree&& other) {
             swap(other);
         }
 
-        ~tree_factory() {
+        ~tree() {
             clear();
             delete _head;
         }
 
-        tree_factory& operator=(const tree_factory& other) {
-            tree_factory temp(other);
+        tree& operator=(const tree& other) {
+            tree temp(other);
             swap(temp);
             return *this;
         }
 
-        tree_factory& operator=(tree_factory&& other) {
+        tree& operator=(tree&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(tree_factory& other) {
+        void swap(tree& other) {
             std::swap(_pred, other._pred);
             std::swap(_head, other._head);
             std::swap(_size, other._size);
         }
 
-        friend void swap(tree_factory& left, tree_factory& right) {
+        friend void swap(tree& left, tree& right) {
             left.swap(right);
         }
 
@@ -467,57 +478,29 @@ namespace plastic {
             return count;
         }
 
-        friend bool operator==(const tree_factory& left, const tree_factory& right) {
+        friend bool operator==(const tree& left, const tree& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const tree_factory& left, const tree_factory& right) {
+        friend auto operator<=>(const tree& left, const tree& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
 
-    template <class T, class Pr>
-    struct binary_search_tree_traits {
-        using value_type = T;
-        using comparator = Pr;
-
-        struct node_base : node_base_factory<node_base> {};
-
-        struct node : node_base {
-            value_type value;
-
-            node(node_base* head, node_base* parent, const value_type& value) :
-                value{ value } {
-
-                this->parent = parent;
-                this->left = this->right = head;
-                this->is_head = false;
-            }
-
-            node_base* clone(node_base* head, node_base* parent) {
-                if (this->is_head) {
-                    return head;
-                }
-
-                auto tree{ new node{ head, parent, value } };
-                tree->left = static_cast<node*>(this->left)->clone(head, tree);
-                tree->right = static_cast<node*>(this->right)->clone(head, tree);
-                return tree;
-            }
-        };
+    struct binary_search_tree_metadata {
+        binary_search_tree_metadata(unsigned char) {}
     };
 
     export template <class T, class Pr = std::less<T>>
-    class binary_search_tree : public tree_factory<binary_search_tree_traits<T, Pr>> {
-        using base = tree_factory<binary_search_tree_traits<T, Pr>>;
+    class binary_search_tree : public tree<T, Pr, binary_search_tree_metadata> {
+        using base = tree<T, Pr, binary_search_tree_metadata>;
 
         friend base;
 
         using typename base::node_base;
 
-        void _insert_rebalance(node_base* inserted) {}
-
-        void _erase_rebalance(node_base* replaced, node_base* erased) {}
+        void _insert_rebalance(node_base*) {}
+        void _erase_rebalance(node_base*, node_base*) {}
 
     public:
         using base::base;
@@ -535,44 +518,16 @@ namespace plastic {
     template <class It>
     binary_search_tree(It, It) -> binary_search_tree<std::iter_value_t<It>>;
 
-    template <class T, class Pr>
-    struct red_black_tree_traits {
-        using value_type = T;
-        using comparator = Pr;
+    struct red_black_tree_metadata {
+        unsigned char is_red{ false };
 
-        struct node_base : node_base_factory<node_base> {
-            unsigned char is_red{ false };
-        };
-
-        struct node : node_base {
-            value_type value;
-
-            node(node_base* head, node_base* parent, const value_type& value) :
-                value{ value } {
-
-                this->parent = parent;
-                this->left = this->right = head;
-                this->is_head = false;
-                this->is_red = true;
-            }
-
-            node_base* clone(node_base* head, node_base* parent) {
-                if (this->is_head) {
-                    return head;
-                }
-
-                auto tree{ new node{ head, parent, value } };
-                tree->left = static_cast<node*>(this->left)->clone(head, tree);
-                tree->right = static_cast<node*>(this->right)->clone(head, tree);
-                tree->is_red = this->is_red;
-                return tree;
-            }
-        };
+        red_black_tree_metadata(unsigned char is_head) :
+            is_red{ is_head } {}
     };
 
     export template <class T, class Pr = std::less<T>>
-    class red_black_tree : public tree_factory<red_black_tree_traits<T, Pr>> {
-        using base = tree_factory<red_black_tree_traits<T, Pr>>;
+    class red_black_tree : public tree<T, Pr, red_black_tree_metadata> {
+        using base = tree<T, Pr, red_black_tree_metadata>;
 
         friend base;
 
@@ -580,112 +535,112 @@ namespace plastic {
 
         void _insert_rebalance(node_base* inserted) {
             node_base* i{ inserted };
-            while (i->parent->is_red) {
+            while (i->parent->meta.is_red) {
                 node_base* parent{ i->parent };
                 node_base* grandparent{ parent->parent };
                 node_base* uncle;
                 if (parent == grandparent->left) {
                     uncle = grandparent->right;
-                    if (!uncle->is_red) {
+                    if (!uncle->meta.is_red) {
                         if (i == parent->right) {
                             i = parent;
                             i->left_rotate();
                         }
 
-                        i->parent->is_red = false;
-                        i->parent->parent->is_red = true;
+                        i->parent->meta.is_red = false;
+                        i->parent->parent->meta.is_red = true;
                         i->parent->parent->right_rotate();
                         break;
                     }
                 }
                 else {
                     uncle = grandparent->left;
-                    if (!uncle->is_red) {
+                    if (!uncle->meta.is_red) {
                         if (i == parent->left) {
                             i = parent;
                             i->right_rotate();
                         }
 
-                        i->parent->is_red = false;
-                        i->parent->parent->is_red = true;
+                        i->parent->meta.is_red = false;
+                        i->parent->parent->meta.is_red = true;
                         i->parent->parent->left_rotate();
                         break;
                     }
                 }
 
-                parent->is_red = uncle->is_red = false;
-                grandparent->is_red = true;
+                parent->meta.is_red = uncle->meta.is_red = false;
+                grandparent->meta.is_red = true;
                 i = grandparent;
             }
 
-            this->_head->parent->is_red = false;
+            this->_head->parent->meta.is_red = false;
         }
 
         void _erase_rebalance(node_base* replaced, node_base* erased) {
-            std::swap(replaced->is_red, erased->is_red);
+            std::swap(replaced->meta.is_red, erased->meta.is_red);
 
             node_base* i{ replaced };
-            if (i->is_red) {
+            if (i->meta.is_red) {
                 return;
             }
 
-            while (!i->parent->is_head && !i->is_red) {
+            while (!i->parent->is_head && !i->meta.is_red) {
                 node_base* parent{ i->parent };
                 node_base* brother;
                 if (i == parent->left) {
                     brother = parent->right;
-                    if (brother->is_red) {
-                        brother->is_red = false;
-                        parent->is_red = true;
+                    if (brother->meta.is_red) {
+                        brother->meta.is_red = false;
+                        parent->meta.is_red = true;
                         parent->left_rotate();
                         brother = parent->right;
                     }
 
-                    if (brother->left->is_red || brother->right->is_red) {
-                        if (!brother->right->is_red) {
-                            brother->left->is_red = false;
-                            brother->is_red = true;
+                    if (brother->left->meta.is_red || brother->right->meta.is_red) {
+                        if (!brother->right->meta.is_red) {
+                            brother->left->meta.is_red = false;
+                            brother->meta.is_red = true;
                             brother->right_rotate();
                             brother = parent->right;
                         }
 
-                        brother->is_red = parent->is_red;
-                        parent->is_red = false;
-                        brother->right->is_red = false;
+                        brother->meta.is_red = parent->meta.is_red;
+                        parent->meta.is_red = false;
+                        brother->right->meta.is_red = false;
                         parent->left_rotate();
                         break;
                     }
                 }
                 else {
                     brother = parent->left;
-                    if (brother->is_red) {
-                        brother->is_red = false;
-                        parent->is_red = true;
+                    if (brother->meta.is_red) {
+                        brother->meta.is_red = false;
+                        parent->meta.is_red = true;
                         parent->right_rotate();
                         brother = parent->left;
                     }
 
-                    if (brother->right->is_red || brother->left->is_red) {
-                        if (!brother->left->is_red) {
-                            brother->right->is_red = false;
-                            brother->is_red = true;
+                    if (brother->right->meta.is_red || brother->left->meta.is_red) {
+                        if (!brother->left->meta.is_red) {
+                            brother->right->meta.is_red = false;
+                            brother->meta.is_red = true;
                             brother->left_rotate();
                             brother = parent->left;
                         }
 
-                        brother->is_red = parent->is_red;
-                        parent->is_red = false;
-                        brother->left->is_red = false;
+                        brother->meta.is_red = parent->meta.is_red;
+                        parent->meta.is_red = false;
+                        brother->left->meta.is_red = false;
                         parent->right_rotate();
                         break;
                     }
                 }
 
-                brother->is_red = true;
+                brother->meta.is_red = true;
                 i = parent;
             }
 
-            i->is_red = false;
+            i->meta.is_red = false;
         }
 
     public:
@@ -704,43 +659,15 @@ namespace plastic {
     template <class It>
     red_black_tree(It, It) -> red_black_tree<std::iter_value_t<It>>;
 
-    template <class T, class Pr>
-    struct avl_tree_traits {
-        using value_type = T;
-        using comparator = Pr;
+    struct avl_tree_metadata {
+        signed char factor{};
 
-        struct node_base : node_base_factory<node_base> {
-            signed char factor{};
-        };
-
-        struct node : node_base {
-            value_type value;
-
-            node(node_base* head, node_base* parent, const value_type& value) :
-                value{ value } {
-
-                this->parent = parent;
-                this->left = this->right = head;
-                this->is_head = false;
-            }
-
-            node_base* clone(node_base* head, node_base* parent) {
-                if (this->is_head) {
-                    return head;
-                }
-
-                auto tree{ new node{ head, parent, value } };
-                tree->left = static_cast<node*>(this->left)->clone(head, tree);
-                tree->right = static_cast<node*>(this->right)->clone(head, tree);
-                tree->factor = this->factor;
-                return tree;
-            }
-        };
+        avl_tree_metadata(unsigned char) {}
     };
 
     export template <class T, class Pr = std::less<T>>
-    class avl_tree : public tree_factory<avl_tree_traits<T, Pr>> {
-        using base = tree_factory<avl_tree_traits<T, Pr>>;
+    class avl_tree : public tree<T, Pr, avl_tree_metadata> {
+        using base = tree<T, Pr, avl_tree_metadata>;
 
         friend base;
 
