@@ -106,16 +106,15 @@ namespace plastic {
         struct node : node_base {
             value_type value;
 
-            node(node_base* head, node_base* parent, const_reference value) :
-                node_base{ parent, head, head, false },
-                value{ value } {}
-
             node_base* clone(node_base* head, node_base* parent) {
-                auto tree{ new node{ *this } };
-                tree->parent = parent;
-                tree->left = tree->left->is_head ? head : static_cast<node*>(this->left)->clone(head, tree);
-                tree->right = tree->right->is_head ? head : static_cast<node*>(this->right)->clone(head, tree);
-                return tree;
+                auto clone{ new node{ parent, head, head, false, this->meta, value } };
+                if (!this->left->is_head) {
+                    clone->left = static_cast<node*>(this->left)->clone(head, clone);
+                }
+                if (!this->right->is_head) {
+                    clone->right = static_cast<node*>(this->right)->clone(head, clone);
+                }
+                return clone;
             }
         };
 
@@ -205,10 +204,10 @@ namespace plastic {
             _size{ other._size } {
 
             if (_size != 0) {
-                node_base* tree{ static_cast<node*>(other._head->parent)->clone(_head, _head) };
-                _head->parent = tree;
-                _head->left = tree->rightmost();
-                _head->right = tree->leftmost();
+                node_base* clone{ static_cast<node*>(other._head->parent)->clone(_head, _head) };
+                _head->parent = clone;
+                _head->left = clone->rightmost();
+                _head->right = clone->leftmost();
             }
         }
 
@@ -356,7 +355,7 @@ namespace plastic {
                 i = is_left ? i->left : i->right;
             }
 
-            auto new_node{ new node{ self._head, parent, value } };
+            auto new_node{ new node{ parent, self._head, self._head, false, {}, value } };
             if (parent->is_head) {
                 parent->parent = new_node;
             }
