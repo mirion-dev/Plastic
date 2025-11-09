@@ -19,7 +19,7 @@ The class designs are primarily based on the standard library, but not identical
 | **`begin`** | `begin` | `begin` | `begin` | `begin` | `begin` | `apex` |
 | **`end`** | `end` | `end` | `end` | `end` | `end` | |
 | **`cbefore_begin`** | | | `cbefore_begin` | | | |
-| **`cbegin`** | `cbegin` | `cbegin` | `cbegin` | `cbegin` | `cbegin` | |
+| **`cbegin`** | `cbegin` | `cbegin` | `cbegin` | `cbegin` | `cbegin` | `capex` |
 | **`cend`** | `cend` | `cend` | `cend` | `cend` | `cend` | |
 | **`rbegin`** | `rbegin` | `rbegin` | | `rbegin` | `rbegin` | |
 | **`rend`** | `rend` | `rend` | | `rend` | `rend` | |

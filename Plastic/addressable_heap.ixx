@@ -211,6 +211,11 @@ namespace plastic {
             return &_data.front()->value;
         }
 
+        const_handle capex() const {
+            assert(!empty());
+            return apex();
+        }
+
         reference top() {
             assert(!empty());
             return *apex();
