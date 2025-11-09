@@ -65,20 +65,24 @@ void test_addressable_heap() {
     x.pop();
     ASSERT(format(x) == "[0, 0, 1, 1, 1, 2]");
 
-    x.merge({ 3, 1, 4 });
-    ASSERT(format(x) == "[0, 0, 1, 1, 1, 1, 2, 3, 4]");
-
     *h1 = 5;
-    ASSERT(format(x) == "[0, 1, 1, 1, 1, 2, 3, 4, 5]");
+    ASSERT(format(x) == "[0, 1, 1, 1, 2, 5]");
     *h2 = 0;
-    ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 4, 5]");
+    ASSERT(format(x) == "[0, 0, 1, 1, 2, 5]");
     *x.apex() = 3;
-    ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 3, 4]");
+    ASSERT(format(x) == "[0, 0, 1, 1, 2, 3]");
 
     x.erase(h1);
-    ASSERT(format(x) == "[0, 0, 1, 1, 1, 2, 3, 4]");
+    ASSERT(format(x) == "[0, 0, 1, 1, 2]");
     x.erase(h2);
-    ASSERT(format(x) == "[0, 1, 1, 1, 2, 3, 4]");
+    ASSERT(format(x) == "[0, 1, 1, 2]");
+
+    x.merge(b);
+    ASSERT(format(x) == "[0, 1, 1, 2, 4, 4, 4, 4]");
+    ASSERT(format(b) == "[]");
+    x.merge(c);
+    ASSERT(format(x) == "[0, 1, 1, 1, 2, 2, 3, 4, 4, 4, 4]");
+    ASSERT(format(c) == "[]");
 }
 
 TEST_CLASS(addressable_heap) {

@@ -265,14 +265,16 @@ namespace plastic {
             delete pos._ptr;
         }
 
-        void merge(const binary_heap& other) {
+        void merge(binary_heap& other) {
             size_type index{ size() };
-            _data.resize(size() + other.size());
+            _data.resize(index + other.size());
 
             auto i{ _data.begin() + index };
             for (node* ptr : other._data) {
-                *i++ = new node{ index++, ptr->value };
+                *i++ = new node{ index++, std::move(ptr->value) };
             }
+            other.clear();
+
             _make_heap();
         }
     };
