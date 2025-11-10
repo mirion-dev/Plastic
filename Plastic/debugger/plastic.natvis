@@ -2,12 +2,13 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
     <Type Name="plastic::inplace_vector&lt;*,*&gt;">
-        <Intrinsic Name="size" Expression="(size_t)(_last - _data)"/>
+		<Intrinsic Name="begin" Expression="($T1*)_data"/>
+        <Intrinsic Name="size" Expression="(size_t)(_last - begin())"/>
         <Intrinsic Name="capacity" Expression="(size_t)$T2"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
-            <ExpandedItem>($T1*)_data, [size()]</ExpandedItem>
+            <ExpandedItem>begin(), [size()]</ExpandedItem>
         </Expand>
     </Type>
 
@@ -22,6 +23,8 @@
     </Type>
 
     <Type Name="plastic::inplace_deque&lt;*,*&gt;">
+		<Intrinsic Name="begin" Expression="($T1*)_data"/>
+		<Intrinsic Name="end" Expression="begin() + $T2 + 1"/>
         <Intrinsic Name="size" Expression="(size_t)(_first &lt;= _last ? _last - _first : $T2 + 1 - (_first - _last))"/>
         <Intrinsic Name="capacity" Expression="(size_t)$T2"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
@@ -29,7 +32,7 @@
             <Item Name="[capacity]">capacity()</Item>
             <IndexListItems>
                 <Size>size()</Size>
-                <ValueNode>_first[$i &lt;= _data + $T2 - _first ? $i : $i - $T2 - 1]</ValueNode>
+                <ValueNode>_first[$i &lt; end() - _first ? $i : $i - $T2 - 1]</ValueNode>
             </IndexListItems>
         </Expand>
     </Type>
@@ -52,7 +55,7 @@
                 <Size>size()</Size>
                 <HeadPointer>_head->next</HeadPointer>
                 <NextPointer>next</NextPointer>
-                <ValueNode>value</ValueNode>
+                <ValueNode>((node*)this)->value</ValueNode>
             </LinkedListItems>
         </Expand>
     </Type>
@@ -65,12 +68,12 @@
                 <Size>size()</Size>
                 <HeadPointer>_head->next</HeadPointer>
                 <NextPointer>next</NextPointer>
-                <ValueNode>value</ValueNode>
+                <ValueNode>((node*)this)->value</ValueNode>
             </LinkedListItems>
         </Expand>
     </Type>
 
-    <Type Name="plastic::basic_binary_search_tree&lt;*&gt;">
+    <Type Name="plastic::tree&lt;*,*,*&gt;">
         <Intrinsic Name="size" Expression="_size"/>
         <Intrinsic Name="pred" Expression="_pred"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
@@ -81,7 +84,7 @@
                 <HeadPointer>_head->parent</HeadPointer>
                 <LeftPointer>left</LeftPointer>
                 <RightPointer>right</RightPointer>
-                <ValueNode Condition="!is_head">value</ValueNode>
+                <ValueNode Condition="!is_head">((node*)this)->value</ValueNode>
             </TreeItems>
         </Expand>
     </Type>
