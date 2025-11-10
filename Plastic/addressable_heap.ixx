@@ -20,7 +20,7 @@ namespace plastic {
 
     private:
         struct node {
-            size_type index;
+            size_type index{};
             value_type value;
         };
 
@@ -85,7 +85,7 @@ namespace plastic {
 
         void _set(size_type index, node* new_node) {
             _data[index] = new_node;
-            _data[index]->index = index;
+            new_node->index = index;
         }
 
         void _sift_up(size_type index) {
@@ -226,10 +226,9 @@ namespace plastic {
         }
 
         handle push(const_reference value) {
-            size_type index{ size() };
-            auto new_node{ new node{ index, value } };
+            auto new_node{ new node{ size(), value } };
             _data.push_back(new_node);
-            _sift_up(index);
+            _sift_up(new_node->index);
             return { new_node, this };
         }
 
@@ -247,7 +246,7 @@ namespace plastic {
         }
 
         void erase(handle pos) {
-            size_type index{ pos._ptr->index };
+            auto& [index, value]{ *pos._ptr };
             assert(index < size());
             if (index == size() - 1) {
                 _data.pop_back();
@@ -255,7 +254,7 @@ namespace plastic {
             else {
                 _set(index, _data.back());
                 _data.pop_back();
-                if (_pred(pos._ptr->value, _data[index]->value)) {
+                if (_pred(value, _data[index]->value)) {
                     _sift_up(index);
                 }
                 else {
@@ -271,9 +270,10 @@ namespace plastic {
 
             auto i{ _data.begin() + index };
             for (node* ptr : other._data) {
-                *i++ = new node{ index++, std::move(ptr->value) };
+                ptr->index = index++;
+                *i++ = ptr;
             }
-            other.clear();
+            other._data.clear();
 
             _make_heap();
         }
