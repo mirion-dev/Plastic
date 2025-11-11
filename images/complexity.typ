@@ -145,7 +145,7 @@
     [*Mergable*],
     grid.cell(colspan: 2)[*Addressable*],
     [Get Apex], [Insertion], [Deletion at Apex], [Merge], [Update], [Deletion],
-    `binary_heap`, O1, Ologn, Ologn, On, Ologn, Ologn,
+    `binary_heap`, O1, Ologna, Ologn, On, Ologn, Ologn,
 )
 
 / \*: Amortized complexity.
