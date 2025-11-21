@@ -391,7 +391,7 @@ namespace plastic {
                 return false;
             }
 
-            first1 = std::ranges::next(first1, size2 - size1, last1);
+            first1 = std::ranges::next(first1, size1 - size2, last1);
         }
 
         return plastic::equal(first1, last1, first2, last2, pred, proj1, proj2);
