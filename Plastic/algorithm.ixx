@@ -409,7 +409,7 @@ namespace plastic {
             return { std::move(first), static_cast<U>(std::move(init)) };
         }
 
-        U value{ std::invoke(func, init, *first) };
+        U value{ std::invoke(func, std::move(init), *first) };
         while (++first != last) {
             value = std::invoke(func, std::move(value), *first);
         }
@@ -435,7 +435,7 @@ namespace plastic {
 
     export template <std::input_iterator It, std::sentinel_for<It> Se, class T = std::iter_value_t<It>, indirectly_binary_left_foldable<T, It> Fn>
     fold_left_result_t<Fn, T, It> fold_left(It first, Se last, T init, Fn func) {
-        return plastic::fold_left_with_iter(first, last, init, func).value;
+        return plastic::fold_left_with_iter(first, last, std::move(init), func).value;
     }
 
     export template <std::input_iterator It, std::sentinel_for<It> Se, indirectly_binary_left_foldable<std::iter_value_t<It>, It> Fn>
@@ -449,11 +449,11 @@ namespace plastic {
         using U = fold_right_result_t<Fn, T, It>;
 
         if (first == last) {
-            return static_cast<U>(init);
+            return static_cast<U>(std::move(init));
         }
 
         It i{ std::ranges::next(first, last) };
-        U value{ std::invoke(func, *--i, init) };
+        U value{ std::invoke(func, *--i, std::move(init)) };
         while (first != i) {
             value = std::invoke(func, *--i, std::move(value));
         }
