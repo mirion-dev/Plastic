@@ -1291,14 +1291,14 @@ namespace plastic {
 
     template <class It, class Pr, class Pj>
     It median_partition(It first, It last, Pr pred, Pj proj) {
-        auto a{ *first }, b{ first[last - first >> 1] }, c{ *std::ranges::prev(last) };
-        if (std::invoke(pred, std::invoke(proj, a), std::invoke(proj, b))) {
-            std::swap(a, b);
+        It left{ first }, middle{ first + (last - first >> 1) }, right{ last - 1 };
+        if (std::invoke(pred, std::invoke(proj, *left), std::invoke(proj, *middle))) {
+            std::swap(*left, *middle);
         }
-        if (std::invoke(pred, std::invoke(proj, b), std::invoke(proj, c))) {
-            std::swap(b, c);
-            if (std::invoke(pred, std::invoke(proj, a), std::invoke(proj, b))) {
-                std::swap(a, b);
+        if (std::invoke(pred, std::invoke(proj, *middle), std::invoke(proj, *right))) {
+            std::swap(*middle, *right);
+            if (std::invoke(pred, std::invoke(proj, *left), std::invoke(proj, *middle))) {
+                std::swap(*left, *middle);
             }
         }
 
@@ -1306,7 +1306,7 @@ namespace plastic {
             if (first == last) {
                 return first;
             }
-            if (!std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, b))) {
+            if (!std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *middle))) {
                 break;
             }
             ++first;
@@ -1314,7 +1314,7 @@ namespace plastic {
 
         It i{ first };
         while (++i != last) {
-            if (std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, b))) {
+            if (std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *middle))) {
                 std::swap(*first++, *i);
             }
         }
