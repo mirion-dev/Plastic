@@ -992,19 +992,25 @@ namespace plastic {
         } while (!std::invoke(pred, std::invoke(proj, *r_last)));
 
         std::allocator<std::iter_value_t<It>> alloc;
-        std::size_t size{ static_cast<std::size_t>(std::ranges::distance(first, r_last)) + 1 };
-
+        auto size{ static_cast<std::size_t>(std::ranges::distance(first, r_last)) + 1 };
         auto buf{ alloc.allocate(size) };
+
         It i{ first };
         auto j{ buf };
-
-        *j++ = std::move(*i++);
+        std::construct_at(j++, std::move(*i++));
         while (i != r_last) {
-            (std::invoke(pred, std::invoke(proj, *i++)) ? *first++ : *j++) = std::move(*i);
+            if (std::invoke(pred, std::invoke(proj, *i))) {
+                *first++ = std::move(*i);
+            }
+            else {
+                std::construct_at(j++, std::move(*i));
+            }
+            ++i;
         }
         *first++ = std::move(*r_last);
 
         It temp{ plastic::move(buf, j, first).out };
+        std::destroy(buf, j);
         alloc.deallocate(buf, size);
         return { std::move(first), std::move(temp) };
     }
@@ -1211,12 +1217,17 @@ namespace plastic {
     It inplace_merge(It first, It middle, Se last, Pr pred = {}, Pj proj = {}) {
         std::allocator<std::iter_value_t<It>> alloc;
         auto size{ static_cast<std::size_t>(std::ranges::distance(first, last)) };
-
         auto buf{ alloc.allocate(size) };
+
         It i{ first }, j{ middle };
         auto k{ buf };
         while (i != middle && j != last) {
-            *k++ = !std::invoke(pred, std::invoke(proj, *j), std::invoke(proj, *i)) ? std::move(*i++) : std::move(*j++);
+            if (!std::invoke(pred, std::invoke(proj, *j), std::invoke(proj, *i))) {
+                std::construct_at(k++, std::move(*i++));
+            }
+            else {
+                std::construct_at(k++, std::move(*j++));
+            }
         }
 
         if (i == middle) {
@@ -1226,6 +1237,7 @@ namespace plastic {
             plastic::move_backward(i, middle, j);
         }
         plastic::move(buf, k, first);
+        std::destroy(buf, k);
         alloc.deallocate(buf, size);
 
         return j;
