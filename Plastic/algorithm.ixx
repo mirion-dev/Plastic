@@ -688,7 +688,12 @@ namespace plastic {
     template <satisfy_type Sat, std::input_iterator It, std::sentinel_for<It> Se, class Out, class TPr, class U, class Pj>
     std::ranges::in_out_result<It, Out> replace_copy_impl(It first, Se last, Out output, const TPr& value_or_pred, const U& value, Pj proj) {
         while (first != last) {
-            *output++ = plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred) ? value : *first;
+            if (plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred)) {
+                *output++ = value;
+            }
+            else {
+                *output++ = *first;
+            }
             ++first;
         }
         return { std::move(first), std::move(output) };
@@ -970,7 +975,12 @@ namespace plastic {
         requires std::indirectly_copyable<It, Out1> && std::indirectly_copyable<It, Out2>
     std::ranges::in_out_out_result<It, Out1, Out2> partition_copy(It first, Se last, Out1 output_true, Out2 output_false, Pr pred, Pj proj = {}) {
         while (first != last) {
-            (std::invoke(pred, std::invoke(proj, *first)) ? *output_true++ : *output_false++) = *first;
+            if (std::invoke(pred, std::invoke(proj, *first))) {
+                *output_true++ = *first;
+            }
+            else {
+                *output_false++ = *first;
+            }
             ++first;
         }
         return { std::move(first), std::move(output_true), std::move(output_false) };
