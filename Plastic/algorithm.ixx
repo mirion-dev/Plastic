@@ -943,13 +943,13 @@ namespace plastic {
             return { first, first };
         }
 
-        if constexpr (std::bidirectional_iterator<It> && std::bidirectional_iterator<Se>) {
-            It i{ last };
+        if constexpr (std::bidirectional_iterator<It>) {
+            It r_last{ std::ranges::next(first, last) }, i{ r_last };
             while (true) {
                 first = plastic::find_if_not(first, i, pred, proj);
                 do {
                     if (first == i) {
-                        return { std::move(first), std::move(last) };
+                        return { std::move(first), std::move(r_last) };
                     }
                 } while (!std::invoke(pred, std::invoke(proj, *--i)));
                 std::swap(*first++, *i);
@@ -962,7 +962,7 @@ namespace plastic {
                     std::swap(*first++, *i);
                 }
             }
-            return { std::move(first), std::move(last) };
+            return { std::move(first), std::move(i) };
         }
     }
 
