@@ -206,7 +206,7 @@ namespace plastic {
         while (true) {
             It j{ plastic::find_impl<Sat>(std::ranges::next(i), last, value_or_pred, proj) };
             if (j == last) {
-                return { std::move(i), std::move(first) };
+                return { std::move(i), std::move(j) };
             }
             i = j;
         }
