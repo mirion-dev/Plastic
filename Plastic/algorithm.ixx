@@ -1300,36 +1300,50 @@ namespace plastic {
     static constexpr std::ptrdiff_t INSERTION_SORT_THRESHOLD{ 32 };
 
     template <std::bidirectional_iterator It, class Pr, class Pj>
-    It median_partition(It first, It last, Pr pred, Pj proj) {
+    std::ranges::subrange<It> median_partition(It first, It last, Pr pred, Pj proj) {
         assert(first != last);
-        It left{ first }, middle{ std::ranges::next(first, last - first >> 1) }, right{ std::ranges::prev(last) };
-        if (std::invoke(pred, std::invoke(proj, *left), std::invoke(proj, *middle))) {
-            std::swap(*left, *middle);
+        It middle{ std::ranges::next(first, std::ranges::distance(first, last) >> 1) };
+        if (std::invoke(pred, std::invoke(proj, *middle), std::invoke(proj, *first))) {
+            std::swap(*first, *middle);
         }
-        if (std::invoke(pred, std::invoke(proj, *middle), std::invoke(proj, *right))) {
-            std::swap(*middle, *right);
-            if (std::invoke(pred, std::invoke(proj, *left), std::invoke(proj, *middle))) {
-                std::swap(*left, *middle);
+        if (std::invoke(pred, std::invoke(proj, *std::ranges::prev(last)), std::invoke(proj, *middle))) {
+            std::swap(*middle, *std::ranges::prev(last));
+            if (std::invoke(pred, std::invoke(proj, *middle), std::invoke(proj, *first))) {
+                std::swap(*first, *middle);
             }
         }
 
+        It left{ middle }, right{ middle }, i{ middle }, j{ middle };
         while (true) {
-            if (first == last) {
-                return first;
+            while (first != i && !std::invoke(pred, std::invoke(proj, *left), std::invoke(proj, *std::ranges::prev(i)))) {
+                if (!std::invoke(pred, std::invoke(proj, *std::ranges::prev(i)), std::invoke(proj, *left))) {
+                    std::swap(*--left, *std::ranges::prev(i));
+                }
+                --i;
             }
-            if (!std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *middle))) {
-                break;
+            while (j != last && !std::invoke(pred, std::invoke(proj, *j), std::invoke(proj, *left))) {
+                if (!std::invoke(pred, std::invoke(proj, *left), std::invoke(proj, *j))) {
+                    std::swap(*right++, *j);
+                }
+                ++j;
             }
-            ++first;
-        }
 
-        It i{ first };
-        while (++i != last) {
-            if (std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *middle))) {
-                std::swap(*first++, *i);
+            if (i == first && j == last) {
+                return { std::move(left), std::move(right) };
+            }
+
+            if (i == first) {
+                std::swap(*right, *j++);
+                std::swap(*left++, *right++);
+            }
+            else if (j == last) {
+                std::swap(*--left, *--i);
+                std::swap(*left, *--right);
+            }
+            else {
+                std::swap(*j++, *--i);
             }
         }
-        return first;
     }
 
     template <std::random_access_iterator It, class Pr, class Pj>
@@ -1345,10 +1359,10 @@ namespace plastic {
             return;
         }
 
-        It point{ plastic::median_partition(first, last, pred, proj) };
+        auto [left, right]{ plastic::median_partition(first, last, pred, proj) };
         margin = (margin >> 1) + (margin >> 2);
-        intro_sort(first, point, margin, pred, proj);
-        intro_sort(point, last, margin, pred, proj);
+        intro_sort(first, left, margin, pred, proj);
+        intro_sort(right, last, margin, pred, proj);
     }
 
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
@@ -1425,20 +1439,20 @@ namespace plastic {
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     It nth_element(It first, It middle, Se last, Pr pred = {}, Pj proj = {}) {
-        It r_last{ std::ranges::next(first, last) };
-        while (r_last - first > INSERTION_SORT_THRESHOLD) {
-            It point{ plastic::median_partition(first, r_last, pred, proj) };
-            if (point == middle) {
-                break;
+        It r_last{ std::ranges::next(first, last) }, i{ r_last };
+        while (i - first > INSERTION_SORT_THRESHOLD) {
+            auto [left, right]{ plastic::median_partition(first, i, pred, proj) };
+            if (middle < left) {
+                i = left;
             }
-            if (point < middle) {
-                first = point;
+            else if (right <= middle) {
+                first = right;
             }
             else {
-                r_last = point;
+                return r_last;
             }
         }
-        plastic::insertion_sort(first, r_last, pred, proj);
+        plastic::insertion_sort(first, i, pred, proj);
         return r_last;
     }
 
