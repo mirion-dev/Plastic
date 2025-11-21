@@ -1400,12 +1400,13 @@ namespace plastic {
 
     template <std::bidirectional_iterator It, class Pr, class Pj>
     void merge_sort(It first, It last, Pr pred, Pj proj) {
-        if (last - first <= INSERTION_SORT_THRESHOLD) {
+        auto size{ std::ranges::distance(first, last) };
+        if (size <= INSERTION_SORT_THRESHOLD) {
             plastic::insertion_sort(first, last, pred, proj);
             return;
         }
 
-        It middle{ std::ranges::next(first, last - first >> 1) };
+        It middle{ std::ranges::next(first, size >> 1) };
         merge_sort(first, middle, pred, proj);
         merge_sort(middle, last, pred, proj);
         if (std::invoke(pred, std::invoke(proj, *middle), std::invoke(proj, *std::ranges::prev(middle)))) {
