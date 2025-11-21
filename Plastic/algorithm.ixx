@@ -1116,7 +1116,7 @@ namespace plastic {
         return plastic::is_heap_until(first, last, pred, proj) == last;
     }
 
-    template <class It, class Pr, class Pj>
+    template <std::random_access_iterator It, class Pr, class Pj>
     void sift_up(It first, std::iter_difference_t<It> index, Pr pred, Pj proj) {
         auto value{ std::move(first[index]) };
         while (index != 0) {
@@ -1130,7 +1130,7 @@ namespace plastic {
         first[index] = std::move(value);
     }
 
-    template <class It, class Pr, class Pj>
+    template <std::random_access_iterator It, class Pr, class Pj>
     void sift_down(It first, std::iter_difference_t<It> index, std::iter_difference_t<It> size, Pr pred, Pj proj) {
         auto value{ std::move(first[index]) };
         while (true) {
@@ -1277,7 +1277,7 @@ namespace plastic {
         return plastic::is_sorted_until(first, last, pred, proj) == last;
     }
 
-    template <class It, class Pr, class Pj>
+    template <std::bidirectional_iterator It, class Pr, class Pj>
     void insertion_sort(It first, It last, Pr pred, Pj proj) {
         if (first == last) {
             return;
@@ -1299,9 +1299,10 @@ namespace plastic {
 
     static constexpr std::ptrdiff_t INSERTION_SORT_THRESHOLD{ 32 };
 
-    template <class It, class Pr, class Pj>
+    template <std::bidirectional_iterator It, class Pr, class Pj>
     It median_partition(It first, It last, Pr pred, Pj proj) {
-        It left{ first }, middle{ first + (last - first >> 1) }, right{ last - 1 };
+        assert(first != last);
+        It left{ first }, middle{ std::ranges::next(first, last - first >> 1) }, right{ std::ranges::prev(last) };
         if (std::invoke(pred, std::invoke(proj, *left), std::invoke(proj, *middle))) {
             std::swap(*left, *middle);
         }
@@ -1331,7 +1332,7 @@ namespace plastic {
         return first;
     }
 
-    template <class It, class Pr, class Pj>
+    template <std::random_access_iterator It, class Pr, class Pj>
     void intro_sort(It first, It last, std::iter_difference_t<It> margin, Pr pred, Pj proj) {
         if (last - first <= INSERTION_SORT_THRESHOLD) {
             plastic::insertion_sort(first, last, pred, proj);
@@ -1397,14 +1398,14 @@ namespace plastic {
         return { std::move(first1), std::move(i) };
     }
 
-    template <class It, class Pr, class Pj>
+    template <std::bidirectional_iterator It, class Pr, class Pj>
     void merge_sort(It first, It last, Pr pred, Pj proj) {
         if (last - first <= INSERTION_SORT_THRESHOLD) {
             plastic::insertion_sort(first, last, pred, proj);
             return;
         }
 
-        It middle{ first + (last - first >> 1) };
+        It middle{ std::ranges::next(first, last - first >> 1) };
         merge_sort(first, middle, pred, proj);
         merge_sort(middle, last, pred, proj);
         if (std::invoke(pred, std::invoke(proj, *middle), std::invoke(proj, *std::ranges::prev(middle)))) {
