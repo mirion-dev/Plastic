@@ -50,19 +50,20 @@ The class designs are primarily based on the standard library, but not identical
 
 ## Algorithms
 
-Same as the [constrained algorithms](https://en.cppreference.com/w/cpp/header/algorithm#Function-like_entities_.28C.2B.2B20.29) in `<algorithm>`, but only meet the standard's minimum requirements.
+Same as the [standard algorithms](https://eel.is/c++draft/#algorithms) in namespace `ranges`, but without optimizations.
 
 | **Category** | **Operations** |
 | -- | -- |
-| Non-modifying Sequence | `all_of`, `any_of`, `none_of`, `for_each`, `for_each_n`, `count`, `count_if`, `mismatch`, `find`, `find_if`, `find_if_not`, `find_end`, `find_first_of`, `adjacent_find`, `search`, `search_n`, `contains`, `contains_subrange`, `starts_with`, `ends_with` |
-| Fold | `fold_left`, `fold_left_first`, `fold_right`, `fold_right_last`, `fold_left_with_iter`, `fold_left_first_with_iter` |
-| Modifying Sequence | `copy`, `copy_if`, `copy_n`, `copy_backward`, `move`, `move_backward`, `fill`, `fill_n`, `transform`, `generate`, `generate_n`, `remove`, `remove_if`, `remove_copy`, `remove_copy_if`, `replace`, `replace_if`, `replace_copy`, `replace_copy_if`, `swap_ranges`, `reverse`, `reverse_copy`, `rotate`, `rotate_copy`, `shift_left`, `shift_right`, `sample`, `shuffle`, `unique`, `unique_copy` |
-| Partitioning | `is_partitioned`, `partition`, `partition_copy`, `stable_partition`, `partition_point` |
-| Sorting | `is_sorted`, `is_sorted_until`, `sort`, `partial_sort`, `partial_sort_copy`, `stable_sort`, `nth_element` |
-| Binary Search | `lower_bound`, `upper_bound`, `binary_search`, `equal_range` |
+| Non-modifying Sequence | `all_of`, `any_of`, `none_of`, `contains`, `contains_subrange`, `for_each`, `for_each_n`, `find`, `find_if`, `find_if_not`, `find_last`, `find_last_if`, `find_last_if_not`, `find_end`, `find_first_of`, `adjacent_find`, `count`, `count_if`, `mismatch`, `equal`, `is_permutation`, `search`, `search_n`, `starts_with`, `ends_with`, `fold_left`, `fold_left_first`, `fold_right`, `fold_right_last`, `fold_left_with_iter`, `fold_left_first_with_iter` |
+| Mutating Sequence | `copy`, `copy_n`, `copy_if`, `copy_backward`, `move`, `move_backward`, `swap_ranges`, `transform`, `replace`, `replace_if`, `replace_copy`, `replace_copy_if`, `fill`, `fill_n`, `generate`, `generate_n`, `remove`, `remove_if`, `remove_copy`, `remove_copy_if`, `unique`, `unique_copy`, `reverse`, `reverse_copy`, `rotate`, `rotate_copy`, `sample`, `shuffle`, `shift_left`, `shift_right` |
+| Sorting | `sort`, `stable_sort`, `partial_sort`, `partial_sort_copy`, `is_sorted`, `is_sorted_until` |
+| Nth element | `nth_element` |
+| Binary Search | `lower_bound`, `upper_bound`, `equal_range`, `binary_search` |
+| Partitioning | `is_partitioned`, `partition`, `stable_partition`, `partition_copy`, `partition_point` |
 | Merge | `merge`, `inplace_merge` |
-| Set | `includes`, `set_difference`, `set_intersection`, `set_symmetric_difference`, `set_union` |
-| Heap | `is_heap`, `is_heap_until`, `make_heap`, `push_heap`, `pop_heap`, `sort_heap` |
-| Minimum/Maximum | `max`, `max_element`, `min`, `min_element`, `minmax`, `minmax_element`, `clamp` |
-| Comparison | `equal`, `lexicographical_compare` |
-| Permutation | `is_permutation`, `next_permutation`, `prev_permutation` |
+| Set | `includes`, `set_union`, `set_intersection`, `set_difference`, `set_symmetric_difference` |
+| Heap | `push_heap`, `pop_heap`, `make_heap`, `sort_heap`, `is_heap`, `is_heap_until` |
+| Minimum and Maximum | `min`, `max`, `minmax`, `min_element`, `max_element`, `minmax_element` |
+| Bounded Value | `clamp` |
+| Lexicographical Comparison | `lexicographical_compare` |
+| Permutation | `next_permutation`, `prev_permutation` |
