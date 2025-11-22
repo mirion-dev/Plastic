@@ -1765,7 +1765,7 @@ namespace plastic {
     std::ranges::in_found_result<It> next_permutation(It first, Se last, Pr pred = {}, Pj proj = {}) {
         It r_last{ std::ranges::next(first, last) }, i{ r_last }, j{ r_last };
         if (first == r_last || first == --i) {
-            return { std::move(first), false };
+            return { std::move(r_last), false };
         }
 
         while (!std::invoke(pred, std::invoke(proj, *--i), std::invoke(proj, *--j))) {
@@ -1788,7 +1788,7 @@ namespace plastic {
     std::ranges::in_found_result<It> prev_permutation(It first, Se last, Pr pred = {}, Pj proj = {}) {
         It r_last{ std::ranges::next(first, last) }, i{ r_last }, j{ r_last };
         if (first == r_last || first == --i) {
-            return { std::move(first), false };
+            return { std::move(r_last), false };
         }
 
         while (!std::invoke(pred, std::invoke(proj, *--j), std::invoke(proj, *--i))) {
