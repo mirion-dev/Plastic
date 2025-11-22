@@ -1602,13 +1602,35 @@ namespace plastic {
 
         It min{ first }, max{ first };
         while (++first != last) {
-            if (std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *min))) {
-                min = first;
+            It i{ first };
+            if (++first == last) {
+                if (std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *min))) {
+                    min = i;
+                }
+                else if (!std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *max))) {
+                    max = i;
+                }
+                break;
             }
-            else if (!std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *max))) {
-                max = first;
+
+            if (std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *i))) {
+                if (std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *min))) {
+                    min = first;
+                }
+                if (!std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *max))) {
+                    max = i;
+                }
+            }
+            else {
+                if (std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *min))) {
+                    min = i;
+                }
+                if (!std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *max))) {
+                    max = first;
+                }
             }
         }
+
         return { std::move(min), std::move(max) };
     }
 
