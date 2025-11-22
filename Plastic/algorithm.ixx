@@ -1225,13 +1225,19 @@ namespace plastic {
 
         It left{ middle }, right{ middle }, i{ middle }, j{ middle };
         while (true) {
-            while (first != i && !std::invoke(pred, std::invoke(proj, *left), std::invoke(proj, *std::ranges::prev(i)))) {
+            while (first != i) {
+                if (std::invoke(pred, std::invoke(proj, *left), std::invoke(proj, *std::ranges::prev(i)))) {
+                    break;
+                }
                 if (!std::invoke(pred, std::invoke(proj, *std::ranges::prev(i)), std::invoke(proj, *left))) {
                     std::swap(*--left, *std::ranges::prev(i));
                 }
                 --i;
             }
-            while (j != last && !std::invoke(pred, std::invoke(proj, *j), std::invoke(proj, *left))) {
+            while (j != last) {
+                if (std::invoke(pred, std::invoke(proj, *j), std::invoke(proj, *left))) {
+                    break;
+                }
                 if (!std::invoke(pred, std::invoke(proj, *left), std::invoke(proj, *j))) {
                     std::swap(*right++, *j);
                 }
