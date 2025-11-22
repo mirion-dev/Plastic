@@ -296,26 +296,66 @@ namespace plastic {
 
     export template <std::forward_iterator It1, std::sentinel_for<It1> Se1, std::forward_iterator It2, std::sentinel_for<It2> Se2, class Pj1 = std::identity, class Pj2 = std::identity, std::indirect_equivalence_relation<std::projected<It1, Pj1>, std::projected<It2, Pj2>> Pr = std::ranges::equal_to>
     bool is_permutation(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
+        if constexpr (std::sized_sentinel_for<Se1, It1> && std::sized_sentinel_for<Se2, It2>) {
+            if (last1 - first1 != last2 - first2) {
+                return false;
+            }
+        }
+
+        auto res{ plastic::mismatch(first1, last1, first2, last2, pred, proj1, proj2) };
+        first1 = res.in1;
+        first2 = res.in2;
+        if (first1 == last1) {
+            return first2 == last2;
+        }
+        if (first2 == last2) {
+            return false;
+        }
+
         It1 i{ first1 };
         It2 j{ first2 };
-        while (j != last2) {
-            if (i == last1) {
+        while (i != last1) {
+            if (j == last2) {
                 return false;
             }
             ++i, ++j;
         }
-        if (i != last1) {
+        if (j != last2) {
             return false;
         }
 
         i = first1;
         while (i != last1) {
-            if (!plastic::contains(first1, i, *i, proj1)) {
-                auto count{ plastic::count(first2, last2, *i, proj2) };
-                if (count == 0 || count != plastic::count(i, last1, *i, proj1)) {
+            It1 j{ first1 };
+            while (j != i) {
+                if (std::invoke(pred, std::invoke(proj1, *i), std::invoke(proj1, *j))) {
+                    break;
+                }
+                ++j;
+            }
+
+            if (j == i) {
+                std::iter_difference_t<It1> count{ 1 };
+                while (++j != last1) {
+                    if (std::invoke(pred, std::invoke(proj1, *i), std::invoke(proj1, *j))) {
+                        ++count;
+                    }
+                }
+
+                It2 k{ first2 };
+                while (k != last2) {
+                    if (std::invoke(pred, std::invoke(proj1, *i), std::invoke(proj2, *k))) {
+                        if (count-- == 0) {
+                            return false;
+                        }
+                    }
+                    ++k;
+                }
+                if (count != 0) {
                     return false;
                 }
             }
+
             ++i;
         }
         return true;
