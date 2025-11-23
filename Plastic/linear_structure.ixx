@@ -192,6 +192,10 @@ namespace plastic {
             swap(other);
         }
 
+        ~inplace_vector() {
+            std::destroy(_begin(), _last);
+        }
+
         inplace_vector& operator=(const inplace_vector& other) {
             inplace_vector temp(other);
             swap(temp);
@@ -891,6 +895,10 @@ namespace plastic {
 
         inplace_deque(inplace_deque&& other) {
             swap(other);
+        }
+
+        ~inplace_deque() {
+            std::destroy(_first, _last);
         }
 
         inplace_deque& operator=(const inplace_deque& other) {
