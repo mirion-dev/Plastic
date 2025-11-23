@@ -1235,15 +1235,19 @@ namespace plastic {
                     std::destroy(_first, _last);
                 }
                 else if (_last <= new_last) {
-                    std::move_backward(_first, middle, new_last);
+                    pointer j{ middle - (new_last - _last) };
+                    std::uninitialized_move(j, middle, _last);
+                    std::move_backward(_first, j, _last);
                     std::destroy(_first, new_first);
                 }
                 else if (_first >= new_first) {
-                    std::move(_first, middle, new_first);
+                    pointer j{ _first + (_first - new_first) };
+                    std::uninitialized_move(_first, j, new_first);
+                    std::move(j, middle, _first);
                     std::destroy(new_last, _last);
                 }
                 else {
-                    std::move_backward(_first, middle, new_first);
+                    std::move_backward(_first, middle, new_last);
                     std::destroy(_first, new_first);
                     std::destroy(new_last, _last);
                 }
@@ -1255,12 +1259,16 @@ namespace plastic {
                     std::destroy(_first, _last);
                 }
                 else if (_first <= new_first) {
-                    std::move_backward(_first, _last, new_middle);
+                    pointer j{ _last - (new_middle - _last) };
+                    std::uninitialized_move(j, _last, _last);
+                    std::move_backward(_first, j, _last);
                     std::destroy(_first, new_first);
                 }
                 else {
-                    std::move(_first, _last, new_first);
-                    std::destroy(std::max(new_middle, _first), _last);
+                    pointer j{ _first + (_first - new_first) };
+                    std::uninitialized_move(_first, j, new_first);
+                    std::move(j, _last, _first);
+                    std::destroy(new_middle, _last);
                 }
                 plastic::construct(new_middle, new_last, args...);
             }
