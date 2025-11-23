@@ -149,7 +149,7 @@ namespace plastic {
             return const_cast<pointer>(_data.begin());
         }
 
-        pointer _end() {
+        pointer _end() const {
             return const_cast<pointer>(_data.end());
         }
 
