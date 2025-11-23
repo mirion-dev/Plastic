@@ -413,7 +413,6 @@ namespace plastic {
         friend auto operator<=>(const inplace_vector& left, const inplace_vector& right) {
             return std::lexicographical_compare_three_way(left._begin(), left._last, right._begin(), right._last);
         }
-
     };
 
     export template <class T>
@@ -704,7 +703,6 @@ namespace plastic {
         friend auto operator<=>(const vector& left, const vector& right) {
             return std::lexicographical_compare_three_way(left._begin(), left._last, right._begin(), right._last);
         }
-
     };
 
     template <class It>
