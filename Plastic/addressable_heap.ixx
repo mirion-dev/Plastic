@@ -71,7 +71,7 @@ namespace plastic {
             handle() = default;
 
             operator const_handle() const {
-                return &_ptr->value;
+                return std::addressof(_ptr->value);
             }
 
             reference operator*() const {
@@ -207,7 +207,7 @@ namespace plastic {
 
         const_handle apex() const {
             assert(!empty());
-            return &_data.front()->value;
+            return std::addressof(_data.front()->value);
         }
 
         const_handle capex() const {

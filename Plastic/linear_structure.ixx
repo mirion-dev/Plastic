@@ -1595,7 +1595,7 @@ namespace plastic {
             }
 
             pointer operator->() const {
-                return &static_cast<node*>(_ptr)->value;
+                return std::addressof(static_cast<node*>(_ptr)->value);
             }
 
             friend bool operator==(iterator left, iterator right) {
@@ -1865,7 +1865,7 @@ namespace plastic {
             }
 
             pointer operator->() const {
-                return &static_cast<node*>(_ptr)->value;
+                return std::addressof(static_cast<node*>(_ptr)->value);
             }
 
             friend bool operator==(iterator left, iterator right) {
