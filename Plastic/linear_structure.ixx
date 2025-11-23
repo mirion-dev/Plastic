@@ -445,6 +445,7 @@ namespace plastic {
         void _reallocate(size_type new_capacity) {
             dynamic_storage<value_type> new_data{ std::max(new_capacity, capacity() + (capacity() >> 1)) };
             pointer new_last{ std::uninitialized_move(_begin(), _last, new_data.begin()) };
+            clear();
             _data = std::move(new_data);
             _last = new_last;
         }
@@ -1194,6 +1195,7 @@ namespace plastic {
             dynamic_storage<value_type> new_data{ std::max(new_capacity, capacity() << 1) };
             pointer new_first{ new_data.begin() + (new_capacity - new_size >> 1) + left_reserved };
             pointer new_last{ std::uninitialized_move(_first, _last, new_first) };
+            clear();
             _data = std::move(new_data);
             _first = new_first;
             _last = new_last;
