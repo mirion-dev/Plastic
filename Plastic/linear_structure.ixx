@@ -123,7 +123,7 @@ namespace plastic {
         }
         else {
             std::uninitialized_fill(first, last, args...);
-    }
+        }
     }
 
     export template <class T, std::size_t N>
@@ -363,9 +363,19 @@ namespace plastic {
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
             assert(size() + count <= N);
-            pointer i{ pos.base() }, new_last{ _last + count };
-            std::fill(i, std::move_backward(i, _last, new_last), value);
-            _last = new_last;
+            value_type clone{ value };
+            pointer i{ pos.base() }, dest{ i + count };
+            if (dest <= _last) {
+                pointer src{ _last - count };
+                std::uninitialized_move(src, _last, _last);
+                std::fill(i, std::move_backward(i, src, _last), clone);
+            }
+            else {
+                std::uninitialized_move(i, _last, dest);
+                plastic::construct(_last, dest, clone);
+                std::fill(i, _last, clone);
+            }
+            _last += count;
             return i;
         }
 
@@ -1100,9 +1110,19 @@ namespace plastic {
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
             assert(size() + count <= N);
-            iterator i{ pos.base() }, new_last{ end() + count };
-            std::fill(i, std::move_backward(i, end(), new_last), value);
-            _last = new_last._ptr;
+            value_type clone{ value };
+            iterator i{ pos.base() }, dest{ i + count };
+            if (dest < end()) {
+                iterator src{ end() - count };
+                std::uninitialized_move(src, end(), end());
+                std::fill(i, std::move_backward(i, src, end()), clone);
+            }
+            else {
+                std::uninitialized_move(i, end(), dest);
+                plastic::construct(end(), dest, clone);
+                std::fill(i, end(), clone);
+            }
+            _last = (end() + count)._ptr;
             return i;
         }
 
