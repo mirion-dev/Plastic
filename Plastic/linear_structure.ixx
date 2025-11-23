@@ -497,7 +497,7 @@ namespace plastic {
         }
 
         ~vector() {
-            std::destroy(_begin(), _last);
+            clear();
         }
 
         vector& operator=(const vector& other) {
@@ -1285,7 +1285,7 @@ namespace plastic {
         }
 
         ~deque() {
-            std::destroy(_first, _last);
+            clear();
         }
 
         deque& operator=(const deque& other) {
