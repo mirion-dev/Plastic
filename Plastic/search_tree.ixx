@@ -302,7 +302,7 @@ namespace plastic {
         const_iterator lower_bound(const_reference value) const {
             node_base *bound{ _head }, *i{ _head->parent };
             while (!i->is_head) {
-                if (!_pred(static_cast<node*>(i)->value, value)) {
+                if (!std::invoke(_pred, static_cast<node*>(i)->value, value)) {
                     bound = i;
                     i = i->left;
                 }
@@ -316,7 +316,7 @@ namespace plastic {
         const_iterator upper_bound(const_reference value) const {
             node_base *bound{ _head }, *i{ _head->parent };
             while (!i->is_head) {
-                if (_pred(value, static_cast<node*>(i)->value)) {
+                if (std::invoke(_pred, value, static_cast<node*>(i)->value)) {
                     bound = i;
                     i = i->left;
                 }
@@ -333,12 +333,12 @@ namespace plastic {
 
         const_iterator find(const_reference value) const {
             node_base* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !_pred(static_cast<node*>(bound)->value, value) ? bound : _head;
+            return !bound->is_head && !std::invoke(_pred, static_cast<node*>(bound)->value, value) ? bound : _head;
         }
 
         bool contains(const_reference value) const {
             node_base* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !_pred(static_cast<node*>(bound)->value, value);
+            return !bound->is_head && !std::invoke(_pred, static_cast<node*>(bound)->value, value);
         }
 
         size_type count(const_reference value) const {
@@ -351,7 +351,7 @@ namespace plastic {
             bool is_left{};
             while (!i->is_head) {
                 parent = i;
-                is_left = self._pred(value, static_cast<node*>(i)->value);
+                is_left = std::invoke(self._pred, value, static_cast<node*>(i)->value);
                 i = is_left ? i->left : i->right;
             }
 

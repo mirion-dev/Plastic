@@ -43,7 +43,7 @@ namespace plastic {
             }
 
             reference operator=(const value_type& other) const {
-                bool is_greater{ _cont->_pred(_ptr->value, other) };
+                bool is_greater{ std::invoke(_cont->_pred, _ptr->value, other) };
                 _ptr->value = other;
                 if (is_greater) {
                     _cont->_sift_up(_ptr->index);
@@ -92,7 +92,7 @@ namespace plastic {
             node* ptr{ _data[index] };
             while (index != 0) {
                 size_type parent{ index - 1 >> 1 };
-                if (!_pred(_data[parent]->value, ptr->value)) {
+                if (!std::invoke(_pred, _data[parent]->value, ptr->value)) {
                     break;
                 }
                 _set(index, _data[parent]);
@@ -108,10 +108,10 @@ namespace plastic {
                 if (child >= size()) {
                     break;
                 }
-                if (child + 1 < size() && _pred(_data[child]->value, _data[child + 1]->value)) {
+                if (child + 1 < size() && std::invoke(_pred, _data[child]->value, _data[child + 1]->value)) {
                     ++child;
                 }
-                if (!_pred(ptr->value, _data[child]->value)) {
+                if (!std::invoke(_pred, ptr->value, _data[child]->value)) {
                     break;
                 }
                 _set(index, _data[child]);
@@ -254,7 +254,7 @@ namespace plastic {
             else {
                 _set(index, _data.back());
                 _data.pop_back();
-                if (_pred(value, _data[index]->value)) {
+                if (std::invoke(_pred, value, _data[index]->value)) {
                     _sift_up(index);
                 }
                 else {
