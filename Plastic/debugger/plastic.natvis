@@ -2,7 +2,7 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
     <Type Name="plastic::inplace_vector&lt;*,*&gt;">
-		<Intrinsic Name="begin" Expression="($T1*)_data"/>
+		<Intrinsic Name="begin" Expression="($T1*)_data._storage.data"/>
         <Intrinsic Name="size" Expression="(size_t)(_last - begin())"/>
         <Intrinsic Name="capacity" Expression="(size_t)$T2"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
@@ -13,17 +13,17 @@
     </Type>
 
     <Type Name="plastic::vector&lt;*&gt;">
-        <Intrinsic Name="size" Expression="(size_t)(_last - _begin)"/>
-        <Intrinsic Name="capacity" Expression="(size_t)(_end - _begin)"/>
+        <Intrinsic Name="size" Expression="(size_t)(_last - _data._begin)"/>
+        <Intrinsic Name="capacity" Expression="(size_t)(_data._end - _data._begin)"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
-            <ExpandedItem>_begin, [size()]</ExpandedItem>
+            <ExpandedItem>_data._begin, [size()]</ExpandedItem>
         </Expand>
     </Type>
 
     <Type Name="plastic::inplace_deque&lt;*,*&gt;">
-		<Intrinsic Name="begin" Expression="($T1*)_data"/>
+		<Intrinsic Name="begin" Expression="($T1*)_data._storage.data"/>
 		<Intrinsic Name="end" Expression="begin() + $T2 + 1"/>
         <Intrinsic Name="size" Expression="(size_t)(_first &lt;= _last ? _last - _first : $T2 + 1 - (_first - _last))"/>
         <Intrinsic Name="capacity" Expression="(size_t)$T2"/>
@@ -39,7 +39,7 @@
 
     <Type Name="plastic::deque&lt;*&gt;">
         <Intrinsic Name="size" Expression="(size_t)(_last - _first)"/>
-        <Intrinsic Name="capacity" Expression="(size_t)(_end - _begin)"/>
+        <Intrinsic Name="capacity" Expression="(size_t)(_data._end - _data._begin)"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
@@ -74,8 +74,8 @@
     </Type>
 
     <Type Name="plastic::tree&lt;*,*,*&gt;">
-        <Intrinsic Name="size" Expression="_size"/>
-        <Intrinsic Name="pred" Expression="_pred"/>
+		<Intrinsic Name="pred" Expression="_pred"/>
+		<Intrinsic Name="size" Expression="_size"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[comparator]">pred()</Item>
@@ -90,8 +90,8 @@
     </Type>
 
     <Type Name="plastic::binary_heap&lt;*&gt;">
-        <Intrinsic Name="size" Expression="_data.size()"/>
-        <Intrinsic Name="pred" Expression="_pred"/>
+		<Intrinsic Name="pred" Expression="_pred"/>
+		<Intrinsic Name="size" Expression="_data.size()"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[comparator]">pred()</Item>
