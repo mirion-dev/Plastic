@@ -543,7 +543,8 @@ namespace plastic {
         }
 
         void resize(size_type new_size, const_reference value) {
-            _resize(new_size, value);
+            value_type clone{ value };
+            _resize(new_size, clone);
         }
 
         size_type capacity() const {
@@ -643,10 +644,11 @@ namespace plastic {
         }
 
         void push_back(const_reference value) {
+            value_type clone{ value };
             if (_last == _end()) {
                 _reallocate(size() + 1);
             }
-            std::construct_at(_last++, value);
+            std::construct_at(_last++, clone);
         }
 
         void pop_back() {
@@ -659,14 +661,25 @@ namespace plastic {
         }
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
+            value_type clone{ value };
             difference_type offset{ pos.base() - _begin() };
             if (static_cast<size_type>(_end() - _last) < count) {
                 _reallocate(size() + count);
             }
 
-            pointer i{ _begin() + offset }, new_last{ _last + count };
-            std::fill(i, std::move_backward(i, _last, new_last), value);
-            _last = new_last;
+            pointer i{ _begin() + offset }, dest{ i + count };
+            if (dest <= _last) {
+                pointer src{ _last - count };
+                std::uninitialized_move(src, _last, _last);
+                std::fill(i, std::move_backward(i, src, _last), clone);
+            }
+            else {
+                std::uninitialized_move(i, _last, dest);
+                plastic::construct(_last, dest, clone);
+                std::fill(i, _last, clone);
+            }
+            _last += count;
+
             return i;
         }
 
@@ -1333,7 +1346,8 @@ namespace plastic {
         }
 
         void resize(size_type new_size, const_reference value) {
-            _resize(new_size, value);
+            value_type clone{ value };
+            _resize(new_size, clone);
         }
 
         size_type capacity() const {
@@ -1433,10 +1447,11 @@ namespace plastic {
         }
 
         void push_front(const_reference value) {
+            value_type clone{ value };
             if (_first == _begin()) {
                 _reallocate(size() + 1, 0, 1);
             }
-            std::construct_at(--_first, value);
+            std::construct_at(--_first, clone);
         }
 
         void pop_front() {
@@ -1445,10 +1460,11 @@ namespace plastic {
         }
 
         void push_back(const_reference value) {
+            value_type clone{ value };
             if (_last == _end()) {
                 _reallocate(size() + 1, 1);
             }
-            std::construct_at(_last++, value);
+            std::construct_at(_last++, clone);
         }
 
         void pop_back() {
@@ -1461,14 +1477,25 @@ namespace plastic {
         }
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
+            value_type clone{ value };
             difference_type offset{ pos.base() - _first };
             if (static_cast<size_type>(_end() - _last) < count) {
                 _reallocate(size() + count, count);
             }
 
-            pointer i{ _first + offset }, new_last{ _last + count };
-            std::fill(i, std::move_backward(i, _last, new_last), value);
-            _last = new_last;
+            pointer i{ _first + offset }, dest{ i + count };
+            if (dest <= _last) {
+                pointer src{ _last - count };
+                std::uninitialized_move(src, _last, _last);
+                std::fill(i, std::move_backward(i, src, _last), clone);
+            }
+            else {
+                std::uninitialized_move(i, _last, dest);
+                plastic::construct(_last, dest, clone);
+                std::fill(i, _last, clone);
+            }
+            _last += count;
+
             return i;
         }
 
