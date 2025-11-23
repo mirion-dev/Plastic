@@ -335,12 +335,12 @@ namespace plastic {
 
         const_iterator find(const_reference value) const {
             node_base* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !std::invoke(_pred, static_cast<node*>(bound)->value, value) ? bound : _head;
+            return !bound->is_head && !std::invoke(_pred, value, static_cast<node*>(bound)->value) ? bound : _head;
         }
 
         bool contains(const_reference value) const {
             node_base* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !std::invoke(_pred, static_cast<node*>(bound)->value, value);
+            return !bound->is_head && !std::invoke(_pred, value, static_cast<node*>(bound)->value);
         }
 
         size_type count(const_reference value) const {
