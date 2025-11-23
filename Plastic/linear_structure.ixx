@@ -115,12 +115,15 @@ namespace plastic {
         }
     };
 
-    template <std::input_iterator It>
-    void construct(It first, It last, const auto&... args) {
-        while (first != last) {
-            std::construct_at(first, args...);
-            ++first;
+    template <std::input_iterator It, class... Args>
+        requires (sizeof...(Args) <= 1)
+    void construct(It first, It last, const Args&... args) {
+        if constexpr (sizeof...(Args) == 0) {
+            std::uninitialized_value_construct(first, last);
         }
+        else {
+            std::uninitialized_fill(first, last, args...);
+    }
     }
 
     export template <class T, std::size_t N>
