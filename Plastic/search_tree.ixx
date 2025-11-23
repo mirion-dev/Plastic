@@ -28,16 +28,6 @@ namespace plastic {
             bool is_head{ true };
             metadata meta;
 
-            void free() {
-                if (is_head) {
-                    return;
-                }
-
-                left->free();
-                right->free();
-                delete this;
-            }
-
             node_base* leftmost() {
                 node_base* i{ this };
                 while (!i->left->is_head) {
@@ -115,6 +105,16 @@ namespace plastic {
                     clone->right = static_cast<node*>(this->right)->clone(head, clone);
                 }
                 return clone;
+            }
+
+            void free() {
+                if (!this->left->is_head) {
+                    static_cast<node*>(this->left)->free();
+                }
+                if (!this->right->is_head) {
+                    static_cast<node*>(this->right)->free();
+                }
+                delete this;
             }
         };
 
@@ -254,9 +254,11 @@ namespace plastic {
         }
 
         void clear() {
-            _head->parent->free();
+            if (_size != 0) {
+                static_cast<node*>(_head->parent)->free();
             _head->parent = _head->left = _head->right = _head;
             _size = 0;
+        }
         }
 
         const_iterator begin() const {
@@ -451,7 +453,7 @@ namespace plastic {
             }
 
             self._erase_rebalance(replaced, erased);
-            delete erased;
+            delete static_cast<node*>(erased);
             --self._size;
             return pos;
         }
