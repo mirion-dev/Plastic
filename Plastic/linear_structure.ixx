@@ -364,15 +364,16 @@ namespace plastic {
         iterator insert(const_iterator pos, size_type count, const_reference value) {
             assert(size() + count <= N);
             value_type clone{ value };
-            pointer i{ pos.base() }, dest{ i + count };
-            if (dest <= _last) {
-                pointer src{ _last - count };
-                std::uninitialized_move(src, _last, _last);
-                std::fill(i, std::move_backward(i, src, _last), clone);
+            pointer i{ pos.base() }, new_i{ i + count };
+            if (new_i <= _last) {
+                pointer j{ _last - count };
+                std::uninitialized_move(j, _last, _last);
+                std::move_backward(i, j, _last);
+                std::fill(i, new_i, clone);
             }
             else {
-                std::uninitialized_move(i, _last, dest);
-                plastic::construct(_last, dest, clone);
+                std::uninitialized_move(i, _last, new_i);
+                plastic::construct(_last, new_i, clone);
                 std::fill(i, _last, clone);
             }
             _last += count;
@@ -667,15 +668,16 @@ namespace plastic {
                 _reallocate(size() + count);
             }
 
-            pointer i{ _begin() + offset }, dest{ i + count };
-            if (dest <= _last) {
-                pointer src{ _last - count };
-                std::uninitialized_move(src, _last, _last);
-                std::fill(i, std::move_backward(i, src, _last), clone);
+            pointer i{ _begin() + offset }, new_i{ i + count };
+            if (new_i <= _last) {
+                pointer j{ _last - count };
+                std::uninitialized_move(j, _last, _last);
+                std::move_backward(i, j, _last);
+                std::fill(i, new_i, clone);
             }
             else {
-                std::uninitialized_move(i, _last, dest);
-                plastic::construct(_last, dest, clone);
+                std::uninitialized_move(i, _last, new_i);
+                plastic::construct(_last, new_i, clone);
                 std::fill(i, _last, clone);
             }
             _last += count;
@@ -1123,15 +1125,16 @@ namespace plastic {
         iterator insert(const_iterator pos, size_type count, const_reference value) {
             assert(size() + count <= N);
             value_type clone{ value };
-            iterator i{ pos.base() }, dest{ i + count };
-            if (dest < end()) {
-                iterator src{ end() - count };
-                std::uninitialized_move(src, end(), end());
-                std::fill(i, std::move_backward(i, src, end()), clone);
+            iterator i{ pos.base() }, new_i{ i + count };
+            if (new_i < end()) {
+                iterator j{ end() - count };
+                std::uninitialized_move(j, end(), end());
+                std::move_backward(i, j, end());
+                std::fill(i, new_i, clone);
             }
             else {
-                std::uninitialized_move(i, end(), dest);
-                plastic::construct(end(), dest, clone);
+                std::uninitialized_move(i, end(), new_i);
+                plastic::construct(end(), new_i, clone);
                 std::fill(i, end(), clone);
             }
             _last = (end() + count)._ptr;
@@ -1483,15 +1486,16 @@ namespace plastic {
                 _reallocate(size() + count, count);
             }
 
-            pointer i{ _first + offset }, dest{ i + count };
-            if (dest <= _last) {
-                pointer src{ _last - count };
-                std::uninitialized_move(src, _last, _last);
-                std::fill(i, std::move_backward(i, src, _last), clone);
+            pointer i{ _first + offset }, new_i{ i + count };
+            if (new_i <= _last) {
+                pointer j{ _last - count };
+                std::uninitialized_move(j, _last, _last);
+                std::move_backward(i, j, _last);
+                std::fill(i, new_i, clone);
             }
             else {
-                std::uninitialized_move(i, _last, dest);
-                plastic::construct(_last, dest, clone);
+                std::uninitialized_move(i, _last, new_i);
+                plastic::construct(_last, new_i, clone);
                 std::fill(i, _last, clone);
             }
             _last += count;
