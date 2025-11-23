@@ -256,9 +256,9 @@ namespace plastic {
         void clear() {
             if (_size != 0) {
                 static_cast<node*>(_head->parent)->free();
-            _head->parent = _head->left = _head->right = _head;
-            _size = 0;
-        }
+                _head->parent = _head->left = _head->right = _head;
+                _size = 0;
+            }
         }
 
         const_iterator begin() const {
@@ -503,8 +503,8 @@ namespace plastic {
 
         using typename base::node_base;
 
-        static void _insert_rebalance(node_base*) {}
-        static void _erase_rebalance(node_base*, node_base*) {}
+        void _insert_rebalance(node_base*) {}
+        void _erase_rebalance(node_base*, node_base*) {}
 
     public:
         using base::base;
