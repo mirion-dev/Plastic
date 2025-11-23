@@ -474,6 +474,10 @@ namespace plastic {
         }
 
         void merge(this auto&& self, tree& other) {
+            if (std::addressof(self) == std::addressof(other)) {
+                return;
+            }
+
             self.insert(other.begin(), other.end());
             other.clear();
         }
