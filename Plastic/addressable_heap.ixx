@@ -265,16 +265,18 @@ namespace plastic {
         }
 
         void merge(binary_heap& other) {
+            if (this == std::addressof(other)) {
+                return;
+            }
+
             size_type index{ size() };
             _data.resize(index + other.size());
-
             auto i{ _data.begin() + index };
             for (node* ptr : other._data) {
-                ptr->index = index++;
                 *i++ = ptr;
+                ptr->index = index++;
             }
             other._data.clear();
-
             _make_heap();
         }
     };

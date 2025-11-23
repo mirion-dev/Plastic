@@ -77,6 +77,8 @@ void test_addressable_heap() {
     x.erase(h2);
     ASSERT(format(x) == "[0, 1, 1, 2]");
 
+    x.merge(x);
+    ASSERT(format(x) == "[0, 1, 1, 2]");
     x.merge(b);
     ASSERT(format(x) == "[0, 1, 1, 2, 4, 4, 4, 4]");
     ASSERT(format(b) == "[]");
