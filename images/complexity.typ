@@ -87,7 +87,7 @@
 #let diag-binary-search-tree = diag-search-tree()
 #let diag-red-black-tree = diag-search-tree(red-black: true)
 
-#let O-cell(complexity, fill: red, amortized: false, label: none, ..args) = grid.cell(
+#let O-cell(complexity, fill: red, label: none, ..args) = grid.cell(
     inset: (left: 1em, right: 1em),
     fill: fill.lighten(50%),
     ..args,
