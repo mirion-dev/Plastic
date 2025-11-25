@@ -10,30 +10,29 @@ namespace plastic {
 
     template <class T, std::size_t N>
     class fixed_storage {
-        union internal_storage {
-            T data[N];
-
-            internal_storage() {}
-            ~internal_storage() {}
+        union {
+            T _data[N];
         };
 
-        internal_storage _storage;
-
     public:
+        // workaround for P3074R7
+        fixed_storage() {}
+        ~fixed_storage() {}
+
         T* begin() {
-            return _storage.data;
+            return _data;
         }
 
         const T* begin() const {
-            return _storage.data;
+            return _data;
         }
 
         T* end() {
-            return _storage.data + N;
+            return _data + N;
         }
 
         const T* end() const {
-            return _storage.data + N;
+            return _data + N;
         }
     };
 

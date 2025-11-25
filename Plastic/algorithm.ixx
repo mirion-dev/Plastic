@@ -6,7 +6,7 @@ export module plastic:algorithm;
 
 import std;
 
-// introduced in C++26, but not yet implemented in MSVC
+// workaround for P2248R8
 namespace std {
     template <std::indirectly_readable It, std::indirectly_regular_unary_invocable<It> Pj>
     using projected_value_t = std::remove_cvref_t<std::invoke_result_t<Pj&, std::iter_value_t<It>&>>;
