@@ -435,28 +435,36 @@ namespace plastic {
         using reference = T&;
         using const_reference = const T&;
         using iterator = pointer;
-        using const_iterator = std::const_iterator<iterator>;
+        using const_iterator = const_pointer;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     private:
         dynamic_storage<value_type> _data;
-        pointer _last{ _begin() };
+        pointer _last_ptr{ _begin() };
 
-        pointer _begin() const {
-            return const_cast<pointer>(_data.begin());
+        auto _begin(this auto&& self) {
+            return self._data.begin();
         }
 
-        pointer _end() const {
-            return const_cast<pointer>(_data.end());
+        auto _end(this auto&& self) {
+            return self._data.end();
+        }
+
+        pointer _last() {
+            return _last_ptr;
+        }
+
+        const_pointer _last() const {
+            return _last_ptr;
         }
 
         void _reallocate(size_type new_capacity) {
             dynamic_storage<value_type> new_data{ std::max(new_capacity, capacity() + (capacity() >> 1)) };
-            pointer new_last{ std::uninitialized_move(_begin(), _last, new_data.begin()) };
+            pointer new_last{ std::uninitialized_move(_begin(), _last(), new_data.begin()) };
             clear();
             _data = std::move(new_data);
-            _last = new_last;
+            _last_ptr = new_last;
         }
 
         void _resize(size_type new_size, const auto&... args) {
@@ -466,12 +474,12 @@ namespace plastic {
 
             pointer new_last{ _begin() + new_size };
             if (new_size <= size()) {
-                std::destroy(new_last, _last);
+                std::destroy(new_last, _last());
             }
             else {
-                plastic::construct(_last, new_last, args...);
+                plastic::construct(_last(), new_last, args...);
             }
-            _last = new_last;
+            _last_ptr = new_last;
         }
 
     public:
@@ -479,16 +487,16 @@ namespace plastic {
 
         explicit vector(size_type size) :
             _data{ size },
-            _last{ _end() } {
+            _last_ptr{ _end() } {
 
-            plastic::construct(_begin(), _last);
+            plastic::construct(_begin(), _last());
         }
 
         vector(size_type size, const_reference value) :
             _data{ size },
-            _last{ _end() } {
+            _last_ptr{ _end() } {
 
-            plastic::construct(_begin(), _last, value);
+            plastic::construct(_begin(), _last(), value);
         }
 
         template <std::input_iterator It>
@@ -500,7 +508,7 @@ namespace plastic {
             vector(list.begin(), list.end()) {}
 
         vector(const vector& other) :
-            vector(other._begin(), other._last) {}
+            vector(other._begin(), other._last()) {}
 
         vector(vector&& other) {
             swap(other);
@@ -523,7 +531,7 @@ namespace plastic {
 
         void swap(vector& other) {
             std::swap(_data, other._data);
-            std::swap(_last, other._last);
+            std::swap(_last_ptr, other._last_ptr);
         }
 
         friend void swap(vector& left, vector& right) {
@@ -531,11 +539,11 @@ namespace plastic {
         }
 
         bool empty() const {
-            return _begin() == _last;
+            return _begin() == _last();
         }
 
         size_type size() const {
-            return _last - _begin();
+            return _last() - _begin();
         }
 
         static size_type max_size() {
@@ -543,8 +551,8 @@ namespace plastic {
         }
 
         void clear() {
-            std::destroy(_begin(), _last);
-            _last = _begin();
+            std::destroy(_begin(), _last());
+            _last_ptr = _begin();
         }
 
         void resize(size_type new_size) {
@@ -575,11 +583,11 @@ namespace plastic {
         }
 
         iterator end() {
-            return _last;
+            return _last();
         }
 
         const_iterator end() const {
-            return _last;
+            return _last();
         }
 
         const_iterator cbegin() const {
@@ -636,12 +644,12 @@ namespace plastic {
 
         reference back() {
             assert(!empty());
-            return _last[-1];
+            return _last()[-1];
         }
 
         const_reference back() const {
             assert(!empty());
-            return _last[-1];
+            return _last()[-1];
         }
 
         pointer data() {
@@ -654,15 +662,15 @@ namespace plastic {
 
         void push_back(const_reference value) {
             value_type clone{ value };
-            if (_last == _end()) {
+            if (_last() == _end()) {
                 _reallocate(size() + 1);
             }
-            std::construct_at(_last++, clone);
+            std::construct_at(_last_ptr++, clone);
         }
 
         void pop_back() {
             assert(!empty());
-            std::destroy_at(--_last);
+            std::destroy_at(--_last_ptr);
         }
 
         iterator insert(const_iterator pos, const_reference value) {
@@ -671,33 +679,33 @@ namespace plastic {
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
             value_type clone{ value };
-            difference_type offset{ pos.base() - _begin() };
-            if (static_cast<size_type>(_end() - _last) < count) {
+            difference_type offset{ pos - _begin() };
+            if (static_cast<size_type>(_end() - _last()) < count) {
                 _reallocate(size() + count);
             }
 
             pointer i{ _begin() + offset }, new_i{ i + count };
-            if (new_i <= _last) {
-                pointer j{ _last - count };
-                std::uninitialized_move(j, _last, _last);
-                std::move_backward(i, j, _last);
+            if (new_i <= _last()) {
+                pointer j{ _last() - count };
+                std::uninitialized_move(j, _last(), _last());
+                std::move_backward(i, j, _last());
                 std::fill(i, new_i, clone);
             }
             else {
-                std::uninitialized_move(i, _last, new_i);
-                plastic::construct(_last, new_i, clone);
-                std::fill(i, _last, clone);
+                std::uninitialized_move(i, _last(), new_i);
+                plastic::construct(_last(), new_i, clone);
+                std::fill(i, _last(), clone);
             }
-            _last += count;
+            _last_ptr += count;
 
             return i;
         }
 
         template <std::input_iterator It>
         iterator insert(const_iterator pos, It first, It last) {
-            difference_type pos_offset{ pos.base() - _begin() }, last_offset{ _last - _begin() };
+            difference_type pos_offset{ pos - _begin() }, last_offset{ _last() - _begin() };
             std::copy(first, last, std::back_inserter(*this));
-            std::rotate(_begin() + pos_offset, _begin() + last_offset, _last);
+            std::rotate(_begin() + pos_offset, _begin() + last_offset, _last());
             return _begin() + pos_offset;
         }
 
@@ -706,26 +714,26 @@ namespace plastic {
         }
 
         iterator erase(const_iterator pos) {
-            pointer i{ pos.base() };
-            assert(i != _last);
-            _last = std::move(i + 1, _last, i);
-            std::destroy_at(_last);
+            auto i{ const_cast<pointer>(pos) };
+            assert(i != _last());
+            _last_ptr = std::move(i + 1, _last(), i);
+            std::destroy_at(_last());
             return i;
         }
 
         iterator erase(const_iterator first, const_iterator last) {
-            pointer i{ first.base() }, e{ last.base() }, new_last{ std::move(e, _last, i) };
-            std::destroy(new_last, _last);
-            _last = new_last;
+            auto i{ const_cast<pointer>(first) }, e{ const_cast<pointer>(last) }, new_last{ std::move(e, _last(), i) };
+            std::destroy(new_last, _last());
+            _last_ptr = new_last;
             return i;
         }
 
         friend bool operator==(const vector& left, const vector& right) {
-            return std::equal(left._begin(), left._last, right._begin(), right._last);
+            return std::equal(left._begin(), left._last(), right._begin(), right._last());
         }
 
         friend auto operator<=>(const vector& left, const vector& right) {
-            return std::lexicographical_compare_three_way(left._begin(), left._last, right._begin(), right._last);
+            return std::lexicographical_compare_three_way(left._begin(), left._last(), right._begin(), right._last());
         }
     };
 
@@ -1223,21 +1231,37 @@ namespace plastic {
         using reference = T&;
         using const_reference = const T&;
         using iterator = pointer;
-        using const_iterator = std::const_iterator<iterator>;
+        using const_iterator = const_pointer;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     private:
         dynamic_storage<value_type> _data;
-        pointer _first{ _begin() };
-        pointer _last{ _begin() };
+        pointer _first_ptr{ _begin() };
+        pointer _last_ptr{ _begin() };
 
-        pointer _begin() const {
-            return const_cast<pointer>(_data.begin());
+        auto _begin(this auto&& self) {
+            return self._data.begin();
         }
 
-        pointer _end() const {
-            return const_cast<pointer>(_data.end());
+        auto _end(this auto&& self) {
+            return self._data.end();
+        }
+
+        pointer _first() {
+            return _first_ptr;
+        }
+
+        const_pointer _first() const {
+            return _first_ptr;
+        }
+
+        pointer _last() {
+            return _last_ptr;
+        }
+
+        const_pointer _last() const {
+            return _last_ptr;
         }
 
         pointer _reallocate(size_type new_capacity, size_type right_reserved = {}, size_type left_reserved = {}) {
@@ -1245,70 +1269,70 @@ namespace plastic {
 
             dynamic_storage<value_type> new_data{ std::max(new_capacity, capacity() << 1) };
             pointer new_first{ new_data.begin() + (new_capacity - new_size >> 1) + left_reserved };
-            pointer new_last{ std::uninitialized_move(_first, _last, new_first) };
+            pointer new_last{ std::uninitialized_move(_first(), _last(), new_first) };
             clear();
             _data = std::move(new_data);
-            _first = new_first;
-            _last = new_last;
+            _first_ptr = new_first;
+            _last_ptr = new_last;
 
-            return _first + new_size;
+            return _first() + new_size;
         }
 
         void _resize(size_type new_size, const auto&... args) {
             if (new_size > capacity()) {
                 pointer new_last{ _reallocate(new_size, new_size - size()) };
-                plastic::construct(_last, new_last, args...);
-                _last = new_last;
+                plastic::construct(_last(), new_last, args...);
+                _last_ptr = new_last;
                 return;
             }
 
             pointer new_first{ _begin() + (capacity() - new_size >> 1) }, new_last{ new_first + new_size };
             if (new_size <= size()) {
-                pointer middle{ _first + new_size };
-                if (_last <= new_first || _first >= new_last) {
-                    std::uninitialized_move(_first, middle, new_first);
-                    std::destroy(_first, _last);
+                pointer middle{ _first() + new_size };
+                if (_last() <= new_first || _first() >= new_last) {
+                    std::uninitialized_move(_first(), middle, new_first);
+                    std::destroy(_first(), _last());
                 }
-                else if (_last <= new_last) {
-                    pointer j{ middle - (new_last - _last) };
-                    std::uninitialized_move(j, middle, _last);
-                    std::move_backward(_first, j, _last);
-                    std::destroy(_first, new_first);
+                else if (_last() <= new_last) {
+                    pointer j{ middle - (new_last - _last()) };
+                    std::uninitialized_move(j, middle, _last());
+                    std::move_backward(_first(), j, _last());
+                    std::destroy(_first(), new_first);
                 }
-                else if (_first >= new_first) {
-                    pointer j{ _first + (_first - new_first) };
-                    std::uninitialized_move(_first, j, new_first);
-                    std::move(j, middle, _first);
-                    std::destroy(new_last, _last);
+                else if (_first() >= new_first) {
+                    pointer j{ _first() + (_first() - new_first) };
+                    std::uninitialized_move(_first(), j, new_first);
+                    std::move(j, middle, _first());
+                    std::destroy(new_last, _last());
                 }
                 else {
-                    std::move_backward(_first, middle, new_last);
-                    std::destroy(_first, new_first);
-                    std::destroy(new_last, _last);
+                    std::move_backward(_first(), middle, new_last);
+                    std::destroy(_first(), new_first);
+                    std::destroy(new_last, _last());
                 }
             }
             else {
                 pointer new_middle{ new_first + size() };
-                if (_last <= new_first || _first >= new_middle) {
-                    std::uninitialized_move(_first, _last, new_first);
-                    std::destroy(_first, _last);
+                if (_last() <= new_first || _first() >= new_middle) {
+                    std::uninitialized_move(_first(), _last(), new_first);
+                    std::destroy(_first(), _last());
                 }
-                else if (_first <= new_first) {
-                    pointer j{ _last - (new_middle - _last) };
-                    std::uninitialized_move(j, _last, _last);
-                    std::move_backward(_first, j, _last);
-                    std::destroy(_first, new_first);
+                else if (_first() <= new_first) {
+                    pointer j{ _last() - (new_middle - _last()) };
+                    std::uninitialized_move(j, _last(), _last());
+                    std::move_backward(_first(), j, _last());
+                    std::destroy(_first(), new_first);
                 }
                 else {
-                    pointer j{ _first + (_first - new_first) };
-                    std::uninitialized_move(_first, j, new_first);
-                    std::move(j, _last, _first);
-                    std::destroy(new_middle, _last);
+                    pointer j{ _first() + (_first() - new_first) };
+                    std::uninitialized_move(_first(), j, new_first);
+                    std::move(j, _last(), _first());
+                    std::destroy(new_middle, _last());
                 }
                 plastic::construct(new_middle, new_last, args...);
             }
-            _first = new_first;
-            _last = new_last;
+            _first_ptr = new_first;
+            _last_ptr = new_last;
         }
 
     public:
@@ -1316,18 +1340,18 @@ namespace plastic {
 
         explicit deque(size_type size) :
             _data{ size },
-            _first{ _begin() },
-            _last{ _end() } {
+            _first_ptr{ _begin() },
+            _last_ptr{ _end() } {
 
-            plastic::construct(_first, _last);
+            plastic::construct(_first(), _last());
         }
 
         deque(size_type size, const_reference value) :
             _data{ size },
-            _first{ _begin() },
-            _last{ _end() } {
+            _first_ptr{ _begin() },
+            _last_ptr{ _end() } {
 
-            plastic::construct(_first, _last, value);
+            plastic::construct(_first(), _last(), value);
         }
 
         template <std::input_iterator It>
@@ -1339,7 +1363,7 @@ namespace plastic {
             deque(list.begin(), list.end()) {}
 
         deque(const deque& other) :
-            deque(other._first, other._last) {}
+            deque(other._first(), other._last()) {}
 
         deque(deque&& other) {
             swap(other);
@@ -1362,8 +1386,8 @@ namespace plastic {
 
         void swap(deque& other) {
             std::swap(_data, other._data);
-            std::swap(_first, other._first);
-            std::swap(_last, other._last);
+            std::swap(_first_ptr, other._first_ptr);
+            std::swap(_last_ptr, other._last_ptr);
         }
 
         friend void swap(deque& left, deque& right) {
@@ -1371,11 +1395,11 @@ namespace plastic {
         }
 
         bool empty() const {
-            return _first == _last;
+            return _first() == _last();
         }
 
         size_type size() const {
-            return _last - _first;
+            return _last() - _first();
         }
 
         static size_type max_size() {
@@ -1383,8 +1407,8 @@ namespace plastic {
         }
 
         void clear() {
-            std::destroy(_first, _last);
-            _first = _last = _begin() + (capacity() >> 1);
+            std::destroy(_first(), _last());
+            _first_ptr = _last_ptr = _begin() + (capacity() >> 1);
         }
 
         void resize(size_type new_size) {
@@ -1407,19 +1431,19 @@ namespace plastic {
         }
 
         iterator begin() {
-            return _first;
+            return _first();
         }
 
         const_iterator begin() const {
-            return _first;
+            return _first();
         }
 
         iterator end() {
-            return _last;
+            return _last();
         }
 
         const_iterator end() const {
-            return _last;
+            return _last();
         }
 
         const_iterator cbegin() const {
@@ -1456,66 +1480,66 @@ namespace plastic {
 
         reference operator[](size_type index) {
             assert(index < size());
-            return _first[index];
+            return _first()[index];
         }
 
         const_reference operator[](size_type index) const {
             assert(index < size());
-            return _first[index];
+            return _first()[index];
         }
 
         reference front() {
             assert(!empty());
-            return *_first;
+            return *_first();
         }
 
         const_reference front() const {
             assert(!empty());
-            return *_first;
+            return *_first();
         }
 
         reference back() {
             assert(!empty());
-            return _last[-1];
+            return _last()[-1];
         }
 
         const_reference back() const {
             assert(!empty());
-            return _last[-1];
+            return _last()[-1];
         }
 
         pointer data() {
-            return _first;
+            return _first();
         }
 
         const_pointer data() const {
-            return _first;
+            return _first();
         }
 
         void push_front(const_reference value) {
             value_type clone{ value };
-            if (_first == _begin()) {
+            if (_first() == _begin()) {
                 _reallocate(size() + 1, 0, 1);
             }
-            std::construct_at(--_first, clone);
+            std::construct_at(--_first_ptr, clone);
         }
 
         void pop_front() {
             assert(!empty());
-            std::destroy_at(_first++);
+            std::destroy_at(_first_ptr++);
         }
 
         void push_back(const_reference value) {
             value_type clone{ value };
-            if (_last == _end()) {
+            if (_last() == _end()) {
                 _reallocate(size() + 1, 1);
             }
-            std::construct_at(_last++, clone);
+            std::construct_at(_last_ptr++, clone);
         }
 
         void pop_back() {
             assert(!empty());
-            std::destroy_at(--_last);
+            std::destroy_at(--_last_ptr);
         }
 
         iterator insert(const_iterator pos, const_reference value) {
@@ -1524,34 +1548,34 @@ namespace plastic {
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
             value_type clone{ value };
-            difference_type offset{ pos.base() - _first };
-            if (static_cast<size_type>(_end() - _last) < count) {
+            difference_type offset{ pos - _first() };
+            if (static_cast<size_type>(_end() - _last()) < count) {
                 _reallocate(size() + count, count);
             }
 
-            pointer i{ _first + offset }, new_i{ i + count };
-            if (new_i <= _last) {
-                pointer j{ _last - count };
-                std::uninitialized_move(j, _last, _last);
-                std::move_backward(i, j, _last);
+            pointer i{ _first() + offset }, new_i{ i + count };
+            if (new_i <= _last()) {
+                pointer j{ _last() - count };
+                std::uninitialized_move(j, _last(), _last());
+                std::move_backward(i, j, _last());
                 std::fill(i, new_i, clone);
             }
             else {
-                std::uninitialized_move(i, _last, new_i);
-                plastic::construct(_last, new_i, clone);
-                std::fill(i, _last, clone);
+                std::uninitialized_move(i, _last(), new_i);
+                plastic::construct(_last(), new_i, clone);
+                std::fill(i, _last(), clone);
             }
-            _last += count;
+            _last_ptr += count;
 
             return i;
         }
 
         template <std::input_iterator It>
         iterator insert(const_iterator pos, It first, It last) {
-            difference_type pos_offset{ pos.base() - _first }, last_offset{ _last - _first };
+            difference_type pos_offset{ pos - _first() }, last_offset{ _last() - _first() };
             std::copy(first, last, std::back_inserter(*this));
-            std::rotate(_first + pos_offset, _first + last_offset, _last);
-            return _first + pos_offset;
+            std::rotate(_first() + pos_offset, _first() + last_offset, _last());
+            return _first() + pos_offset;
         }
 
         iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
@@ -1559,26 +1583,26 @@ namespace plastic {
         }
 
         iterator erase(const_iterator pos) {
-            pointer i{ pos.base() };
-            assert(i != _last);
-            _last = std::move(i + 1, _last, i);
-            std::destroy_at(_last);
+            auto i{ const_cast<pointer>(pos) };
+            assert(i != _last());
+            _last_ptr = std::move(i + 1, _last(), i);
+            std::destroy_at(_last());
             return i;
         }
 
         iterator erase(const_iterator first, const_iterator last) {
-            pointer i{ first.base() }, e{ last.base() }, new_last{ std::move(e, _last, i) };
-            std::destroy(new_last, _last);
-            _last = new_last;
+            auto i{ const_cast<pointer>(first) }, e{ const_cast<pointer>(last) }, new_last{ std::move(e, _last(), i) };
+            std::destroy(new_last, _last());
+            _last_ptr = new_last;
             return i;
         }
 
         friend bool operator==(const deque& left, const deque& right) {
-            return std::equal(left._first, left._last, right._first, right._last);
+            return std::equal(left._first(), left._last(), right._first(), right._last());
         }
 
         friend auto operator<=>(const deque& left, const deque& right) {
-            return std::lexicographical_compare_three_way(left._first, left._last, right._first, right._last);
+            return std::lexicographical_compare_three_way(left._first(), left._last(), right._first(), right._last());
         }
     };
 
