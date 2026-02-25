@@ -33,8 +33,6 @@ void test_addressable_heap() {
     ASSERT(b.size() == 4);
     ASSERT(c.size() == 3);
 
-    ASSERT(x.max_size() == std::numeric_limits<std::size_t>::max());
-
     x = c;
     x.clear();
     ASSERT(format(x) == "[]");

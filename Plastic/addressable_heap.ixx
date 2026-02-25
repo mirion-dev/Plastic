@@ -81,28 +81,28 @@ namespace plastic {
 
     private:
         comparator _pred;
-        std::vector<node*> _data;
+        std::vector<std::unique_ptr<node>> _data;
 
-        void _set(size_type index, node* new_node) {
-            _data[index] = new_node;
-            new_node->index = index;
+        void _set(size_type index, std::unique_ptr<node> ptr) {
+            ptr->index = index;
+            _data[index] = std::move(ptr);
         }
 
         void _sift_up(size_type index) {
-            node* ptr{ _data[index] };
+            std::unique_ptr<node> i{ std::move(_data[index]) };
             while (index != 0) {
                 size_type parent{ index - 1 >> 1 };
-                if (!std::invoke(_pred, _data[parent]->value, ptr->value)) {
+                if (!std::invoke(_pred, _data[parent]->value, i->value)) {
                     break;
                 }
-                _set(index, _data[parent]);
+                _set(index, std::move(_data[parent]));
                 index = parent;
             }
-            _set(index, ptr);
+            _set(index, std::move(i));
         }
 
         void _sift_down(size_type index) {
-            node* ptr{ _data[index] };
+            std::unique_ptr<node> i{ std::move(_data[index]) };
             while (true) {
                 size_type child{ (index << 1) + 1 };
                 if (child >= size()) {
@@ -111,13 +111,13 @@ namespace plastic {
                 if (child + 1 < size() && std::invoke(_pred, _data[child]->value, _data[child + 1]->value)) {
                     ++child;
                 }
-                if (!std::invoke(_pred, ptr->value, _data[child]->value)) {
+                if (!std::invoke(_pred, i->value, _data[child]->value)) {
                     break;
                 }
-                _set(index, _data[child]);
+                _set(index, std::move(_data[child]));
                 index = child;
             }
-            _set(index, ptr);
+            _set(index, std::move(i));
         }
 
         void _make_heap() {
@@ -134,7 +134,7 @@ namespace plastic {
         binary_heap(It first, It last) {
             size_type index{};
             while (first != last) {
-                _data.push_back(new node{ index++, *first });
+                _data.emplace_back(std::make_unique<node>(index++, *first));
                 ++first;
             }
             _make_heap();
@@ -148,17 +148,13 @@ namespace plastic {
             _data(other.size()) {
 
             auto i{ _data.begin() };
-            for (node* ptr : other._data) {
-                *i++ = new node{ *ptr };
+            for (auto& ptr : other._data) {
+                *i++ = std::make_unique<node>(*ptr);
             }
         }
 
         binary_heap(binary_heap&& other) {
             swap(other);
-        }
-
-        ~binary_heap() {
-            clear();
         }
 
         binary_heap& operator=(const binary_heap& other) {
@@ -189,20 +185,17 @@ namespace plastic {
             return _data.size();
         }
 
-        static size_type max_size() {
-            return std::numeric_limits<size_type>::max();
+        size_type max_size() const {
+            return _data.max_size();
         }
 
         void clear() {
-            for (node* ptr : _data) {
-                delete ptr;
-            }
             _data.clear();
         }
 
         handle apex() {
             assert(!empty());
-            return { _data.front(), this };
+            return { _data.front().get(), this };
         }
 
         const_handle apex() const {
@@ -226,42 +219,42 @@ namespace plastic {
         }
 
         handle push(const_reference value) {
-            auto new_node{ new node{ size(), value } };
-            _data.push_back(new_node);
-            _sift_up(new_node->index);
-            return { new_node, this };
+            auto ptr{ std::make_unique<node>(size(), value) };
+            node* raw{ ptr.get() };
+            _data.emplace_back(std::move(ptr));
+            _sift_up(raw->index);
+            return { raw, this };
         }
 
         void pop() {
             assert(!empty());
-            delete _data.front();
             if (size() == 1) {
                 _data.pop_back();
+                return;
             }
-            else {
-                _set(0, _data.back());
-                _data.pop_back();
-                _sift_down(0);
-            }
+
+            _set(0, std::move(_data.back()));
+            _data.pop_back();
+            _sift_down(0);
         }
 
         void erase(handle pos) {
-            auto& [index, value]{ *pos._ptr };
+            size_type index{ pos._ptr->index };
             assert(index < size());
             if (index == size() - 1) {
                 _data.pop_back();
+                return;
+            }
+
+            bool is_greater{ std::invoke(_pred, pos._ptr->value, _data.back()->value) };
+            _set(index, std::move(_data.back()));
+            _data.pop_back();
+            if (is_greater) {
+                _sift_up(index);
             }
             else {
-                _set(index, _data.back());
-                _data.pop_back();
-                if (std::invoke(_pred, value, _data[index]->value)) {
-                    _sift_up(index);
-                }
-                else {
-                    _sift_down(index);
-                }
+                _sift_down(index);
             }
-            delete pos._ptr;
         }
 
         void merge(binary_heap& other) {
@@ -272,9 +265,9 @@ namespace plastic {
             size_type index{ size() };
             _data.resize(index + other.size());
             auto i{ _data.begin() + index };
-            for (node* ptr : other._data) {
-                *i++ = ptr;
+            for (auto& ptr : other._data) {
                 ptr->index = index++;
+                *i++ = std::move(ptr);
             }
             other._data.clear();
             _make_heap();

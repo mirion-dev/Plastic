@@ -2,18 +2,17 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
     <Type Name="plastic::inplace_vector&lt;*,*&gt;">
-		<Intrinsic Name="begin" Expression="($T1*)_data._storage.data"/>
-        <Intrinsic Name="size" Expression="(size_t)(_last - begin())"/>
-        <Intrinsic Name="capacity" Expression="(size_t)$T2"/>
+        <Intrinsic Name="size" Expression="(size_t)(_last_ptr - _data)"/>
+        <Intrinsic Name="capacity" Expression="$T2"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
-            <ExpandedItem>begin(), [size()]</ExpandedItem>
+            <ExpandedItem>($T1*)_data, [size()]</ExpandedItem>
         </Expand>
     </Type>
 
     <Type Name="plastic::vector&lt;*&gt;">
-        <Intrinsic Name="size" Expression="(size_t)(_last - _data._begin)"/>
+        <Intrinsic Name="size" Expression="(size_t)(_last_ptr - _data._begin)"/>
         <Intrinsic Name="capacity" Expression="(size_t)(_data._end - _data._begin)"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
@@ -23,27 +22,25 @@
     </Type>
 
     <Type Name="plastic::inplace_deque&lt;*,*&gt;">
-		<Intrinsic Name="begin" Expression="($T1*)_data._storage.data"/>
-		<Intrinsic Name="end" Expression="begin() + $T2 + 1"/>
-        <Intrinsic Name="size" Expression="(size_t)(_first &lt;= _last ? _last - _first : $T2 + 1 - (_first - _last))"/>
-        <Intrinsic Name="capacity" Expression="(size_t)$T2"/>
+        <Intrinsic Name="size" Expression="(size_t)(_first_ptr &lt;= _last_ptr ? _last_ptr - _first_ptr : $T2 + 1 - (_first_ptr - _last_ptr))"/>
+        <Intrinsic Name="capacity" Expression="$T2"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
             <IndexListItems>
                 <Size>size()</Size>
-                <ValueNode>_first[$i &lt; end() - _first ? $i : $i - $T2 - 1]</ValueNode>
+                <ValueNode>($i &lt; _data + $T2 + 1 - _first_ptr ? _first_ptr : _first_ptr - $T2 - 1)[$i]</ValueNode>
             </IndexListItems>
         </Expand>
     </Type>
 
     <Type Name="plastic::deque&lt;*&gt;">
-        <Intrinsic Name="size" Expression="(size_t)(_last - _first)"/>
+        <Intrinsic Name="size" Expression="(size_t)(_last_ptr - _first_ptr)"/>
         <Intrinsic Name="capacity" Expression="(size_t)(_data._end - _data._begin)"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
-            <ExpandedItem>_first, [size()]</ExpandedItem>
+            <ExpandedItem>_first_ptr, [size()]</ExpandedItem>
         </Expand>
     </Type>
 
@@ -89,17 +86,17 @@
         </Expand>
     </Type>
 
-    <Type Name="plastic::binary_heap&lt;*&gt;">
+    <Type Name="plastic::binary_heap&lt;*,*&gt;">
 		<Intrinsic Name="pred" Expression="_pred"/>
-		<Intrinsic Name="size" Expression="_data.size()"/>
+		<Intrinsic Name="size" Expression="_data._Mypair._Myval2._Mylast - _data._Mypair._Myval2._Myfirst"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
-        <Expand>
-            <Item Name="[comparator]">pred()</Item>
-            <IndexListItems>
-                <Size>size()</Size>
-                <ValueNode>_data._begin[$i]->value</ValueNode>
-            </IndexListItems>
-        </Expand>
+		<Expand>
+			<Item Name="[comparator]">pred()</Item>
+			<IndexListItems>
+				<Size>size()</Size>
+				<ValueNode>_data._Mypair._Myval2._Myfirst[$i]._Mypair._Myval2->value</ValueNode>
+			</IndexListItems>
+		</Expand>
     </Type>
 
 </AutoVisualizer>
