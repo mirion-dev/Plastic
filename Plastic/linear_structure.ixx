@@ -116,7 +116,7 @@ namespace plastic {
 
     template <std::input_iterator It, class... Args>
         requires (sizeof...(Args) <= 1)
-    void construct(It first, It last, const Args&... args) {
+    static void construct(It first, It last, const Args&... args) {
         if constexpr (sizeof...(Args) == 0) {
             std::uninitialized_value_construct(first, last);
         }

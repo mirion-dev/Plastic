@@ -21,7 +21,7 @@ namespace plastic {
     };
 
     template <satisfy_type Sat, class T, class UPr>
-    bool satisfy(const T& given, const UPr& value_or_pred) {
+    static bool satisfy(const T& given, const UPr& value_or_pred) {
         if constexpr (Sat == satisfy_type::value) {
             return given == value_or_pred;
         }
@@ -37,7 +37,7 @@ namespace plastic {
 #pragma region non-modifying sequence operations
 
     template <satisfy_type Sat, std::input_iterator It, std::sentinel_for<It> Se, class TPr, class Pj>
-    It find_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
+    static It find_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
         while (first != last) {
             if (plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred)) {
                 break;
@@ -157,7 +157,7 @@ namespace plastic {
     }
 
     template <satisfy_type Sat, std::forward_iterator It, std::sentinel_for<It> Se, class TPr, class Pj>
-    std::ranges::subrange<It> find_last_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
+    static std::ranges::subrange<It> find_last_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
         It i{ plastic::find_impl<Sat>(first, last, value_or_pred, proj) };
         if (i == last) {
             return { i, i };
@@ -242,7 +242,7 @@ namespace plastic {
     }
 
     template <satisfy_type Sat, std::input_iterator It, std::sentinel_for<It> Se, class TPr, class Pj>
-    std::iter_difference_t<It> count_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
+    static std::iter_difference_t<It> count_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
         std::iter_difference_t<It> count{};
         while (first != last) {
             if (plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred)) {
@@ -620,7 +620,7 @@ namespace plastic {
     }
 
     template <satisfy_type Sat, std::input_iterator It, std::sentinel_for<It> Se, class TPr, class U, class Pj>
-    It replace_impl(It first, Se last, const TPr& value_or_pred, const U& value, Pj proj) {
+    static It replace_impl(It first, Se last, const TPr& value_or_pred, const U& value, Pj proj) {
         while (first != last) {
             if (plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred)) {
                 *first = value;
@@ -643,7 +643,7 @@ namespace plastic {
     }
 
     template <satisfy_type Sat, std::input_iterator It, std::sentinel_for<It> Se, class Out, class TPr, class U, class Pj>
-    std::ranges::in_out_result<It, Out> replace_copy_impl(It first, Se last, Out output, const TPr& value_or_pred, const U& value, Pj proj) {
+    static std::ranges::in_out_result<It, Out> replace_copy_impl(It first, Se last, Out output, const TPr& value_or_pred, const U& value, Pj proj) {
         while (first != last) {
             if (plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred)) {
                 *output++ = value;
@@ -713,7 +713,7 @@ namespace plastic {
     }
 
     template <satisfy_type Sat, std::forward_iterator It, std::sentinel_for<It> Se, class TPr, class Pj>
-    std::ranges::subrange<It> remove_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
+    static std::ranges::subrange<It> remove_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
         first = plastic::find_impl<Sat>(first, last, value_or_pred, proj);
         if (first == last) {
             return { first, first };
@@ -740,7 +740,7 @@ namespace plastic {
     }
 
     template <satisfy_type Sat, std::input_iterator It, std::sentinel_for<It> Se, class Out, class TPr, class Pj>
-    std::ranges::in_out_result<It, Out> remove_copy_impl(It first, Se last, Out output, const TPr& value_or_pred, Pj proj) {
+    static std::ranges::in_out_result<It, Out> remove_copy_impl(It first, Se last, Out output, const TPr& value_or_pred, Pj proj) {
         while (first != last) {
             if (!plastic::satisfy<Sat>(std::invoke(proj, *first), value_or_pred)) {
                 *output++ = *first;
@@ -1145,7 +1145,7 @@ namespace plastic {
 #pragma region heap operations
 
     template <std::random_access_iterator It, class Pr, class Pj>
-    void sift_up(It first, std::iter_difference_t<It> index, Pr pred, Pj proj) {
+    static void sift_up(It first, std::iter_difference_t<It> index, Pr pred, Pj proj) {
         auto value{ std::move(first[index]) };
         while (index != 0) {
             auto parent{ index - 1 >> 1 };
@@ -1159,7 +1159,7 @@ namespace plastic {
     }
 
     template <std::random_access_iterator It, class Pr, class Pj>
-    void sift_down(It first, std::iter_difference_t<It> index, std::iter_difference_t<It> size, Pr pred, Pj proj) {
+    static void sift_down(It first, std::iter_difference_t<It> index, std::iter_difference_t<It> size, Pr pred, Pj proj) {
         auto value{ std::move(first[index]) };
         while (true) {
             auto child{ (index << 1) + 1 };
@@ -1250,7 +1250,7 @@ namespace plastic {
 #pragma region sorting operations
 
     template <std::bidirectional_iterator It, class Pr, class Pj>
-    std::ranges::subrange<It> median_partition(It first, It last, Pr pred, Pj proj) {
+    static std::ranges::subrange<It> median_partition(It first, It last, Pr pred, Pj proj) {
         assert(first != last);
         It middle{ std::ranges::next(first, std::ranges::distance(first, last) >> 1) };
         if (std::invoke(pred, std::invoke(proj, *middle), std::invoke(proj, *first))) {
@@ -1303,7 +1303,7 @@ namespace plastic {
     }
 
     template <std::bidirectional_iterator It, class Pr, class Pj>
-    void insertion_sort(It first, It last, Pr pred, Pj proj) {
+    static void insertion_sort(It first, It last, Pr pred, Pj proj) {
         if (first == last) {
             return;
         }
@@ -1325,7 +1325,7 @@ namespace plastic {
     static constexpr std::ptrdiff_t INSERTION_SORT_THRESHOLD{ 32 };
 
     template <std::random_access_iterator It, class Pr, class Pj>
-    void intro_sort(It first, It last, std::iter_difference_t<It> margin, Pr pred, Pj proj) {
+    static void intro_sort(It first, It last, std::iter_difference_t<It> margin, Pr pred, Pj proj) {
         if (last - first <= INSERTION_SORT_THRESHOLD) {
             plastic::insertion_sort(first, last, pred, proj);
             return;
@@ -1352,7 +1352,7 @@ namespace plastic {
     }
 
     template <std::bidirectional_iterator It, class Pr, class Pj>
-    void merge_sort(It first, It last, Pr pred, Pj proj) {
+    static void merge_sort(It first, It last, Pr pred, Pj proj) {
         auto size{ std::ranges::distance(first, last) };
         if (size <= INSERTION_SORT_THRESHOLD) {
             plastic::insertion_sort(first, last, pred, proj);
