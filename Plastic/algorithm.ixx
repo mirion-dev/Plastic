@@ -25,13 +25,16 @@ namespace plastic {
         if constexpr (Sat == satisfy_type::value) {
             return given == value_or_pred;
         }
-        if constexpr (Sat == satisfy_type::predicate) {
+        else if constexpr (Sat == satisfy_type::predicate) {
             return std::invoke(value_or_pred, given);
         }
-        if constexpr (Sat == satisfy_type::negated_predicate) {
+        else if constexpr (Sat == satisfy_type::negated_predicate) {
             return !std::invoke(value_or_pred, given);
         }
-        std::unreachable();
+        else {
+            static_assert(false);
+            return {};
+        }
     }
 
 #pragma region non-modifying sequence operations
