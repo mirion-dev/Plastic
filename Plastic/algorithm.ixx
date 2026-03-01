@@ -33,7 +33,7 @@ namespace plastic {
         }
         else {
             static_assert(false);
-            return {};
+            std::unreachable();
         }
     }
 
