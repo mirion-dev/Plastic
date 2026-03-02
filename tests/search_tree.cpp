@@ -52,20 +52,20 @@ void test_search_tree() {
     ASSERT(c.back() == 3);
 
     x = { 1, 2, 2, 2, 3 };
-    ASSERT(std::distance(x.begin(), x.lower_bound(1)) == 0);
-    ASSERT(std::distance(x.begin(), x.lower_bound(2)) == 1);
-    ASSERT(std::distance(x.begin(), x.lower_bound(3)) == 4);
-    ASSERT(std::distance(x.begin(), x.lower_bound(4)) == 5);
+    ASSERT(std::ranges::distance(x.begin(), x.lower_bound(1)) == 0);
+    ASSERT(std::ranges::distance(x.begin(), x.lower_bound(2)) == 1);
+    ASSERT(std::ranges::distance(x.begin(), x.lower_bound(3)) == 4);
+    ASSERT(std::ranges::distance(x.begin(), x.lower_bound(4)) == 5);
 
-    ASSERT(std::distance(x.begin(), x.upper_bound(1)) == 1);
-    ASSERT(std::distance(x.begin(), x.upper_bound(2)) == 4);
-    ASSERT(std::distance(x.begin(), x.upper_bound(3)) == 5);
-    ASSERT(std::distance(x.begin(), x.upper_bound(4)) == 5);
+    ASSERT(std::ranges::distance(x.begin(), x.upper_bound(1)) == 1);
+    ASSERT(std::ranges::distance(x.begin(), x.upper_bound(2)) == 4);
+    ASSERT(std::ranges::distance(x.begin(), x.upper_bound(3)) == 5);
+    ASSERT(std::ranges::distance(x.begin(), x.upper_bound(4)) == 5);
 
-    ASSERT(std::distance(x.begin(), x.find(1)) == 0);
-    ASSERT(std::distance(x.begin(), x.find(2)) == 1);
-    ASSERT(std::distance(x.begin(), x.find(3)) == 4);
-    ASSERT(std::distance(x.begin(), x.find(4)) == 5);
+    ASSERT(std::ranges::distance(x.begin(), x.find(1)) == 0);
+    ASSERT(std::ranges::distance(x.begin(), x.find(2)) == 1);
+    ASSERT(std::ranges::distance(x.begin(), x.find(3)) == 4);
+    ASSERT(std::ranges::distance(x.begin(), x.find(4)) == 5);
 
     ASSERT(x.contains(1) == true);
     ASSERT(x.contains(2) == true);
@@ -92,7 +92,7 @@ void test_search_tree() {
     ASSERT(format(x) == "[0, 0, 3, 3, 4, 5]");
     x.erase(++x.begin());
     ASSERT(format(x) == "[0, 3, 3, 4, 5]");
-    x.erase(std::next(x.begin(), 2), std::prev(x.end(), 2));
+    x.erase(std::ranges::next(x.begin(), 2), std::ranges::prev(x.end(), 2));
     ASSERT(format(x) == "[0, 3, 4, 5]");
 
     x.merge(x);

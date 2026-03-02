@@ -232,9 +232,9 @@ namespace plastic {
         }
 
         void swap(tree& other) {
-            std::swap(_pred, other._pred);
-            std::swap(_head, other._head);
-            std::swap(_size, other._size);
+            std::ranges::swap(_pred, other._pred);
+            std::ranges::swap(_head, other._head);
+            std::ranges::swap(_size, other._size);
         }
 
         friend void swap(tree& left, tree& right) {
@@ -345,7 +345,7 @@ namespace plastic {
 
         size_type count(const_reference value) const {
             auto [first, last]{ equal_range(value) };
-            return std::distance(first, last);
+            return std::ranges::distance(first, last);
         }
 
         iterator insert(this auto&& self, const_reference value) {
@@ -578,7 +578,7 @@ namespace plastic {
         }
 
         void _erase_rebalance(node_base* replaced, node_base* erased) {
-            std::swap(replaced->meta.is_red, erased->meta.is_red);
+            std::ranges::swap(replaced->meta.is_red, erased->meta.is_red);
 
             node_base* i{ replaced };
             if (i->meta.is_red) {

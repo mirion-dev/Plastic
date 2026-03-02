@@ -169,8 +169,8 @@ namespace plastic {
         }
 
         void swap(binary_heap& other) {
-            std::swap(_pred, other._pred);
-            std::swap(_data, other._data);
+            std::ranges::swap(_pred, other._pred);
+            std::ranges::swap(_data, other._data);
         }
 
         friend void swap(binary_heap& left, binary_heap& right) {

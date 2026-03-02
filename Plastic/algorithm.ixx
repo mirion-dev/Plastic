@@ -596,7 +596,7 @@ namespace plastic {
         requires std::indirectly_swappable<It1, It2>
     std::ranges::in_in_result<It1, It2> swap_ranges(It1 first1, Se1 last1, It2 first2, Se2 last2) {
         while (first1 != last1 && first2 != last2) {
-            std::swap(*first1, *first2);
+            std::ranges::swap(*first1, *first2);
             ++first1, ++first2;
         }
         return { std::move(first1), std::move(first2) };
@@ -824,7 +824,7 @@ namespace plastic {
     It reverse(It first, Se last) {
         It r_last{ std::ranges::next(first, last) }, i{ r_last };
         while (first != i && first != --i) {
-            std::swap(*first++, *i);
+            std::ranges::swap(*first++, *i);
         }
         return r_last;
     }
@@ -852,7 +852,7 @@ namespace plastic {
 
         It i{ middle };
         do {
-            std::swap(*first++, *i++);
+            std::ranges::swap(*first++, *i++);
             if (first == middle) {
                 middle = i;
             }
@@ -862,7 +862,7 @@ namespace plastic {
         while (middle != last) {
             It i{ middle };
             do {
-                std::swap(*first++, *i++);
+                std::ranges::swap(*first++, *i++);
                 if (first == middle) {
                     middle = i;
                 }
@@ -930,7 +930,7 @@ namespace plastic {
         Distr distr;
         Diff size{ last - first };
         while (size-- != 0) {
-            std::swap(first[size], first[distr(gen, Param{ 0, size })]);
+            std::ranges::swap(first[size], first[distr(gen, Param{ 0, size })]);
         }
         return std::ranges::next(first, last);
     }
@@ -965,7 +965,7 @@ namespace plastic {
 
         It buf{ first };
         while (j != last) {
-            std::swap(*buf++, *i++);
+            std::ranges::swap(*buf++, *i++);
             ++j;
             if (buf == dest) {
                 buf = first;
@@ -1001,14 +1001,14 @@ namespace plastic {
                         return { std::move(first), std::move(r_last) };
                     }
                 } while (!std::invoke(pred, std::invoke(proj, *--i)));
-                std::swap(*first++, *i);
+                std::ranges::swap(*first++, *i);
             }
         }
         else {
             It i{ first };
             while (++i != last) {
                 if (std::invoke(pred, std::invoke(proj, *i))) {
-                    std::swap(*first++, *i);
+                    std::ranges::swap(*first++, *i);
                 }
             }
             return { std::move(first), std::move(i) };
@@ -1198,7 +1198,7 @@ namespace plastic {
         It r_last{ std::ranges::next(first, last) }, i{ r_last };
         auto size{ r_last - first };
         if (size > 1) {
-            std::swap(*first, *--i);
+            std::ranges::swap(*first, *--i);
             plastic::sift_down(first, 0, size - 1, pred, proj);
         }
         return r_last;
@@ -1221,7 +1221,7 @@ namespace plastic {
         It r_last{ std::ranges::next(first, last) }, i{ r_last };
         auto size{ r_last - first };
         while (size > 1) {
-            std::swap(*first, *--i);
+            std::ranges::swap(*first, *--i);
             plastic::sift_down(first, 0, --size, pred, proj);
         }
         return r_last;
@@ -1257,12 +1257,12 @@ namespace plastic {
         assert(first != last);
         It middle{ std::ranges::next(first, std::ranges::distance(first, last) >> 1) };
         if (std::invoke(pred, std::invoke(proj, *middle), std::invoke(proj, *first))) {
-            std::swap(*first, *middle);
+            std::ranges::swap(*first, *middle);
         }
         if (std::invoke(pred, std::invoke(proj, *std::ranges::prev(last)), std::invoke(proj, *middle))) {
-            std::swap(*middle, *std::ranges::prev(last));
+            std::ranges::swap(*middle, *std::ranges::prev(last));
             if (std::invoke(pred, std::invoke(proj, *middle), std::invoke(proj, *first))) {
-                std::swap(*first, *middle);
+                std::ranges::swap(*first, *middle);
             }
         }
 
@@ -1273,7 +1273,7 @@ namespace plastic {
                     break;
                 }
                 if (!std::invoke(pred, std::invoke(proj, *std::ranges::prev(i)), std::invoke(proj, *left))) {
-                    std::swap(*--left, *std::ranges::prev(i));
+                    std::ranges::swap(*--left, *std::ranges::prev(i));
                 }
                 --i;
             }
@@ -1282,7 +1282,7 @@ namespace plastic {
                     break;
                 }
                 if (!std::invoke(pred, std::invoke(proj, *left), std::invoke(proj, *j))) {
-                    std::swap(*right++, *j);
+                    std::ranges::swap(*right++, *j);
                 }
                 ++j;
             }
@@ -1292,15 +1292,15 @@ namespace plastic {
             }
 
             if (i == first) {
-                std::swap(*right, *j++);
-                std::swap(*left++, *right++);
+                std::ranges::swap(*right, *j++);
+                std::ranges::swap(*left++, *right++);
             }
             else if (j == last) {
-                std::swap(*--left, *--i);
-                std::swap(*left, *--right);
+                std::ranges::swap(*--left, *--i);
+                std::ranges::swap(*left, *--right);
             }
             else {
-                std::swap(*j++, *--i);
+                std::ranges::swap(*j++, *--i);
             }
         }
     }
@@ -1386,7 +1386,7 @@ namespace plastic {
         auto size{ middle - first };
         while (i != last) {
             if (std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *first))) {
-                std::swap(*i, *first);
+                std::ranges::swap(*i, *first);
                 plastic::sift_down(first, 0, size, pred, proj);
             }
             ++i;
@@ -1780,7 +1780,7 @@ namespace plastic {
 
         j = r_last;
         while (!std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *--j))) {}
-        std::swap(*i, *j);
+        std::ranges::swap(*i, *j);
         plastic::reverse(++i, r_last);
 
         return { std::move(r_last), true };
@@ -1803,7 +1803,7 @@ namespace plastic {
 
         j = r_last;
         while (!std::invoke(pred, std::invoke(proj, *--j), std::invoke(proj, *i))) {}
-        std::swap(*i, *j);
+        std::ranges::swap(*i, *j);
         plastic::reverse(++i, r_last);
 
         return { std::move(r_last), true };

@@ -505,14 +505,14 @@ public:
 
         x.insert_after(++x.begin(), 1);
         ASSERT(format(x) == "[3, 2, 1, 0, 1, 1]");
-        x.insert_after(std::next(x.begin(), 3), 2, 1);
+        x.insert_after(std::ranges::next(x.begin(), 3), 2, 1);
         ASSERT(format(x) == "[3, 2, 1, 0, 1, 1, 1, 1]");
-        x.insert_after(std::next(x.begin(), 4), { 2, 3, 2 });
+        x.insert_after(std::ranges::next(x.begin(), 4), { 2, 3, 2 });
         ASSERT(format(x) == "[3, 2, 1, 0, 1, 2, 3, 2, 1, 1, 1]");
 
         x.erase_after(x.begin());
         ASSERT(format(x) == "[3, 1, 0, 1, 2, 3, 2, 1, 1, 1]");
-        x.erase_after(++x.begin(), std::next(x.begin(), 8));
+        x.erase_after(++x.begin(), std::ranges::next(x.begin(), 8));
         ASSERT(format(x) == "[3, 1, 1, 1]");
 
         plastic::forward_list d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };
@@ -604,16 +604,16 @@ public:
         x.pop_front();
         ASSERT(format(x) == "[3, 2, 0, 1, 1]");
 
-        x.insert(std::next(x.begin(), 2), 1);
+        x.insert(std::ranges::next(x.begin(), 2), 1);
         ASSERT(format(x) == "[3, 2, 1, 0, 1, 1]");
         x.insert(--x.end(), 2, 2);
         ASSERT(format(x) == "[3, 2, 1, 0, 1, 2, 2, 1]");
-        x.insert(std::next(x.begin(), 5), { 2, 3, 2 });
+        x.insert(std::ranges::next(x.begin(), 5), { 2, 3, 2 });
         ASSERT(format(x) == "[3, 2, 1, 0, 1, 2, 3, 2, 2, 2, 1]");
 
         x.erase(++x.begin());
         ASSERT(format(x) == "[3, 1, 0, 1, 2, 3, 2, 2, 2, 1]");
-        x.erase(std::next(x.begin(), 2), std::prev(x.end(), 2));
+        x.erase(std::ranges::next(x.begin(), 2), std::ranges::prev(x.end(), 2));
         ASSERT(format(x) == "[3, 1, 2, 1]");
 
         plastic::list d{ 1, 2 }, e{ 1, 2, 2 }, f{ 1, 2, 3 };

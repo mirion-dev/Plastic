@@ -89,8 +89,8 @@ namespace plastic {
         }
 
         void swap(dynamic_storage& other) {
-            std::swap(_begin, other._begin);
-            std::swap(_end, other._end);
+            std::ranges::swap(_begin, other._begin);
+            std::ranges::swap(_end, other._end);
         }
 
         friend void swap(dynamic_storage& left, dynamic_storage& right) {
@@ -530,8 +530,8 @@ namespace plastic {
         }
 
         void swap(vector& other) {
-            std::swap(_data, other._data);
-            std::swap(_last_ptr, other._last_ptr);
+            std::ranges::swap(_data, other._data);
+            std::ranges::swap(_last_ptr, other._last_ptr);
         }
 
         friend void swap(vector& left, vector& right) {
@@ -1385,9 +1385,9 @@ namespace plastic {
         }
 
         void swap(deque& other) {
-            std::swap(_data, other._data);
-            std::swap(_first_ptr, other._first_ptr);
-            std::swap(_last_ptr, other._last_ptr);
+            std::ranges::swap(_data, other._data);
+            std::ranges::swap(_first_ptr, other._first_ptr);
+            std::ranges::swap(_last_ptr, other._last_ptr);
         }
 
         friend void swap(deque& left, deque& right) {
@@ -1689,10 +1689,10 @@ namespace plastic {
 
         void _resize(size_type new_size, const auto&... args) {
             if (new_size <= _size) {
-                erase_after(std::next(before_begin(), new_size), end());
+                erase_after(std::ranges::next(before_begin(), new_size), end());
             }
             else {
-                _insert_after(std::next(before_begin(), _size)._ptr, new_size - _size, args...);
+                _insert_after(std::ranges::next(before_begin(), _size)._ptr, new_size - _size, args...);
             }
         }
 
@@ -1739,8 +1739,8 @@ namespace plastic {
         }
 
         void swap(forward_list& other) {
-            std::swap(_head, other._head);
-            std::swap(_size, other._size);
+            std::ranges::swap(_head, other._head);
+            std::ranges::swap(_size, other._size);
         }
 
         friend void swap(forward_list& left, forward_list& right) {
@@ -2026,8 +2026,8 @@ namespace plastic {
         }
 
         void swap(list& other) {
-            std::swap(_head, other._head);
-            std::swap(_size, other._size);
+            std::ranges::swap(_head, other._head);
+            std::ranges::swap(_size, other._size);
         }
 
         friend void swap(list& left, list& right) {
