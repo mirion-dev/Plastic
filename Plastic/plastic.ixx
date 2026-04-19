@@ -1,6 +1,6 @@
 export module plastic;
 
-export import :algorithm;
-export import :linear_structure;
-export import :search_tree;
-export import :addressable_heap;
+export import plastic.algorithm;
+export import plastic.linear_structure;
+export import plastic.search_tree;
+export import plastic.addressable_heap;

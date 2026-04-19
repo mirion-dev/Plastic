@@ -2,7 +2,7 @@ module;
 
 #include <cassert>
 
-export module plastic:search_tree;
+export module plastic.search_tree;
 
 import std;
 

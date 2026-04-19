@@ -2,7 +2,7 @@ module;
 
 #include <cassert>
 
-export module plastic:linear_structure;
+export module plastic.linear_structure;
 
 import std;
 

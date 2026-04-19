@@ -2,7 +2,7 @@ module;
 
 #include <cassert>
 
-export module plastic:addressable_heap;
+export module plastic.addressable_heap;
 
 import std;
 

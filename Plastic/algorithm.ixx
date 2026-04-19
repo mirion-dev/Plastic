@@ -2,7 +2,7 @@ module;
 
 #include <cassert>
 
-export module plastic:algorithm;
+export module plastic.algorithm;
 
 import std;
 
