@@ -4,9 +4,9 @@ My implementations of common data structures and algorithms for study.
 
 ## Data Structures
 
-The class designs are primarily based on the standard library, but not identical. For example, the underlying structure of `deque` is implemented as a bidirectional dynamic array instead of blocks.
+The class designs are primarily based on the standard library, but not identical, as the goal is to implement different structures rather than the complete standard conformance.
 
-| | **`inplace_vector`<br>`vector`** | **`inplace_deque`<br>`deque`** | **`forward_list`** | **`list`** | Search Trees | Addressable Heaps |
+| | **`vector`** | **`deque`** | **`forward_list`** | **`list`** | Search Trees | Addressable Heaps |
 | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
 | **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` |
 | **`size`** | `size` | `size` | `size` | `size` | `size` | `size` |
@@ -27,7 +27,7 @@ The class designs are primarily based on the standard library, but not identical
 | **`crend`** | `crend` | `crend` | | `crend` | `crend` | |
 | **`front`** | `front` | `front` | `front` | `front` | `front` | `top` |
 | **`back`** | `back` | `back` | | `back` | `back` | |
-| **`data`** | `data` | `deque::data` | | | | |
+| **`data`** | `data` | | | | | |
 | **`operator[]`** | `operator[]` | `operator[]` | | | | |
 | **`contains`** | | | | | `contains` | |
 | **`find`** | | | | | `find` | |
@@ -48,12 +48,19 @@ The class designs are primarily based on the standard library, but not identical
 
 ![](./images/complexity.svg)
 
+| **Removed structure** | **Reason** |
+| :--: | -- |
+| `bignum` | More about algorithms than data structures |
+| `inplace_vector` | Essentially the same as `vector` except the fixed storage |
+| `inplace_deque` | Essentially the same as `deque` except the fixed storage |
+| `devector` | Essentially the same as `vector` except the bidirectional extending |
+
 ## Algorithms
 
 Same as the [standard algorithms](https://eel.is/c++draft/#algorithms) in namespace `ranges`, but without optimizations.
 
 | **Category** | **Operations** |
-| -- | -- |
+| :--: | -- |
 | Non-modifying Sequence | `all_of`, `any_of`, `none_of`, `contains`, `contains_subrange`, `for_each`, `for_each_n`, `find`, `find_if`, `find_if_not`, `find_last`, `find_last_if`, `find_last_if_not`, `find_end`, `find_first_of`, `adjacent_find`, `count`, `count_if`, `mismatch`, `equal`, `is_permutation`, `search`, `search_n`, `starts_with`, `ends_with`, `fold_left`, `fold_left_first`, `fold_right`, `fold_right_last`, `fold_left_with_iter`, `fold_left_first_with_iter` |
 | Mutating Sequence | `copy`, `copy_n`, `copy_if`, `copy_backward`, `move`, `move_backward`, `swap_ranges`, `transform`, `replace`, `replace_if`, `replace_copy`, `replace_copy_if`, `fill`, `fill_n`, `generate`, `generate_n`, `remove`, `remove_if`, `remove_copy`, `remove_copy_if`, `unique`, `unique_copy`, `reverse`, `reverse_copy`, `rotate`, `rotate_copy`, `sample`, `shuffle`, `shift_left`, `shift_right` |
 | Sorting | `sort`, `stable_sort`, `partial_sort`, `partial_sort_copy`, `is_sorted`, `is_sorted_until` |

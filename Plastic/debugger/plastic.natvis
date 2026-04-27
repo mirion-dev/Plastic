@@ -1,16 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-    <Type Name="plastic::inplace_vector&lt;*,*&gt;">
-        <Intrinsic Name="size" Expression="(size_t)(_last_ptr - _data)"/>
-        <Intrinsic Name="capacity" Expression="$T2"/>
-        <DisplayString>{{ size={size()} }}</DisplayString>
-        <Expand>
-            <Item Name="[capacity]">capacity()</Item>
-            <ExpandedItem>($T1*)_data, [size()]</ExpandedItem>
-        </Expand>
-    </Type>
-
     <Type Name="plastic::vector&lt;*&gt;">
         <Intrinsic Name="size" Expression="(size_t)(_last_ptr - _data._begin)"/>
         <Intrinsic Name="capacity" Expression="(size_t)(_data._end - _data._begin)"/>
@@ -18,19 +8,6 @@
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
             <ExpandedItem>_data._begin, [size()]</ExpandedItem>
-        </Expand>
-    </Type>
-
-    <Type Name="plastic::inplace_deque&lt;*,*&gt;">
-        <Intrinsic Name="size" Expression="(size_t)(_first_ptr &lt;= _last_ptr ? _last_ptr - _first_ptr : $T2 + 1 - (_first_ptr - _last_ptr))"/>
-        <Intrinsic Name="capacity" Expression="$T2"/>
-        <DisplayString>{{ size={size()} }}</DisplayString>
-        <Expand>
-            <Item Name="[capacity]">capacity()</Item>
-            <IndexListItems>
-                <Size>size()</Size>
-                <ValueNode>($i &lt; _data + $T2 + 1 - _first_ptr ? _first_ptr : _first_ptr - $T2 - 1)[$i]</ValueNode>
-            </IndexListItems>
         </Expand>
     </Type>
 

@@ -17,36 +17,15 @@
 #let curve = cetz.draw.bezier.with(stroke: .5pt)
 #let arrow = line.with(mark: (end: "stealth", stroke: 0pt, fill: black))
 
-#let diag-inplace-vector = diag({
+#let diag-vector = diag({
     for x in range(6) {
         box((x, 0), fill: if x < 4 { lime })
     }
 })
 
-#let diag-vector = diag(
-    padding: (left: .5),
-    {
-        for x in range(6) {
-            box((x, 0), fill: if x < 4 { lime })
-        }
-        for y in (-.5, .5) {
-            line((5, y), (6, y))
-        }
-    },
-)
-
-#let diag-inplace-deque = diag({
-    for x in range(6) {
-        box((x, 0), fill: if x == 2 { gray } else if x != 1 { lime })
-    }
-})
-
 #let diag-deque = diag({
     for x in range(6) {
-        box((x, 0), fill: if x > 0 and x < 5 { lime })
-    }
-    for y in (-.5, .5) {
-        line((-1, y), (6, y))
+        box((x, 0), fill: if x == 0 or x > 2 { lime })
     }
 })
 
@@ -108,9 +87,9 @@
 #let O1 = O1-cell()
 #let Ologn = Ologn-cell()
 #let On = On-cell()
-#let O1a = O1-cell(label: <am>)
-#let Ologna = Ologn-cell(label: <am>)
-#let Ona = On-cell(label: <am>)
+#let O1a = O1-cell(label: <amortized>)
+#let Ologna = Ologn-cell(label: <amortized>)
+#let Ona = On-cell(label: <amortized>)
 
 = Time Complexity
 
@@ -124,15 +103,13 @@
     grid.cell(colspan: 4)[*Get Iterator*],
     grid.cell(colspan: 3)[*Insertion*],
     grid.cell(colspan: 3)[*Deletion*],
-    [Begin], [Middle], [End], [By Search], [Begin], [Middle], [End], [Begin], [Middle], [End],
-    `inplace_vector`, diag-inplace-vector, O1, O1, O1, On, On, On, O1, On, On, O1,
+    [First], [Middle], [Last], [By Search], [First], [Middle], [Last], [First], [Middle], [Last],
     `vector`, diag-vector, O1, O1, O1, On, On, On, O1a, On, On, O1,
-    `inplace_deque`, diag-inplace-deque, O1, O1, O1, On, O1, On, O1, O1, On, O1,
     `deque`, diag-deque, O1, O1, O1, On, O1a, On, O1a, O1, On, O1,
-    `forward_list`, diag-forward-list, O1, On, On-cell(label: <note1>), On, O1, O1, O1, O1, O1, O1,
+    `forward_list`, diag-forward-list, O1, On, On-cell(label: <forward-list>), On, O1, O1, O1, O1, O1, O1,
     `list`, diag-list, O1, On, O1, On, O1, O1, O1, O1, O1, O1,
     `binary_search_tree`, diag-binary-search-tree, O1, On, O1, On, On-cell(colspan: 3), On-cell(colspan: 3),
-    [Self-balancing Search Trees], diag-red-black-tree, O1, On-cell(label: <note2>), O1, Ologn, Ologn-cell(colspan: 3), Ologn-cell(colspan: 3),
+    [Self-balancing\ Search Trees], diag-red-black-tree, O1, On-cell(label: <search-tree>), O1, Ologn, Ologn-cell(colspan: 3), Ologn-cell(colspan: 3),
 )
 
 == Addressable Heaps
@@ -149,8 +126,8 @@
 )
 
 / \*: Amortized complexity.
-<am>
+<amortized>
 / 1: Can be $O(1)$ if store a pointer to the last element.
-<note1>
+<forward-list>
 / 2: Can be $O(log n)$ if store the subtree size in the node.
-<note2>
+<search-tree>
