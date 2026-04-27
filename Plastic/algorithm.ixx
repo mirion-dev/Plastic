@@ -1342,8 +1342,8 @@ namespace plastic {
 
         auto [left, right]{ plastic::median_partition(first, last, pred, proj) };
         margin = (margin >> 1) + (margin >> 2);
-        intro_sort(first, left, margin, pred, proj);
-        intro_sort(right, last, margin, pred, proj);
+        plastic::intro_sort(first, left, margin, pred, proj);
+        plastic::intro_sort(right, last, margin, pred, proj);
     }
 
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
@@ -1363,8 +1363,8 @@ namespace plastic {
         }
 
         It middle{ std::ranges::next(first, size >> 1) };
-        merge_sort(first, middle, pred, proj);
-        merge_sort(middle, last, pred, proj);
+        plastic::merge_sort(first, middle, pred, proj);
+        plastic::merge_sort(middle, last, pred, proj);
         if (std::invoke(pred, std::invoke(proj, *middle), std::invoke(proj, *std::ranges::prev(middle)))) {
             plastic::inplace_merge(first, middle, last, pred, proj);
         }
