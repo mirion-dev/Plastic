@@ -9,43 +9,41 @@ import std;
 namespace plastic {
 
     template <class T>
-    class dynamic_storage : std::allocator<T> {
-        using allocator = std::allocator<T>;
-
+    class Storage : std::allocator<T> {
         T* _begin{};
         T* _end{};
 
     public:
-        dynamic_storage() = default;
+        Storage() = default;
 
-        dynamic_storage(std::size_t size) {
+        Storage(std::size_t size) {
             if (size != 0) {
-                _begin = allocator::allocate(size);
+                _begin = this->allocate(size);
                 _end = _begin + size;
             }
         }
 
-        dynamic_storage(dynamic_storage&& other) {
+        Storage(Storage&& other) {
             swap(other);
         }
 
-        ~dynamic_storage() {
+        ~Storage() {
             if (_begin != nullptr) {
-                allocator::deallocate(_begin, _end - _begin);
+                this->deallocate(_begin, _end - _begin);
             }
         }
 
-        dynamic_storage& operator=(dynamic_storage&& other) {
+        Storage& operator=(Storage&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(dynamic_storage& other) {
+        void swap(Storage& other) {
             std::ranges::swap(_begin, other._begin);
             std::ranges::swap(_end, other._end);
         }
 
-        friend void swap(dynamic_storage& left, dynamic_storage& right) {
+        friend void swap(Storage& left, Storage& right) {
             left.swap(right);
         }
 
@@ -78,7 +76,7 @@ namespace plastic {
     }
 
     export template <class T>
-    class vector {
+    class Vector {
     public:
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
@@ -93,7 +91,7 @@ namespace plastic {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     private:
-        dynamic_storage<value_type> _data;
+        Storage<value_type> _data;
         pointer _last_ptr{ _begin() };
 
         auto _begin(this auto&& self) {
@@ -113,7 +111,7 @@ namespace plastic {
         }
 
         void _reallocate(size_type new_capacity) {
-            dynamic_storage<value_type> new_data{ std::max(new_capacity, capacity() + (capacity() >> 1)) };
+            Storage<value_type> new_data{ std::max(new_capacity, capacity() + (capacity() >> 1)) };
             pointer new_last{ std::uninitialized_move(_begin(), _last(), new_data.begin()) };
             clear();
             _data = std::move(new_data);
@@ -136,16 +134,16 @@ namespace plastic {
         }
 
     public:
-        vector() = default;
+        Vector() = default;
 
-        explicit vector(size_type size) :
+        explicit Vector(size_type size) :
             _data{ size },
             _last_ptr{ _end() } {
 
             plastic::construct(_begin(), _last());
         }
 
-        vector(size_type size, const_reference value) :
+        Vector(size_type size, const_reference value) :
             _data{ size },
             _last_ptr{ _end() } {
 
@@ -153,41 +151,41 @@ namespace plastic {
         }
 
         template <std::input_iterator It>
-        vector(It first, It last) {
+        Vector(It first, It last) {
             std::copy(first, last, std::back_inserter(*this));
         }
 
-        vector(std::initializer_list<value_type> list) :
-            vector(list.begin(), list.end()) {}
+        Vector(std::initializer_list<value_type> list) :
+            Vector(list.begin(), list.end()) {}
 
-        vector(const vector& other) :
-            vector(other._begin(), other._last()) {}
+        Vector(const Vector& other) :
+            Vector(other._begin(), other._last()) {}
 
-        vector(vector&& other) {
+        Vector(Vector&& other) {
             swap(other);
         }
 
-        ~vector() {
+        ~Vector() {
             clear();
         }
 
-        vector& operator=(const vector& other) {
-            vector temp(other);
+        Vector& operator=(const Vector& other) {
+            Vector temp(other);
             swap(temp);
             return *this;
         }
 
-        vector& operator=(vector&& other) {
+        Vector& operator=(Vector&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(vector& other) {
+        void swap(Vector& other) {
             std::ranges::swap(_data, other._data);
             std::ranges::swap(_last_ptr, other._last_ptr);
         }
 
-        friend void swap(vector& left, vector& right) {
+        friend void swap(Vector& left, Vector& right) {
             left.swap(right);
         }
 
@@ -381,20 +379,20 @@ namespace plastic {
             return i;
         }
 
-        friend bool operator==(const vector& left, const vector& right) {
+        friend bool operator==(const Vector& left, const Vector& right) {
             return std::equal(left._begin(), left._last(), right._begin(), right._last());
         }
 
-        friend auto operator<=>(const vector& left, const vector& right) {
+        friend auto operator<=>(const Vector& left, const Vector& right) {
             return std::lexicographical_compare_three_way(left._begin(), left._last(), right._begin(), right._last());
         }
     };
 
     template <class It>
-    vector(It, It) -> vector<std::iter_value_t<It>>;
+    Vector(It, It) -> Vector<std::iter_value_t<It>>;
 
     export template <class T>
-    class deque {
+    class Deque {
     public:
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
@@ -409,7 +407,7 @@ namespace plastic {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     private:
-        dynamic_storage<value_type> _data;
+        Storage<value_type> _data;
         pointer _first_ptr{ _begin() };
         pointer _last_ptr{ _begin() };
 
@@ -440,7 +438,7 @@ namespace plastic {
         pointer _reallocate(size_type new_capacity, size_type right_reserved = {}, size_type left_reserved = {}) {
             size_type new_size{ size() + left_reserved + right_reserved };
 
-            dynamic_storage<value_type> new_data{ std::max(new_capacity, capacity() << 1) };
+            Storage<value_type> new_data{ std::max(new_capacity, capacity() << 1) };
             pointer new_first{ new_data.begin() + (new_capacity - new_size >> 1) + left_reserved };
             pointer new_last{ std::uninitialized_move(_first(), _last(), new_first) };
             clear();
@@ -509,9 +507,9 @@ namespace plastic {
         }
 
     public:
-        deque() = default;
+        Deque() = default;
 
-        explicit deque(size_type size) :
+        explicit Deque(size_type size) :
             _data{ size },
             _first_ptr{ _begin() },
             _last_ptr{ _end() } {
@@ -519,7 +517,7 @@ namespace plastic {
             plastic::construct(_first(), _last());
         }
 
-        deque(size_type size, const_reference value) :
+        Deque(size_type size, const_reference value) :
             _data{ size },
             _first_ptr{ _begin() },
             _last_ptr{ _end() } {
@@ -528,42 +526,42 @@ namespace plastic {
         }
 
         template <std::input_iterator It>
-        deque(It first, It last) {
+        Deque(It first, It last) {
             std::copy(first, last, std::back_inserter(*this));
         }
 
-        deque(std::initializer_list<value_type> list) :
-            deque(list.begin(), list.end()) {}
+        Deque(std::initializer_list<value_type> list) :
+            Deque(list.begin(), list.end()) {}
 
-        deque(const deque& other) :
-            deque(other._first(), other._last()) {}
+        Deque(const Deque& other) :
+            Deque(other._first(), other._last()) {}
 
-        deque(deque&& other) {
+        Deque(Deque&& other) {
             swap(other);
         }
 
-        ~deque() {
+        ~Deque() {
             clear();
         }
 
-        deque& operator=(const deque& other) {
-            deque temp(other);
+        Deque& operator=(const Deque& other) {
+            Deque temp(other);
             swap(temp);
             return *this;
         }
 
-        deque& operator=(deque&& other) {
+        Deque& operator=(Deque&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(deque& other) {
+        void swap(Deque& other) {
             std::ranges::swap(_data, other._data);
             std::ranges::swap(_first_ptr, other._first_ptr);
             std::ranges::swap(_last_ptr, other._last_ptr);
         }
 
-        friend void swap(deque& left, deque& right) {
+        friend void swap(Deque& left, Deque& right) {
             left.swap(right);
         }
 
@@ -770,289 +768,20 @@ namespace plastic {
             return i;
         }
 
-        friend bool operator==(const deque& left, const deque& right) {
+        friend bool operator==(const Deque& left, const Deque& right) {
             return std::equal(left._first(), left._last(), right._first(), right._last());
         }
 
-        friend auto operator<=>(const deque& left, const deque& right) {
+        friend auto operator<=>(const Deque& left, const Deque& right) {
             return std::lexicographical_compare_three_way(left._first(), left._last(), right._first(), right._last());
         }
     };
 
     template <class It>
-    deque(It, It) -> deque<std::iter_value_t<It>>;
+    Deque(It, It) -> Deque<std::iter_value_t<It>>;
 
     export template <class T>
-    class forward_list {
-    public:
-        using difference_type = std::ptrdiff_t;
-        using size_type = std::size_t;
-        using value_type = T;
-        using pointer = T*;
-        using const_pointer = const T*;
-        using reference = T&;
-        using const_reference = const T&;
-
-    private:
-        struct node_base {
-            node_base* next{ this };
-        };
-
-        struct node : node_base {
-            value_type value;
-        };
-
-    public:
-        class iterator {
-            friend forward_list;
-
-        public:
-            using difference_type = std::ptrdiff_t;
-            using value_type = T;
-            using pointer = T*;
-            using reference = T&;
-            using iterator_category = std::forward_iterator_tag;
-
-        private:
-            node_base* _ptr{};
-
-            iterator(node_base* ptr) :
-                _ptr{ ptr } {}
-
-        public:
-            iterator() = default;
-
-            reference operator*() const {
-                return static_cast<node*>(_ptr)->value;
-            }
-
-            pointer operator->() const {
-                return std::addressof(static_cast<node*>(_ptr)->value);
-            }
-
-            friend bool operator==(iterator left, iterator right) {
-                return left._ptr == right._ptr;
-            }
-
-            iterator& operator++() {
-                _ptr = _ptr->next;
-                return *this;
-            }
-
-            iterator operator++(int) {
-                iterator temp{ *this };
-                ++*this;
-                return temp;
-            }
-        };
-
-        using const_iterator = std::const_iterator<iterator>;
-
-    private:
-        node_base* _head{ new node_base };
-        size_type _size{};
-
-        node_base* _insert_after(node_base* pos, size_type count, const auto&... args) {
-            _size += count;
-            while (count-- != 0) {
-                pos = pos->next = new node{ pos->next, args... };
-            }
-            return pos;
-        }
-
-        void _resize(size_type new_size, const auto&... args) {
-            if (new_size <= _size) {
-                erase_after(std::ranges::next(before_begin(), new_size), end());
-            }
-            else {
-                _insert_after(std::ranges::next(before_begin(), _size)._ptr, new_size - _size, args...);
-            }
-        }
-
-    public:
-        forward_list() = default;
-
-        explicit forward_list(size_type size) {
-            insert_after(before_begin(), size, {});
-        }
-
-        forward_list(size_type size, const_reference value) {
-            insert_after(before_begin(), size, value);
-        }
-
-        template <std::input_iterator It>
-        forward_list(It first, It last) {
-            insert_after(before_begin(), first, last);
-        }
-
-        forward_list(std::initializer_list<value_type> list) :
-            forward_list(list.begin(), list.end()) {}
-
-        forward_list(const forward_list& other) :
-            forward_list(other.begin(), other.end()) {}
-
-        forward_list(forward_list&& other) {
-            swap(other);
-        }
-
-        ~forward_list() {
-            clear();
-            delete _head;
-        }
-
-        forward_list& operator=(const forward_list& other) {
-            forward_list temp{ other };
-            swap(temp);
-            return *this;
-        }
-
-        forward_list& operator=(forward_list&& other) {
-            swap(other);
-            return *this;
-        }
-
-        void swap(forward_list& other) {
-            std::ranges::swap(_head, other._head);
-            std::ranges::swap(_size, other._size);
-        }
-
-        friend void swap(forward_list& left, forward_list& right) {
-            left.swap(right);
-        }
-
-        bool empty() const {
-            return _size == 0;
-        }
-
-        size_type size() const {
-            return _size;
-        }
-
-        static size_type max_size() {
-            return std::numeric_limits<size_type>::max();
-        }
-
-        void clear() {
-            erase_after(before_begin(), end());
-        }
-
-        void resize(size_type new_size) {
-            _resize(new_size);
-        }
-
-        void resize(size_type new_size, const_reference value) {
-            _resize(new_size, value);
-        }
-
-        iterator before_begin() {
-            return end();
-        }
-
-        const_iterator before_begin() const {
-            return end();
-        }
-
-        iterator begin() {
-            return _head->next;
-        }
-
-        const_iterator begin() const {
-            return iterator{ _head->next };
-        }
-
-        iterator end() {
-            return _head;
-        }
-
-        const_iterator end() const {
-            return iterator{ _head };
-        }
-
-        const_iterator cbefore_begin() const {
-            return before_begin();
-        }
-
-        const_iterator cbegin() const {
-            return begin();
-        }
-
-        const_iterator cend() const {
-            return end();
-        }
-
-        reference front() {
-            assert(!empty());
-            return *begin();
-        }
-
-        const_reference front() const {
-            assert(!empty());
-            return *begin();
-        }
-
-        void push_front(const_reference value) {
-            _head->next = new node{ _head->next, value };
-            ++_size;
-        }
-
-        void pop_front() {
-            assert(!empty());
-            erase_after(before_begin());
-        }
-
-        iterator insert_after(const_iterator pos, const_reference value) {
-            return insert_after(pos, 1, value);
-        }
-
-        iterator insert_after(const_iterator pos, size_type count, const_reference value) {
-            return _insert_after(pos.base()._ptr, count, value);
-        }
-
-        template <std::input_iterator It>
-        iterator insert_after(const_iterator pos, It first, It last) {
-            node_base* i{ pos.base()._ptr };
-            while (first != last) {
-                i = i->next = new node{ i->next, *first };
-                ++first, ++_size;
-            }
-            return i;
-        }
-
-        iterator insert_after(const_iterator pos, std::initializer_list<value_type> list) {
-            return insert_after(pos, list.begin(), list.end());
-        }
-
-        iterator erase_after(const_iterator pos) {
-            node_base* i{ pos.base()._ptr };
-            delete static_cast<node*>(std::exchange(i->next, i->next->next));
-            --_size;
-            return i->next;
-        }
-
-        iterator erase_after(const_iterator first, const_iterator last) {
-            node_base *i{ first.base()._ptr }, *e{ last.base()._ptr };
-            i = std::exchange(i->next, e);
-            while (i != e) {
-                delete static_cast<node*>(std::exchange(i, i->next));
-                --_size;
-            }
-            return i;
-        }
-
-        friend bool operator==(const forward_list& left, const forward_list& right) {
-            return std::equal(left.begin(), left.end(), right.begin(), right.end());
-        }
-
-        friend auto operator<=>(const forward_list& left, const forward_list& right) {
-            return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
-        }
-    };
-
-    template <class It>
-    forward_list(It, It) -> forward_list<std::iter_value_t<It>>;
-
-    export template <class T>
-    class list {
+    class List {
     public:
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
@@ -1074,7 +803,7 @@ namespace plastic {
 
     public:
         class iterator {
-            friend list;
+            friend List;
 
         public:
             using difference_type = std::ptrdiff_t;
@@ -1157,53 +886,53 @@ namespace plastic {
         }
 
     public:
-        list() = default;
+        List() = default;
 
-        explicit list(size_type size) {
+        explicit List(size_type size) {
             insert(end(), size, {});
         }
 
-        list(size_type size, const_reference value) {
+        List(size_type size, const_reference value) {
             insert(end(), size, value);
         }
 
         template <std::input_iterator It>
-        list(It first, It last) {
+        List(It first, It last) {
             insert(end(), first, last);
         }
 
-        list(std::initializer_list<value_type> list) :
-            list(list.begin(), list.end()) {}
+        List(std::initializer_list<value_type> list) :
+            List(list.begin(), list.end()) {}
 
-        list(const list& other) :
-            list(other.begin(), other.end()) {}
+        List(const List& other) :
+            List(other.begin(), other.end()) {}
 
-        list(list&& other) {
+        List(List&& other) {
             swap(other);
         }
 
-        ~list() {
+        ~List() {
             clear();
             delete _head;
         }
 
-        list& operator=(const list& other) {
-            list temp{ other };
+        List& operator=(const List& other) {
+            List temp{ other };
             swap(temp);
             return *this;
         }
 
-        list& operator=(list&& other) {
+        List& operator=(List&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(list& other) {
+        void swap(List& other) {
             std::ranges::swap(_head, other._head);
             std::ranges::swap(_size, other._size);
         }
 
-        friend void swap(list& left, list& right) {
+        friend void swap(List& left, List& right) {
             left.swap(right);
         }
 
@@ -1361,16 +1090,16 @@ namespace plastic {
             return i;
         }
 
-        friend bool operator==(const list& left, const list& right) {
+        friend bool operator==(const List& left, const List& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const list& left, const list& right) {
+        friend auto operator<=>(const List& left, const List& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
 
     template <class It>
-    list(It, It) -> list<std::iter_value_t<It>>;
+    List(It, It) -> List<std::iter_value_t<It>>;
 
 }

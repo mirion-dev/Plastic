@@ -117,12 +117,8 @@ void test_search_tree() {
 TEST_CLASS(search_tree) {
 
 public:
-    TEST_METHOD(binary_search_tree) {
-        test_search_tree<plastic::binary_search_tree<int>>();
-    }
-
     TEST_METHOD(red_black_tree) {
-        test_search_tree<plastic::red_black_tree<int>>();
+        test_search_tree<plastic::RedBlackTree<int>>();
     }
 
     BEGIN_TEST_METHOD_ATTRIBUTE(avl_tree)
@@ -130,7 +126,7 @@ public:
     END_TEST_METHOD_ATTRIBUTE()
 
     TEST_METHOD(avl_tree) {
-        test_search_tree<plastic::avl_tree<int>>();
+        test_search_tree<plastic::AvlTree<int>>();
     }
 
 };

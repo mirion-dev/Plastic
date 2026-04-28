@@ -89,7 +89,7 @@ TEST_CLASS(addressable_heap) {
 
 public:
     TEST_METHOD(binary_heap) {
-        test_addressable_heap<plastic::binary_heap<int>>();
+        test_addressable_heap<plastic::BinaryHeap<int>>();
     }
 
 };

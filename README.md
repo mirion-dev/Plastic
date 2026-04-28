@@ -6,54 +6,47 @@ My implementations of common data structures and algorithms for study.
 
 The class designs are primarily based on the standard library, but not identical, as the goal is to implement different structures rather than the complete standard conformance.
 
-| | **`vector`** | **`deque`** | **`forward_list`** | **`list`** | Search Trees | Addressable Heaps |
-| :--: | :--: | :--: | :--: | :--: | :--: | :--: |
-| **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` | `empty` |
-| **`size`** | `size` | `size` | `size` | `size` | `size` | `size` |
-| **`max_size`** | `max_size` | `max_size` | `max_size` | `max_size` | `max_size` | `max_size` |
-| **`clear`** | `clear` | `clear` | `clear` | `clear` | `clear` | `clear` |
-| **`resize`** | `resize` | `resize` | `resize` | `resize` | | |
-| **`capacity`** | `capacity` | `capacity` | | | | |
-| **`reserve`** | `reserve` | `reserve` | | | | |
-| **`before_begin`** | | | `before_begin` | | | |
-| **`begin`** | `begin` | `begin` | `begin` | `begin` | `begin` | `apex` |
-| **`end`** | `end` | `end` | `end` | `end` | `end` | |
-| **`cbefore_begin`** | | | `cbefore_begin` | | | |
-| **`cbegin`** | `cbegin` | `cbegin` | `cbegin` | `cbegin` | `cbegin` | `capex` |
-| **`cend`** | `cend` | `cend` | `cend` | `cend` | `cend` | |
-| **`rbegin`** | `rbegin` | `rbegin` | | `rbegin` | `rbegin` | |
-| **`rend`** | `rend` | `rend` | | `rend` | `rend` | |
-| **`crbegin`** | `crbegin` | `crbegin` | | `crbegin` | `crbegin` | |
-| **`crend`** | `crend` | `crend` | | `crend` | `crend` | |
-| **`front`** | `front` | `front` | `front` | `front` | `front` | `top` |
-| **`back`** | `back` | `back` | | `back` | `back` | |
-| **`data`** | `data` | | | | | |
-| **`operator[]`** | `operator[]` | `operator[]` | | | | |
-| **`contains`** | | | | | `contains` | |
-| **`find`** | | | | | `find` | |
-| **`count`** | | | | | `count` | |
-| **`lower_bound`** | | | | | `lower_bound` | |
-| **`upper_bound`** | | | | | `upper_bound` | |
-| **`equal_range`** | | | | | `equal_range` | |
-| **`push_front`** | | `push_front` | `push_front` | `push_front` | | |
-| **`pop_front`** | | `pop_front` | `pop_front` | `pop_front` | | `pop` |
-| **`push_back`** | `push_back` | `push_back` | | `push_back` | | |
-| **`pop_back`** | `pop_back` | `pop_back` | | `pop_back` | | |
-| **`insert`** | `insert` | `insert` | `insert_after` | `insert` | `insert` | `push` |
-| **`erase`** | `erase` | `erase` | `erase_after` | `erase` | `erase` | `erase` |
-| **`swap`** | `swap` | `swap` | `swap` | `swap` | `swap` | `swap` |
-| **`merge`** | | | | | `merge` | `merge` |
-| **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` | `operator==` | |
-| **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | |
+Removed structures: `Bignum`, `InplaceVector`, `InplaceDeque`, `Devector`, `ForwardList`.
+
+| | **`Vector`** | **`Deque`** | **`List`** | Search Trees | Addressable Heaps |
+| :--: | :--: | :--: | :--: | :--: | :--: |
+| **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` |
+| **`size`** | `size` | `size` | `size` | `size` | `size` |
+| **`max_size`** | `max_size` | `max_size` | `max_size` | `max_size` | `max_size` |
+| **`clear`** | `clear` | `clear` | `clear` | `clear` | `clear` |
+| **`resize`** | `resize` | `resize` | `resize` | | |
+| **`capacity`** | `capacity` | `capacity` | | | |
+| **`reserve`** | `reserve` | `reserve` | | | |
+| **`begin`** | `begin` | `begin` | `begin` | `begin` | `apex` |
+| **`end`** | `end` | `end` | `end` | `end` | |
+| **`cbegin`** | `cbegin` | `cbegin` | `cbegin` | `cbegin` | `capex` |
+| **`cend`** | `cend` | `cend` | `cend` | `cend` | |
+| **`rbegin`** | `rbegin` | `rbegin` | `rbegin` | `rbegin` | |
+| **`rend`** | `rend` | `rend` | `rend` | `rend` | |
+| **`crbegin`** | `crbegin` | `crbegin` | `crbegin` | `crbegin` | |
+| **`crend`** | `crend` | `crend` | `crend` | `crend` | |
+| **`front`** | `front` | `front` | `front` | `front` | `top` |
+| **`back`** | `back` | `back` | `back` | `back` | |
+| **`data`** | `data` | | | | |
+| **`operator[]`** | `operator[]` | `operator[]` | | | |
+| **`contains`** | | | | `contains` | |
+| **`find`** | | | | `find` | |
+| **`count`** | | | | `count` | |
+| **`lower_bound`** | | | | `lower_bound` | |
+| **`upper_bound`** | | | | `upper_bound` | |
+| **`equal_range`** | | | | `equal_range` | |
+| **`push_front`** | | `push_front` | `push_front` | | |
+| **`pop_front`** | | `pop_front` | `pop_front` | | `pop` |
+| **`push_back`** | `push_back` | `push_back` | `push_back` | | |
+| **`pop_back`** | `pop_back` | `pop_back` | `pop_back` | | |
+| **`insert`** | `insert` | `insert` | `insert` | `insert` | `push` |
+| **`erase`** | `erase` | `erase` | `erase` | `erase` | `erase` |
+| **`swap`** | `swap` | `swap` | `swap` | `swap` | `swap` |
+| **`merge`** | | | | `merge` | `merge` |
+| **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` | |
+| **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | |
 
 ![](./images/complexity.svg)
-
-| **Removed structure** | **Reason** |
-| :--: | -- |
-| `bignum` | More about algorithms than data structures |
-| `inplace_vector` | Essentially the same as `vector` except the fixed storage |
-| `inplace_deque` | Essentially the same as `deque` except the fixed storage |
-| `devector` | Essentially the same as `vector` except the bidirectional extending |
 
 ## Algorithms
 

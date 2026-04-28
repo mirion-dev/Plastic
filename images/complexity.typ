@@ -29,16 +29,6 @@
     }
 })
 
-#let diag-forward-list = diag({
-    let y = .7
-    cbox((0, 0), fill: gray)
-    for x in (2, 4) {
-        arrow((x - 1.5, 0), (x - .5, 0))
-        cbox((x, 0), fill: lime)
-    }
-    arrow((4.5, 0), (5.25, 0), (5.25, -y), (-1.25, -y), (-1.25, 0), (-.5, 0))
-})
-
 #let diag-list = diag({
     let y1 = .2
     let y2 = .7
@@ -52,19 +42,16 @@
     arrow((-.5, y1), (-1.25, y1), (-1.25, y2), (5.25, y2), (5.25, y1), (4.5, y1))
 })
 
-#let diag-search-tree(red-black: false) = diag({
+#let diag-red-black-tree = diag({
     line((0, 0), (0, 1.5))
     for x in (-1, 1) {
         line((0, 0), (x, -1))
         curve((0, 1.5), (x, -1), (x * -4.5, -3.5))
-        cbox((x, -1), fill: if red-black { red } else { lime })
+        cbox((x, -1), fill: red)
     }
-    cbox((0, 0), fill: if red-black { black } else { lime })
+    cbox((0, 0), fill: black)
     cbox((0, 1.5), fill: gray)
 })
-
-#let diag-binary-search-tree = diag-search-tree()
-#let diag-red-black-tree = diag-search-tree(red-black: true)
 
 #let O-cell(complexity, fill: red, label: none, ..args) = grid.cell(
     inset: (left: 1em, right: 1em),
@@ -104,11 +91,9 @@
     grid.cell(colspan: 3)[*Insertion*],
     grid.cell(colspan: 3)[*Deletion*],
     [First], [Middle], [Last], [By Search], [First], [Middle], [Last], [First], [Middle], [Last],
-    `vector`, diag-vector, O1, O1, O1, On, On, On, O1a, On, On, O1,
-    `deque`, diag-deque, O1, O1, O1, On, O1a, On, O1a, O1, On, O1,
-    `forward_list`, diag-forward-list, O1, On, On-cell(label: <forward-list>), On, O1, O1, O1, O1, O1, O1,
-    `list`, diag-list, O1, On, O1, On, O1, O1, O1, O1, O1, O1,
-    `binary_search_tree`, diag-binary-search-tree, O1, On, O1, On, On-cell(colspan: 3), On-cell(colspan: 3),
+    `Vector`, diag-vector, O1, O1, O1, On, On, On, O1a, On, On, O1,
+    `Deque`, diag-deque, O1, O1, O1, On, O1a, On, O1a, O1, On, O1,
+    `List`, diag-list, O1, On, O1, On, O1, O1, O1, O1, O1, O1,
     [Self-balancing\ Search Trees], diag-red-black-tree, O1, On-cell(label: <search-tree>), O1, Ologn, Ologn-cell(colspan: 3), Ologn-cell(colspan: 3),
 )
 
@@ -122,12 +107,10 @@
     [*Mergable*],
     grid.cell(colspan: 2)[*Addressable*],
     [Get Apex], [Insertion], [Deletion at Apex], [Merge], [Update], [Deletion],
-    `binary_heap`, O1, Ologna, Ologn, On, Ologn, Ologn,
+    `BinaryHeap`, O1, Ologna, Ologn, On, Ologn, Ologn,
 )
 
 / \*: Amortized complexity.
 <amortized>
-/ 1: Can be $O(1)$ if store a pointer to the last element.
-<forward-list>
-/ 2: Can be $O(log n)$ if store the subtree size in the node.
+/ 1: Can be $O(log n)$ if store the subtree size in the node.
 <search-tree>

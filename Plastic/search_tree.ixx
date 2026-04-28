@@ -9,7 +9,7 @@ import std;
 namespace plastic {
 
     template <class T, class Pr, class Me>
-    class tree {
+    class Tree {
     public:
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
@@ -120,7 +120,7 @@ namespace plastic {
 
     public:
         class iterator {
-            friend tree;
+            friend Tree;
 
             node_base* _ptr{};
 
@@ -197,9 +197,9 @@ namespace plastic {
         size_type _size{};
 
     public:
-        tree() = default;
+        Tree() = default;
 
-        tree(const tree& other) :
+        Tree(const Tree& other) :
             _pred{ other._pred },
             _size{ other._size } {
 
@@ -211,33 +211,33 @@ namespace plastic {
             }
         }
 
-        tree(tree&& other) {
+        Tree(Tree&& other) {
             swap(other);
         }
 
-        ~tree() {
+        ~Tree() {
             clear();
             delete _head;
         }
 
-        tree& operator=(const tree& other) {
-            tree temp(other);
+        Tree& operator=(const Tree& other) {
+            Tree temp(other);
             swap(temp);
             return *this;
         }
 
-        tree& operator=(tree&& other) {
+        Tree& operator=(Tree&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(tree& other) {
+        void swap(Tree& other) {
             std::ranges::swap(_pred, other._pred);
             std::ranges::swap(_head, other._head);
             std::ranges::swap(_size, other._size);
         }
 
-        friend void swap(tree& left, tree& right) {
+        friend void swap(Tree& left, Tree& right) {
             left.swap(right);
         }
 
@@ -475,7 +475,7 @@ namespace plastic {
             return count;
         }
 
-        void merge(this auto&& self, tree& other) {
+        void merge(this auto&& self, Tree& other) {
             if (std::addressof(self) == std::addressof(other)) {
                 return;
             }
@@ -484,51 +484,22 @@ namespace plastic {
             other.clear();
         }
 
-        friend bool operator==(const tree& left, const tree& right) {
+        friend bool operator==(const Tree& left, const Tree& right) {
             return std::equal(left.begin(), left.end(), right.begin(), right.end());
         }
 
-        friend auto operator<=>(const tree& left, const tree& right) {
+        friend auto operator<=>(const Tree& left, const Tree& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
 
-    struct binary_search_tree_metadata {};
-
-    export template <class T, class Pr = std::less<T>>
-    class binary_search_tree : public tree<T, Pr, binary_search_tree_metadata> {
-        using base = tree<T, Pr, binary_search_tree_metadata>;
-
-        friend base;
-
-        using typename base::node_base;
-
-        void _insert_rebalance(node_base*) {}
-        void _erase_rebalance(node_base*, node_base*) {}
-
-    public:
-        using base::base;
-        using typename base::value_type;
-
-        template <std::input_iterator It>
-        binary_search_tree(It first, It last) {
-            this->insert(first, last);
-        }
-
-        binary_search_tree(std::initializer_list<value_type> list) :
-            binary_search_tree(list.begin(), list.end()) {}
-    };
-
-    template <class It>
-    binary_search_tree(It, It) -> binary_search_tree<std::iter_value_t<It>>;
-
-    struct red_black_tree_metadata {
+    struct RedBlackTreeMetadata {
         bool is_red{ true };
     };
 
     export template <class T, class Pr = std::less<T>>
-    class red_black_tree : public tree<T, Pr, red_black_tree_metadata> {
-        using base = tree<T, Pr, red_black_tree_metadata>;
+    class RedBlackTree : public Tree<T, Pr, RedBlackTreeMetadata> {
+        using base = Tree<T, Pr, RedBlackTreeMetadata>;
 
         friend base;
 
@@ -649,24 +620,24 @@ namespace plastic {
         using typename base::value_type;
 
         template <std::input_iterator It>
-        red_black_tree(It first, It last) {
+        RedBlackTree(It first, It last) {
             this->insert(first, last);
         }
 
-        red_black_tree(std::initializer_list<value_type> list) :
-            red_black_tree(list.begin(), list.end()) {}
+        RedBlackTree(std::initializer_list<value_type> list) :
+            RedBlackTree(list.begin(), list.end()) {}
     };
 
     template <class It>
-    red_black_tree(It, It) -> red_black_tree<std::iter_value_t<It>>;
+    RedBlackTree(It, It) -> RedBlackTree<std::iter_value_t<It>>;
 
-    struct avl_tree_metadata {
+    struct AvlTreeMetadata {
         signed char factor{};
     };
 
     export template <class T, class Pr = std::less<T>>
-    class avl_tree : public tree<T, Pr, avl_tree_metadata> {
-        using base = tree<T, Pr, avl_tree_metadata>;
+    class AvlTree : public Tree<T, Pr, AvlTreeMetadata> {
+        using base = Tree<T, Pr, AvlTreeMetadata>;
 
         friend base;
 
@@ -685,15 +656,15 @@ namespace plastic {
         using typename base::value_type;
 
         template <std::input_iterator It>
-        avl_tree(It first, It last) {
+        AvlTree(It first, It last) {
             this->insert(first, last);
         }
 
-        avl_tree(std::initializer_list<value_type> list) :
-            avl_tree(list.begin(), list.end()) {}
+        AvlTree(std::initializer_list<value_type> list) :
+            AvlTree(list.begin(), list.end()) {}
     };
 
     template <class It>
-    avl_tree(It, It) -> avl_tree<std::iter_value_t<It>>;
+    AvlTree(It, It) -> AvlTree<std::iter_value_t<It>>;
 
 }

@@ -9,7 +9,7 @@ import std;
 namespace plastic {
 
     export template <class T, class Pr = std::less<T>>
-    class binary_heap {
+    class BinaryHeap {
     public:
         using difference_type = std::ptrdiff_t;
         using size_type = std::size_t;
@@ -31,9 +31,9 @@ namespace plastic {
             friend class handle;
 
             node* _ptr;
-            binary_heap* _cont;
+            BinaryHeap* _cont;
 
-            reference(node* ptr, binary_heap* cont) :
+            reference(node* ptr, BinaryHeap* cont) :
                 _ptr{ ptr },
                 _cont{ cont } {}
 
@@ -58,12 +58,12 @@ namespace plastic {
         using const_handle = const_pointer;
 
         class handle {
-            friend binary_heap;
+            friend BinaryHeap;
 
             node* _ptr{};
-            binary_heap* _cont{};
+            BinaryHeap* _cont{};
 
-            handle(node* ptr, binary_heap* cont) :
+            handle(node* ptr, BinaryHeap* cont) :
                 _ptr{ ptr },
                 _cont{ cont } {}
 
@@ -128,10 +128,10 @@ namespace plastic {
         }
 
     public:
-        binary_heap() = default;
+        BinaryHeap() = default;
 
         template <std::input_iterator It>
-        binary_heap(It first, It last) {
+        BinaryHeap(It first, It last) {
             size_type index{};
             while (first != last) {
                 _data.emplace_back(std::make_unique<node>(index++, *first));
@@ -140,10 +140,10 @@ namespace plastic {
             _make_heap();
         }
 
-        binary_heap(std::initializer_list<value_type> list) :
-            binary_heap(list.begin(), list.end()) {}
+        BinaryHeap(std::initializer_list<value_type> list) :
+            BinaryHeap(list.begin(), list.end()) {}
 
-        binary_heap(const binary_heap& other) :
+        BinaryHeap(const BinaryHeap& other) :
             _pred{ other._pred },
             _data(other.size()) {
 
@@ -153,27 +153,27 @@ namespace plastic {
             }
         }
 
-        binary_heap(binary_heap&& other) {
+        BinaryHeap(BinaryHeap&& other) {
             swap(other);
         }
 
-        binary_heap& operator=(const binary_heap& other) {
-            binary_heap temp(other);
+        BinaryHeap& operator=(const BinaryHeap& other) {
+            BinaryHeap temp(other);
             swap(temp);
             return *this;
         }
 
-        binary_heap& operator=(binary_heap&& other) {
+        BinaryHeap& operator=(BinaryHeap&& other) {
             swap(other);
             return *this;
         }
 
-        void swap(binary_heap& other) {
+        void swap(BinaryHeap& other) {
             std::ranges::swap(_pred, other._pred);
             std::ranges::swap(_data, other._data);
         }
 
-        friend void swap(binary_heap& left, binary_heap& right) {
+        friend void swap(BinaryHeap& left, BinaryHeap& right) {
             left.swap(right);
         }
 
@@ -257,7 +257,7 @@ namespace plastic {
             }
         }
 
-        void merge(binary_heap& other) {
+        void merge(BinaryHeap& other) {
             if (this == std::addressof(other)) {
                 return;
             }
@@ -275,6 +275,6 @@ namespace plastic {
     };
 
     template <class It>
-    binary_heap(It, It) -> binary_heap<std::iter_value_t<It>>;
+    BinaryHeap(It, It) -> BinaryHeap<std::iter_value_t<It>>;
 
 }
