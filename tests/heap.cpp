@@ -85,7 +85,7 @@ void test_addressable_heap() {
     ASSERT(format(c) == "[]");
 }
 
-TEST_CLASS(addressable_heap) {
+TEST_CLASS(heap) {
 
 public:
     TEST_METHOD(binary_heap) {

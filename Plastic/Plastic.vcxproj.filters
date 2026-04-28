@@ -3,22 +3,22 @@
   <ItemGroup>
     <ClCompile Include="algorithm.ixx" />
     <ClCompile Include="plastic.ixx" />
-    <ClCompile Include="linear_structure.ixx" />
-    <ClCompile Include="search_tree.ixx" />
-    <ClCompile Include="addressable_heap.ixx" />
+    <ClCompile Include="sequence.ixx" />
+    <ClCompile Include="tree.ixx" />
+    <ClCompile Include="heap.ixx" />
     <ClCompile Include="..\tests\algorithm.cpp">
       <Filter>tests</Filter>
     </ClCompile>
     <ClCompile Include="..\tests\utils.ixx">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="..\tests\linear_structure.cpp">
+    <ClCompile Include="..\tests\sequence.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="..\tests\search_tree.cpp">
+    <ClCompile Include="..\tests\tree.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="..\tests\addressable_heap.cpp">
+    <ClCompile Include="..\tests\heap.cpp">
       <Filter>tests</Filter>
     </ClCompile>
   </ItemGroup>

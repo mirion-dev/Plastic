@@ -114,7 +114,7 @@ void test_search_tree() {
     ASSERT(f >= d);
 }
 
-TEST_CLASS(search_tree) {
+TEST_CLASS(tree) {
 
 public:
     TEST_METHOD(red_black_tree) {

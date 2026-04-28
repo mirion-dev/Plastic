@@ -8,7 +8,7 @@ import utils;
 
 using namespace plastic;
 
-TEST_CLASS(linear_structure) {
+TEST_CLASS(sequence) {
 
     TEST_METHOD(vector) {
         plastic::Vector<int> a(3), b(4, 4), c{ 3, 2, 1 }, x;
