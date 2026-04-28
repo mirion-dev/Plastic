@@ -1650,11 +1650,18 @@ namespace plastic {
 
     export template <std::forward_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
     std::ranges::minmax_result<It> minmax_element(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        if (first == last) {
-            return { first, first };
+        It min{ first }, max{ first };
+        if (first == last || ++first == last) {
+            return { std::move(min), std::move(max) };
         }
 
-        It min{ first }, max{ first };
+        if (std::invoke(pred, std::invoke(proj, *first), std::invoke(proj, *min))) {
+            min = first;
+        }
+        else {
+            max = first;
+        }
+
         while (++first != last) {
             It i{ first };
             if (++first == last) {
