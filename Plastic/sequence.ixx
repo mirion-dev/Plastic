@@ -24,7 +24,7 @@ namespace plastic {
         }
 
         Storage(Storage&& other) noexcept {
-            swap(other);
+            this->swap(other);
         }
 
         ~Storage() {
@@ -34,7 +34,7 @@ namespace plastic {
         }
 
         Storage& operator=(Storage&& other) noexcept {
-            swap(other);
+            this->swap(other);
             return *this;
         }
 
@@ -162,7 +162,7 @@ namespace plastic {
             Vector(other._begin(), other._last()) {}
 
         Vector(Vector&& other) noexcept {
-            swap(other);
+            this->swap(other);
         }
 
         ~Vector() {
@@ -171,12 +171,12 @@ namespace plastic {
 
         Vector& operator=(const Vector& other) {
             Vector temp(other);
-            swap(temp);
+            this->swap(temp);
             return *this;
         }
 
         Vector& operator=(Vector&& other) noexcept {
-            swap(other);
+            this->swap(other);
             return *this;
         }
 
@@ -208,7 +208,7 @@ namespace plastic {
 
         void resize(size_type new_size, const_reference value) {
             value_type clone{ value };
-            _resize(new_size, clone);
+            this->_resize(new_size, clone);
         }
 
         size_type capacity() const {
@@ -321,7 +321,7 @@ namespace plastic {
         }
 
         iterator insert(const_iterator pos, const_reference value) {
-            return insert(pos, 1, value);
+            return this->insert(pos, 1, value);
         }
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
@@ -357,7 +357,7 @@ namespace plastic {
         }
 
         iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
-            return insert(pos, list.begin(), list.end());
+            return this->insert(pos, list.begin(), list.end());
         }
 
         iterator erase(const_iterator pos) {
@@ -533,7 +533,7 @@ namespace plastic {
             Deque(other._first(), other._last()) {}
 
         Deque(Deque&& other) noexcept {
-            swap(other);
+            this->swap(other);
         }
 
         ~Deque() {
@@ -542,12 +542,12 @@ namespace plastic {
 
         Deque& operator=(const Deque& other) {
             Deque temp(other);
-            swap(temp);
+            this->swap(temp);
             return *this;
         }
 
         Deque& operator=(Deque&& other) noexcept {
-            swap(other);
+            this->swap(other);
             return *this;
         }
 
@@ -580,7 +580,7 @@ namespace plastic {
 
         void resize(size_type new_size, const_reference value) {
             value_type clone{ value };
-            _resize(new_size, clone);
+            this->_resize(new_size, clone);
         }
 
         size_type capacity() const {
@@ -706,7 +706,7 @@ namespace plastic {
         }
 
         iterator insert(const_iterator pos, const_reference value) {
-            return insert(pos, 1, value);
+            return this->insert(pos, 1, value);
         }
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
@@ -742,7 +742,7 @@ namespace plastic {
         }
 
         iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
-            return insert(pos, list.begin(), list.end());
+            return this->insert(pos, list.begin(), list.end());
         }
 
         iterator erase(const_iterator pos) {
@@ -873,7 +873,7 @@ namespace plastic {
                 }
             }
             else {
-                _insert(_head, new_size - _size, args...);
+                this->_insert(_head, new_size - _size, args...);
             }
         }
 
@@ -881,16 +881,16 @@ namespace plastic {
         List() = default;
 
         explicit List(size_type size) {
-            insert(end(), size, {});
+            this->insert(end(), size, {});
         }
 
         List(size_type size, const_reference value) {
-            insert(end(), size, value);
+            this->insert(end(), size, value);
         }
 
         template <std::input_iterator It>
         List(It first, It last) {
-            insert(end(), first, last);
+            this->insert(end(), first, last);
         }
 
         List(std::initializer_list<value_type> list) :
@@ -900,7 +900,7 @@ namespace plastic {
             List(other.begin(), other.end()) {}
 
         List(List&& other) noexcept {
-            swap(other);
+            this->swap(other);
         }
 
         ~List() {
@@ -910,12 +910,12 @@ namespace plastic {
 
         List& operator=(const List& other) {
             List temp{ other };
-            swap(temp);
+            this->swap(temp);
             return *this;
         }
 
         List& operator=(List&& other) noexcept {
-            swap(other);
+            this->swap(other);
             return *this;
         }
 
@@ -937,7 +937,7 @@ namespace plastic {
         }
 
         void clear() {
-            erase(begin(), end());
+            this->erase(begin(), end());
         }
 
         void resize(size_type new_size) {
@@ -945,7 +945,7 @@ namespace plastic {
         }
 
         void resize(size_type new_size, const_reference value) {
-            _resize(new_size, value);
+            this->_resize(new_size, value);
         }
 
         iterator begin() {
@@ -1023,7 +1023,7 @@ namespace plastic {
 
         void pop_front() {
             assert(!empty());
-            erase(begin());
+            this->erase(begin());
         }
 
         void push_back(const_reference value) {
@@ -1033,15 +1033,15 @@ namespace plastic {
 
         void pop_back() {
             assert(!empty());
-            erase(--end());
+            this->erase(--end());
         }
 
         iterator insert(const_iterator pos, const_reference value) {
-            return insert(pos, 1, value);
+            return this->insert(pos, 1, value);
         }
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
-            return _insert(pos.base()._ptr, count, value);
+            return this->_insert(pos.base()._ptr, count, value);
         }
 
         template <std::input_iterator It>
@@ -1056,7 +1056,7 @@ namespace plastic {
         }
 
         iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
-            return insert(pos, list.begin(), list.end());
+            return this->insert(pos, list.begin(), list.end());
         }
 
         iterator erase(const_iterator pos) {

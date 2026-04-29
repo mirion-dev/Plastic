@@ -212,7 +212,7 @@ namespace plastic {
         }
 
         Tree(Tree&& other) noexcept {
-            swap(other);
+            this->swap(other);
         }
 
         ~Tree() {
@@ -222,12 +222,12 @@ namespace plastic {
 
         Tree& operator=(const Tree& other) {
             Tree temp(other);
-            swap(temp);
+            this->swap(temp);
             return *this;
         }
 
         Tree& operator=(Tree&& other) noexcept {
-            swap(other);
+            this->swap(other);
             return *this;
         }
 
@@ -326,21 +326,21 @@ namespace plastic {
         }
 
         std::pair<const_iterator, const_iterator> equal_range(const_reference value) const {
-            return { lower_bound(value), upper_bound(value) };
+            return { this->lower_bound(value), this->upper_bound(value) };
         }
 
         const_iterator find(const_reference value) const {
-            NodeBase* bound{ lower_bound(value)._ptr };
+            NodeBase* bound{ this->lower_bound(value)._ptr };
             return !bound->is_head && !std::invoke(_pred, value, static_cast<Node*>(bound)->value) ? bound : _head;
         }
 
         bool contains(const_reference value) const {
-            NodeBase* bound{ lower_bound(value)._ptr };
+            NodeBase* bound{ this->lower_bound(value)._ptr };
             return !bound->is_head && !std::invoke(_pred, value, static_cast<Node*>(bound)->value);
         }
 
         size_type count(const_reference value) const {
-            auto [first, last]{ equal_range(value) };
+            auto [first, last]{ this->equal_range(value) };
             return std::ranges::distance(first, last);
         }
 

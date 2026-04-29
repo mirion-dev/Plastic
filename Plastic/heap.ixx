@@ -93,10 +93,10 @@ namespace plastic {
                 if (!std::invoke(_pred, _data[parent]->value, i->value)) {
                     break;
                 }
-                _set(index, std::move(_data[parent]));
+                this->_set(index, std::move(_data[parent]));
                 index = parent;
             }
-            _set(index, std::move(i));
+            this->_set(index, std::move(i));
         }
 
         void _sift_down(size_type index) {
@@ -112,10 +112,10 @@ namespace plastic {
                 if (!std::invoke(_pred, i->value, _data[child]->value)) {
                     break;
                 }
-                _set(index, std::move(_data[child]));
+                this->_set(index, std::move(_data[child]));
                 index = child;
             }
-            _set(index, std::move(i));
+            this->_set(index, std::move(i));
         }
 
         void _make_heap() {
@@ -152,17 +152,17 @@ namespace plastic {
         }
 
         BinaryHeap(BinaryHeap&& other) noexcept {
-            swap(other);
+            this->swap(other);
         }
 
         BinaryHeap& operator=(const BinaryHeap& other) {
             BinaryHeap temp(other);
-            swap(temp);
+            this->swap(temp);
             return *this;
         }
 
         BinaryHeap& operator=(BinaryHeap&& other) noexcept {
-            swap(other);
+            this->swap(other);
             return *this;
         }
 
@@ -216,7 +216,7 @@ namespace plastic {
             auto ptr{ std::make_unique<Node>(size(), value) };
             Node* raw{ ptr.get() };
             _data.emplace_back(std::move(ptr));
-            _sift_up(raw->index);
+            this->_sift_up(raw->index);
             return { raw, this };
         }
 
@@ -227,7 +227,7 @@ namespace plastic {
                 return;
             }
 
-            _set(0, std::move(_data.back()));
+            this->_set(0, std::move(_data.back()));
             _data.pop_back();
             _sift_down(0);
         }
@@ -241,7 +241,7 @@ namespace plastic {
             }
 
             bool is_greater{ std::invoke(_pred, pos._ptr->value, _data.back()->value) };
-            _set(index, std::move(_data.back()));
+            this->_set(index, std::move(_data.back()));
             _data.pop_back();
             if (is_greater) {
                 _sift_up(index);
