@@ -344,7 +344,7 @@ namespace plastic {
             return std::ranges::distance(first, last);
         }
 
-        iterator insert(this auto&& self, const_reference value) {
+        iterator insert(this auto& self, const_reference value) {
             NodeBase *parent{ self._head }, *i{ self._head->parent };
             bool is_left{};
             while (!i->is_head) {
@@ -376,18 +376,18 @@ namespace plastic {
         }
 
         template <std::input_iterator It>
-        void insert(this auto&& self, It first, It last) {
+        void insert(this auto& self, It first, It last) {
             while (first != last) {
                 self.insert(*first);
                 ++first;
             }
         }
 
-        void insert(this auto&& self, std::initializer_list<value_type> list) {
+        void insert(this auto& self, std::initializer_list<value_type> list) {
             self.insert(list.begin(), list.end());
         }
 
-        iterator erase(this auto&& self, const_iterator pos) {
+        iterator erase(this auto& self, const_iterator pos) {
             NodeBase* erased{ pos++._ptr };
             assert(erased != self._head);
 
@@ -454,14 +454,14 @@ namespace plastic {
             return pos;
         }
 
-        iterator erase(this auto&& self, const_iterator first, const_iterator last) {
+        iterator erase(this auto& self, const_iterator first, const_iterator last) {
             while (first != last) {
                 self.erase(first++);
             }
             return last;
         }
 
-        size_type erase(this auto&& self, const_reference value) {
+        size_type erase(this auto& self, const_reference value) {
             size_type count{};
             auto [first, last]{ self.equal_range(value) };
             while (first != last) {
@@ -471,7 +471,7 @@ namespace plastic {
             return count;
         }
 
-        void merge(this auto&& self, Tree& other) {
+        void merge(this auto& self, Tree& other) {
             if (std::addressof(self) == std::addressof(other)) {
                 return;
             }

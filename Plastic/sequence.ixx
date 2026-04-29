@@ -407,11 +407,11 @@ namespace plastic {
         pointer _first_ptr{ _begin() };
         pointer _last_ptr{ _begin() };
 
-        auto _begin(this auto&& self) {
+        auto _begin(this auto& self) {
             return self._data.begin();
         }
 
-        auto _end(this auto&& self) {
+        auto _end(this auto& self) {
             return self._data.end();
         }
 
