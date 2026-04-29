@@ -197,10 +197,6 @@ namespace plastic {
             return _last() - _begin();
         }
 
-        static size_type max_size() {
-            return std::numeric_limits<size_type>::max();
-        }
-
         void clear() {
             std::destroy(_begin(), _last());
             _last_ptr = _begin();
@@ -573,10 +569,6 @@ namespace plastic {
             return _last() - _first();
         }
 
-        static size_type max_size() {
-            return std::numeric_limits<size_type>::max();
-        }
-
         void clear() {
             std::destroy(_first(), _last());
             _first_ptr = _last_ptr = _begin() + (capacity() >> 1);
@@ -942,10 +934,6 @@ namespace plastic {
 
         size_type size() const {
             return _size;
-        }
-
-        static size_type max_size() {
-            return std::numeric_limits<size_type>::max();
         }
 
         void clear() {

@@ -249,10 +249,6 @@ namespace plastic {
             return _size;
         }
 
-        static size_type max_size() {
-            return std::numeric_limits<size_type>::max();
-        }
-
         void clear() {
             if (_size != 0) {
                 static_cast<Node*>(_head->parent)->free();

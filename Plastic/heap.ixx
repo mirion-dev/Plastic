@@ -183,10 +183,6 @@ namespace plastic {
             return _data.size();
         }
 
-        size_type max_size() const {
-            return _data.max_size();
-        }
-
         void clear() {
             _data.clear();
         }

@@ -37,8 +37,6 @@ void test_search_tree() {
     ASSERT(b.size() == 4);
     ASSERT(c.size() == 3);
 
-    ASSERT(x.max_size() == std::numeric_limits<std::size_t>::max());
-
     x = c;
     x.clear();
     ASSERT(format(x) == "[]");

@@ -12,7 +12,6 @@ Removed structures: `Bignum`, `InplaceVector`, `InplaceDeque`, `Devector`, `Forw
 | :--: | :--: | :--: | :--: | :--: | :--: |
 | **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` |
 | **`size`** | `size` | `size` | `size` | `size` | `size` |
-| **`max_size`** | `max_size` | `max_size` | `max_size` | `max_size` | `max_size` |
 | **`clear`** | `clear` | `clear` | `clear` | `clear` | `clear` |
 | **`resize`** | `resize` | `resize` | `resize` | | |
 | **`capacity`** | `capacity` | `capacity` | | | |
