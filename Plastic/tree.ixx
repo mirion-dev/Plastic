@@ -481,7 +481,7 @@ namespace plastic {
         }
 
         friend bool operator==(const Tree& left, const Tree& right) {
-            return std::equal(left.begin(), left.end(), right.begin(), right.end());
+            return std::ranges::equal(left, right);
         }
 
         friend auto operator<=>(const Tree& left, const Tree& right) {

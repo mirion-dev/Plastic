@@ -1036,20 +1036,20 @@ namespace plastic {
 
         It i{ first };
         auto j{ buf };
-        std::construct_at(j++, std::move(*i++));
+        std::ranges::construct_at(j++, std::move(*i++));
         while (i != r_last) {
             if (std::invoke(pred, std::invoke(proj, *i))) {
                 *first++ = std::move(*i);
             }
             else {
-                std::construct_at(j++, std::move(*i));
+                std::ranges::construct_at(j++, std::move(*i));
             }
             ++i;
         }
         *first++ = std::move(*r_last);
 
         It temp{ plastic::move(buf, j, first).out };
-        std::destroy(buf, j);
+        std::ranges::destroy(buf, j);
         alloc.deallocate(buf, size);
         return { std::move(first), std::move(temp) };
     }
@@ -1123,10 +1123,10 @@ namespace plastic {
         auto k{ buf };
         while (i != middle && j != last) {
             if (!std::invoke(pred, std::invoke(proj, *j), std::invoke(proj, *i))) {
-                std::construct_at(k++, std::move(*i++));
+                std::ranges::construct_at(k++, std::move(*i++));
             }
             else {
-                std::construct_at(k++, std::move(*j++));
+                std::ranges::construct_at(k++, std::move(*j++));
             }
         }
 
@@ -1137,7 +1137,7 @@ namespace plastic {
             plastic::move_backward(i, middle, j);
         }
         plastic::move(buf, k, first);
-        std::destroy(buf, k);
+        std::ranges::destroy(buf, k);
         alloc.deallocate(buf, size);
 
         return j;
