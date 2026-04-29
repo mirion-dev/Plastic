@@ -11,33 +11,33 @@ namespace plastic {
     template <class T, class Pr, class Me>
     class Tree {
     public:
-        using difference_type = std::ptrdiff_t;
-        using size_type = std::size_t;
         using value_type = T;
-        using reference = T&;
-        using const_reference = const T&;
         using comparator = Pr;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
 
     protected:
-        using metadata = Me;
+        using Metadata = Me;
 
-        struct node_base {
-            node_base* parent{ this };
-            node_base* left{ this };
-            node_base* right{ this };
+        struct NodeBase {
+            NodeBase* parent{ this };
+            NodeBase* left{ this };
+            NodeBase* right{ this };
             bool is_head{ true };
-            metadata meta;
+            Metadata meta;
 
-            node_base* leftmost() {
-                node_base* i{ this };
+            NodeBase* leftmost() {
+                NodeBase* i{ this };
                 while (!i->left->is_head) {
                     i = i->left;
                 }
                 return i;
             }
 
-            node_base* rightmost() {
-                node_base* i{ this };
+            NodeBase* rightmost() {
+                NodeBase* i{ this };
                 while (!i->right->is_head) {
                     i = i->right;
                 }
@@ -45,8 +45,8 @@ namespace plastic {
             }
 
             void left_rotate() {
-                node_base* replaced{ right };
-                node_base* replaced_left{ replaced->left };
+                NodeBase* replaced{ right };
+                NodeBase* replaced_left{ replaced->left };
 
                 right = replaced_left;
                 if (!replaced_left->is_head) {
@@ -69,8 +69,8 @@ namespace plastic {
             }
 
             void right_rotate() {
-                node_base* replaced{ left };
-                node_base* replaced_right{ replaced->right };
+                NodeBase* replaced{ left };
+                NodeBase* replaced_right{ replaced->right };
 
                 left = replaced_right;
                 if (!replaced_right->is_head) {
@@ -93,26 +93,26 @@ namespace plastic {
             }
         };
 
-        struct node : node_base {
+        struct Node : NodeBase {
             value_type value;
 
-            node_base* clone(node_base* head, node_base* parent) {
-                auto clone{ new node{ parent, head, head, false, this->meta, value } };
+            NodeBase* clone(NodeBase* head, NodeBase* parent) {
+                auto clone{ new Node{ parent, head, head, false, this->meta, value } };
                 if (!this->left->is_head) {
-                    clone->left = static_cast<node*>(this->left)->clone(head, clone);
+                    clone->left = static_cast<Node*>(this->left)->clone(head, clone);
                 }
                 if (!this->right->is_head) {
-                    clone->right = static_cast<node*>(this->right)->clone(head, clone);
+                    clone->right = static_cast<Node*>(this->right)->clone(head, clone);
                 }
                 return clone;
             }
 
             void free() {
                 if (!this->left->is_head) {
-                    static_cast<node*>(this->left)->free();
+                    static_cast<Node*>(this->left)->free();
                 }
                 if (!this->right->is_head) {
-                    static_cast<node*>(this->right)->free();
+                    static_cast<Node*>(this->right)->free();
                 }
                 delete this;
             }
@@ -122,26 +122,26 @@ namespace plastic {
         class iterator {
             friend Tree;
 
-            node_base* _ptr{};
+            NodeBase* _ptr{};
 
-            iterator(node_base* ptr) :
+            iterator(NodeBase* ptr) :
                 _ptr{ ptr } {}
 
         public:
-            using difference_type = std::ptrdiff_t;
             using value_type = T;
-            using pointer = const T*;
-            using reference = const T&;
+            using pointer = const value_type*;
+            using reference = const value_type&;
+            using difference_type = std::ptrdiff_t;
             using iterator_category = std::bidirectional_iterator_tag;
 
             iterator() = default;
 
             reference operator*() const {
-                return static_cast<node*>(_ptr)->value;
+                return static_cast<Node*>(_ptr)->value;
             }
 
             pointer operator->() const {
-                return std::addressof(static_cast<node*>(_ptr)->value);
+                return std::addressof(static_cast<Node*>(_ptr)->value);
             }
 
             friend bool operator==(iterator left, iterator right) {
@@ -153,7 +153,7 @@ namespace plastic {
                     _ptr = _ptr->right->leftmost();
                 }
                 else {
-                    node_base* old_ptr;
+                    NodeBase* old_ptr;
                     do {
                         old_ptr = std::exchange(_ptr, _ptr->parent);
                     } while (!_ptr->is_head && _ptr->right == old_ptr);
@@ -172,7 +172,7 @@ namespace plastic {
                     _ptr = _ptr->left->rightmost();
                 }
                 else {
-                    node_base* old_ptr;
+                    NodeBase* old_ptr;
                     do {
                         old_ptr = std::exchange(_ptr, _ptr->parent);
                     } while (!_ptr->is_head && _ptr->left == old_ptr);
@@ -193,7 +193,7 @@ namespace plastic {
 
     protected:
         comparator _pred;
-        node_base* _head{ new node_base };
+        NodeBase* _head{ new NodeBase };
         size_type _size{};
 
     public:
@@ -204,14 +204,14 @@ namespace plastic {
             _size{ other._size } {
 
             if (_size != 0) {
-                node_base* clone{ static_cast<node*>(other._head->parent)->clone(_head, _head) };
+                NodeBase* clone{ static_cast<Node*>(other._head->parent)->clone(_head, _head) };
                 _head->parent = clone;
                 _head->left = clone->rightmost();
                 _head->right = clone->leftmost();
             }
         }
 
-        Tree(Tree&& other) {
+        Tree(Tree&& other) noexcept {
             swap(other);
         }
 
@@ -226,18 +226,18 @@ namespace plastic {
             return *this;
         }
 
-        Tree& operator=(Tree&& other) {
+        Tree& operator=(Tree&& other) noexcept {
             swap(other);
             return *this;
         }
 
-        void swap(Tree& other) {
+        void swap(Tree& other) noexcept {
             std::ranges::swap(_pred, other._pred);
             std::ranges::swap(_head, other._head);
             std::ranges::swap(_size, other._size);
         }
 
-        friend void swap(Tree& left, Tree& right) {
+        friend void swap(Tree& left, Tree& right) noexcept {
             left.swap(right);
         }
 
@@ -255,7 +255,7 @@ namespace plastic {
 
         void clear() {
             if (_size != 0) {
-                static_cast<node*>(_head->parent)->free();
+                static_cast<Node*>(_head->parent)->free();
                 _head->parent = _head->left = _head->right = _head;
                 _size = 0;
             }
@@ -302,9 +302,9 @@ namespace plastic {
         }
 
         const_iterator lower_bound(const_reference value) const {
-            node_base *bound{ _head }, *i{ _head->parent };
+            NodeBase *bound{ _head }, *i{ _head->parent };
             while (!i->is_head) {
-                if (!std::invoke(_pred, static_cast<node*>(i)->value, value)) {
+                if (!std::invoke(_pred, static_cast<Node*>(i)->value, value)) {
                     bound = i;
                     i = i->left;
                 }
@@ -316,9 +316,9 @@ namespace plastic {
         }
 
         const_iterator upper_bound(const_reference value) const {
-            node_base *bound{ _head }, *i{ _head->parent };
+            NodeBase *bound{ _head }, *i{ _head->parent };
             while (!i->is_head) {
-                if (std::invoke(_pred, value, static_cast<node*>(i)->value)) {
+                if (std::invoke(_pred, value, static_cast<Node*>(i)->value)) {
                     bound = i;
                     i = i->left;
                 }
@@ -334,13 +334,13 @@ namespace plastic {
         }
 
         const_iterator find(const_reference value) const {
-            node_base* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !std::invoke(_pred, value, static_cast<node*>(bound)->value) ? bound : _head;
+            NodeBase* bound{ lower_bound(value)._ptr };
+            return !bound->is_head && !std::invoke(_pred, value, static_cast<Node*>(bound)->value) ? bound : _head;
         }
 
         bool contains(const_reference value) const {
-            node_base* bound{ lower_bound(value)._ptr };
-            return !bound->is_head && !std::invoke(_pred, value, static_cast<node*>(bound)->value);
+            NodeBase* bound{ lower_bound(value)._ptr };
+            return !bound->is_head && !std::invoke(_pred, value, static_cast<Node*>(bound)->value);
         }
 
         size_type count(const_reference value) const {
@@ -349,15 +349,15 @@ namespace plastic {
         }
 
         iterator insert(this auto&& self, const_reference value) {
-            node_base *parent{ self._head }, *i{ self._head->parent };
+            NodeBase *parent{ self._head }, *i{ self._head->parent };
             bool is_left{};
             while (!i->is_head) {
                 parent = i;
-                is_left = std::invoke(self._pred, value, static_cast<node*>(i)->value);
+                is_left = std::invoke(self._pred, value, static_cast<Node*>(i)->value);
                 i = is_left ? i->left : i->right;
             }
 
-            auto new_node{ new node{ parent, self._head, self._head, false, {}, value } };
+            auto new_node{ new Node{ parent, self._head, self._head, false, {}, value } };
             if (parent->is_head) {
                 parent->parent = new_node;
             }
@@ -392,13 +392,13 @@ namespace plastic {
         }
 
         iterator erase(this auto&& self, const_iterator pos) {
-            node_base* erased{ pos++._ptr };
+            NodeBase* erased{ pos++._ptr };
             assert(erased != self._head);
 
-            node_base* parent{ erased->parent };
-            node_base* left{ erased->left };
-            node_base* right{ erased->right };
-            node_base* replaced;
+            NodeBase* parent{ erased->parent };
+            NodeBase* left{ erased->left };
+            NodeBase* right{ erased->right };
+            NodeBase* replaced;
             if (left->is_head || right->is_head) {
                 replaced = left->is_head ? right : left;
 
@@ -424,8 +424,8 @@ namespace plastic {
             }
             else {
                 replaced = pos._ptr;
-                node_base* replaced_parent{ replaced->parent };
-                node_base* replaced_right{ replaced->right };
+                NodeBase* replaced_parent{ replaced->parent };
+                NodeBase* replaced_right{ replaced->right };
 
                 replaced->left = left;
                 left->parent = replaced;
@@ -453,7 +453,7 @@ namespace plastic {
             }
 
             self._erase_rebalance(replaced, erased);
-            delete static_cast<node*>(erased);
+            delete static_cast<Node*>(erased);
             --self._size;
             return pos;
         }
@@ -499,18 +499,18 @@ namespace plastic {
 
     export template <class T, class Pr = std::less<T>>
     class RedBlackTree : public Tree<T, Pr, RedBlackTreeMetadata> {
-        using base = Tree<T, Pr, RedBlackTreeMetadata>;
+        using Base = Tree<T, Pr, RedBlackTreeMetadata>;
 
-        friend base;
+        friend Base;
 
-        using typename base::node_base;
+        using typename Base::NodeBase;
 
-        void _insert_rebalance(node_base* inserted) {
-            node_base* i{ inserted };
+        void _insert_rebalance(NodeBase* inserted) {
+            NodeBase* i{ inserted };
             while (i->parent->meta.is_red) {
-                node_base* parent{ i->parent };
-                node_base* grandparent{ parent->parent };
-                node_base* uncle;
+                NodeBase* parent{ i->parent };
+                NodeBase* grandparent{ parent->parent };
+                NodeBase* uncle;
                 if (parent == grandparent->left) {
                     uncle = grandparent->right;
                     if (!uncle->meta.is_red) {
@@ -548,17 +548,17 @@ namespace plastic {
             this->_head->parent->meta.is_red = false;
         }
 
-        void _erase_rebalance(node_base* replaced, node_base* erased) {
+        void _erase_rebalance(NodeBase* replaced, NodeBase* erased) {
             std::ranges::swap(replaced->meta.is_red, erased->meta.is_red);
 
-            node_base* i{ replaced };
+            NodeBase* i{ replaced };
             if (i->meta.is_red) {
                 return;
             }
 
             while (!i->parent->is_head && !i->meta.is_red) {
-                node_base* parent{ i->parent };
-                node_base* brother;
+                NodeBase* parent{ i->parent };
+                NodeBase* brother;
                 if (i == parent->left) {
                     brother = parent->right;
                     if (brother->meta.is_red) {
@@ -616,8 +616,8 @@ namespace plastic {
         }
 
     public:
-        using base::base;
-        using typename base::value_type;
+        using Base::Base;
+        using typename Base::value_type;
 
         template <std::input_iterator It>
         RedBlackTree(It first, It last) {
@@ -637,23 +637,23 @@ namespace plastic {
 
     export template <class T, class Pr = std::less<T>>
     class AvlTree : public Tree<T, Pr, AvlTreeMetadata> {
-        using base = Tree<T, Pr, AvlTreeMetadata>;
+        using Base = Tree<T, Pr, AvlTreeMetadata>;
 
-        friend base;
+        friend Base;
 
-        using typename base::node_base;
+        using typename Base::NodeBase;
 
-        static void _insert_rebalance(node_base* inserted) {
+        static void _insert_rebalance(NodeBase* inserted) {
             // TODO
         }
 
-        static void _erase_rebalance(node_base* replaced, node_base* erased) {
+        static void _erase_rebalance(NodeBase* replaced, NodeBase* erased) {
             // TODO
         }
 
     public:
-        using base::base;
-        using typename base::value_type;
+        using Base::Base;
+        using typename Base::value_type;
 
         template <std::input_iterator It>
         AvlTree(It first, It last) {

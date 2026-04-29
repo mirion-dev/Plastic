@@ -23,7 +23,7 @@ namespace plastic {
             }
         }
 
-        Storage(Storage&& other) {
+        Storage(Storage&& other) noexcept {
             swap(other);
         }
 
@@ -33,17 +33,17 @@ namespace plastic {
             }
         }
 
-        Storage& operator=(Storage&& other) {
+        Storage& operator=(Storage&& other) noexcept {
             swap(other);
             return *this;
         }
 
-        void swap(Storage& other) {
+        void swap(Storage& other) noexcept {
             std::ranges::swap(_begin, other._begin);
             std::ranges::swap(_end, other._end);
         }
 
-        friend void swap(Storage& left, Storage& right) {
+        friend void swap(Storage& left, Storage& right) noexcept {
             left.swap(right);
         }
 
@@ -78,13 +78,13 @@ namespace plastic {
     export template <class T>
     class Vector {
     public:
-        using difference_type = std::ptrdiff_t;
-        using size_type = std::size_t;
         using value_type = T;
-        using pointer = T*;
-        using const_pointer = const T*;
-        using reference = T&;
-        using const_reference = const T&;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
         using iterator = pointer;
         using const_iterator = const_pointer;
         using reverse_iterator = std::reverse_iterator<iterator>;
@@ -161,7 +161,7 @@ namespace plastic {
         Vector(const Vector& other) :
             Vector(other._begin(), other._last()) {}
 
-        Vector(Vector&& other) {
+        Vector(Vector&& other) noexcept {
             swap(other);
         }
 
@@ -175,17 +175,17 @@ namespace plastic {
             return *this;
         }
 
-        Vector& operator=(Vector&& other) {
+        Vector& operator=(Vector&& other) noexcept {
             swap(other);
             return *this;
         }
 
-        void swap(Vector& other) {
+        void swap(Vector& other) noexcept {
             std::ranges::swap(_data, other._data);
             std::ranges::swap(_last_ptr, other._last_ptr);
         }
 
-        friend void swap(Vector& left, Vector& right) {
+        friend void swap(Vector& left, Vector& right) noexcept {
             left.swap(right);
         }
 
@@ -394,13 +394,13 @@ namespace plastic {
     export template <class T>
     class Deque {
     public:
-        using difference_type = std::ptrdiff_t;
-        using size_type = std::size_t;
         using value_type = T;
-        using pointer = T*;
-        using const_pointer = const T*;
-        using reference = T&;
-        using const_reference = const T&;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
         using iterator = pointer;
         using const_iterator = const_pointer;
         using reverse_iterator = std::reverse_iterator<iterator>;
@@ -536,7 +536,7 @@ namespace plastic {
         Deque(const Deque& other) :
             Deque(other._first(), other._last()) {}
 
-        Deque(Deque&& other) {
+        Deque(Deque&& other) noexcept {
             swap(other);
         }
 
@@ -550,18 +550,18 @@ namespace plastic {
             return *this;
         }
 
-        Deque& operator=(Deque&& other) {
+        Deque& operator=(Deque&& other) noexcept {
             swap(other);
             return *this;
         }
 
-        void swap(Deque& other) {
+        void swap(Deque& other) noexcept {
             std::ranges::swap(_data, other._data);
             std::ranges::swap(_first_ptr, other._first_ptr);
             std::ranges::swap(_last_ptr, other._last_ptr);
         }
 
-        friend void swap(Deque& left, Deque& right) {
+        friend void swap(Deque& left, Deque& right) noexcept {
             left.swap(right);
         }
 
@@ -783,21 +783,21 @@ namespace plastic {
     export template <class T>
     class List {
     public:
-        using difference_type = std::ptrdiff_t;
-        using size_type = std::size_t;
         using value_type = T;
-        using pointer = T*;
-        using const_pointer = const T*;
-        using reference = T&;
-        using const_reference = const T&;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
 
     private:
-        struct node_base {
-            node_base* prev{ this };
-            node_base* next{ this };
+        struct NodeBase {
+            NodeBase* prev{ this };
+            NodeBase* next{ this };
         };
 
-        struct node : node_base {
+        struct Node : NodeBase {
             value_type value;
         };
 
@@ -806,27 +806,27 @@ namespace plastic {
             friend List;
 
         public:
-            using difference_type = std::ptrdiff_t;
             using value_type = T;
-            using pointer = T*;
-            using reference = T&;
+            using pointer = value_type*;
+            using reference = value_type&;
+            using difference_type = std::ptrdiff_t;
             using iterator_category = std::bidirectional_iterator_tag;
 
         private:
-            node_base* _ptr{};
+            NodeBase* _ptr{};
 
-            iterator(node_base* ptr) :
+            iterator(NodeBase* ptr) :
                 _ptr{ ptr } {}
 
         public:
             iterator() = default;
 
             reference operator*() const {
-                return static_cast<node*>(_ptr)->value;
+                return static_cast<Node*>(_ptr)->value;
             }
 
             pointer operator->() const {
-                return std::addressof(static_cast<node*>(_ptr)->value);
+                return std::addressof(static_cast<Node*>(_ptr)->value);
             }
 
             friend bool operator==(iterator left, iterator right) {
@@ -861,14 +861,14 @@ namespace plastic {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     private:
-        node_base* _head{ new node_base };
+        NodeBase* _head{ new NodeBase };
         size_type _size{};
 
-        node_base* _insert(node_base* pos, size_type count, const auto&... args) {
-            node_base *prev{ pos->prev }, *i{ prev };
+        NodeBase* _insert(NodeBase* pos, size_type count, const auto&... args) {
+            NodeBase *prev{ pos->prev }, *i{ prev };
             _size += count;
             while (count-- != 0) {
-                i = i->next = new node{ i, i->next, args... };
+                i = i->next = new Node{ i, i->next, args... };
             }
             i->next->prev = i;
             return prev->next;
@@ -907,7 +907,7 @@ namespace plastic {
         List(const List& other) :
             List(other.begin(), other.end()) {}
 
-        List(List&& other) {
+        List(List&& other) noexcept {
             swap(other);
         }
 
@@ -922,17 +922,17 @@ namespace plastic {
             return *this;
         }
 
-        List& operator=(List&& other) {
+        List& operator=(List&& other) noexcept {
             swap(other);
             return *this;
         }
 
-        void swap(List& other) {
+        void swap(List& other) noexcept {
             std::ranges::swap(_head, other._head);
             std::ranges::swap(_size, other._size);
         }
 
-        friend void swap(List& left, List& right) {
+        friend void swap(List& left, List& right) noexcept {
             left.swap(right);
         }
 
@@ -1029,7 +1029,7 @@ namespace plastic {
         }
 
         void push_front(const_reference value) {
-            _head->next->next->prev = _head->next = new node{ _head, _head->next, value };
+            _head->next->next->prev = _head->next = new Node{ _head, _head->next, value };
             ++_size;
         }
 
@@ -1039,7 +1039,7 @@ namespace plastic {
         }
 
         void push_back(const_reference value) {
-            _head->prev->prev->next = _head->prev = new node{ _head->prev, _head, value };
+            _head->prev->prev->next = _head->prev = new Node{ _head->prev, _head, value };
             ++_size;
         }
 
@@ -1058,9 +1058,9 @@ namespace plastic {
 
         template <std::input_iterator It>
         iterator insert(const_iterator pos, It first, It last) {
-            node_base *prev{ pos.base()._ptr->prev }, *i{ prev };
+            NodeBase *prev{ pos.base()._ptr->prev }, *i{ prev };
             while (first != last) {
-                i = i->next = new node{ i, i->next, *first };
+                i = i->next = new Node{ i, i->next, *first };
                 ++first, ++_size;
             }
             i->next->prev = i;
@@ -1072,19 +1072,19 @@ namespace plastic {
         }
 
         iterator erase(const_iterator pos) {
-            node_base* i{ pos.base()._ptr->prev };
-            delete static_cast<node*>(std::exchange(i->next, i->next->next));
+            NodeBase* i{ pos.base()._ptr->prev };
+            delete static_cast<Node*>(std::exchange(i->next, i->next->next));
             --_size;
             i->next->prev = i;
             return i->next;
         }
 
         iterator erase(const_iterator first, const_iterator last) {
-            node_base *i{ first.base()._ptr }, *e{ last.base()._ptr };
+            NodeBase *i{ first.base()._ptr }, *e{ last.base()._ptr };
             i->prev->next = e;
             e->prev = i->prev;
             while (i != e) {
-                delete static_cast<node*>(std::exchange(i, i->next));
+                delete static_cast<Node*>(std::exchange(i, i->next));
                 --_size;
             }
             return i;

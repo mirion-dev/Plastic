@@ -11,29 +11,27 @@ namespace plastic {
     export template <class T, class Pr = std::less<T>>
     class BinaryHeap {
     public:
-        using difference_type = std::ptrdiff_t;
-        using size_type = std::size_t;
         using value_type = T;
-        using pointer = T*;
-        using const_pointer = const T*;
         using comparator = Pr;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
 
     private:
-        struct node {
+        struct Node {
             size_type index{};
             value_type value;
         };
 
     public:
-        using const_reference = const T&;
+        using const_reference = const value_type&;
 
         class reference {
             friend class handle;
 
-            node* _ptr;
+            Node* _ptr;
             BinaryHeap* _cont;
 
-            reference(node* ptr, BinaryHeap* cont) :
+            reference(Node* ptr, BinaryHeap* cont) :
                 _ptr{ ptr },
                 _cont{ cont } {}
 
@@ -55,15 +53,15 @@ namespace plastic {
             }
         };
 
-        using const_handle = const_pointer;
+        using const_handle = const value_type*;
 
         class handle {
             friend BinaryHeap;
 
-            node* _ptr{};
+            Node* _ptr{};
             BinaryHeap* _cont{};
 
-            handle(node* ptr, BinaryHeap* cont) :
+            handle(Node* ptr, BinaryHeap* cont) :
                 _ptr{ ptr },
                 _cont{ cont } {}
 
@@ -81,15 +79,15 @@ namespace plastic {
 
     private:
         comparator _pred;
-        std::vector<std::unique_ptr<node>> _data;
+        std::vector<std::unique_ptr<Node>> _data;
 
-        void _set(size_type index, std::unique_ptr<node> ptr) {
+        void _set(size_type index, std::unique_ptr<Node> ptr) {
             ptr->index = index;
             _data[index] = std::move(ptr);
         }
 
         void _sift_up(size_type index) {
-            std::unique_ptr<node> i{ std::move(_data[index]) };
+            std::unique_ptr<Node> i{ std::move(_data[index]) };
             while (index != 0) {
                 size_type parent{ index - 1 >> 1 };
                 if (!std::invoke(_pred, _data[parent]->value, i->value)) {
@@ -102,7 +100,7 @@ namespace plastic {
         }
 
         void _sift_down(size_type index) {
-            std::unique_ptr<node> i{ std::move(_data[index]) };
+            std::unique_ptr<Node> i{ std::move(_data[index]) };
             while (true) {
                 size_type child{ (index << 1) + 1 };
                 if (child >= size()) {
@@ -134,7 +132,7 @@ namespace plastic {
         BinaryHeap(It first, It last) {
             size_type index{};
             while (first != last) {
-                _data.emplace_back(std::make_unique<node>(index++, *first));
+                _data.emplace_back(std::make_unique<Node>(index++, *first));
                 ++first;
             }
             _make_heap();
@@ -149,11 +147,11 @@ namespace plastic {
 
             auto i{ _data.begin() };
             for (auto& ptr : other._data) {
-                *i++ = std::make_unique<node>(*ptr);
+                *i++ = std::make_unique<Node>(*ptr);
             }
         }
 
-        BinaryHeap(BinaryHeap&& other) {
+        BinaryHeap(BinaryHeap&& other) noexcept {
             swap(other);
         }
 
@@ -163,17 +161,17 @@ namespace plastic {
             return *this;
         }
 
-        BinaryHeap& operator=(BinaryHeap&& other) {
+        BinaryHeap& operator=(BinaryHeap&& other) noexcept {
             swap(other);
             return *this;
         }
 
-        void swap(BinaryHeap& other) {
+        void swap(BinaryHeap& other) noexcept {
             std::ranges::swap(_pred, other._pred);
             std::ranges::swap(_data, other._data);
         }
 
-        friend void swap(BinaryHeap& left, BinaryHeap& right) {
+        friend void swap(BinaryHeap& left, BinaryHeap& right) noexcept {
             left.swap(right);
         }
 
@@ -219,8 +217,8 @@ namespace plastic {
         }
 
         handle push(const_reference value) {
-            auto ptr{ std::make_unique<node>(size(), value) };
-            node* raw{ ptr.get() };
+            auto ptr{ std::make_unique<Node>(size(), value) };
+            Node* raw{ ptr.get() };
             _data.emplace_back(std::move(ptr));
             _sift_up(raw->index);
             return { raw, this };
