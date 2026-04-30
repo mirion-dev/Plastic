@@ -321,7 +321,9 @@ namespace plastic {
             if (dest <= end()) {
                 iterator extra{ end() - count };
                 std::ranges::uninitialized_move(extra, end(), end(), _data.end());
-                std::ranges::move_backward(src, extra, end());
+                if (extra != end()) {
+                    std::ranges::move_backward(src, extra, end());
+                }
                 std::ranges::fill(src, dest, clone);
             }
             else {
@@ -330,7 +332,6 @@ namespace plastic {
                 std::ranges::fill(src, end(), clone);
             }
             _size += count;
-
             return src;
         }
 
@@ -350,19 +351,21 @@ namespace plastic {
 
         iterator erase(const_iterator pos) {
             assert(pos != end());
-            auto i{ const_cast<iterator>(pos) };
-            std::ranges::move(i + 1, end(), i);
+            auto dest{ const_cast<iterator>(pos) };
+            std::ranges::move(dest + 1, end(), dest);
             --_size;
             std::ranges::destroy_at(end());
-            return i;
+            return dest;
         }
 
         iterator erase(const_iterator first, const_iterator last) {
-            auto i{ const_cast<iterator>(first) }, e{ const_cast<iterator>(last) };
-            iterator new_end{ std::ranges::move(e, end(), i).out };
-            std::ranges::destroy(new_end, end());
-            _size = new_end - begin();
-            return i;
+            auto dest{ const_cast<iterator>(first) }, src{ const_cast<iterator>(last) };
+            if (src != dest) {
+                iterator new_end{ std::ranges::move(src, end(), dest).out };
+                std::ranges::destroy(new_end, end());
+                _size = new_end - begin();
+            }
+            return dest;
         }
 
         void swap(Vector& other) noexcept {
