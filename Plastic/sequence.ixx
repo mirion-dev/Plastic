@@ -9,17 +9,31 @@ import std;
 namespace plastic {
 
     template <class T>
-    class Storage : std::allocator<T> {
-        T* _begin{};
-        T* _end{};
+    class Storage {
+    public:
+        using value_type = T;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
+
+    private:
+#ifdef _MSC_VER
+        [[msvc::no_unique_address]]
+#else
+        [[no_unique_address]] 
+#endif
+        std::allocator<value_type> _alloc;
+        pointer _ptr{};
+        size_type _size{};
 
     public:
         Storage() = default;
 
-        Storage(std::size_t size) {
+        explicit Storage(size_type size) {
             if (size != 0) {
-                _begin = this->allocate(size);
-                _end = _begin + size;
+                _ptr = _alloc.allocate(size);
+                _size = size;
             }
         }
 
@@ -28,8 +42,8 @@ namespace plastic {
         }
 
         ~Storage() {
-            if (_begin != nullptr) {
-                this->deallocate(_begin, _end - _begin);
+            if (_ptr != nullptr) {
+                _alloc.deallocate(_ptr, _size);
             }
         }
 
@@ -38,42 +52,35 @@ namespace plastic {
             return *this;
         }
 
+        pointer begin() {
+            return _ptr;
+        }
+
+        const_pointer begin() const {
+            return _ptr;
+        }
+
+        pointer end() {
+            return _ptr + _size;
+        }
+
+        const_pointer end() const {
+            return _ptr + _size;
+        }
+
+        size_type size() const {
+            return _size;
+        }
+
         void swap(Storage& other) noexcept {
-            std::ranges::swap(_begin, other._begin);
-            std::ranges::swap(_end, other._end);
+            std::ranges::swap(_ptr, other._ptr);
+            std::ranges::swap(_size, other._size);
         }
 
         friend void swap(Storage& left, Storage& right) noexcept {
             left.swap(right);
         }
-
-        T* begin() {
-            return _begin;
-        }
-
-        const T* begin() const {
-            return _begin;
-        }
-
-        T* end() {
-            return _end;
-        }
-
-        const T* end() const {
-            return _end;
-        }
     };
-
-    template <std::input_iterator It, class... Args>
-        requires (sizeof...(Args) <= 1)
-    static void construct(It first, It last, const Args&... args) {
-        if constexpr (sizeof...(Args) == 0) {
-            std::uninitialized_value_construct(first, last);
-        }
-        else {
-            std::uninitialized_fill(first, last, args...);
-        }
-    }
 
     export template <class T>
     class Vector {
@@ -92,30 +99,13 @@ namespace plastic {
 
     private:
         Storage<value_type> _data;
-        pointer _last_ptr{ _begin() };
-
-        auto _begin(this auto&& self) {
-            return self._data.begin();
-        }
-
-        auto _end(this auto&& self) {
-            return self._data.end();
-        }
-
-        pointer _last() {
-            return _last_ptr;
-        }
-
-        const_pointer _last() const {
-            return _last_ptr;
-        }
+        size_type _size{};
 
         void _reallocate(size_type new_capacity) {
-            Storage<value_type> new_data{ std::max(new_capacity, capacity() + (capacity() >> 1)) };
-            pointer new_last{ std::uninitialized_move(_begin(), _last(), new_data.begin()) };
-            clear();
+            Storage<value_type> new_data{ std::ranges::max(new_capacity, capacity() + (capacity() >> 1)) };
+            std::ranges::uninitialized_move(*this, new_data);
+            std::ranges::destroy(*this);
             _data = std::move(new_data);
-            _last_ptr = new_last;
         }
 
         void _resize(size_type new_size, const auto&... args) {
@@ -123,14 +113,17 @@ namespace plastic {
                 _reallocate(new_size);
             }
 
-            pointer new_last{ _begin() + new_size };
+            iterator new_end{ begin() + new_size };
             if (new_size <= size()) {
-                std::destroy(new_last, _last());
+                std::ranges::destroy(new_end, end());
+            }
+            else if constexpr (sizeof...(args) == 0) {
+                std::ranges::uninitialized_value_construct(end(), new_end);
             }
             else {
-                plastic::construct(_last(), new_last, args...);
+                std::ranges::uninitialized_fill(end(), new_end, args...);
             }
-            _last_ptr = new_last;
+            _size = new_size;
         }
 
     public:
@@ -138,32 +131,32 @@ namespace plastic {
 
         explicit Vector(size_type size) :
             _data{ size },
-            _last_ptr{ _end() } {
+            _size{ size } {
 
-            plastic::construct(_begin(), _last());
+            std::ranges::uninitialized_value_construct(*this);
         }
 
         Vector(size_type size, const_reference value) :
             _data{ size },
-            _last_ptr{ _end() } {
+            _size{ size } {
 
-            plastic::construct(_begin(), _last(), value);
+            std::ranges::uninitialized_fill(*this, value);
         }
 
         template <std::input_iterator It>
         Vector(It first, It last) {
-            std::copy(first, last, std::back_inserter(*this));
+            std::ranges::copy(first, last, std::back_inserter(*this));
         }
 
-        Vector(std::initializer_list<value_type> list) :
-            Vector(list.begin(), list.end()) {}
-
         Vector(const Vector& other) :
-            Vector(other._begin(), other._last()) {}
+            Vector(other.begin(), other.end()) {}
 
         Vector(Vector&& other) noexcept {
             this->swap(other);
         }
+
+        Vector(std::initializer_list<value_type> list) :
+            Vector(list.begin(), list.end()) {}
 
         ~Vector() {
             clear();
@@ -180,69 +173,20 @@ namespace plastic {
             return *this;
         }
 
-        void swap(Vector& other) noexcept {
-            std::ranges::swap(_data, other._data);
-            std::ranges::swap(_last_ptr, other._last_ptr);
-        }
-
-        friend void swap(Vector& left, Vector& right) noexcept {
-            left.swap(right);
-        }
-
-        bool empty() const {
-            return _begin() == _last();
-        }
-
-        size_type size() const {
-            return _last() - _begin();
-        }
-
-        void clear() {
-            std::destroy(_begin(), _last());
-            _last_ptr = _begin();
-        }
-
-        void resize(size_type new_size) {
-            _resize(new_size);
-        }
-
-        void resize(size_type new_size, const_reference value) {
-            value_type clone{ value };
-            this->_resize(new_size, clone);
-        }
-
-        size_type capacity() const {
-            return _end() - _begin();
-        }
-
-        void reserve(size_type new_capacity) {
-            if (new_capacity > capacity()) {
-                _reallocate(new_capacity);
-            }
-        }
-
         iterator begin() {
-            return _begin();
+            return _data.begin();
         }
 
         const_iterator begin() const {
-            return _begin();
+            return _data.begin();
         }
 
         iterator end() {
-            return _last();
+            return _data.begin() + _size;
         }
 
         const_iterator end() const {
-            return _last();
-        }
-
-        const_iterator cbegin() const {
-            return begin();
-        }
-
-        const_iterator cend() const {
-            return end();
+            return _data.begin() + _size;
         }
 
         reverse_iterator rbegin() {
@@ -261,6 +205,14 @@ namespace plastic {
             return const_reverse_iterator{ begin() };
         }
 
+        const_iterator cbegin() const {
+            return begin();
+        }
+
+        const_iterator cend() const {
+            return end();
+        }
+
         const_reverse_iterator crbegin() const {
             return rbegin();
         }
@@ -269,55 +221,89 @@ namespace plastic {
             return rend();
         }
 
+        bool empty() const {
+            return _size == 0;
+        }
+
+        size_type size() const {
+            return _size;
+        }
+
+        size_type max_size() const {
+            return static_cast<size_type>(-1) / sizeof(value_type);
+        }
+
+        size_type capacity() const {
+            return _data.size();
+        }
+
+        void resize(size_type new_size) {
+            _resize(new_size);
+        }
+
+        void resize(size_type new_size, const_reference value) {
+            value_type clone{ value };
+            this->_resize(new_size, clone);
+        }
+
+        void reserve(size_type new_capacity) {
+            if (new_capacity > capacity()) {
+                _reallocate(new_capacity);
+            }
+        }
+
         reference operator[](size_type index) {
             assert(index < size());
-            return _begin()[index];
+            return begin()[index];
         }
 
         const_reference operator[](size_type index) const {
             assert(index < size());
-            return _begin()[index];
+            return begin()[index];
         }
 
         reference front() {
             assert(!empty());
-            return *_begin();
+            return *begin();
         }
 
         const_reference front() const {
             assert(!empty());
-            return *_begin();
+            return *begin();
         }
 
         reference back() {
             assert(!empty());
-            return _last()[-1];
+            return end()[-1];
         }
 
         const_reference back() const {
             assert(!empty());
-            return _last()[-1];
+            return end()[-1];
         }
 
         pointer data() {
-            return _begin();
+            return begin();
         }
 
         const_pointer data() const {
-            return _begin();
+            return begin();
         }
 
         void push_back(const_reference value) {
             value_type clone{ value };
-            if (_last() == _end()) {
+            if (size() == capacity()) {
                 _reallocate(size() + 1);
             }
-            std::construct_at(_last_ptr++, clone);
+
+            std::ranges::construct_at(end(), clone);
+            ++_size;
         }
 
         void pop_back() {
             assert(!empty());
-            std::destroy_at(--_last_ptr);
+            --_size;
+            std::ranges::destroy_at(end());
         }
 
         iterator insert(const_iterator pos, const_reference value) {
@@ -326,34 +312,36 @@ namespace plastic {
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
             value_type clone{ value };
-            difference_type offset{ pos - _begin() };
-            if (static_cast<size_type>(_end() - _last()) < count) {
+            difference_type offset{ pos - begin() };
+            if (capacity() - size() < count) {
                 _reallocate(size() + count);
             }
 
-            pointer i{ _begin() + offset }, new_i{ i + count };
-            if (new_i <= _last()) {
-                pointer j{ _last() - count };
-                std::ranges::uninitialized_move(j, _last(), _last());
-                std::ranges::move_backward(i, j, _last());
-                std::ranges::fill(i, new_i, clone);
+            iterator src{ begin() + offset }, dest{ src + count };
+            if (dest <= end()) {
+                iterator extra{ end() - count };
+                std::ranges::uninitialized_move(extra, end(), end(), _data.end());
+                std::ranges::move_backward(src, extra, end());
+                std::ranges::fill(src, dest, clone);
             }
             else {
-                std::ranges::uninitialized_move(i, _last(), new_i);
-                plastic::construct(_last(), new_i, clone);
-                std::ranges::fill(i, _last(), clone);
+                std::ranges::uninitialized_move(src, end(), dest, _data.end());
+                std::ranges::uninitialized_fill(end(), dest, clone);
+                std::ranges::fill(src, end(), clone);
             }
-            _last_ptr += count;
+            _size += count;
 
-            return i;
+            return src;
         }
 
         template <std::input_iterator It>
         iterator insert(const_iterator pos, It first, It last) {
-            difference_type pos_offset{ pos - _begin() }, last_offset{ _last() - _begin() };
+            difference_type src_offset{ pos - begin() }, src_end_offset{ static_cast<difference_type>(size()) };
             std::ranges::copy(first, last, std::back_inserter(*this));
-            std::ranges::rotate(_begin() + pos_offset, _begin() + last_offset, _last());
-            return _begin() + pos_offset;
+
+            iterator src{ begin() + src_offset }, src_end{ begin() + src_end_offset };
+            std::ranges::rotate(src, src_end, end());
+            return src;
         }
 
         iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
@@ -361,18 +349,34 @@ namespace plastic {
         }
 
         iterator erase(const_iterator pos) {
-            auto i{ const_cast<pointer>(pos) };
-            assert(i != _last());
-            _last_ptr = std::move(i + 1, _last(), i);
-            std::ranges::destroy_at(_last());
+            assert(pos != end());
+            auto i{ const_cast<iterator>(pos) };
+            std::ranges::move(i + 1, end(), i);
+            --_size;
+            std::ranges::destroy_at(end());
             return i;
         }
 
         iterator erase(const_iterator first, const_iterator last) {
-            auto i{ const_cast<pointer>(first) }, e{ const_cast<pointer>(last) }, new_last{ std::move(e, _last(), i) };
-            std::ranges::destroy(new_last, _last());
-            _last_ptr = new_last;
+            auto i{ const_cast<iterator>(first) }, e{ const_cast<iterator>(last) };
+            iterator new_end{ std::ranges::move(e, end(), i).out };
+            std::ranges::destroy(new_end, end());
+            _size = new_end - begin();
             return i;
+        }
+
+        void swap(Vector& other) noexcept {
+            std::ranges::swap(_data, other._data);
+            std::ranges::swap(_size, other._size);
+        }
+
+        friend void swap(Vector& left, Vector& right) noexcept {
+            left.swap(right);
+        }
+
+        void clear() {
+            std::ranges::destroy(*this);
+            _size = 0;
         }
 
         friend bool operator==(const Vector& left, const Vector& right) {

@@ -10,30 +10,24 @@ Removed structures: `Bignum`, `InplaceVector`, `InplaceDeque`, `Devector`, `Forw
 
 | | **`Vector`** | **`Deque`** | **`List`** | Search Trees | Addressable Heaps |
 | :--: | :--: | :--: | :--: | :--: | :--: |
-| **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` |
-| **`size`** | `size` | `size` | `size` | `size` | `size` |
-| **`clear`** | `clear` | `clear` | `clear` | `clear` | `clear` |
-| **`resize`** | `resize` | `resize` | `resize` | | |
-| **`capacity`** | `capacity` | `capacity` | | | |
-| **`reserve`** | `reserve` | `reserve` | | | |
 | **`begin`** | `begin` | `begin` | `begin` | `begin` | `apex` |
 | **`end`** | `end` | `end` | `end` | `end` | |
-| **`cbegin`** | `cbegin` | `cbegin` | `cbegin` | `cbegin` | `capex` |
-| **`cend`** | `cend` | `cend` | `cend` | `cend` | |
 | **`rbegin`** | `rbegin` | `rbegin` | `rbegin` | `rbegin` | |
 | **`rend`** | `rend` | `rend` | `rend` | `rend` | |
+| **`cbegin`** | `cbegin` | `cbegin` | `cbegin` | `cbegin` | `capex` |
+| **`cend`** | `cend` | `cend` | `cend` | `cend` | |
 | **`crbegin`** | `crbegin` | `crbegin` | `crbegin` | `crbegin` | |
 | **`crend`** | `crend` | `crend` | `crend` | `crend` | |
+| **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` |
+| **`size`** | `size` | `size` | `size` | `size` | `size` |
+| **`max_size`** | `max_size` | `max_size` | `max_size` | `max_size` | `max_size` |
+| **`capacity`** | `capacity` | `capacity` | | | |
+| **`resize`** | `resize` | `resize` | `resize` | | |
+| **`reserve`** | `reserve` | `reserve` | | | |
+| **`operator[]`** | `operator[]` | `operator[]` | | | |
 | **`front`** | `front` | `front` | `front` | `front` | `top` |
 | **`back`** | `back` | `back` | `back` | `back` | |
 | **`data`** | `data` | | | | |
-| **`operator[]`** | `operator[]` | `operator[]` | | | |
-| **`contains`** | | | | `contains` | |
-| **`find`** | | | | `find` | |
-| **`count`** | | | | `count` | |
-| **`lower_bound`** | | | | `lower_bound` | |
-| **`upper_bound`** | | | | `upper_bound` | |
-| **`equal_range`** | | | | `equal_range` | |
 | **`push_front`** | | `push_front` | `push_front` | | |
 | **`pop_front`** | | `pop_front` | `pop_front` | | `pop` |
 | **`push_back`** | `push_back` | `push_back` | `push_back` | | |
@@ -41,7 +35,14 @@ Removed structures: `Bignum`, `InplaceVector`, `InplaceDeque`, `Devector`, `Forw
 | **`insert`** | `insert` | `insert` | `insert` | `insert` | `push` |
 | **`erase`** | `erase` | `erase` | `erase` | `erase` | `erase` |
 | **`swap`** | `swap` | `swap` | `swap` | `swap` | `swap` |
+| **`clear`** | `clear` | `clear` | `clear` | `clear` | `clear` |
 | **`merge`** | | | | `merge` | `merge` |
+| **`find`** | | | | `find` | |
+| **`count`** | | | | `count` | |
+| **`contains`** | | | | `contains` | |
+| **`lower_bound`** | | | | `lower_bound` | |
+| **`upper_bound`** | | | | `upper_bound` | |
+| **`equal_range`** | | | | `equal_range` | |
 | **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` | |
 | **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` | |
 
