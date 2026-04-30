@@ -101,10 +101,13 @@ namespace plastic {
         size_type _size{ capacity() };
 
         void _reallocate(size_type new_capacity) {
+            size_type size{ this->size() };
             Storage<value_type> new_data{ std::ranges::max(new_capacity, capacity() + (capacity() >> 1)) };
             std::ranges::uninitialized_move(*this, new_data);
-            std::ranges::destroy(*this);
+            clear();
+
             _data = std::move(new_data);
+            _size = size;
         }
 
         void _resize(size_type new_size, const auto&... args) {
@@ -146,14 +149,20 @@ namespace plastic {
         }
 
         Vector(const Vector& other) :
-            Vector(other.begin(), other.end()) {}
+            _data{ other.size() } {
+
+            std::ranges::copy(other, begin());
+        }
 
         Vector(Vector&& other) noexcept {
             this->swap(other);
         }
 
         Vector(std::initializer_list<value_type> list) :
-            Vector(list.begin(), list.end()) {}
+            _data{ list.size() } {
+
+            std::ranges::copy(list, begin());
+        }
 
         ~Vector() {
             clear();
