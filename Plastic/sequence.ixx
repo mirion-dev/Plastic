@@ -448,7 +448,12 @@ namespace plastic {
         void _resize(size_type new_size, const auto&... args) {
             if (new_size > capacity()) {
                 pointer new_last{ _reallocate(new_size, new_size - size()) };
-                plastic::construct(_last(), new_last, args...);
+                if constexpr (sizeof...(args) == 0) {
+                    std::ranges::uninitialized_value_construct(_last(), new_last);
+                }
+                else {
+                    std::ranges::uninitialized_fill(_last(), new_last, args...);
+                }
                 _last_ptr = new_last;
                 return;
             }
@@ -496,7 +501,12 @@ namespace plastic {
                     std::ranges::move(j, _last(), _first());
                     std::ranges::destroy(new_middle, _last());
                 }
-                plastic::construct(new_middle, new_last, args...);
+                if constexpr (sizeof...(args) == 0) {
+                    std::ranges::uninitialized_value_construct(new_middle, new_last);
+                }
+                else {
+                    std::ranges::uninitialized_fill(new_middle, new_last, args...);
+                }
             }
             _first_ptr = new_first;
             _last_ptr = new_last;
@@ -510,7 +520,7 @@ namespace plastic {
             _first_ptr{ _begin() },
             _last_ptr{ _end() } {
 
-            plastic::construct(_first(), _last());
+            std::ranges::uninitialized_value_construct(_first(), _last());
         }
 
         Deque(size_type size, const_reference value) :
@@ -518,7 +528,7 @@ namespace plastic {
             _first_ptr{ _begin() },
             _last_ptr{ _end() } {
 
-            plastic::construct(_first(), _last(), value);
+            std::ranges::uninitialized_fill(_first(), _last(), value);
         }
 
         template <std::input_iterator It>
@@ -725,7 +735,7 @@ namespace plastic {
             }
             else {
                 std::ranges::uninitialized_move(i, _last(), new_i);
-                plastic::construct(_last(), new_i, clone);
+                std::ranges::uninitialized_fill(_last(), new_i, clone);
                 std::ranges::fill(i, _last(), clone);
             }
             _last_ptr += count;
