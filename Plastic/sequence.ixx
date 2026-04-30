@@ -12,10 +12,9 @@ namespace plastic {
     class Storage {
     public:
         using value_type = T;
+        using size_type = std::size_t;
         using pointer = value_type*;
         using const_pointer = const value_type*;
-        using size_type = std::size_t;
-        using difference_type = std::ptrdiff_t;
 
     private:
 #ifdef _MSC_VER
@@ -99,7 +98,7 @@ namespace plastic {
 
     private:
         Storage<value_type> _data;
-        size_type _size{};
+        size_type _size{ capacity() };
 
         void _reallocate(size_type new_capacity) {
             Storage<value_type> new_data{ std::ranges::max(new_capacity, capacity() + (capacity() >> 1)) };
@@ -130,15 +129,13 @@ namespace plastic {
         Vector() = default;
 
         explicit Vector(size_type size) :
-            _data{ size },
-            _size{ size } {
+            _data{ size } {
 
             std::ranges::uninitialized_value_construct(*this);
         }
 
         Vector(size_type size, const_reference value) :
-            _data{ size },
-            _size{ size } {
+            _data{ size } {
 
             std::ranges::uninitialized_fill(*this, value);
         }
