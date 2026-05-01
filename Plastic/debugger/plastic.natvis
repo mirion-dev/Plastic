@@ -23,11 +23,10 @@
     </Type>
 
     <Type Name="plastic::List&lt;*&gt;">
-        <Intrinsic Name="size" Expression="_size"/>
-        <DisplayString>{{ size={size()} }}</DisplayString>
+        <DisplayString>{{ size={_size} }}</DisplayString>
         <Expand>
             <LinkedListItems>
-                <Size>size()</Size>
+                <Size>_size</Size>
                 <HeadPointer>_head->next</HeadPointer>
                 <NextPointer>next</NextPointer>
                 <ValueNode>((node*)this)->value</ValueNode>
@@ -37,12 +36,11 @@
 
     <Type Name="plastic::Tree&lt;*,*,*&gt;">
 		<Intrinsic Name="pred" Expression="_pred"/>
-		<Intrinsic Name="size" Expression="_size"/>
-        <DisplayString>{{ size={size()} }}</DisplayString>
+        <DisplayString>{{ size={_size} }}</DisplayString>
         <Expand>
             <Item Name="[comparator]">pred()</Item>
             <TreeItems>
-                <Size>size()</Size>
+                <Size>_size</Size>
                 <HeadPointer>_head->parent</HeadPointer>
                 <LeftPointer>left</LeftPointer>
                 <RightPointer>right</RightPointer>

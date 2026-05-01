@@ -1019,11 +1019,11 @@ namespace plastic {
             friend List;
 
         public:
-            using value_type = T;
+            using iterator_category = std::bidirectional_iterator_tag;
+            using value_type = value_type;
+            using difference_type = std::ptrdiff_t;
             using pointer = value_type*;
             using reference = value_type&;
-            using difference_type = std::ptrdiff_t;
-            using iterator_category = std::bidirectional_iterator_tag;
 
         private:
             NodeBase* _ptr{};
@@ -1078,25 +1078,27 @@ namespace plastic {
         size_type _size{};
 
         template <class... Args>
+            requires (sizeof...(Args) <= 1)
         NodeBase* _insert(NodeBase* pos, size_type count, const Args&... args) {
-            NodeBase *prev{ pos->prev }, *i{ prev };
+            NodeBase *prev{ pos->prev }, *cur{ prev };
             _size += count;
             while (count-- != 0) {
-                i = i->next = new Node{ i, i->next, args... };
+                cur = cur->next = new Node{ cur, cur->next, args... };
             }
-            i->next->prev = i;
+            cur->next->prev = cur;
             return prev->next;
         }
 
         template <class... Args>
+            requires (sizeof...(Args) <= 1)
         void _resize(size_type new_size, const Args&... args) {
-            if (new_size <= _size) {
-                while (_size != new_size) {
+            if (new_size <= size()) {
+                while (size() != new_size) {
                     pop_back();
                 }
             }
             else {
-                this->_insert(_head, new_size - _size, args...);
+                this->_insert(_head, new_size - size(), args...);
             }
         }
 
@@ -1104,7 +1106,7 @@ namespace plastic {
         List() = default;
 
         explicit List(size_type size) {
-            this->insert(end(), size, {});
+            this->_insert(_head, size);
         }
 
         List(size_type size, const_reference value) {
@@ -1116,9 +1118,6 @@ namespace plastic {
             this->insert(end(), first, last);
         }
 
-        List(std::initializer_list<value_type> list) :
-            List(list.begin(), list.end()) {}
-
         List(const List& other) :
             List(other.begin(), other.end()) {}
 
@@ -1126,13 +1125,16 @@ namespace plastic {
             this->swap(other);
         }
 
+        List(std::initializer_list<value_type> list) :
+            List(list.begin(), list.end()) {}
+
         ~List() {
             clear();
             delete _head;
         }
 
         List& operator=(const List& other) {
-            List temp{ other };
+            List temp(other);
             this->swap(temp);
             return *this;
         }
@@ -1142,37 +1144,14 @@ namespace plastic {
             return *this;
         }
 
-        void swap(List& other) noexcept {
-            std::ranges::swap(_head, other._head);
-            std::ranges::swap(_size, other._size);
-        }
-
-        friend void swap(List& left, List& right) noexcept {
-            left.swap(right);
-        }
-
-        bool empty() const {
-            return _size == 0;
-        }
-
-        size_type size() const {
-            return _size;
-        }
-
-        void clear() {
-            this->erase(begin(), end());
-        }
-
-        void resize(size_type new_size) {
-            _resize(new_size);
-        }
-
-        void resize(size_type new_size, const_reference value) {
-            this->_resize(new_size, value);
+        List& operator=(std::initializer_list<value_type> list) {
+            List temp(list);
+            this->swap(temp);
+            return *this;
         }
 
         iterator begin() {
-            return _head->next;
+            return iterator{ _head->next };
         }
 
         const_iterator begin() const {
@@ -1180,19 +1159,11 @@ namespace plastic {
         }
 
         iterator end() {
-            return _head;
+            return iterator{ _head };
         }
 
         const_iterator end() const {
             return iterator{ _head };
-        }
-
-        const_iterator cbegin() const {
-            return begin();
-        }
-
-        const_iterator cend() const {
-            return end();
         }
 
         reverse_iterator rbegin() {
@@ -1211,12 +1182,40 @@ namespace plastic {
             return const_reverse_iterator{ begin() };
         }
 
+        const_iterator cbegin() const {
+            return begin();
+        }
+
+        const_iterator cend() const {
+            return end();
+        }
+
         const_reverse_iterator crbegin() const {
             return rbegin();
         }
 
         const_reverse_iterator crend() const {
             return rend();
+        }
+
+        bool empty() const {
+            return _size == 0;
+        }
+
+        size_type size() const {
+            return _size;
+        }
+
+        size_type max_size() const {
+            return static_cast<size_type>(-1) / sizeof(value_type);
+        }
+
+        void resize(size_type new_size) {
+            _resize(new_size);
+        }
+
+        void resize(size_type new_size, const_reference value) {
+            this->_resize(new_size, value);
         }
 
         reference front() {
@@ -1240,8 +1239,7 @@ namespace plastic {
         }
 
         void push_front(const_reference value) {
-            _head->next->next->prev = _head->next = new Node{ _head, _head->next, value };
-            ++_size;
+            this->insert(begin(), value);
         }
 
         void pop_front() {
@@ -1250,8 +1248,7 @@ namespace plastic {
         }
 
         void push_back(const_reference value) {
-            _head->prev->prev->next = _head->prev = new Node{ _head->prev, _head, value };
-            ++_size;
+            this->insert(end(), value);
         }
 
         void pop_back() {
@@ -1260,7 +1257,10 @@ namespace plastic {
         }
 
         iterator insert(const_iterator pos, const_reference value) {
-            return this->insert(pos, 1, value);
+            NodeBase* prev{ pos.base()._ptr->prev };
+            prev->next->next->prev = prev->next = new Node{ prev, prev->next, value };
+            ++_size;
+            return prev->next;
         }
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
@@ -1269,12 +1269,12 @@ namespace plastic {
 
         template <std::input_iterator It>
         iterator insert(const_iterator pos, It first, It last) {
-            NodeBase *prev{ pos.base()._ptr->prev }, *i{ prev };
+            NodeBase *prev{ pos.base()._ptr->prev }, *cur{ prev };
             while (first != last) {
-                i = i->next = new Node{ i, i->next, *first };
+                cur = cur->next = new Node{ cur, cur->next, *first };
                 ++first, ++_size;
             }
-            i->next->prev = i;
+            cur->next->prev = cur;
             return prev->next;
         }
 
@@ -1283,22 +1283,35 @@ namespace plastic {
         }
 
         iterator erase(const_iterator pos) {
-            NodeBase* i{ pos.base()._ptr->prev };
-            delete static_cast<Node*>(std::exchange(i->next, i->next->next));
+            NodeBase* prev{ pos.base()._ptr->prev };
+            delete static_cast<Node*>(std::exchange(prev->next, prev->next->next));
             --_size;
-            i->next->prev = i;
-            return i->next;
+            prev->next->prev = prev;
+            return prev->next;
         }
 
         iterator erase(const_iterator first, const_iterator last) {
-            NodeBase *i{ first.base()._ptr }, *e{ last.base()._ptr };
-            i->prev->next = e;
-            e->prev = i->prev;
-            while (i != e) {
-                delete static_cast<Node*>(std::exchange(i, i->next));
+            NodeBase *first_ptr{ first.base()._ptr }, *last_ptr{ last.base()._ptr };
+            first_ptr->prev->next = last_ptr;
+            last_ptr->prev = first_ptr->prev;
+            while (first_ptr != last_ptr) {
+                delete static_cast<Node*>(std::exchange(first_ptr, first_ptr->next));
                 --_size;
             }
-            return i;
+            return first_ptr;
+        }
+
+        void swap(List& other) noexcept {
+            std::ranges::swap(_head, other._head);
+            std::ranges::swap(_size, other._size);
+        }
+
+        friend void swap(List& left, List& right) noexcept {
+            left.swap(right);
+        }
+
+        void clear() {
+            this->erase(begin(), end());
         }
 
         friend bool operator==(const List& left, const List& right) {
