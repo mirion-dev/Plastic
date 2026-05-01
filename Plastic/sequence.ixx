@@ -181,6 +181,12 @@ namespace plastic {
             return *this;
         }
 
+        Vector& operator=(std::initializer_list<value_type> list) {
+            Vector temp(list);
+            this->swap(temp);
+            return *this;
+        }
+
         iterator begin() {
             return _data.begin();
         }
@@ -250,8 +256,7 @@ namespace plastic {
         }
 
         void resize(size_type new_size, const_reference value) {
-            value_type clone{ value };
-            this->_resize(new_size, clone);
+            this->_resize(new_size, value_type{ value });
         }
 
         void reserve(size_type new_capacity) {
@@ -304,7 +309,7 @@ namespace plastic {
                 _grow(size() + 1);
             }
 
-            std::ranges::construct_at(end(), clone);
+            std::ranges::construct_at(end(), std::move(clone));
             ++_size;
         }
 
@@ -315,65 +320,106 @@ namespace plastic {
         }
 
         iterator insert(const_iterator pos, const_reference value) {
-            return this->insert(pos, 1, value);
+            value_type clone{ value };
+            difference_type offset{ pos - begin() };
+            if (size() == capacity()) {
+                _grow(size() + 1);
+        }
+
+            iterator pos_iter{ begin() + offset };
+            if (pos_iter == end()) {
+                std::ranges::construct_at(end(), std::move(clone));
+            }
+            else {
+                std::ranges::construct_at(end(), std::move(back()));
+                std::ranges::move_backward(pos_iter, end() - 1, end());
+                *pos_iter = std::move(clone);
+            }
+            ++_size;
+            return pos_iter;
         }
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
+            if (count == 0) {
+                return const_cast<iterator>(pos);
+            }
+
             value_type clone{ value };
             difference_type offset{ pos - begin() };
             if (capacity() - size() < count) {
                 _grow(size() + count);
             }
 
-            iterator src{ begin() + offset }, dest{ src + count };
-            if (dest <= end()) {
+            iterator pos_iter{ begin() + offset }, new_pos{ pos_iter + count };
+            if (new_pos <= end()) {
                 iterator extra{ end() - count };
                 std::ranges::uninitialized_move(extra, end(), end(), _data.end());
-                if (extra != end()) {
-                    std::ranges::move_backward(src, extra, end());
+                std::ranges::move_backward(pos_iter, extra, end());
+                std::ranges::fill(pos_iter, new_pos, clone);
                 }
-                std::ranges::fill(src, dest, clone);
-            }
             else {
-                std::ranges::uninitialized_move(src, end(), dest, _data.end());
-                std::ranges::uninitialized_fill(end(), dest, clone);
-                std::ranges::fill(src, end(), clone);
+                std::ranges::uninitialized_move(pos_iter, end(), new_pos, _data.end());
+                std::ranges::fill(pos_iter, end(), clone);
+                std::ranges::uninitialized_fill(end(), new_pos, clone);
             }
             _size += count;
-            return src;
+            return pos_iter;
         }
 
         template <std::input_iterator It>
         iterator insert(const_iterator pos, It first, It last) {
-            difference_type src_offset{ pos - begin() }, src_end_offset{ static_cast<difference_type>(size()) };
+            difference_type pos_offset{ pos - begin() }, pos_end_offset{ static_cast<difference_type>(size()) };
             std::ranges::copy(first, last, std::back_inserter(*this));
 
-            iterator src{ begin() + src_offset }, src_end{ begin() + src_end_offset };
-            std::ranges::rotate(src, src_end, end());
-            return src;
+            iterator pos_iter{ begin() + pos_offset }, pos_end{ begin() + pos_end_offset };
+            std::ranges::rotate(pos_iter, pos_end, end());
+            return pos_iter;
         }
 
         iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
-            return this->insert(pos, list.begin(), list.end());
+            if (list.empty()) {
+                return const_cast<iterator>(pos);
+        }
+
+            difference_type offset{ pos - begin() };
+            if (capacity() - size() < list.size()) {
+                _grow(size() + list.size());
+            }
+
+            iterator pos_iter{ begin() + offset }, new_pos{ pos_iter + list.size() };
+            if (new_pos <= end()) {
+                iterator extra{ end() - list.size() };
+                std::ranges::uninitialized_move(extra, end(), end(), _data.end());
+                std::ranges::move_backward(pos_iter, extra, end());
+                std::ranges::move(list, pos_iter);
+            }
+            else {
+                auto extra{ list.begin() + (end() - pos_iter) };
+                std::ranges::uninitialized_move(pos_iter, end(), new_pos, _data.end());
+                std::ranges::copy(list.begin(), extra, pos_iter);
+                std::ranges::uninitialized_copy(extra, list.end(), end(), new_pos);
+            }
+            _size += list.size();
+            return pos_iter;
         }
 
         iterator erase(const_iterator pos) {
             assert(pos != end());
-            auto dest{ const_cast<iterator>(pos) };
-            std::ranges::move(dest + 1, end(), dest);
+            auto pos_iter{ const_cast<iterator>(pos) };
+            std::ranges::move(pos_iter + 1, end(), pos_iter);
             --_size;
             std::ranges::destroy_at(end());
-            return dest;
+            return pos_iter;
         }
 
         iterator erase(const_iterator first, const_iterator last) {
-            auto dest{ const_cast<iterator>(first) }, src{ const_cast<iterator>(last) };
-            if (src != dest) {
-                iterator new_end{ std::ranges::move(src, end(), dest).out };
+            auto first_iter{ const_cast<iterator>(first) }, last_iter{ const_cast<iterator>(last) };
+            if (first_iter != last_iter) {
+                iterator new_end{ std::ranges::move(last_iter, end(), first_iter).out };
                 std::ranges::destroy(new_end, end());
                 _size = new_end - begin();
             }
-            return dest;
+            return first_iter;
         }
 
         void swap(Vector& other) noexcept {
