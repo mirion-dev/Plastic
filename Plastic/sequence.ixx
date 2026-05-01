@@ -112,7 +112,7 @@ namespace plastic {
 
         template <class... Args>
             requires (sizeof...(Args) <= 1)
-        void _resize(size_type new_size, Args&&... args) {
+        void _resize(size_type new_size, const Args&... args) {
             if (new_size > capacity()) {
                 _grow(new_size);
             }
@@ -125,7 +125,7 @@ namespace plastic {
                 std::ranges::uninitialized_value_construct(end(), new_end);
             }
             else {
-                std::ranges::uninitialized_fill(end(), new_end, std::forward<Args>(args)...);
+                std::ranges::uninitialized_fill(end(), new_end, args...);
             }
             _size = new_size;
         }
@@ -882,25 +882,25 @@ namespace plastic {
         size_type _size{};
 
         template <class... Args>
-        NodeBase* _insert(NodeBase* pos, size_type count, Args&&... args) {
+        NodeBase* _insert(NodeBase* pos, size_type count, const Args&... args) {
             NodeBase *prev{ pos->prev }, *i{ prev };
             _size += count;
             while (count-- != 0) {
-                i = i->next = new Node{ i, i->next, std::forward<Args>(args)... };
+                i = i->next = new Node{ i, i->next, args... };
             }
             i->next->prev = i;
             return prev->next;
         }
 
         template <class... Args>
-        void _resize(size_type new_size, Args&&... args) {
+        void _resize(size_type new_size, const Args&... args) {
             if (new_size <= _size) {
                 while (_size != new_size) {
                     pop_back();
                 }
             }
             else {
-                this->_insert(_head, new_size - _size, std::forward<Args>(args)...);
+                this->_insert(_head, new_size - _size, args...);
             }
         }
 
