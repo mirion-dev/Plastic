@@ -352,13 +352,13 @@ namespace plastic {
 
             iterator pos_iter{ begin() + offset }, new_pos{ pos_iter + count };
             if (new_pos <= end()) {
-                iterator extra{ end() - count };
-                std::ranges::uninitialized_move(extra, end(), end(), _data.end());
-                std::ranges::move_backward(pos_iter, extra, end());
+                iterator middle{ end() - count };
+                std::ranges::uninitialized_move(middle, end(), end(), std::unreachable_sentinel);
+                std::ranges::move_backward(pos_iter, middle, end());
                 std::ranges::fill(pos_iter, new_pos, clone);
                 }
             else {
-                std::ranges::uninitialized_move(pos_iter, end(), new_pos, _data.end());
+                std::ranges::uninitialized_move(pos_iter, end(), new_pos, std::unreachable_sentinel);
                 std::ranges::fill(pos_iter, end(), clone);
                 std::ranges::uninitialized_fill(end(), new_pos, clone);
             }
@@ -388,16 +388,16 @@ namespace plastic {
 
             iterator pos_iter{ begin() + offset }, new_pos{ pos_iter + list.size() };
             if (new_pos <= end()) {
-                iterator extra{ end() - list.size() };
-                std::ranges::uninitialized_move(extra, end(), end(), _data.end());
-                std::ranges::move_backward(pos_iter, extra, end());
+                iterator middle{ end() - list.size() };
+                std::ranges::uninitialized_move(middle, end(), end(), std::unreachable_sentinel);
+                std::ranges::move_backward(pos_iter, middle, end());
                 std::ranges::move(list, pos_iter);
             }
             else {
-                auto extra{ list.begin() + (end() - pos_iter) };
-                std::ranges::uninitialized_move(pos_iter, end(), new_pos, _data.end());
-                std::ranges::copy(list.begin(), extra, pos_iter);
-                std::ranges::uninitialized_copy(extra, list.end(), end(), new_pos);
+                auto middle{ list.begin() + (end() - pos_iter) };
+                std::ranges::uninitialized_move(pos_iter, end(), new_pos, std::unreachable_sentinel);
+                std::ranges::copy(list.begin(), middle, pos_iter);
+                std::ranges::uninitialized_copy(middle, list.end(), end(), std::unreachable_sentinel);
             }
             _size += list.size();
             return pos_iter;
@@ -414,11 +414,13 @@ namespace plastic {
 
         iterator erase(const_iterator first, const_iterator last) {
             auto first_iter{ const_cast<iterator>(first) }, last_iter{ const_cast<iterator>(last) };
-            if (first_iter != last_iter) {
+            if (first_iter == last_iter) {
+                return first_iter;
+            }
+
                 iterator new_end{ std::ranges::move(last_iter, end(), first_iter).out };
                 std::ranges::destroy(new_end, end());
                 _size = new_end - begin();
-            }
             return first_iter;
         }
 
