@@ -195,8 +195,8 @@ namespace plastic {
         requires std::indirectly_comparable<It1, It2, Pr, Pj1, Pj2>
     std::ranges::subrange<It1> find_end(It1 first1, Se1 last1, It2 first2, Se2 last2, Pr pred = {}, Pj1 proj1 = {}, Pj2 proj2 = {}) {
         if (first2 == last2) {
-            It1 r_last{ std::ranges::next(first1, last1) };
-            return { r_last, r_last };
+            It1 last_iter{ std::ranges::next(first1, last1) };
+            return { last_iter, last_iter };
         }
 
         auto r{ plastic::search(first1, last1, first2, last2, pred, proj1, proj2) };
@@ -565,11 +565,11 @@ namespace plastic {
     export template <std::bidirectional_iterator It1, std::sentinel_for<It1> Se1, std::bidirectional_iterator It2>
         requires std::indirectly_copyable<It1, It2>
     std::ranges::in_out_result<It1, It2> copy_backward(It1 first, Se1 last, It2 output) {
-        It1 r_last{ std::ranges::next(first, last) }, i{ r_last };
+        It1 last_iter{ std::ranges::next(first, last) }, i{ last_iter };
         while (first != i) {
             *--output = *--i;
         }
-        return { std::move(r_last), std::move(output) };
+        return { std::move(last_iter), std::move(output) };
     }
 
     export template <std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out>
@@ -585,11 +585,11 @@ namespace plastic {
     export template <std::bidirectional_iterator It1, std::sentinel_for<It1> Se1, std::bidirectional_iterator It2>
         requires std::indirectly_movable<It1, It2>
     std::ranges::in_out_result<It1, It2> move_backward(It1 first, Se1 last, It2 output) {
-        It1 r_last{ std::ranges::next(first, last) }, i{ r_last };
+        It1 last_iter{ std::ranges::next(first, last) }, i{ last_iter };
         while (first != i) {
             *--output = std::move(*--i);
         }
-        return { std::move(r_last), std::move(output) };
+        return { std::move(last_iter), std::move(output) };
     }
 
     export template <std::input_iterator It1, std::sentinel_for<It1> Se1, std::input_iterator It2, std::sentinel_for<It2> Se2>
@@ -822,21 +822,21 @@ namespace plastic {
     export template <std::bidirectional_iterator It, std::sentinel_for<It> Se>
         requires std::permutable<It>
     It reverse(It first, Se last) {
-        It r_last{ std::ranges::next(first, last) }, i{ r_last };
+        It last_iter{ std::ranges::next(first, last) }, i{ last_iter };
         while (first != i && first != --i) {
             std::ranges::swap(*first++, *i);
         }
-        return r_last;
+        return last_iter;
     }
 
     export template <std::bidirectional_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out>
         requires std::indirectly_copyable<It, Out>
     std::ranges::in_out_result<It, Out> reverse_copy(It first, Se last, Out output) {
-        It r_last{ std::ranges::next(first, last) }, i{ r_last };
+        It last_iter{ std::ranges::next(first, last) }, i{ last_iter };
         while (first != i) {
             *output++ = *--i;
         }
-        return { std::move(r_last), std::move(output) };
+        return { std::move(last_iter), std::move(output) };
     }
 
     export template <std::permutable It, std::sentinel_for<It> Se>
@@ -993,12 +993,12 @@ namespace plastic {
         }
 
         if constexpr (std::bidirectional_iterator<It>) {
-            It r_last{ std::ranges::next(first, last) }, i{ r_last };
+            It last_iter{ std::ranges::next(first, last) }, i{ last_iter };
             while (true) {
                 first = plastic::find_if_not(first, i, pred, proj);
                 do {
                     if (first == i) {
-                        return { std::move(first), std::move(r_last) };
+                        return { std::move(first), std::move(last_iter) };
                     }
                 } while (!std::invoke(pred, std::invoke(proj, *--i)));
                 std::ranges::swap(*first++, *i);
@@ -1023,21 +1023,21 @@ namespace plastic {
             return { first, first };
         }
 
-        It r_last{ std::ranges::next(first, last) };
+        It last_iter{ std::ranges::next(first, last) };
         do {
-            if (first == --r_last) {
-                return { std::move(first), std::move(r_last) };
+            if (first == --last_iter) {
+                return { std::move(first), std::move(last_iter) };
             }
-        } while (!std::invoke(pred, std::invoke(proj, *r_last)));
+        } while (!std::invoke(pred, std::invoke(proj, *last_iter)));
 
         std::allocator<std::iter_value_t<It>> alloc;
-        auto size{ static_cast<std::size_t>(std::ranges::distance(first, r_last)) + 1 };
+        auto size{ static_cast<std::size_t>(std::ranges::distance(first, last_iter)) + 1 };
         auto buf{ alloc.allocate(size) };
 
         It i{ first };
         auto j{ buf };
         std::ranges::construct_at(j++, std::move(*i++));
-        while (i != r_last) {
+        while (i != last_iter) {
             if (std::invoke(pred, std::invoke(proj, *i))) {
                 *first++ = std::move(*i);
             }
@@ -1046,7 +1046,7 @@ namespace plastic {
             }
             ++i;
         }
-        *first++ = std::move(*r_last);
+        *first++ = std::move(*last_iter);
 
         It temp{ plastic::move(buf, j, first).out };
         std::ranges::destroy(buf, j);
@@ -1184,47 +1184,47 @@ namespace plastic {
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     It push_heap(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        It r_last{ std::ranges::next(first, last) };
-        auto size{ r_last - first };
+        It last_iter{ std::ranges::next(first, last) };
+        auto size{ last_iter - first };
         if (size > 1) {
             plastic::sift_up(first, size - 1, pred, proj);
         }
-        return r_last;
+        return last_iter;
     }
 
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     It pop_heap(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        It r_last{ std::ranges::next(first, last) }, i{ r_last };
-        auto size{ r_last - first };
+        It last_iter{ std::ranges::next(first, last) }, i{ last_iter };
+        auto size{ last_iter - first };
         if (size > 1) {
             std::ranges::swap(*first, *--i);
             plastic::sift_down(first, 0, size - 1, pred, proj);
         }
-        return r_last;
+        return last_iter;
     }
 
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     It make_heap(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        It r_last{ std::ranges::next(first, last) };
-        auto size{ r_last - first }, i{ size >> 1 };
+        It last_iter{ std::ranges::next(first, last) };
+        auto size{ last_iter - first }, i{ size >> 1 };
         while (i-- != 0) {
             plastic::sift_down(first, i, size, pred, proj);
         }
-        return r_last;
+        return last_iter;
     }
 
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     It sort_heap(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        It r_last{ std::ranges::next(first, last) }, i{ r_last };
-        auto size{ r_last - first };
+        It last_iter{ std::ranges::next(first, last) }, i{ last_iter };
+        auto size{ last_iter - first };
         while (size > 1) {
             std::ranges::swap(*first, *--i);
             plastic::sift_down(first, 0, --size, pred, proj);
         }
-        return r_last;
+        return last_iter;
     }
 
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pj = std::identity, std::indirect_strict_weak_order<std::projected<It, Pj>> Pr = std::ranges::less>
@@ -1349,9 +1349,9 @@ namespace plastic {
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     It sort(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        It r_last{ std::ranges::next(first, last) };
-        plastic::intro_sort(first, r_last, r_last - first, pred, proj);
-        return r_last;
+        It last_iter{ std::ranges::next(first, last) };
+        plastic::intro_sort(first, last_iter, last_iter - first, pred, proj);
+        return last_iter;
     }
 
     template <std::bidirectional_iterator It, class Pr, class Pj>
@@ -1373,9 +1373,9 @@ namespace plastic {
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     It stable_sort(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        It r_last{ std::ranges::next(first, last) };
-        plastic::merge_sort(first, r_last, pred, proj);
-        return r_last;
+        It last_iter{ std::ranges::next(first, last) };
+        plastic::merge_sort(first, last_iter, pred, proj);
+        return last_iter;
     }
 
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
@@ -1444,7 +1444,7 @@ namespace plastic {
     export template <std::random_access_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     It nth_element(It first, It middle, Se last, Pr pred = {}, Pj proj = {}) {
-        It r_last{ std::ranges::next(first, last) }, i{ r_last };
+        It last_iter{ std::ranges::next(first, last) }, i{ last_iter };
         while (i - first > INSERTION_SORT_THRESHOLD) {
             auto [left, right]{ plastic::median_partition(first, i, pred, proj) };
             if (middle < left) {
@@ -1454,11 +1454,11 @@ namespace plastic {
                 first = right;
             }
             else {
-                return r_last;
+                return last_iter;
             }
         }
         plastic::insertion_sort(first, i, pred, proj);
-        return r_last;
+        return last_iter;
     }
 
 #pragma endregion
@@ -1773,47 +1773,47 @@ namespace plastic {
     export template <std::bidirectional_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     std::ranges::in_found_result<It> next_permutation(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        It r_last{ std::ranges::next(first, last) }, i{ r_last }, j{ r_last };
-        if (first == r_last || first == --i) {
-            return { std::move(r_last), false };
+        It last_iter{ std::ranges::next(first, last) }, i{ last_iter }, j{ last_iter };
+        if (first == last_iter || first == --i) {
+            return { std::move(last_iter), false };
         }
 
         while (!std::invoke(pred, std::invoke(proj, *--i), std::invoke(proj, *--j))) {
             if (i == first) {
-                plastic::reverse(first, r_last);
-                return { std::move(r_last), false };
+                plastic::reverse(first, last_iter);
+                return { std::move(last_iter), false };
             }
         }
 
-        j = r_last;
+        j = last_iter;
         while (!std::invoke(pred, std::invoke(proj, *i), std::invoke(proj, *--j))) {}
         std::ranges::swap(*i, *j);
-        plastic::reverse(++i, r_last);
+        plastic::reverse(++i, last_iter);
 
-        return { std::move(r_last), true };
+        return { std::move(last_iter), true };
     }
 
     export template <std::bidirectional_iterator It, std::sentinel_for<It> Se, class Pr = std::ranges::less, class Pj = std::identity>
         requires std::sortable<It, Pr, Pj>
     std::ranges::in_found_result<It> prev_permutation(It first, Se last, Pr pred = {}, Pj proj = {}) {
-        It r_last{ std::ranges::next(first, last) }, i{ r_last }, j{ r_last };
-        if (first == r_last || first == --i) {
-            return { std::move(r_last), false };
+        It last_iter{ std::ranges::next(first, last) }, i{ last_iter }, j{ last_iter };
+        if (first == last_iter || first == --i) {
+            return { std::move(last_iter), false };
         }
 
         while (!std::invoke(pred, std::invoke(proj, *--j), std::invoke(proj, *--i))) {
             if (i == first) {
-                plastic::reverse(first, r_last);
-                return { std::move(r_last), false };
+                plastic::reverse(first, last_iter);
+                return { std::move(last_iter), false };
             }
         }
 
-        j = r_last;
+        j = last_iter;
         while (!std::invoke(pred, std::invoke(proj, *--j), std::invoke(proj, *i))) {}
         std::ranges::swap(*i, *j);
-        plastic::reverse(++i, r_last);
+        plastic::reverse(++i, last_iter);
 
-        return { std::move(r_last), true };
+        return { std::move(last_iter), true };
     }
 
 #pragma endregion
