@@ -100,7 +100,7 @@ namespace plastic {
         Storage<value_type> _data;
         size_type _size{ capacity() };
 
-        void _reallocate(size_type new_capacity) {
+        void _grow(size_type new_capacity) {
             size_type size{ this->size() };
             Storage<value_type> new_data{ std::ranges::max(new_capacity, capacity() + (capacity() >> 1)) };
             std::ranges::uninitialized_move(*this, new_data);
@@ -110,20 +110,22 @@ namespace plastic {
             _size = size;
         }
 
-        void _resize(size_type new_size, const auto&... args) {
+        template <class... Args>
+            requires (sizeof...(Args) <= 1)
+        void _resize(size_type new_size, Args&&... args) {
             if (new_size > capacity()) {
-                _reallocate(new_size);
+                _grow(new_size);
             }
 
             iterator new_end{ begin() + new_size };
             if (new_size <= size()) {
                 std::ranges::destroy(new_end, end());
             }
-            else if constexpr (sizeof...(args) == 0) {
+            else if constexpr (sizeof...(Args) == 0) {
                 std::ranges::uninitialized_value_construct(end(), new_end);
             }
             else {
-                std::ranges::uninitialized_fill(end(), new_end, args...);
+                std::ranges::uninitialized_fill(end(), new_end, std::forward<Args>(args)...);
             }
             _size = new_size;
         }
@@ -254,7 +256,7 @@ namespace plastic {
 
         void reserve(size_type new_capacity) {
             if (new_capacity > capacity()) {
-                _reallocate(new_capacity);
+                _grow(new_capacity);
             }
         }
 
@@ -299,7 +301,7 @@ namespace plastic {
         void push_back(const_reference value) {
             value_type clone{ value };
             if (size() == capacity()) {
-                _reallocate(size() + 1);
+                _grow(size() + 1);
             }
 
             std::ranges::construct_at(end(), clone);
@@ -320,7 +322,7 @@ namespace plastic {
             value_type clone{ value };
             difference_type offset{ pos - begin() };
             if (capacity() - size() < count) {
-                _reallocate(size() + count);
+                _grow(size() + count);
             }
 
             iterator src{ begin() + offset }, dest{ src + count };
@@ -879,24 +881,26 @@ namespace plastic {
         NodeBase* _head{ new NodeBase };
         size_type _size{};
 
-        NodeBase* _insert(NodeBase* pos, size_type count, const auto&... args) {
+        template <class... Args>
+        NodeBase* _insert(NodeBase* pos, size_type count, Args&&... args) {
             NodeBase *prev{ pos->prev }, *i{ prev };
             _size += count;
             while (count-- != 0) {
-                i = i->next = new Node{ i, i->next, args... };
+                i = i->next = new Node{ i, i->next, std::forward<Args>(args)... };
             }
             i->next->prev = i;
             return prev->next;
         }
 
-        void _resize(size_type new_size, const auto&... args) {
+        template <class... Args>
+        void _resize(size_type new_size, Args&&... args) {
             if (new_size <= _size) {
                 while (_size != new_size) {
                     pop_back();
                 }
             }
             else {
-                this->_insert(_head, new_size - _size, args...);
+                this->_insert(_head, new_size - _size, std::forward<Args>(args)...);
             }
         }
 
