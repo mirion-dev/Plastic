@@ -98,7 +98,7 @@ namespace plastic {
 
     private:
         Storage<value_type> _data;
-        size_type _size{ capacity() };
+        size_type _size{};
 
         void _grow(size_type new_capacity) {
             size_type size{ this->size() };
@@ -134,13 +134,15 @@ namespace plastic {
         Vector() = default;
 
         explicit Vector(size_type size) :
-            _data{ size } {
+            _data{ size },
+            _size{ size } {
 
             std::ranges::uninitialized_value_construct(*this);
         }
 
         Vector(size_type size, const_reference value) :
-            _data{ size } {
+            _data{ size },
+            _size{ size } {
 
             std::ranges::uninitialized_fill(*this, value);
         }
@@ -151,7 +153,8 @@ namespace plastic {
         }
 
         Vector(const Vector& other) :
-            _data{ other.size() } {
+            _data{ other.size() },
+            _size{ other.size() } {
 
             std::ranges::uninitialized_copy(other, *this);
         }
@@ -161,7 +164,8 @@ namespace plastic {
         }
 
         Vector(std::initializer_list<value_type> list) :
-            _data{ list.size() } {
+            _data{ list.size() },
+            _size{ list.size() } {
 
             std::ranges::uninitialized_copy(list, *this);
         }
