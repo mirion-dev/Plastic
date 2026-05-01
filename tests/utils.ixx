@@ -9,30 +9,25 @@ namespace tests {
         return std::format("{}", value);
     }
 
-    export template <std::contiguous_iterator It>
-    std::string format(It first, std::size_t size) {
-        return tests::format(std::span{ first, size });
-    }
-
     export template <std::input_iterator It>
     std::string format(It first, It last) {
         return tests::format(std::ranges::subrange{ first, last });
     }
 
+    export template <std::contiguous_iterator It>
+    std::string format(It first, std::size_t size) {
+        return tests::format(std::span{ first, size });
+    }
+
     export template <class Hp>
-        requires requires(Hp heap) {
-            heap.empty();
-            heap.top();
-            heap.pop();
-        }
-    std::string format(const Hp& heap) {
+    std::string format_heap(const Hp& heap) {
         Hp clone{ heap };
-        std::vector<typename Hp::value_type> temp;
+        std::vector<typename Hp::value_type> res;
         while (!clone.empty()) {
-            temp.push_back(clone.top());
+            res.push_back(clone.top());
             clone.pop();
         }
-        return tests::format(temp | std::views::reverse);
+        return std::format("{}", res | std::views::reverse);
     }
 
 }
