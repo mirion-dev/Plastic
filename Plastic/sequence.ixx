@@ -153,7 +153,7 @@ namespace plastic {
         Vector(const Vector& other) :
             _data{ other.size() } {
 
-            std::ranges::copy(other, begin());
+            std::ranges::uninitialized_copy(other, *this);
         }
 
         Vector(Vector&& other) noexcept {
@@ -163,7 +163,7 @@ namespace plastic {
         Vector(std::initializer_list<value_type> list) :
             _data{ list.size() } {
 
-            std::ranges::copy(list, begin());
+            std::ranges::uninitialized_copy(list, *this);
         }
 
         ~Vector() {
