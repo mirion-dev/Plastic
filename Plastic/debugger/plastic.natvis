@@ -1,27 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-    <Type Name="plastic::vector&lt;*&gt;">
-        <Intrinsic Name="size" Expression="(size_t)(_last_ptr - _data._begin)"/>
-        <Intrinsic Name="capacity" Expression="(size_t)(_data._end - _data._begin)"/>
-        <DisplayString>{{ size={size()} }}</DisplayString>
+    <Type Name="plastic::Vector&lt;*&gt;">
+        <Intrinsic Name="capacity" Expression="_data._size"/>
+        <DisplayString>{{ size={_size} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
-            <ExpandedItem>_data._begin, [size()]</ExpandedItem>
+            <ExpandedItem>_data._ptr, [_size]</ExpandedItem>
         </Expand>
     </Type>
 
-    <Type Name="plastic::deque&lt;*&gt;">
-        <Intrinsic Name="size" Expression="(size_t)(_last_ptr - _first_ptr)"/>
-        <Intrinsic Name="capacity" Expression="(size_t)(_data._end - _data._begin)"/>
-        <DisplayString>{{ size={size()} }}</DisplayString>
+    <Type Name="plastic::Deque&lt;*&gt;">
+        <Intrinsic Name="capacity" Expression="_data._size"/>
+        <DisplayString>{{ size={_size} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
-            <ExpandedItem>_first_ptr, [size()]</ExpandedItem>
+			<IndexListItems>
+				<Size>_size</Size>
+				<ValueNode>(_data._ptr + _first)[$i &lt; capacity() - _first ? $i : $i - capacity()]</ValueNode>
+			</IndexListItems>
         </Expand>
     </Type>
 
-    <Type Name="plastic::forward_list&lt;*&gt;">
+    <Type Name="plastic::List&lt;*&gt;">
         <Intrinsic Name="size" Expression="_size"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
         <Expand>
@@ -34,20 +35,7 @@
         </Expand>
     </Type>
 
-    <Type Name="plastic::list&lt;*&gt;">
-        <Intrinsic Name="size" Expression="_size"/>
-        <DisplayString>{{ size={size()} }}</DisplayString>
-        <Expand>
-            <LinkedListItems>
-                <Size>size()</Size>
-                <HeadPointer>_head->next</HeadPointer>
-                <NextPointer>next</NextPointer>
-                <ValueNode>((node*)this)->value</ValueNode>
-            </LinkedListItems>
-        </Expand>
-    </Type>
-
-    <Type Name="plastic::tree&lt;*,*,*&gt;">
+    <Type Name="plastic::Tree&lt;*,*,*&gt;">
 		<Intrinsic Name="pred" Expression="_pred"/>
 		<Intrinsic Name="size" Expression="_size"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
@@ -63,7 +51,7 @@
         </Expand>
     </Type>
 
-    <Type Name="plastic::binary_heap&lt;*,*&gt;">
+    <Type Name="plastic::BinaryHeap&lt;*,*&gt;">
 		<Intrinsic Name="pred" Expression="_pred"/>
 		<Intrinsic Name="size" Expression="_data._Mypair._Myval2._Mylast - _data._Mypair._Myval2._Myfirst"/>
         <DisplayString>{{ size={size()} }}</DisplayString>

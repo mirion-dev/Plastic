@@ -118,7 +118,6 @@ namespace tests {
             ASSERT(format(b) == "[4, 4, 4, 4]");
             ASSERT(format(c) == "[3, 2, 1]");
 
-            ASSERT(format(c.data(), c.size()) == "[3, 2, 1]");
             ASSERT(format(c.cbegin(), c.cend()) == "[3, 2, 1]");
             ASSERT(format(c.rbegin(), c.rend()) == "[1, 2, 3]");
             ASSERT(format(c.crbegin(), c.crend()) == "[1, 2, 3]");

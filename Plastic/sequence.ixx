@@ -328,7 +328,7 @@ namespace plastic {
             difference_type offset{ pos - begin() };
             if (size() == capacity()) {
                 _grow(size() + 1);
-        }
+            }
 
             iterator pos_iter{ begin() + offset };
             if (pos_iter == end()) {
@@ -360,7 +360,7 @@ namespace plastic {
                 std::ranges::uninitialized_move(middle, end(), end(), std::unreachable_sentinel);
                 std::ranges::move_backward(pos_iter, middle, end());
                 std::ranges::fill(pos_iter, new_pos, clone);
-                }
+            }
             else {
                 std::ranges::uninitialized_move(pos_iter, end(), new_pos, std::unreachable_sentinel);
                 std::ranges::fill(pos_iter, end(), clone);
@@ -383,7 +383,7 @@ namespace plastic {
         iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
             if (list.empty()) {
                 return const_cast<iterator>(pos);
-        }
+            }
 
             difference_type offset{ pos - begin() };
             if (capacity() - size() < list.size()) {
@@ -411,8 +411,7 @@ namespace plastic {
             assert(pos != end());
             auto pos_iter{ const_cast<iterator>(pos) };
             std::ranges::move(pos_iter + 1, end(), pos_iter);
-            --_size;
-            std::ranges::destroy_at(end());
+            pop_back();
             return pos_iter;
         }
 
@@ -422,9 +421,9 @@ namespace plastic {
                 return first_iter;
             }
 
-                iterator new_end{ std::ranges::move(last_iter, end(), first_iter).out };
-                std::ranges::destroy(new_end, end());
-                _size = new_end - begin();
+            iterator new_end{ std::ranges::move(last_iter, end(), first_iter).out };
+            std::ranges::destroy(new_end, end());
+            _size = new_end - begin();
             return first_iter;
         }
 
@@ -464,119 +463,184 @@ namespace plastic {
         using const_reference = const value_type&;
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
-        using iterator = pointer;
-        using const_iterator = const_pointer;
+
+        class iterator {
+            friend Deque;
+
+        public:
+            using iterator_category = std::random_access_iterator_tag;
+            using value_type = value_type;
+            using difference_type = std::ptrdiff_t;
+            using pointer = value_type*;
+            using reference = value_type&;
+
+        private:
+            Deque* _cont{};
+            pointer _ptr{};
+            bool _wrapped{};
+
+            iterator(Deque* cont) :
+                _cont{ cont },
+                _ptr{ cont->_data.begin() + cont->_first },
+                _wrapped{ cont->capacity() == 0 } {}
+
+            difference_type _offset() const {
+                difference_type diff{ _ptr - _cont->_data.begin() - static_cast<difference_type>(_cont->_first) };
+                return _wrapped ? diff + _cont->capacity() : diff;
+            }
+
+        public:
+            iterator() = default;
+
+            reference operator*() const {
+                return *_ptr;
+            }
+
+            pointer operator->() const {
+                return _ptr;
+            }
+
+            reference operator[](difference_type index) const {
+                return *(*this + index);
+            }
+
+            friend bool operator==(iterator left, iterator right) {
+                return left._ptr == right._ptr && left._wrapped == right._wrapped;
+            }
+
+            friend auto operator<=>(iterator left, iterator right) {
+                return left._offset() <=> right._offset();
+            }
+
+            iterator& operator+=(difference_type diff) {
+                if (_cont->_data.end() - _ptr <= diff) {
+                    _ptr += diff - _cont->capacity();
+                    _wrapped = true;
+                }
+                else if (_ptr - _cont->_data.begin() < -diff) {
+                    _ptr += diff + _cont->capacity();
+                    _wrapped = false;
+                }
+                else {
+                    _ptr += diff;
+                }
+                return *this;
+            }
+
+            iterator& operator-=(difference_type diff) {
+                return *this += -diff;
+            }
+
+            friend iterator operator+(iterator iter, difference_type diff) {
+                return iter += diff;
+            }
+
+            friend iterator operator+(difference_type diff, iterator iter) {
+                return iter += diff;
+            }
+
+            friend iterator operator-(iterator iter, difference_type diff) {
+                return iter -= diff;
+            }
+
+            friend difference_type operator-(iterator left, iterator right) {
+                return left._offset() - right._offset();
+            }
+
+            iterator& operator++() {
+                ++_ptr;
+                if (_ptr == _cont->_data.end()) {
+                    _ptr = _cont->_data.begin();
+                    _wrapped = true;
+                }
+                return *this;
+            }
+
+            iterator operator++(int) {
+                iterator temp{ *this };
+                ++*this;
+                return temp;
+            }
+
+            iterator& operator--() {
+                if (_ptr == _cont->_data.begin()) {
+                    _ptr = _cont->_data.end();
+                    _wrapped = false;
+                }
+                --_ptr;
+                return *this;
+            }
+
+            iterator operator--(int) {
+                iterator temp{ *this };
+                --*this;
+                return temp;
+            }
+        };
+
+        using const_iterator = std::const_iterator<iterator>;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     private:
         Storage<value_type> _data;
-        pointer _first_ptr{ _begin() };
-        pointer _last_ptr{ _begin() };
+        size_type _first{};
+        size_type _size{};
 
-        auto _begin(this auto& self) {
-            return self._data.begin();
-        }
-
-        auto _end(this auto& self) {
-            return self._data.end();
-        }
-
-        pointer _first() {
-            return _first_ptr;
-        }
-
-        const_pointer _first() const {
-            return _first_ptr;
-        }
-
-        pointer _last() {
-            return _last_ptr;
-        }
-
-        const_pointer _last() const {
-            return _last_ptr;
-        }
-
-        pointer _reallocate(size_type new_capacity, size_type right_reserved = {}, size_type left_reserved = {}) {
-            size_type new_size{ size() + left_reserved + right_reserved };
-
-            Storage<value_type> new_data{ std::ranges::max(new_capacity, capacity() << 1) };
-            pointer new_first{ new_data.begin() + (new_capacity - new_size >> 1) + left_reserved };
-            pointer new_last{ std::ranges::uninitialized_move(_first(), _last(), new_first, new_data.end()).out };
+        void _grow(size_type new_capacity) {
+            size_type size{ this->size() };
+            iterator begin{ this->begin() }, end{ this->end() };
+            Storage<value_type> new_data{ std::ranges::max(new_capacity, capacity() + (capacity() >> 1)) };
+            if (!end._wrapped) {
+                std::ranges::uninitialized_move(begin._ptr, end._ptr, new_data.begin(), std::unreachable_sentinel);
+            }
+            else {
+                pointer middle{ std::ranges::uninitialized_move(begin._ptr, _data.end(), new_data.begin(), std::unreachable_sentinel).out };
+                std::ranges::uninitialized_move(_data.begin(), end._ptr, middle, std::unreachable_sentinel);
+            }
             clear();
-            _data = std::move(new_data);
-            _first_ptr = new_first;
-            _last_ptr = new_last;
 
-            return _first() + new_size;
+            _data = std::move(new_data);
+            _first = 0;
+            _size = size;
         }
 
-        void _resize(size_type new_size, const auto&... args) {
+        template <class... Args>
+            requires (sizeof...(Args) <= 1)
+        void _resize(size_type new_size, const Args&... args) {
             if (new_size > capacity()) {
-                pointer new_last{ _reallocate(new_size, new_size - size()) };
-                if constexpr (sizeof...(args) == 0) {
-                    std::ranges::uninitialized_value_construct(_last(), new_last);
-                }
-                else {
-                    std::ranges::uninitialized_fill(_last(), new_last, args...);
-                }
-                _last_ptr = new_last;
-                return;
+                _grow(new_size);
             }
 
-            pointer new_first{ _begin() + (capacity() - new_size >> 1) }, new_last{ new_first + new_size };
+            iterator begin{ this->begin() }, end{ this->end() }, new_end{ begin + new_size };
             if (new_size <= size()) {
-                pointer middle{ _first() + new_size };
-                if (_last() <= new_first || _first() >= new_last) {
-                    std::ranges::uninitialized_move(_first(), middle, new_first, _end());
-                    std::ranges::destroy(_first(), _last());
-                }
-                else if (_last() <= new_last) {
-                    pointer j{ middle - (new_last - _last()) };
-                    std::ranges::uninitialized_move(j, middle, _last(), _end());
-                    std::ranges::move_backward(_first(), j, _last());
-                    std::ranges::destroy(_first(), new_first);
-                }
-                else if (_first() >= new_first) {
-                    pointer j{ _first() + (_first() - new_first) };
-                    std::ranges::uninitialized_move(_first(), j, new_first, _end());
-                    std::ranges::move(j, middle, _first());
-                    std::ranges::destroy(new_last, _last());
+                if (new_end._wrapped == end._wrapped) {
+                    std::ranges::destroy(new_end._ptr, end._ptr);
                 }
                 else {
-                    std::ranges::move_backward(_first(), middle, new_last);
-                    std::ranges::destroy(_first(), new_first);
-                    std::ranges::destroy(new_last, _last());
+                    std::ranges::destroy(new_end._ptr, _data.end());
+                    std::ranges::destroy(_data.begin(), end._ptr);
+                }
+            }
+            else if constexpr (sizeof...(Args) == 0) {
+                if (new_end._wrapped == end._wrapped) {
+                    std::ranges::uninitialized_value_construct(end._ptr, new_end._ptr);
+                }
+                else {
+                    std::ranges::uninitialized_value_construct(end._ptr, _data.end());
+                    std::ranges::uninitialized_value_construct(_data.begin(), new_end._ptr);
                 }
             }
             else {
-                pointer new_middle{ new_first + size() };
-                if (_last() <= new_first || _first() >= new_middle) {
-                    std::ranges::uninitialized_move(_first(), _last(), new_first, _end());
-                    std::ranges::destroy(_first(), _last());
-                }
-                else if (_first() <= new_first) {
-                    pointer j{ _last() - (new_middle - _last()) };
-                    std::ranges::uninitialized_move(j, _last(), _last(), _end());
-                    std::ranges::move_backward(_first(), j, _last());
-                    std::ranges::destroy(_first(), new_first);
+                if (new_end._wrapped == end._wrapped) {
+                    std::ranges::uninitialized_fill(end._ptr, new_end._ptr, args...);
                 }
                 else {
-                    pointer j{ _first() + (_first() - new_first) };
-                    std::ranges::uninitialized_move(_first(), j, new_first, _end());
-                    std::ranges::move(j, _last(), _first());
-                    std::ranges::destroy(new_middle, _last());
-                }
-                if constexpr (sizeof...(args) == 0) {
-                    std::ranges::uninitialized_value_construct(new_middle, new_last);
-                }
-                else {
-                    std::ranges::uninitialized_fill(new_middle, new_last, args...);
+                    std::ranges::uninitialized_fill(end._ptr, _data.end(), args...);
+                    std::ranges::uninitialized_fill(_data.begin(), new_end._ptr, args...);
                 }
             }
-            _first_ptr = new_first;
-            _last_ptr = new_last;
+            _size = new_size;
         }
 
     public:
@@ -584,18 +648,16 @@ namespace plastic {
 
         explicit Deque(size_type size) :
             _data{ size },
-            _first_ptr{ _begin() },
-            _last_ptr{ _end() } {
+            _size{ size } {
 
-            std::ranges::uninitialized_value_construct(_first(), _last());
+            std::ranges::uninitialized_value_construct(_data);
         }
 
         Deque(size_type size, const_reference value) :
             _data{ size },
-            _first_ptr{ _begin() },
-            _last_ptr{ _end() } {
+            _size{ size } {
 
-            std::ranges::uninitialized_fill(_first(), _last(), value);
+            std::ranges::uninitialized_fill(_data, value);
         }
 
         template <std::input_iterator It>
@@ -603,14 +665,29 @@ namespace plastic {
             std::ranges::copy(first, last, std::back_inserter(*this));
         }
 
-        Deque(std::initializer_list<value_type> list) :
-            Deque(list.begin(), list.end()) {}
-
         Deque(const Deque& other) :
-            Deque(other._first(), other._last()) {}
+            _data{ other.size() },
+            _size{ other.size() } {
+
+            iterator begin{ other.begin().base() }, end{ other.end().base() };
+            if (!end._wrapped) {
+                std::ranges::uninitialized_copy(begin._ptr, end._ptr, _data.begin(), std::unreachable_sentinel);
+            }
+            else {
+                pointer middle{ std::ranges::uninitialized_copy(begin._ptr, other._data.end(), _data.begin(), std::unreachable_sentinel).out };
+                std::ranges::uninitialized_copy(other._data.begin(), end._ptr, middle, std::unreachable_sentinel);
+            }
+        }
 
         Deque(Deque&& other) noexcept {
             this->swap(other);
+        }
+
+        Deque(std::initializer_list<value_type> list) :
+            _data{ list.size() },
+            _size{ list.size() } {
+
+            std::ranges::uninitialized_copy(list, _data);
         }
 
         ~Deque() {
@@ -628,70 +705,26 @@ namespace plastic {
             return *this;
         }
 
-        void swap(Deque& other) noexcept {
-            std::ranges::swap(_data, other._data);
-            std::ranges::swap(_first_ptr, other._first_ptr);
-            std::ranges::swap(_last_ptr, other._last_ptr);
-        }
-
-        friend void swap(Deque& left, Deque& right) noexcept {
-            left.swap(right);
-        }
-
-        bool empty() const {
-            return _first() == _last();
-        }
-
-        size_type size() const {
-            return _last() - _first();
-        }
-
-        void clear() {
-            std::ranges::destroy(_first(), _last());
-            _first_ptr = _last_ptr = _begin() + (capacity() >> 1);
-        }
-
-        void resize(size_type new_size) {
-            _resize(new_size);
-        }
-
-        void resize(size_type new_size, const_reference value) {
-            value_type clone{ value };
-            this->_resize(new_size, clone);
-        }
-
-        size_type capacity() const {
-            return _end() - _begin();
-        }
-
-        void reserve(size_type new_capacity) {
-            if (new_capacity > capacity()) {
-                _reallocate(new_capacity);
-            }
+        Deque& operator=(std::initializer_list<value_type> list) {
+            Deque temp(list);
+            this->swap(temp);
+            return *this;
         }
 
         iterator begin() {
-            return _first();
+            return iterator{ this };
         }
 
         const_iterator begin() const {
-            return _first();
+            return iterator{ const_cast<Deque*>(this) };
         }
 
         iterator end() {
-            return _last();
+            return iterator{ this } + _size;
         }
 
         const_iterator end() const {
-            return _last();
-        }
-
-        const_iterator cbegin() const {
-            return begin();
-        }
-
-        const_iterator cend() const {
-            return end();
+            return iterator{ const_cast<Deque*>(this) } + _size;
         }
 
         reverse_iterator rbegin() {
@@ -710,6 +743,14 @@ namespace plastic {
             return const_reverse_iterator{ begin() };
         }
 
+        const_iterator cbegin() const {
+            return begin();
+        }
+
+        const_iterator cend() const {
+            return end();
+        }
+
         const_reverse_iterator crbegin() const {
             return rbegin();
         }
@@ -718,123 +759,226 @@ namespace plastic {
             return rend();
         }
 
+        bool empty() const {
+            return _size == 0;
+        }
+
+        size_type size() const {
+            return _size;
+        }
+
+        size_type max_size() const {
+            return static_cast<size_type>(-1) / sizeof(value_type);
+        }
+
+        size_type capacity() const {
+            return _data.size();
+        }
+
+        void resize(size_type new_size) {
+            _resize(new_size);
+        }
+
+        void resize(size_type new_size, const_reference value) {
+            this->_resize(new_size, value_type{ value });
+        }
+
+        void reserve(size_type new_capacity) {
+            if (new_capacity > capacity()) {
+                _grow(new_capacity);
+            }
+        }
+
         reference operator[](size_type index) {
             assert(index < size());
-            return _first()[index];
+            return begin()[index];
         }
 
         const_reference operator[](size_type index) const {
             assert(index < size());
-            return _first()[index];
+            return begin()[index];
         }
 
         reference front() {
             assert(!empty());
-            return *_first();
+            return *begin();
         }
 
         const_reference front() const {
             assert(!empty());
-            return *_first();
+            return *begin();
         }
 
         reference back() {
             assert(!empty());
-            return _last()[-1];
+            return *--end();
         }
 
         const_reference back() const {
             assert(!empty());
-            return _last()[-1];
-        }
-
-        pointer data() {
-            return _first();
-        }
-
-        const_pointer data() const {
-            return _first();
+            return *--end();
         }
 
         void push_front(const_reference value) {
             value_type clone{ value };
-            if (_first() == _begin()) {
-                _reallocate(size() + 1, 0, 1);
+            if (size() == capacity()) {
+                _grow(size() + 1);
             }
-            std::ranges::construct_at(--_first_ptr, clone);
+
+            iterator begin{ this->begin() };
+            std::ranges::construct_at((--begin)._ptr, std::move(clone));
+            _first = begin._ptr - _data.begin();
+            ++_size;
         }
 
         void pop_front() {
             assert(!empty());
-            std::ranges::destroy_at(_first_ptr++);
+            iterator begin{ this->begin() };
+            std::ranges::destroy_at(begin++._ptr);
+            _first = begin._ptr - _data.begin();
+            --_size;
         }
 
         void push_back(const_reference value) {
             value_type clone{ value };
-            if (_last() == _end()) {
-                _reallocate(size() + 1, 1);
+            if (size() == capacity()) {
+                _grow(size() + 1);
             }
-            std::ranges::construct_at(_last_ptr++, clone);
+
+            std::ranges::construct_at(end()._ptr, std::move(clone));
+            ++_size;
         }
 
         void pop_back() {
             assert(!empty());
-            std::ranges::destroy_at(--_last_ptr);
+            --_size;
+            std::ranges::destroy_at(end()._ptr);
         }
 
         iterator insert(const_iterator pos, const_reference value) {
-            return this->insert(pos, 1, value);
+            value_type clone{ value };
+            difference_type offset{ pos - begin() };
+            if (size() == capacity()) {
+                _grow(size() + 1);
+            }
+
+            iterator begin{ this->begin() }, end{ this->end() }, pos_iter{ begin + offset };
+            if (pos_iter == end) {
+                std::ranges::construct_at(end._ptr, std::move(clone));
+            }
+            else {
+                std::ranges::construct_at(end._ptr, std::move(back()));
+                std::ranges::move_backward(pos_iter, end - 1, end);
+                *pos_iter = std::move(clone);
+            }
+            ++_size;
+            return pos_iter;
         }
 
         iterator insert(const_iterator pos, size_type count, const_reference value) {
-            value_type clone{ value };
-            difference_type offset{ pos - _first() };
-            if (static_cast<size_type>(_end() - _last()) < count) {
-                _reallocate(size() + count, count);
+            if (count == 0) {
+                return pos.base();
             }
 
-            pointer i{ _first() + offset }, new_i{ i + count };
-            if (new_i <= _last()) {
-                pointer j{ _last() - count };
-                std::ranges::uninitialized_move(j, _last(), _last(), _end());
-                std::ranges::move_backward(i, j, _last());
-                std::ranges::fill(i, new_i, clone);
+            value_type clone{ value };
+            difference_type offset{ pos - begin() };
+            if (capacity() - size() < count) {
+                _grow(size() + count);
+            }
+
+            iterator begin{ this->begin() }, end{ this->end() }, pos_iter{ begin + offset }, new_pos{ pos_iter + count };
+            if (new_pos <= end) {
+                iterator middle{ end - count };
+                std::ranges::uninitialized_move(middle, end, end, std::unreachable_sentinel);
+                std::ranges::move_backward(pos_iter, middle, end);
+                std::ranges::fill(pos_iter, new_pos, clone);
             }
             else {
-                std::ranges::uninitialized_move(i, _last(), new_i, _end());
-                std::ranges::uninitialized_fill(_last(), new_i, clone);
-                std::ranges::fill(i, _last(), clone);
+                std::ranges::uninitialized_move(pos_iter, end, new_pos, std::unreachable_sentinel);
+                std::ranges::fill(pos_iter, end, clone);
+                std::ranges::uninitialized_fill(end, new_pos, clone);
             }
-            _last_ptr += count;
-
-            return i;
+            _size += count;
+            return pos_iter;
         }
 
         template <std::input_iterator It>
         iterator insert(const_iterator pos, It first, It last) {
-            difference_type pos_offset{ pos - _first() }, last_offset{ _last() - _first() };
+            difference_type pos_offset{ pos - begin() }, pos_end_offset{ static_cast<difference_type>(size()) };
             std::ranges::copy(first, last, std::back_inserter(*this));
-            std::ranges::rotate(_first() + pos_offset, _first() + last_offset, _last());
-            return _first() + pos_offset;
+
+            iterator begin{ this->begin() }, end{ this->end() }, pos_iter{ begin + pos_offset }, pos_end{ begin + pos_end_offset };
+            std::ranges::rotate(pos_iter, pos_end, end);
+            return pos_iter;
         }
 
         iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
-            return this->insert(pos, list.begin(), list.end());
+            if (list.empty()) {
+                return pos.base();
+            }
+
+            difference_type offset{ pos - begin() };
+            if (capacity() - size() < list.size()) {
+                _grow(size() + list.size());
+            }
+
+            iterator begin{ this->begin() }, end{ this->end() }, pos_iter{ begin + offset }, new_pos{ pos_iter + list.size() };
+            if (new_pos <= end) {
+                iterator middle{ end - list.size() };
+                std::ranges::uninitialized_move(middle, end, end, std::unreachable_sentinel);
+                std::ranges::move_backward(pos_iter, middle, end);
+                std::ranges::move(list, pos_iter);
+            }
+            else {
+                auto middle{ list.begin() + (end - pos_iter) };
+                std::ranges::uninitialized_move(pos_iter, end, new_pos, std::unreachable_sentinel);
+                std::ranges::copy(list.begin(), middle, pos_iter);
+                std::ranges::uninitialized_copy(middle, list.end(), end, std::unreachable_sentinel);
+            }
+            _size += list.size();
+            return pos_iter;
         }
 
         iterator erase(const_iterator pos) {
-            auto i{ const_cast<pointer>(pos) };
-            assert(i != _last());
-            _last_ptr = std::ranges::move(i + 1, _last(), i).out;
-            std::ranges::destroy_at(_last());
-            return i;
+            assert(pos != end());
+            iterator pos_iter{ pos.base() };
+            std::ranges::move(std::ranges::next(pos_iter), end(), pos_iter);
+            pop_back();
+            return pos_iter;
         }
 
         iterator erase(const_iterator first, const_iterator last) {
-            auto i{ const_cast<pointer>(first) }, e{ const_cast<pointer>(last) }, new_last{ std::ranges::move(e, _last(), i).out };
-            std::ranges::destroy(new_last, _last());
-            _last_ptr = new_last;
-            return i;
+            iterator first_iter{ first.base() }, last_iter{ last.base() };
+            if (first_iter == last_iter) {
+                return first_iter;
+            }
+
+            iterator begin{ this->begin() }, end{ this->end() }, new_end{ std::ranges::move(last_iter, end, first_iter).out };
+            std::ranges::destroy(new_end, end);
+            _size = new_end - begin;
+            return first_iter;
+        }
+
+        void swap(Deque& other) noexcept {
+            std::ranges::swap(_data, other._data);
+            std::ranges::swap(_first, other._first);
+            std::ranges::swap(_size, other._size);
+        }
+
+        friend void swap(Deque& left, Deque& right) noexcept {
+            left.swap(right);
+        }
+
+        void clear() {
+            iterator begin{ this->begin() }, end{ this->end() };
+            if (!end._wrapped) {
+                std::ranges::destroy(begin._ptr, end._ptr);
+            }
+            else {
+                std::ranges::destroy(begin._ptr, _data.end());
+                std::ranges::destroy(_data.begin(), end._ptr);
+            }
+            _size = 0;
         }
 
         friend bool operator==(const Deque& left, const Deque& right) {
