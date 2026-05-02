@@ -13,6 +13,8 @@ namespace plastic {
     public:
         using value_type = T;
         using comparator = Pr;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
 
@@ -28,19 +30,19 @@ namespace plastic {
         class reference {
             friend class handle;
 
-            Node* _ptr;
             BinaryHeap* _cont;
+            Node* _ptr;
 
-            reference(Node* ptr, BinaryHeap* cont) :
-                _ptr{ ptr },
-                _cont{ cont } {}
+            reference(BinaryHeap* cont, Node* ptr) :
+                _cont{ cont },
+                _ptr{ ptr } {}
 
         public:
             operator const_reference() const {
                 return _ptr->value;
             }
 
-            reference operator=(const value_type& other) const {
+            reference operator=(const_reference other) const {
                 bool is_greater{ std::invoke(_cont->_pred, _ptr->value, other) };
                 _ptr->value = other;
                 if (is_greater) {
@@ -53,17 +55,17 @@ namespace plastic {
             }
         };
 
-        using const_handle = const value_type*;
+        using const_handle = const_pointer;
 
         class handle {
             friend BinaryHeap;
 
-            Node* _ptr{};
             BinaryHeap* _cont{};
+            Node* _ptr{};
 
-            handle(Node* ptr, BinaryHeap* cont) :
-                _ptr{ ptr },
-                _cont{ cont } {}
+            handle(BinaryHeap* cont, Node* ptr) :
+                _cont{ cont },
+                _ptr{ ptr } {}
 
         public:
             handle() = default;
@@ -73,7 +75,7 @@ namespace plastic {
             }
 
             reference operator*() const {
-                return { _ptr, _cont };
+                return { _cont, _ptr };
             }
         };
 
@@ -138,9 +140,6 @@ namespace plastic {
             _make_heap();
         }
 
-        BinaryHeap(std::initializer_list<value_type> list) :
-            BinaryHeap(list.begin(), list.end()) {}
-
         BinaryHeap(const BinaryHeap& other) :
             _pred{ other._pred },
             _data(other.size()) {
@@ -155,6 +154,9 @@ namespace plastic {
             this->swap(other);
         }
 
+        BinaryHeap(std::initializer_list<value_type> list) :
+            BinaryHeap(list.begin(), list.end()) {}
+
         BinaryHeap& operator=(const BinaryHeap& other) {
             BinaryHeap temp(other);
             this->swap(temp);
@@ -166,30 +168,15 @@ namespace plastic {
             return *this;
         }
 
-        void swap(BinaryHeap& other) noexcept {
-            std::ranges::swap(_pred, other._pred);
-            std::ranges::swap(_data, other._data);
-        }
-
-        friend void swap(BinaryHeap& left, BinaryHeap& right) noexcept {
-            left.swap(right);
-        }
-
-        bool empty() const {
-            return _data.empty();
-        }
-
-        size_type size() const {
-            return _data.size();
-        }
-
-        void clear() {
-            _data.clear();
+        BinaryHeap& operator=(std::initializer_list<value_type> list) {
+            BinaryHeap temp(list);
+            this->swap(temp);
+            return *this;
         }
 
         handle apex() {
             assert(!empty());
-            return { _data.front().get(), this };
+            return { this, _data.front().get() };
         }
 
         const_handle apex() const {
@@ -200,6 +187,18 @@ namespace plastic {
         const_handle capex() const {
             assert(!empty());
             return apex();
+        }
+
+        bool empty() const {
+            return _data.empty();
+        }
+
+        size_type size() const {
+            return _data.size();
+        }
+
+        size_type max_size() const {
+            return static_cast<size_type>(-1) / sizeof(value_type);
         }
 
         reference top() {
@@ -217,7 +216,7 @@ namespace plastic {
             Node* raw{ ptr.get() };
             _data.emplace_back(std::move(ptr));
             this->_sift_up(raw->index);
-            return { raw, this };
+            return { this, raw };
         }
 
         void pop() {
@@ -249,6 +248,19 @@ namespace plastic {
             else {
                 _sift_down(index);
             }
+        }
+
+        void swap(BinaryHeap& other) noexcept {
+            std::ranges::swap(_pred, other._pred);
+            std::ranges::swap(_data, other._data);
+        }
+
+        friend void swap(BinaryHeap& left, BinaryHeap& right) noexcept {
+            left.swap(right);
+        }
+
+        void clear() {
+            _data.clear();
         }
 
         void merge(BinaryHeap& other) {

@@ -9,6 +9,17 @@ import utils;
 namespace tests {
 
     template <class Hp>
+    std::string format_heap(const Hp& heap) {
+        Hp clone{ heap };
+        std::vector<typename Hp::value_type> res;
+        while (!clone.empty()) {
+            res.push_back(clone.top());
+            clone.pop();
+        }
+        return std::format("{}", res | std::views::reverse);
+    }
+
+    template <class Hp>
     void test_addressable_heap() {
         Hp a{ 0, 0, 0 }, b{ 4, 4, 4, 4 }, c{ 3, 2, 1 }, x;
         ASSERT(tests::format_heap(x) == "[]");

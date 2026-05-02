@@ -19,15 +19,4 @@ namespace tests {
         return tests::format(std::span{ first, size });
     }
 
-    export template <class Hp>
-    std::string format_heap(const Hp& heap) {
-        Hp clone{ heap };
-        std::vector<typename Hp::value_type> res;
-        while (!clone.empty()) {
-            res.push_back(clone.top());
-            clone.pop();
-        }
-        return std::format("{}", res | std::views::reverse);
-    }
-
 }
