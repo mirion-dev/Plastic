@@ -15,10 +15,10 @@
         <DisplayString>{{ size={_size} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
-			<IndexListItems>
-				<Size>_size</Size>
-				<ValueNode>(_data._ptr + _first)[$i &lt; capacity() - _first ? $i : $i - capacity()]</ValueNode>
-			</IndexListItems>
+            <IndexListItems>
+                <Size>_size</Size>
+                <ValueNode>(_data._ptr + _first)[$i &lt; capacity() - _first ? $i : $i - capacity()]</ValueNode>
+            </IndexListItems>
         </Expand>
     </Type>
 
@@ -35,7 +35,7 @@
     </Type>
 
     <Type Name="plastic::Tree&lt;*,*,*&gt;">
-		<Intrinsic Name="pred" Expression="_pred"/>
+        <Intrinsic Name="pred" Expression="_pred"/>
         <DisplayString>{{ size={_size} }}</DisplayString>
         <Expand>
             <Item Name="[comparator]">pred()</Item>
@@ -50,16 +50,16 @@
     </Type>
 
     <Type Name="plastic::BinaryHeap&lt;*,*&gt;">
-		<Intrinsic Name="pred" Expression="_pred"/>
-		<Intrinsic Name="size" Expression="_data._Mypair._Myval2._Mylast - _data._Mypair._Myval2._Myfirst"/>
+        <Intrinsic Name="pred" Expression="_pred"/>
+        <Intrinsic Name="size" Expression="_data._Mypair._Myval2._Mylast - _data._Mypair._Myval2._Myfirst"/>
         <DisplayString>{{ size={size()} }}</DisplayString>
-		<Expand>
-			<Item Name="[comparator]">pred()</Item>
-			<IndexListItems>
-				<Size>size()</Size>
-				<ValueNode>_data._Mypair._Myval2._Myfirst[$i]._Mypair._Myval2->value</ValueNode>
-			</IndexListItems>
-		</Expand>
+        <Expand>
+            <Item Name="[comparator]">pred()</Item>
+            <IndexListItems>
+                <Size>size()</Size>
+                <ValueNode>_data._Mypair._Myval2._Myfirst[$i]._Mypair._Myval2->value</ValueNode>
+            </IndexListItems>
+        </Expand>
     </Type>
 
 </AutoVisualizer>

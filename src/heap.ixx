@@ -33,9 +33,8 @@ namespace plastic {
             BinaryHeap* _cont;
             Node* _ptr;
 
-            reference(BinaryHeap* cont, Node* ptr) :
-                _cont{ cont },
-                _ptr{ ptr } {}
+            reference(BinaryHeap* cont, Node* ptr)
+                : _cont{ cont }, _ptr{ ptr } {}
 
         public:
             operator const_reference() const {
@@ -47,8 +46,7 @@ namespace plastic {
                 _ptr->value = other;
                 if (is_greater) {
                     _cont->_sift_up(_ptr->index);
-                }
-                else {
+                } else {
                     _cont->_sift_down(_ptr->index);
                 }
                 return *this;
@@ -63,9 +61,8 @@ namespace plastic {
             BinaryHeap* _cont{};
             Node* _ptr{};
 
-            handle(BinaryHeap* cont, Node* ptr) :
-                _cont{ cont },
-                _ptr{ ptr } {}
+            handle(BinaryHeap* cont, Node* ptr)
+                : _cont{ cont }, _ptr{ ptr } {}
 
         public:
             handle() = default;
@@ -91,7 +88,7 @@ namespace plastic {
         void _sift_up(size_type index) {
             std::unique_ptr<Node> i{ std::move(_data[index]) };
             while (index != 0) {
-                size_type parent{ index - 1 >> 1 };
+                size_type parent{ (index - 1) >> 1 };
                 if (!std::invoke(_pred, _data[parent]->value, i->value)) {
                     break;
                 }
@@ -140,9 +137,8 @@ namespace plastic {
             _make_heap();
         }
 
-        BinaryHeap(const BinaryHeap& other) :
-            _pred{ other._pred },
-            _data(other.size()) {
+        BinaryHeap(const BinaryHeap& other)
+            : _pred{ other._pred }, _data(other.size()) {
 
             auto i{ _data.begin() };
             for (auto& ptr : other._data) {
@@ -154,8 +150,8 @@ namespace plastic {
             this->swap(other);
         }
 
-        BinaryHeap(std::initializer_list<value_type> list) :
-            BinaryHeap(list.begin(), list.end()) {}
+        BinaryHeap(std::initializer_list<value_type> list)
+            : BinaryHeap(list.begin(), list.end()) {}
 
         BinaryHeap& operator=(const BinaryHeap& other) {
             BinaryHeap temp(other);
@@ -244,8 +240,7 @@ namespace plastic {
             _data.pop_back();
             if (is_greater) {
                 _sift_up(index);
-            }
-            else {
+            } else {
                 _sift_down(index);
             }
         }

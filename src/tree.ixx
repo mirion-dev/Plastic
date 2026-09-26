@@ -55,11 +55,9 @@ namespace plastic {
 
                 if (parent->is_head) {
                     parent->parent = replaced;
-                }
-                else if (this == parent->left) {
+                } else if (this == parent->left) {
                     parent->left = replaced;
-                }
-                else {
+                } else {
                     parent->right = replaced;
                 }
                 replaced->parent = parent;
@@ -79,11 +77,9 @@ namespace plastic {
 
                 if (parent->is_head) {
                     parent->parent = replaced;
-                }
-                else if (this == parent->left) {
+                } else if (this == parent->left) {
                     parent->left = replaced;
-                }
-                else {
+                } else {
                     parent->right = replaced;
                 }
                 replaced->parent = parent;
@@ -124,8 +120,8 @@ namespace plastic {
 
             NodeBase* _ptr{};
 
-            iterator(NodeBase* ptr) :
-                _ptr{ ptr } {}
+            iterator(NodeBase* ptr)
+                : _ptr{ ptr } {}
 
         public:
             using value_type = T;
@@ -151,8 +147,7 @@ namespace plastic {
             iterator& operator++() {
                 if (!_ptr->right->is_head) {
                     _ptr = _ptr->right->leftmost();
-                }
-                else {
+                } else {
                     NodeBase* old_ptr;
                     do {
                         old_ptr = std::exchange(_ptr, _ptr->parent);
@@ -170,8 +165,7 @@ namespace plastic {
             iterator& operator--() {
                 if (!_ptr->left->is_head) {
                     _ptr = _ptr->left->rightmost();
-                }
-                else {
+                } else {
                     NodeBase* old_ptr;
                     do {
                         old_ptr = std::exchange(_ptr, _ptr->parent);
@@ -199,9 +193,8 @@ namespace plastic {
     public:
         Tree() = default;
 
-        Tree(const Tree& other) :
-            _pred{ other._pred },
-            _size{ other._size } {
+        Tree(const Tree& other)
+            : _pred{ other._pred }, _size{ other._size } {
 
             if (_size != 0) {
                 NodeBase* clone{ static_cast<Node*>(other._head->parent)->clone(_head, _head) };
@@ -303,8 +296,7 @@ namespace plastic {
                 if (!std::invoke(_pred, static_cast<Node*>(i)->value, value)) {
                     bound = i;
                     i = i->left;
-                }
-                else {
+                } else {
                     i = i->right;
                 }
             }
@@ -317,8 +309,7 @@ namespace plastic {
                 if (std::invoke(_pred, value, static_cast<Node*>(i)->value)) {
                     bound = i;
                     i = i->left;
-                }
-                else {
+                } else {
                     i = i->right;
                 }
             }
@@ -362,8 +353,7 @@ namespace plastic {
                 if (parent == self._head->right) {
                     self._head->right = new_node;
                 }
-            }
-            else {
+            } else {
                 parent->right = new_node;
                 if (parent == self._head->left) {
                     self._head->left = new_node;
@@ -400,11 +390,9 @@ namespace plastic {
 
                 if (parent->is_head) {
                     parent->parent = replaced;
-                }
-                else if (erased == parent->left) {
+                } else if (erased == parent->left) {
                     parent->left = replaced;
-                }
-                else {
+                } else {
                     parent->right = replaced;
                 }
                 if (!replaced->is_head) {
@@ -417,8 +405,7 @@ namespace plastic {
                 if (erased == self._head->left) {
                     self._head->left = replaced->is_head ? parent : replaced->rightmost();
                 }
-            }
-            else {
+            } else {
                 replaced = pos._ptr;
                 NodeBase* replaced_parent{ replaced->parent };
                 NodeBase* replaced_right{ replaced->right };
@@ -438,11 +425,9 @@ namespace plastic {
 
                 if (parent->is_head) {
                     parent->parent = replaced;
-                }
-                else if (erased == parent->left) {
+                } else if (erased == parent->left) {
                     parent->left = replaced;
-                }
-                else {
+                } else {
                     parent->right = replaced;
                 }
                 replaced->parent = parent;
@@ -520,8 +505,7 @@ namespace plastic {
                         i->parent->parent->right_rotate();
                         break;
                     }
-                }
-                else {
+                } else {
                     uncle = grandparent->left;
                     if (!uncle->meta.is_red) {
                         if (i == parent->left) {
@@ -578,8 +562,7 @@ namespace plastic {
                         parent->left_rotate();
                         break;
                     }
-                }
-                else {
+                } else {
                     brother = parent->left;
                     if (brother->meta.is_red) {
                         brother->meta.is_red = false;
@@ -620,8 +603,8 @@ namespace plastic {
             this->insert(first, last);
         }
 
-        RedBlackTree(std::initializer_list<value_type> list) :
-            RedBlackTree(list.begin(), list.end()) {}
+        RedBlackTree(std::initializer_list<value_type> list)
+            : RedBlackTree(list.begin(), list.end()) {}
     };
 
     template <class It>
@@ -656,8 +639,8 @@ namespace plastic {
             this->insert(first, last);
         }
 
-        AvlTree(std::initializer_list<value_type> list) :
-            AvlTree(list.begin(), list.end()) {}
+        AvlTree(std::initializer_list<value_type> list)
+            : AvlTree(list.begin(), list.end()) {}
     };
 
     template <class It>

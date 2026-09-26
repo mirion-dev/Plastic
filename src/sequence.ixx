@@ -20,7 +20,7 @@ namespace plastic {
 #ifdef _MSC_VER
         [[msvc::no_unique_address]]
 #else
-        [[no_unique_address]] 
+        [[no_unique_address]]
 #endif
         std::allocator<value_type> _alloc;
         pointer _ptr{};
@@ -111,7 +111,7 @@ namespace plastic {
         }
 
         template <class... Args>
-            requires (sizeof...(Args) <= 1)
+            requires(sizeof...(Args) <= 1)
         void _resize(size_type new_size, const Args&... args) {
             if (new_size > capacity()) {
                 _grow(new_size);
@@ -120,11 +120,9 @@ namespace plastic {
             iterator new_end{ begin() + new_size };
             if (new_size <= size()) {
                 std::ranges::destroy(new_end, end());
-            }
-            else if constexpr (sizeof...(Args) == 0) {
+            } else if constexpr (sizeof...(Args) == 0) {
                 std::ranges::uninitialized_value_construct(end(), new_end);
-            }
-            else {
+            } else {
                 std::ranges::uninitialized_fill(end(), new_end, args...);
             }
             _size = new_size;
@@ -133,16 +131,14 @@ namespace plastic {
     public:
         Vector() = default;
 
-        explicit Vector(size_type size) :
-            _data{ size },
-            _size{ size } {
+        explicit Vector(size_type size)
+            : _data{ size }, _size{ size } {
 
             std::ranges::uninitialized_value_construct(*this);
         }
 
-        Vector(size_type size, const_reference value) :
-            _data{ size },
-            _size{ size } {
+        Vector(size_type size, const_reference value)
+            : _data{ size }, _size{ size } {
 
             std::ranges::uninitialized_fill(*this, value);
         }
@@ -152,9 +148,8 @@ namespace plastic {
             std::ranges::copy(first, last, std::back_inserter(*this));
         }
 
-        Vector(const Vector& other) :
-            _data{ other.size() },
-            _size{ other.size() } {
+        Vector(const Vector& other)
+            : _data{ other.size() }, _size{ other.size() } {
 
             std::ranges::uninitialized_copy(other, *this);
         }
@@ -163,9 +158,8 @@ namespace plastic {
             this->swap(other);
         }
 
-        Vector(std::initializer_list<value_type> list) :
-            _data{ list.size() },
-            _size{ list.size() } {
+        Vector(std::initializer_list<value_type> list)
+            : _data{ list.size() }, _size{ list.size() } {
 
             std::ranges::uninitialized_copy(list, *this);
         }
@@ -333,8 +327,7 @@ namespace plastic {
             iterator pos_iter{ begin() + offset };
             if (pos_iter == end()) {
                 std::ranges::construct_at(end(), std::move(clone));
-            }
-            else {
+            } else {
                 std::ranges::construct_at(end(), std::move(back()));
                 std::ranges::move_backward(pos_iter, end() - 1, end());
                 *pos_iter = std::move(clone);
@@ -360,8 +353,7 @@ namespace plastic {
                 std::ranges::uninitialized_move(middle, end(), end(), std::unreachable_sentinel);
                 std::ranges::move_backward(pos_iter, middle, end());
                 std::ranges::fill(pos_iter, new_pos, clone);
-            }
-            else {
+            } else {
                 std::ranges::uninitialized_move(pos_iter, end(), new_pos, std::unreachable_sentinel);
                 std::ranges::fill(pos_iter, end(), clone);
                 std::ranges::uninitialized_fill(end(), new_pos, clone);
@@ -396,8 +388,7 @@ namespace plastic {
                 std::ranges::uninitialized_move(middle, end(), end(), std::unreachable_sentinel);
                 std::ranges::move_backward(pos_iter, middle, end());
                 std::ranges::move(list, pos_iter);
-            }
-            else {
+            } else {
                 auto middle{ list.begin() + (end() - pos_iter) };
                 std::ranges::uninitialized_move(pos_iter, end(), new_pos, std::unreachable_sentinel);
                 std::ranges::copy(list.begin(), middle, pos_iter);
@@ -479,10 +470,8 @@ namespace plastic {
             pointer _ptr{};
             bool _wrapped{};
 
-            iterator(Deque* cont) :
-                _cont{ cont },
-                _ptr{ cont->_data.begin() + cont->_first },
-                _wrapped{ cont->capacity() == 0 } {}
+            iterator(Deque* cont)
+                : _cont{ cont }, _ptr{ cont->_data.begin() + cont->_first }, _wrapped{ cont->capacity() == 0 } {}
 
             difference_type _offset() const {
                 difference_type diff{ _ptr - _cont->_data.begin() - static_cast<difference_type>(_cont->_first) };
@@ -516,12 +505,10 @@ namespace plastic {
                 if (_cont->_data.end() - _ptr <= diff) {
                     _ptr += diff - _cont->capacity();
                     _wrapped = true;
-                }
-                else if (_ptr - _cont->_data.begin() < -diff) {
+                } else if (_ptr - _cont->_data.begin() < -diff) {
                     _ptr += diff + _cont->capacity();
                     _wrapped = false;
-                }
-                else {
+                } else {
                     _ptr += diff;
                 }
                 return *this;
@@ -593,9 +580,11 @@ namespace plastic {
             Storage<value_type> new_data{ std::ranges::max(new_capacity, capacity() + (capacity() >> 1)) };
             if (!end._wrapped) {
                 std::ranges::uninitialized_move(begin._ptr, end._ptr, new_data.begin(), std::unreachable_sentinel);
-            }
-            else {
-                pointer middle{ std::ranges::uninitialized_move(begin._ptr, _data.end(), new_data.begin(), std::unreachable_sentinel).out };
+            } else {
+                pointer middle{ std::ranges::uninitialized_move(
+                                    begin._ptr, _data.end(), new_data.begin(), std::unreachable_sentinel
+                )
+                                    .out };
                 std::ranges::uninitialized_move(_data.begin(), end._ptr, middle, std::unreachable_sentinel);
             }
             clear();
@@ -606,7 +595,7 @@ namespace plastic {
         }
 
         template <class... Args>
-            requires (sizeof...(Args) <= 1)
+            requires(sizeof...(Args) <= 1)
         void _resize(size_type new_size, const Args&... args) {
             if (new_size > capacity()) {
                 _grow(new_size);
@@ -616,26 +605,21 @@ namespace plastic {
             if (new_size <= size()) {
                 if (new_end._wrapped == end._wrapped) {
                     std::ranges::destroy(new_end._ptr, end._ptr);
-                }
-                else {
+                } else {
                     std::ranges::destroy(new_end._ptr, _data.end());
                     std::ranges::destroy(_data.begin(), end._ptr);
                 }
-            }
-            else if constexpr (sizeof...(Args) == 0) {
+            } else if constexpr (sizeof...(Args) == 0) {
                 if (new_end._wrapped == end._wrapped) {
                     std::ranges::uninitialized_value_construct(end._ptr, new_end._ptr);
-                }
-                else {
+                } else {
                     std::ranges::uninitialized_value_construct(end._ptr, _data.end());
                     std::ranges::uninitialized_value_construct(_data.begin(), new_end._ptr);
                 }
-            }
-            else {
+            } else {
                 if (new_end._wrapped == end._wrapped) {
                     std::ranges::uninitialized_fill(end._ptr, new_end._ptr, args...);
-                }
-                else {
+                } else {
                     std::ranges::uninitialized_fill(end._ptr, _data.end(), args...);
                     std::ranges::uninitialized_fill(_data.begin(), new_end._ptr, args...);
                 }
@@ -646,16 +630,14 @@ namespace plastic {
     public:
         Deque() = default;
 
-        explicit Deque(size_type size) :
-            _data{ size },
-            _size{ size } {
+        explicit Deque(size_type size)
+            : _data{ size }, _size{ size } {
 
             std::ranges::uninitialized_value_construct(_data);
         }
 
-        Deque(size_type size, const_reference value) :
-            _data{ size },
-            _size{ size } {
+        Deque(size_type size, const_reference value)
+            : _data{ size }, _size{ size } {
 
             std::ranges::uninitialized_fill(_data, value);
         }
@@ -665,16 +647,17 @@ namespace plastic {
             std::ranges::copy(first, last, std::back_inserter(*this));
         }
 
-        Deque(const Deque& other) :
-            _data{ other.size() },
-            _size{ other.size() } {
+        Deque(const Deque& other)
+            : _data{ other.size() }, _size{ other.size() } {
 
             iterator begin{ other.begin().base() }, end{ other.end().base() };
             if (!end._wrapped) {
                 std::ranges::uninitialized_copy(begin._ptr, end._ptr, _data.begin(), std::unreachable_sentinel);
-            }
-            else {
-                pointer middle{ std::ranges::uninitialized_copy(begin._ptr, other._data.end(), _data.begin(), std::unreachable_sentinel).out };
+            } else {
+                pointer middle{ std::ranges::uninitialized_copy(
+                                    begin._ptr, other._data.end(), _data.begin(), std::unreachable_sentinel
+                )
+                                    .out };
                 std::ranges::uninitialized_copy(other._data.begin(), end._ptr, middle, std::unreachable_sentinel);
             }
         }
@@ -683,9 +666,8 @@ namespace plastic {
             this->swap(other);
         }
 
-        Deque(std::initializer_list<value_type> list) :
-            _data{ list.size() },
-            _size{ list.size() } {
+        Deque(std::initializer_list<value_type> list)
+            : _data{ list.size() }, _size{ list.size() } {
 
             std::ranges::uninitialized_copy(list, _data);
         }
@@ -865,8 +847,7 @@ namespace plastic {
             iterator begin{ this->begin() }, end{ this->end() }, pos_iter{ begin + offset };
             if (pos_iter == end) {
                 std::ranges::construct_at(end._ptr, std::move(clone));
-            }
-            else {
+            } else {
                 std::ranges::construct_at(end._ptr, std::move(back()));
                 std::ranges::move_backward(pos_iter, end - 1, end);
                 *pos_iter = std::move(clone);
@@ -886,14 +867,14 @@ namespace plastic {
                 _grow(size() + count);
             }
 
-            iterator begin{ this->begin() }, end{ this->end() }, pos_iter{ begin + offset }, new_pos{ pos_iter + count };
+            iterator begin{ this->begin() }, end{ this->end() }, pos_iter{ begin + offset },
+                new_pos{ pos_iter + count };
             if (new_pos <= end) {
                 iterator middle{ end - count };
                 std::ranges::uninitialized_move(middle, end, end, std::unreachable_sentinel);
                 std::ranges::move_backward(pos_iter, middle, end);
                 std::ranges::fill(pos_iter, new_pos, clone);
-            }
-            else {
+            } else {
                 std::ranges::uninitialized_move(pos_iter, end, new_pos, std::unreachable_sentinel);
                 std::ranges::fill(pos_iter, end, clone);
                 std::ranges::uninitialized_fill(end, new_pos, clone);
@@ -907,7 +888,8 @@ namespace plastic {
             difference_type pos_offset{ pos - begin() }, pos_end_offset{ static_cast<difference_type>(size()) };
             std::ranges::copy(first, last, std::back_inserter(*this));
 
-            iterator begin{ this->begin() }, end{ this->end() }, pos_iter{ begin + pos_offset }, pos_end{ begin + pos_end_offset };
+            iterator begin{ this->begin() }, end{ this->end() }, pos_iter{ begin + pos_offset },
+                pos_end{ begin + pos_end_offset };
             std::ranges::rotate(pos_iter, pos_end, end);
             return pos_iter;
         }
@@ -922,14 +904,14 @@ namespace plastic {
                 _grow(size() + list.size());
             }
 
-            iterator begin{ this->begin() }, end{ this->end() }, pos_iter{ begin + offset }, new_pos{ pos_iter + list.size() };
+            iterator begin{ this->begin() }, end{ this->end() }, pos_iter{ begin + offset },
+                new_pos{ pos_iter + list.size() };
             if (new_pos <= end) {
                 iterator middle{ end - list.size() };
                 std::ranges::uninitialized_move(middle, end, end, std::unreachable_sentinel);
                 std::ranges::move_backward(pos_iter, middle, end);
                 std::ranges::move(list, pos_iter);
-            }
-            else {
+            } else {
                 auto middle{ list.begin() + (end - pos_iter) };
                 std::ranges::uninitialized_move(pos_iter, end, new_pos, std::unreachable_sentinel);
                 std::ranges::copy(list.begin(), middle, pos_iter);
@@ -953,7 +935,8 @@ namespace plastic {
                 return first_iter;
             }
 
-            iterator begin{ this->begin() }, end{ this->end() }, new_end{ std::ranges::move(last_iter, end, first_iter).out };
+            iterator begin{ this->begin() }, end{ this->end() },
+                new_end{ std::ranges::move(last_iter, end, first_iter).out };
             std::ranges::destroy(new_end, end);
             _size = new_end - begin;
             return first_iter;
@@ -973,8 +956,7 @@ namespace plastic {
             iterator begin{ this->begin() }, end{ this->end() };
             if (!end._wrapped) {
                 std::ranges::destroy(begin._ptr, end._ptr);
-            }
-            else {
+            } else {
                 std::ranges::destroy(begin._ptr, _data.end());
                 std::ranges::destroy(_data.begin(), end._ptr);
             }
@@ -1028,8 +1010,8 @@ namespace plastic {
         private:
             NodeBase* _ptr{};
 
-            iterator(NodeBase* ptr) :
-                _ptr{ ptr } {}
+            iterator(NodeBase* ptr)
+                : _ptr{ ptr } {}
 
         public:
             iterator() = default;
@@ -1078,7 +1060,7 @@ namespace plastic {
         size_type _size{};
 
         template <class... Args>
-            requires (sizeof...(Args) <= 1)
+            requires(sizeof...(Args) <= 1)
         NodeBase* _insert(NodeBase* pos, size_type count, const Args&... args) {
             NodeBase *prev{ pos->prev }, *cur{ prev };
             _size += count;
@@ -1090,14 +1072,13 @@ namespace plastic {
         }
 
         template <class... Args>
-            requires (sizeof...(Args) <= 1)
+            requires(sizeof...(Args) <= 1)
         void _resize(size_type new_size, const Args&... args) {
             if (new_size <= size()) {
                 while (size() != new_size) {
                     pop_back();
                 }
-            }
-            else {
+            } else {
                 this->_insert(_head, new_size - size(), args...);
             }
         }
@@ -1118,15 +1099,15 @@ namespace plastic {
             this->insert(end(), first, last);
         }
 
-        List(const List& other) :
-            List(other.begin(), other.end()) {}
+        List(const List& other)
+            : List(other.begin(), other.end()) {}
 
         List(List&& other) noexcept {
             this->swap(other);
         }
 
-        List(std::initializer_list<value_type> list) :
-            List(list.begin(), list.end()) {}
+        List(std::initializer_list<value_type> list)
+            : List(list.begin(), list.end()) {}
 
         ~List() {
             clear();
