@@ -6,56 +6,54 @@ My implementations of common data structures and algorithms for study.
 
 = Data Structures
 
-The class designs are primarily based on the standard library, but not identical, as the goal is to implement different structures rather than the complete standard conformance.
-
-Removed structures: `BigInt`, `FixedArrayList`, `DeArrayList`, `SinglyLinkedList`, `FixedDeque`.
+Reference the #link("https://eel.is/c++draft/#containers")[standard containers], but are not identical, as the goal is to implement different structures rather than complete standard conformance.
 
 #table(
     columns: 6,
     align: center + horizon,
-    table.header[][*`ArrayList`*][*`LinkedList`*][*`Deque`*][Search Trees][Addressable Heaps],
-    [*`begin`*], [`begin`], [`begin`], [`begin`], [`begin`], [`apex`],
-    [*`end`*], [`end`], [`end`], [`end`], [`end`], [],
-    [*`rbegin`*], [`rbegin`], [`rbegin`], [`rbegin`], [`rbegin`], [],
-    [*`rend`*], [`rend`], [`rend`], [`rend`], [`rend`], [],
-    [*`cbegin`*], [`cbegin`], [`cbegin`], [`cbegin`], [`cbegin`], [`capex`],
-    [*`cend`*], [`cend`], [`cend`], [`cend`], [`cend`], [],
-    [*`crbegin`*], [`crbegin`], [`crbegin`], [`crbegin`], [`crbegin`], [],
-    [*`crend`*], [`crend`], [`crend`], [`crend`], [`crend`], [],
-    [*`empty`*], [`empty`], [`empty`], [`empty`], [`empty`], [`empty`],
-    [*`size`*], [`size`], [`size`], [`size`], [`size`], [`size`],
-    [*`max_size`*], [`max_size`], [`max_size`], [`max_size`], [`max_size`], [`max_size`],
-    [*`capacity`*], [`capacity`], [], [`capacity`], [], [],
-    [*`resize`*], [`resize`], [`resize`], [`resize`], [], [],
-    [*`reserve`*], [`reserve`], [], [`reserve`], [], [],
-    [*`operator[]`*], [`operator[]`], [], [`operator[]`], [], [],
-    [*`front`*], [`front`], [`front`], [`front`], [`front`], [`top`],
-    [*`back`*], [`back`], [`back`], [`back`], [`back`], [],
-    [*`data`*], [`data`], [], [], [], [],
-    [*`push_front`*], [], [`push_front`], [`push_front`], [], [],
-    [*`pop_front`*], [], [`pop_front`], [`pop_front`], [], [`pop`],
-    [*`push_back`*], [`push_back`], [`push_back`], [`push_back`], [], [],
-    [*`pop_back`*], [`pop_back`], [`pop_back`], [`pop_back`], [], [],
-    [*`insert`*], [`insert`], [`insert`], [`insert`], [`insert`], [`push`],
-    [*`erase`*], [`erase`], [`erase`], [`erase`], [`erase`], [`erase`],
-    [*`swap`*], [`swap`], [`swap`], [`swap`], [`swap`], [`swap`],
-    [*`clear`*], [`clear`], [`clear`], [`clear`], [`clear`], [`clear`],
-    [*`merge`*], [], [], [], [`merge`], [`merge`],
-    [*`find`*], [], [], [], [`find`], [],
-    [*`count`*], [], [], [], [`count`], [],
-    [*`contains`*], [], [], [], [`contains`], [],
-    [*`lower_bound`*], [], [], [], [`lower_bound`], [],
-    [*`upper_bound`*], [], [], [], [`upper_bound`], [],
-    [*`equal_range`*], [], [], [], [`equal_range`], [],
-    [*`operator==`*], [`operator==`], [`operator==`], [`operator==`], [`operator==`], [],
-    [*`operator<=>`*], [`operator<=>`], [`operator<=>`], [`operator<=>`], [`operator<=>`], [],
+    table.header[][*`ArrayList`*][*`LinkedList`*][*`Deque`*][*Trees*][*Heaps*],
+    [*`begin`*], `begin`, `begin`, `begin`, `begin`, `apex`,
+    [*`end`*], `end`, `end`, `end`, `end`, [],
+    [*`rbegin`*], `rbegin`, `rbegin`, `rbegin`, `rbegin`, [],
+    [*`rend`*], `rend`, `rend`, `rend`, `rend`, [],
+    [*`cbegin`*], `cbegin`, `cbegin`, `cbegin`, `cbegin`, `capex`,
+    [*`cend`*], `cend`, `cend`, `cend`, `cend`, [],
+    [*`crbegin`*], `crbegin`, `crbegin`, `crbegin`, `crbegin`, [],
+    [*`crend`*], `crend`, `crend`, `crend`, `crend`, [],
+    [*`empty`*], `empty`, `empty`, `empty`, `empty`, `empty`,
+    [*`size`*], `size`, `size`, `size`, `size`, `size`,
+    [*`max_size`*], `max_size`, `max_size`, `max_size`, `max_size`, `max_size`,
+    [*`capacity`*], `capacity`, [], `capacity`, [], [],
+    [*`resize`*], `resize`, `resize`, `resize`, [], [],
+    [*`reserve`*], `reserve`, [], `reserve`, [], [],
+    [*`operator[]`*], `operator[]`, [], `operator[]`, [], [],
+    [*`front`*], `front`, `front`, `front`, `front`, `top`,
+    [*`back`*], `back`, `back`, `back`, `back`, [],
+    [*`data`*], `data`, [], [], [], [],
+    [*`push_front`*], [], `push_front`, `push_front`, [], [],
+    [*`pop_front`*], [], `pop_front`, `pop_front`, [], `pop`,
+    [*`push_back`*], `push_back`, `push_back`, `push_back`, [], [],
+    [*`pop_back`*], `pop_back`, `pop_back`, `pop_back`, [], [],
+    [*`insert`*], `insert`, `insert`, `insert`, `insert`, `push`,
+    [*`erase`*], `erase`, `erase`, `erase`, `erase`, `erase`,
+    [*`swap`*], `swap`, `swap`, `swap`, `swap`, `swap`,
+    [*`clear`*], `clear`, `clear`, `clear`, `clear`, `clear`,
+    [*`merge`*], [], [], [], `merge`, `merge`,
+    [*`find`*], [], [], [], `find`, [],
+    [*`count`*], [], [], [], `count`, [],
+    [*`contains`*], [], [], [], `contains`, [],
+    [*`lower_bound`*], [], [], [], `lower_bound`, [],
+    [*`upper_bound`*], [], [], [], `upper_bound`, [],
+    [*`equal_range`*], [], [], [], `equal_range`, [],
+    [*`operator==`*], `operator==`, `operator==`, `operator==`, `operator==`, [],
+    [*`operator<=>`*], `operator<=>`, `operator<=>`, `operator<=>`, `operator<=>`, [],
 )
 
-#image("images/complexity.svg")
+Removed structures: `BigInt`, `FixedArrayList`, `DeArrayList`, `SinglyLinkedList`, `FixedDeque`.
 
 = Algorithms
 
-Same as the #link("https://eel.is/c++draft/#algorithms")[standard algorithms] in namespace `ranges`, but without optimizations.
+Same as the #link("https://eel.is/c++draft/#algorithms")[standard algorithms] in namespace `ranges`.
 
 #table(
     columns: 2,

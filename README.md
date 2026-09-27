@@ -4,11 +4,9 @@ My implementations of common data structures and algorithms for study.
 
 ## Data Structures
 
-The class designs are primarily based on the standard library, but not identical, as the goal is to implement different structures rather than the complete standard conformance.
+Reference the [standard containers](https://eel.is/c++draft/#containers), but are not identical, as the goal is to implement different structures rather than complete standard conformance.
 
-Removed structures: `BigInt`, `FixedArrayList`, `DeArrayList`, `SinglyLinkedList`, `FixedDeque`.
-
-|  | **`ArrayList`** | **`LinkedList`** | **`Deque`** | Search Trees | Addressable Heaps |
+|  | **`ArrayList`** | **`LinkedList`** | **`Deque`** | **Trees** | **Heaps** |
 | --- | --- | --- | --- | --- | --- |
 | **`begin`** | `begin` | `begin` | `begin` | `begin` | `apex` |
 | **`end`** | `end` | `end` | `end` | `end` |  |
@@ -46,11 +44,11 @@ Removed structures: `BigInt`, `FixedArrayList`, `DeArrayList`, `SinglyLinkedList
 | **`operator==`** | `operator==` | `operator==` | `operator==` | `operator==` |  |
 | **`operator<=>`** | `operator<=>` | `operator<=>` | `operator<=>` | `operator<=>` |  |
 
-![](images/complexity.svg)
+Removed structures: `BigInt`, `FixedArrayList`, `DeArrayList`, `SinglyLinkedList`, `FixedDeque`.
 
 ## Algorithms
 
-Same as the [standard algorithms](https://eel.is/c++draft/#algorithms) in namespace `ranges`, but without optimizations.
+Same as the [standard algorithms](https://eel.is/c++draft/#algorithms) in namespace `ranges`.
 
 | **Category** | **Operations** |
 | --- | --- |
