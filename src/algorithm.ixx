@@ -6,13 +6,11 @@ export module plastic.algorithm;
 
 import std;
 
-// workaround for P2248R8
-namespace std {
+namespace plastic {
+
+    // workaround for P2248
     template <std::indirectly_readable It, std::indirectly_regular_unary_invocable<It> Pj>
     using projected_value_t = std::remove_cvref_t<std::invoke_result_t<Pj&, std::iter_value_t<It>&>>;
-}
-
-namespace plastic {
 
     enum class satisfy_type {
         value,
@@ -51,7 +49,7 @@ namespace plastic {
         std::input_iterator It,
         std::sentinel_for<It> Se,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>
+        class T = projected_value_t<It, Pj>
     >
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     It find(It first, Se last, const T& value, Pj proj = {}) {
@@ -140,7 +138,7 @@ namespace plastic {
         std::sentinel_for<It> Se,
         class Pr = std::ranges::equal_to,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>
+        class T = projected_value_t<It, Pj>
     >
         requires std::indirectly_comparable<It, const T*, Pr, Pj>
     std::ranges::subrange<It>
@@ -175,7 +173,7 @@ namespace plastic {
         std::input_iterator It,
         std::sentinel_for<It> Se,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>
+        class T = projected_value_t<It, Pj>
     >
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     bool contains(It first, Se last, const T& value, Pj proj = {}) {
@@ -244,7 +242,7 @@ namespace plastic {
         std::forward_iterator It,
         std::sentinel_for<It> Se,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>
+        class T = projected_value_t<It, Pj>
     >
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     std::ranges::subrange<It> find_last(It first, Se last, const T& value, Pj proj = {}) {
@@ -362,7 +360,7 @@ namespace plastic {
         std::input_iterator It,
         std::sentinel_for<It> Se,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>
+        class T = projected_value_t<It, Pj>
     >
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     std::iter_difference_t<It> count(It first, Se last, const T& value, Pj proj = {}) {
@@ -604,7 +602,9 @@ namespace plastic {
     public:
         template <class T, class U>
             requires std::invocable<Fn&, U, T>
-        std::invoke_result_t<Fn&, U, T> operator()(T&&, U&&);
+        std::invoke_result_t<Fn&, U, T> operator()(T&&, U&&) {
+            std::unreachable();
+        }
     };
 
     template <class Fn, class T, class It>
@@ -864,7 +864,7 @@ namespace plastic {
         std::input_iterator It,
         std::sentinel_for<It> Se,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>,
+        class T = projected_value_t<It, Pj>,
         class U = T
     >
         requires std::indirectly_writable<It, const U&>
@@ -877,7 +877,7 @@ namespace plastic {
         std::input_iterator It,
         std::sentinel_for<It> Se,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>,
+        class T = projected_value_t<It, Pj>,
         std::indirect_unary_predicate<std::projected<It, Pj>> Pr
     >
         requires std::indirectly_writable<It, const T&>
@@ -912,7 +912,7 @@ namespace plastic {
         std::sentinel_for<It> Se,
         class Out,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>,
+        class T = projected_value_t<It, Pj>,
         class U = std::iter_value_t<Out>
     >
         requires std::indirectly_copyable<It, Out>
@@ -1001,7 +1001,7 @@ namespace plastic {
         std::permutable It,
         std::sentinel_for<It> Se,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>
+        class T = projected_value_t<It, Pj>
     >
         requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
     std::ranges::subrange<It> remove(It first, Se last, const T& value, Pj proj = {}) {
@@ -1035,7 +1035,7 @@ namespace plastic {
         std::sentinel_for<It> Se,
         std::weakly_incrementable Out,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>
+        class T = projected_value_t<It, Pj>
     >
         requires std::indirectly_copyable<It, Out>
                  && std::indirect_binary_predicate<std::ranges::equal_to, std::projected<It, Pj>, const T*>
@@ -1877,7 +1877,7 @@ namespace plastic {
         std::forward_iterator It,
         std::sentinel_for<It> Se,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>,
+        class T = projected_value_t<It, Pj>,
         std::indirect_strict_weak_order<const T*, std::projected<It, Pj>> Pr = std::ranges::less
     >
     It lower_bound(It first, Se last, const T& value, Pr pred = {}, Pj proj = {}) {
@@ -1899,7 +1899,7 @@ namespace plastic {
         std::forward_iterator It,
         std::sentinel_for<It> Se,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>,
+        class T = projected_value_t<It, Pj>,
         std::indirect_strict_weak_order<const T*, std::projected<It, Pj>> Pr = std::ranges::less
     >
     It upper_bound(It first, Se last, const T& value, Pr pred = {}, Pj proj = {}) {
@@ -1921,7 +1921,7 @@ namespace plastic {
         std::forward_iterator It,
         std::sentinel_for<It> Se,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>,
+        class T = projected_value_t<It, Pj>,
         std::indirect_strict_weak_order<const T*, std::projected<It, Pj>> Pr = std::ranges::less
     >
     std::ranges::subrange<It> equal_range(It first, Se last, const T& value, Pr pred = {}, Pj proj = {}) {
@@ -1933,7 +1933,7 @@ namespace plastic {
         std::forward_iterator It,
         std::sentinel_for<It> Se,
         class Pj = std::identity,
-        class T = std::projected_value_t<It, Pj>,
+        class T = projected_value_t<It, Pj>,
         std::indirect_strict_weak_order<const T*, std::projected<It, Pj>> Pr = std::ranges::less
     >
     bool binary_search(It first, Se last, const T& value, Pr pred = {}, Pj proj = {}) {
@@ -2199,7 +2199,7 @@ namespace plastic {
         std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less
     >
     T min(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
-        assert(list.size() != 0);
+        assert(!list.empty());
         return *plastic::min_element(list.begin(), list.end(), pred, proj);
     }
 
@@ -2218,7 +2218,7 @@ namespace plastic {
         std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less
     >
     T max(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
-        assert(list.size() != 0);
+        assert(!list.empty());
         return *plastic::max_element(list.begin(), list.end(), pred, proj);
     }
 
@@ -2240,7 +2240,7 @@ namespace plastic {
         std::indirect_strict_weak_order<std::projected<const T*, Pj>> Pr = std::ranges::less
     >
     std::ranges::minmax_result<T> minmax(std::initializer_list<T> list, Pr pred = {}, Pj proj = {}) {
-        assert(list.size() != 0);
+        assert(!list.empty());
         auto res{ plastic::minmax_element(list.begin(), list.end(), pred, proj) };
         return { *res.min, *res.max };
     }
