@@ -1,12 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-    <Type Name="plastic::Vector&lt;*&gt;">
+    <Type Name="plastic::ArrayList&lt;*&gt;">
         <Intrinsic Name="capacity" Expression="_data._size"/>
         <DisplayString>{{ size={_size} }}</DisplayString>
         <Expand>
             <Item Name="[capacity]">capacity()</Item>
             <ExpandedItem>_data._ptr, [_size]</ExpandedItem>
+        </Expand>
+    </Type>
+
+    <Type Name="plastic::LinkedList&lt;*&gt;">
+        <DisplayString>{{ size={_size} }}</DisplayString>
+        <Expand>
+            <LinkedListItems>
+                <Size>_size</Size>
+                <HeadPointer>_head->next</HeadPointer>
+                <NextPointer>next</NextPointer>
+                <ValueNode>((node*)this)->value</ValueNode>
+            </LinkedListItems>
         </Expand>
     </Type>
 
@@ -19,18 +31,6 @@
                 <Size>_size</Size>
                 <ValueNode>(_data._ptr + _first)[$i &lt; capacity() - _first ? $i : $i - capacity()]</ValueNode>
             </IndexListItems>
-        </Expand>
-    </Type>
-
-    <Type Name="plastic::List&lt;*&gt;">
-        <DisplayString>{{ size={_size} }}</DisplayString>
-        <Expand>
-            <LinkedListItems>
-                <Size>_size</Size>
-                <HeadPointer>_head->next</HeadPointer>
-                <NextPointer>next</NextPointer>
-                <ValueNode>((node*)this)->value</ValueNode>
-            </LinkedListItems>
         </Expand>
     </Type>
 

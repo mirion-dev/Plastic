@@ -6,9 +6,9 @@ My implementations of common data structures and algorithms for study.
 
 The class designs are primarily based on the standard library, but not identical, as the goal is to implement different structures rather than the complete standard conformance.
 
-Removed structures: `Bignum`, `InplaceVector`, `InplaceDeque`, `Devector`, `ForwardList`.
+Removed structures: `BigInt`, `FixedArrayList`, `DeArrayList`, `SinglyLinkedList`, `FixedDeque`.
 
-| | **`Vector`** | **`Deque`** | **`List`** | Search Trees | Addressable Heaps |
+| | **`ArrayList`** | **`LinkedList`** | **`Deque`** | Search Trees | Addressable Heaps |
 | :--: | :--: | :--: | :--: | :--: | :--: |
 | **`begin`** | `begin` | `begin` | `begin` | `begin` | `apex` |
 | **`end`** | `end` | `end` | `end` | `end` | |
@@ -21,10 +21,10 @@ Removed structures: `Bignum`, `InplaceVector`, `InplaceDeque`, `Devector`, `Forw
 | **`empty`** | `empty` | `empty` | `empty` | `empty` | `empty` |
 | **`size`** | `size` | `size` | `size` | `size` | `size` |
 | **`max_size`** | `max_size` | `max_size` | `max_size` | `max_size` | `max_size` |
-| **`capacity`** | `capacity` | `capacity` | | | |
+| **`capacity`** | `capacity` | | `capacity` | | |
 | **`resize`** | `resize` | `resize` | `resize` | | |
-| **`reserve`** | `reserve` | `reserve` | | | |
-| **`operator[]`** | `operator[]` | `operator[]` | | | |
+| **`reserve`** | `reserve` | | `reserve` | | |
+| **`operator[]`** | `operator[]` | | `operator[]` | | |
 | **`front`** | `front` | `front` | `front` | `front` | `top` |
 | **`back`** | `back` | `back` | `back` | `back` | |
 | **`data`** | `data` | | | | |

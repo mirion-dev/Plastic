@@ -4,26 +4,26 @@ import std;
 import plastic;
 import utils;
 
-TEST_SUITE("sequence") {
-    TEST_CASE("vector") {
+TEST_SUITE("list") {
+    TEST_CASE("array_list") {
         std::array arr{ 5, 4, 3, 2, 1 };
 
-        plastic::Vector<int> v1;
+        plastic::ArrayList<int> v1;
         REQUIRE(format(v1) == "[]");
-        plastic::Vector<int> v2(3);
+        plastic::ArrayList<int> v2(3);
         REQUIRE(format(v2) == "[0, 0, 0]");
-        plastic::Vector v3(4, 4);
+        plastic::ArrayList v3(4, 4);
         REQUIRE(format(v3) == "[4, 4, 4, 4]");
-        plastic::Vector v4(arr.begin(), arr.end());
+        plastic::ArrayList v4(arr.begin(), arr.end());
         REQUIRE(format(v4) == "[5, 4, 3, 2, 1]");
-        plastic::Vector v5(v2);
+        plastic::ArrayList v5(v2);
         REQUIRE(format(v5) == "[0, 0, 0]");
-        plastic::Vector v6(std::move(v3));
+        plastic::ArrayList v6(std::move(v3));
         REQUIRE(format(v6) == "[4, 4, 4, 4]");
-        plastic::Vector v7{ 5, 4, 3, 2, 1 };
+        plastic::ArrayList v7{ 5, 4, 3, 2, 1 };
         REQUIRE(format(v7) == "[5, 4, 3, 2, 1]");
 
-        plastic::Vector<int> e, a(3), b(4, 4), c{ 5, 4, 3, 2, 1 }, x, y{ 3, 2, 1 };
+        plastic::ArrayList<int> e, a(3), b(4, 4), c{ 5, 4, 3, 2, 1 }, x, y{ 3, 2, 1 };
 
         x = y;
         REQUIRE(format(x) == "[3, 2, 1]");
@@ -115,6 +115,133 @@ TEST_SUITE("sequence") {
         x.erase(x.begin() + 1);
         REQUIRE(format(x) == "[5, 3, 2, 1]");
         x.erase(x.begin() + 1, x.end() - 1);
+        REQUIRE(format(x) == "[5, 1]");
+
+        x = { 3, 2, 1 };
+        y = { 0, 1 };
+        x.swap(y);
+        REQUIRE(format(x) == "[0, 1]");
+        REQUIRE(format(y) == "[3, 2, 1]");
+        swap(x, y);
+        REQUIRE(format(x) == "[3, 2, 1]");
+        REQUIRE(format(y) == "[0, 1]");
+
+        x = { 3, 2, 1 };
+        x.clear();
+        REQUIRE(format(x) == "[]");
+
+        x = { 1, 2 };
+        y = { 1, 2, 3 };
+        REQUIRE(x == x);
+        REQUIRE(x != y);
+        REQUIRE(x < y);
+        REQUIRE(y > x);
+        REQUIRE(x <= y);
+        REQUIRE(y >= x);
+    }
+
+    TEST_CASE("linked_list") {
+        std::array arr{ 5, 4, 3, 2, 1 };
+
+        plastic::LinkedList<int> l1;
+        REQUIRE(format(l1) == "[]");
+        plastic::LinkedList<int> l2(3);
+        REQUIRE(format(l2) == "[0, 0, 0]");
+        plastic::LinkedList l3(4, 4);
+        REQUIRE(format(l3) == "[4, 4, 4, 4]");
+        plastic::LinkedList l4(arr.begin(), arr.end());
+        REQUIRE(format(l4) == "[5, 4, 3, 2, 1]");
+        plastic::LinkedList l5(l2);
+        REQUIRE(format(l5) == "[0, 0, 0]");
+        plastic::LinkedList l6(std::move(l3));
+        REQUIRE(format(l6) == "[4, 4, 4, 4]");
+        plastic::LinkedList l7{ 5, 4, 3, 2, 1 };
+        REQUIRE(format(l7) == "[5, 4, 3, 2, 1]");
+
+        plastic::LinkedList<int> e, a(3), b(4, 4), c{ 5, 4, 3, 2, 1 }, x, y{ 3, 2, 1 };
+
+        x = y;
+        REQUIRE(format(x) == "[3, 2, 1]");
+        x = std::move(y);
+        REQUIRE(format(x) == "[3, 2, 1]");
+        x = { 1, 2, 3 };
+        REQUIRE(format(x) == "[1, 2, 3]");
+
+        REQUIRE(format(c) == "[5, 4, 3, 2, 1]");
+        REQUIRE(format(c.rbegin(), c.rend()) == "[1, 2, 3, 4, 5]");
+        REQUIRE(format(c.cbegin(), c.cend()) == "[5, 4, 3, 2, 1]");
+        REQUIRE(format(c.crbegin(), c.crend()) == "[1, 2, 3, 4, 5]");
+
+        REQUIRE(e.empty());
+        REQUIRE(!a.empty());
+        REQUIRE(!b.empty());
+        REQUIRE(!c.empty());
+
+        REQUIRE(e.size() == 0);
+        REQUIRE(a.size() == 3);
+        REQUIRE(b.size() == 4);
+        REQUIRE(c.size() == 5);
+
+        REQUIRE(e.max_size() >= 1'000'000);
+        REQUIRE(a.max_size() >= 1'000'000);
+        REQUIRE(b.max_size() >= 1'000'000);
+        REQUIRE(c.max_size() >= 1'000'000);
+
+        x = { 3, 2, 1 };
+        x.resize(2);
+        REQUIRE(format(x) == "[3, 2]");
+        x.resize(3);
+        REQUIRE(format(x) == "[3, 2, 0]");
+        x.resize(5, 1);
+        REQUIRE(format(x) == "[3, 2, 0, 1, 1]");
+
+        REQUIRE(a.front() == 0);
+        REQUIRE(b.front() == 4);
+        REQUIRE(c.front() == 5);
+
+        REQUIRE(a.back() == 0);
+        REQUIRE(b.back() == 4);
+        REQUIRE(c.back() == 1);
+
+        x = { 3, 2, 1 };
+        x.push_front(4);
+        REQUIRE(format(x) == "[4, 3, 2, 1]");
+        x.pop_front();
+        REQUIRE(format(x) == "[3, 2, 1]");
+        x.push_front(5);
+        REQUIRE(format(x) == "[5, 3, 2, 1]");
+        x.push_front(6);
+        REQUIRE(format(x) == "[6, 5, 3, 2, 1]");
+        x.pop_front();
+        REQUIRE(format(x) == "[5, 3, 2, 1]");
+
+        x = { 3, 2, 1 };
+        x.push_back(4);
+        REQUIRE(format(x) == "[3, 2, 1, 4]");
+        x.pop_back();
+        REQUIRE(format(x) == "[3, 2, 1]");
+        x.push_back(5);
+        REQUIRE(format(x) == "[3, 2, 1, 5]");
+        x.push_back(6);
+        REQUIRE(format(x) == "[3, 2, 1, 5, 6]");
+        x.pop_back();
+        REQUIRE(format(x) == "[3, 2, 1, 5]");
+
+        x = { 3, 2, 1 };
+        y = { 0, 1, 2 };
+        x.insert(std::ranges::next(x.begin(), 1), 3);
+        REQUIRE(format(x) == "[3, 3, 2, 1]");
+        x.insert(std::ranges::next(x.begin(), 1), 2, 4);
+        REQUIRE(format(x) == "[3, 4, 4, 3, 2, 1]");
+        x.insert(x.begin(), y.begin(), y.end());
+        REQUIRE(format(x) == "[0, 1, 2, 3, 4, 4, 3, 2, 1]");
+        x.insert(x.end(), { 0 });
+        REQUIRE(format(x) == "[0, 1, 2, 3, 4, 4, 3, 2, 1, 0]");
+
+        x = { 5, 4, 3, 2, 1 };
+        x.erase(std::ranges::next(x.begin(), 1));
+        REQUIRE(format(x) == "[5, 3, 2, 1]");
+        x.erase(std::ranges::next(x.begin(), 1), std::ranges::prev(x.end(), 1));
         REQUIRE(format(x) == "[5, 1]");
 
         x = { 3, 2, 1 };
@@ -257,133 +384,6 @@ TEST_SUITE("sequence") {
         x.erase(x.begin() + 1);
         REQUIRE(format(x) == "[5, 3, 2, 1]");
         x.erase(x.begin() + 1, x.end() - 1);
-        REQUIRE(format(x) == "[5, 1]");
-
-        x = { 3, 2, 1 };
-        y = { 0, 1 };
-        x.swap(y);
-        REQUIRE(format(x) == "[0, 1]");
-        REQUIRE(format(y) == "[3, 2, 1]");
-        swap(x, y);
-        REQUIRE(format(x) == "[3, 2, 1]");
-        REQUIRE(format(y) == "[0, 1]");
-
-        x = { 3, 2, 1 };
-        x.clear();
-        REQUIRE(format(x) == "[]");
-
-        x = { 1, 2 };
-        y = { 1, 2, 3 };
-        REQUIRE(x == x);
-        REQUIRE(x != y);
-        REQUIRE(x < y);
-        REQUIRE(y > x);
-        REQUIRE(x <= y);
-        REQUIRE(y >= x);
-    }
-
-    TEST_CASE("list") {
-        std::array arr{ 5, 4, 3, 2, 1 };
-
-        plastic::List<int> l1;
-        REQUIRE(format(l1) == "[]");
-        plastic::List<int> l2(3);
-        REQUIRE(format(l2) == "[0, 0, 0]");
-        plastic::List l3(4, 4);
-        REQUIRE(format(l3) == "[4, 4, 4, 4]");
-        plastic::List l4(arr.begin(), arr.end());
-        REQUIRE(format(l4) == "[5, 4, 3, 2, 1]");
-        plastic::List l5(l2);
-        REQUIRE(format(l5) == "[0, 0, 0]");
-        plastic::List l6(std::move(l3));
-        REQUIRE(format(l6) == "[4, 4, 4, 4]");
-        plastic::List l7{ 5, 4, 3, 2, 1 };
-        REQUIRE(format(l7) == "[5, 4, 3, 2, 1]");
-
-        plastic::List<int> e, a(3), b(4, 4), c{ 5, 4, 3, 2, 1 }, x, y{ 3, 2, 1 };
-
-        x = y;
-        REQUIRE(format(x) == "[3, 2, 1]");
-        x = std::move(y);
-        REQUIRE(format(x) == "[3, 2, 1]");
-        x = { 1, 2, 3 };
-        REQUIRE(format(x) == "[1, 2, 3]");
-
-        REQUIRE(format(c) == "[5, 4, 3, 2, 1]");
-        REQUIRE(format(c.rbegin(), c.rend()) == "[1, 2, 3, 4, 5]");
-        REQUIRE(format(c.cbegin(), c.cend()) == "[5, 4, 3, 2, 1]");
-        REQUIRE(format(c.crbegin(), c.crend()) == "[1, 2, 3, 4, 5]");
-
-        REQUIRE(e.empty());
-        REQUIRE(!a.empty());
-        REQUIRE(!b.empty());
-        REQUIRE(!c.empty());
-
-        REQUIRE(e.size() == 0);
-        REQUIRE(a.size() == 3);
-        REQUIRE(b.size() == 4);
-        REQUIRE(c.size() == 5);
-
-        REQUIRE(e.max_size() >= 1'000'000);
-        REQUIRE(a.max_size() >= 1'000'000);
-        REQUIRE(b.max_size() >= 1'000'000);
-        REQUIRE(c.max_size() >= 1'000'000);
-
-        x = { 3, 2, 1 };
-        x.resize(2);
-        REQUIRE(format(x) == "[3, 2]");
-        x.resize(3);
-        REQUIRE(format(x) == "[3, 2, 0]");
-        x.resize(5, 1);
-        REQUIRE(format(x) == "[3, 2, 0, 1, 1]");
-
-        REQUIRE(a.front() == 0);
-        REQUIRE(b.front() == 4);
-        REQUIRE(c.front() == 5);
-
-        REQUIRE(a.back() == 0);
-        REQUIRE(b.back() == 4);
-        REQUIRE(c.back() == 1);
-
-        x = { 3, 2, 1 };
-        x.push_front(4);
-        REQUIRE(format(x) == "[4, 3, 2, 1]");
-        x.pop_front();
-        REQUIRE(format(x) == "[3, 2, 1]");
-        x.push_front(5);
-        REQUIRE(format(x) == "[5, 3, 2, 1]");
-        x.push_front(6);
-        REQUIRE(format(x) == "[6, 5, 3, 2, 1]");
-        x.pop_front();
-        REQUIRE(format(x) == "[5, 3, 2, 1]");
-
-        x = { 3, 2, 1 };
-        x.push_back(4);
-        REQUIRE(format(x) == "[3, 2, 1, 4]");
-        x.pop_back();
-        REQUIRE(format(x) == "[3, 2, 1]");
-        x.push_back(5);
-        REQUIRE(format(x) == "[3, 2, 1, 5]");
-        x.push_back(6);
-        REQUIRE(format(x) == "[3, 2, 1, 5, 6]");
-        x.pop_back();
-        REQUIRE(format(x) == "[3, 2, 1, 5]");
-
-        x = { 3, 2, 1 };
-        y = { 0, 1, 2 };
-        x.insert(std::ranges::next(x.begin(), 1), 3);
-        REQUIRE(format(x) == "[3, 3, 2, 1]");
-        x.insert(std::ranges::next(x.begin(), 1), 2, 4);
-        REQUIRE(format(x) == "[3, 4, 4, 3, 2, 1]");
-        x.insert(x.begin(), y.begin(), y.end());
-        REQUIRE(format(x) == "[0, 1, 2, 3, 4, 4, 3, 2, 1]");
-        x.insert(x.end(), { 0 });
-        REQUIRE(format(x) == "[0, 1, 2, 3, 4, 4, 3, 2, 1, 0]");
-
-        x = { 5, 4, 3, 2, 1 };
-        x.erase(std::ranges::next(x.begin(), 1));
-        REQUIRE(format(x) == "[5, 3, 2, 1]");
-        x.erase(std::ranges::next(x.begin(), 1), std::ranges::prev(x.end(), 1));
         REQUIRE(format(x) == "[5, 1]");
 
         x = { 3, 2, 1 };

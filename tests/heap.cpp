@@ -12,7 +12,7 @@ std::string format_heap(const Hp& heap) {
         res.push_back(clone.top());
         clone.pop();
     }
-    return std::format("{}", res | std::views::reverse);
+    return ::format(res | std::views::reverse);
 }
 
 template <class Hp>

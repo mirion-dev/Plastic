@@ -17,19 +17,13 @@
 #let curve = cetz.draw.bezier.with(stroke: .5pt)
 #let arrow = line.with(mark: (end: "stealth", stroke: 0pt, fill: black))
 
-#let diag-vector = diag({
+#let diag-array-list = diag({
     for x in range(6) {
         box((x, 0), fill: if x < 4 { lime })
     }
 })
 
-#let diag-deque = diag({
-    for x in range(6) {
-        box((x, 0), fill: if x == 0 or x > 2 { lime })
-    }
-})
-
-#let diag-list = diag({
+#let diag-linked-list = diag({
     let y1 = .2
     let y2 = .7
     cbox((0, 0), fill: gray)
@@ -40,6 +34,12 @@
     }
     arrow((4.5, -y1), (5.25, -y1), (5.25, -y2), (-1.25, -y2), (-1.25, -y1), (-.5, -y1))
     arrow((-.5, y1), (-1.25, y1), (-1.25, y2), (5.25, y2), (5.25, y1), (4.5, y1))
+})
+
+#let diag-deque = diag({
+    for x in range(6) {
+        box((x, 0), fill: if x == 0 or x > 2 { lime })
+    }
 })
 
 #let diag-red-black-tree = diag({
@@ -91,9 +91,9 @@
     grid.cell(colspan: 3)[*Insertion*],
     grid.cell(colspan: 3)[*Deletion*],
     [First], [Middle], [Last], [By Search], [First], [Middle], [Last], [First], [Middle], [Last],
-    `Vector`, diag-vector, O1, O1, O1, On, On, On, O1a, On, On, O1,
+    `ArrayList`, diag-array-list, O1, O1, O1, On, On, On, O1a, On, On, O1,
+    `LinkedList`, diag-linked-list, O1, On, O1, On, O1, O1, O1, O1, O1, O1,
     `Deque`, diag-deque, O1, O1, O1, On, O1a, On, O1a, O1, On, O1,
-    `List`, diag-list, O1, On, O1, On, O1, O1, O1, O1, O1, O1,
     [Self-balancing\ Search Trees], diag-red-black-tree, O1, On-cell(label: <search-tree>), O1, Ologn, Ologn-cell(colspan: 3), Ologn-cell(colspan: 3),
 )
 

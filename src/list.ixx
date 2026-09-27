@@ -2,7 +2,7 @@ module;
 
 #include <cassert>
 
-export module plastic.sequence;
+export module plastic.list;
 
 import std;
 
@@ -82,7 +82,7 @@ namespace plastic {
     };
 
     export template <class T>
-    class Vector {
+    class ArrayList {
     public:
         using value_type = T;
         using pointer = value_type*;
@@ -129,58 +129,58 @@ namespace plastic {
         }
 
     public:
-        Vector() = default;
+        ArrayList() = default;
 
-        explicit Vector(size_type size)
+        explicit ArrayList(size_type size)
             : _data{ size }, _size{ size } {
 
             std::ranges::uninitialized_value_construct(*this);
         }
 
-        Vector(size_type size, const_reference value)
+        ArrayList(size_type size, const_reference value)
             : _data{ size }, _size{ size } {
 
             std::ranges::uninitialized_fill(*this, value);
         }
 
         template <std::input_iterator It>
-        Vector(It first, It last) {
+        ArrayList(It first, It last) {
             std::ranges::copy(first, last, std::back_inserter(*this));
         }
 
-        Vector(const Vector& other)
+        ArrayList(const ArrayList& other)
             : _data{ other.size() }, _size{ other.size() } {
 
             std::ranges::uninitialized_copy(other, *this);
         }
 
-        Vector(Vector&& other) noexcept {
+        ArrayList(ArrayList&& other) noexcept {
             this->swap(other);
         }
 
-        Vector(std::initializer_list<value_type> list)
+        ArrayList(std::initializer_list<value_type> list)
             : _data{ list.size() }, _size{ list.size() } {
 
             std::ranges::uninitialized_copy(list, *this);
         }
 
-        ~Vector() {
+        ~ArrayList() {
             clear();
         }
 
-        Vector& operator=(const Vector& other) {
-            Vector temp(other);
+        ArrayList& operator=(const ArrayList& other) {
+            ArrayList temp(other);
             this->swap(temp);
             return *this;
         }
 
-        Vector& operator=(Vector&& other) noexcept {
+        ArrayList& operator=(ArrayList&& other) noexcept {
             this->swap(other);
             return *this;
         }
 
-        Vector& operator=(std::initializer_list<value_type> list) {
-            Vector temp(list);
+        ArrayList& operator=(std::initializer_list<value_type> list) {
+            ArrayList temp(list);
             this->swap(temp);
             return *this;
         }
@@ -418,12 +418,12 @@ namespace plastic {
             return first_iter;
         }
 
-        void swap(Vector& other) noexcept {
+        void swap(ArrayList& other) noexcept {
             std::ranges::swap(_data, other._data);
             std::ranges::swap(_size, other._size);
         }
 
-        friend void swap(Vector& left, Vector& right) noexcept {
+        friend void swap(ArrayList& left, ArrayList& right) noexcept {
             left.swap(right);
         }
 
@@ -432,17 +432,349 @@ namespace plastic {
             _size = 0;
         }
 
-        friend bool operator==(const Vector& left, const Vector& right) {
+        friend bool operator==(const ArrayList& left, const ArrayList& right) {
             return std::ranges::equal(left, right);
         }
 
-        friend auto operator<=>(const Vector& left, const Vector& right) {
+        friend auto operator<=>(const ArrayList& left, const ArrayList& right) {
             return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
         }
     };
 
     template <class It>
-    Vector(It, It) -> Vector<std::iter_value_t<It>>;
+    ArrayList(It, It) -> ArrayList<std::iter_value_t<It>>;
+
+    export template <class T>
+    class LinkedList {
+    public:
+        using value_type = T;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
+
+    private:
+        struct NodeBase {
+            NodeBase* prev{ this };
+            NodeBase* next{ this };
+        };
+
+        struct Node : NodeBase {
+            value_type value;
+        };
+
+    public:
+        class iterator {
+            friend LinkedList;
+
+        public:
+            using iterator_category = std::bidirectional_iterator_tag;
+            using value_type = value_type;
+            using difference_type = std::ptrdiff_t;
+            using pointer = value_type*;
+            using reference = value_type&;
+
+        private:
+            NodeBase* _ptr{};
+
+            iterator(NodeBase* ptr)
+                : _ptr{ ptr } {}
+
+        public:
+            iterator() = default;
+
+            reference operator*() const {
+                return static_cast<Node*>(_ptr)->value;
+            }
+
+            pointer operator->() const {
+                return std::addressof(static_cast<Node*>(_ptr)->value);
+            }
+
+            friend bool operator==(iterator left, iterator right) {
+                return left._ptr == right._ptr;
+            }
+
+            iterator& operator++() {
+                _ptr = _ptr->next;
+                return *this;
+            }
+
+            iterator operator++(int) {
+                iterator temp{ *this };
+                ++*this;
+                return temp;
+            }
+
+            iterator& operator--() {
+                _ptr = _ptr->prev;
+                return *this;
+            }
+
+            iterator operator--(int) {
+                iterator temp{ *this };
+                --*this;
+                return temp;
+            }
+        };
+
+        using const_iterator = std::const_iterator<iterator>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+    private:
+        NodeBase* _head{ new NodeBase };
+        size_type _size{};
+
+        template <class... Args>
+            requires(sizeof...(Args) <= 1)
+        NodeBase* _insert(NodeBase* pos, size_type count, const Args&... args) {
+            NodeBase *prev{ pos->prev }, *cur{ prev };
+            _size += count;
+            while (count-- != 0) {
+                cur = cur->next = new Node{ cur, cur->next, args... };
+            }
+            cur->next->prev = cur;
+            return prev->next;
+        }
+
+        template <class... Args>
+            requires(sizeof...(Args) <= 1)
+        void _resize(size_type new_size, const Args&... args) {
+            if (new_size <= size()) {
+                while (size() != new_size) {
+                    pop_back();
+                }
+            } else {
+                this->_insert(_head, new_size - size(), args...);
+            }
+        }
+
+    public:
+        LinkedList() = default;
+
+        explicit LinkedList(size_type size) {
+            this->_insert(_head, size);
+        }
+
+        LinkedList(size_type size, const_reference value) {
+            this->insert(end(), size, value);
+        }
+
+        template <std::input_iterator It>
+        LinkedList(It first, It last) {
+            this->insert(end(), first, last);
+        }
+
+        LinkedList(const LinkedList& other)
+            : LinkedList(other.begin(), other.end()) {}
+
+        LinkedList(LinkedList&& other) noexcept {
+            this->swap(other);
+        }
+
+        LinkedList(std::initializer_list<value_type> list)
+            : LinkedList(list.begin(), list.end()) {}
+
+        ~LinkedList() {
+            clear();
+            delete _head;
+        }
+
+        LinkedList& operator=(const LinkedList& other) {
+            LinkedList temp(other);
+            this->swap(temp);
+            return *this;
+        }
+
+        LinkedList& operator=(LinkedList&& other) noexcept {
+            this->swap(other);
+            return *this;
+        }
+
+        LinkedList& operator=(std::initializer_list<value_type> list) {
+            LinkedList temp(list);
+            this->swap(temp);
+            return *this;
+        }
+
+        iterator begin() {
+            return iterator{ _head->next };
+        }
+
+        const_iterator begin() const {
+            return iterator{ _head->next };
+        }
+
+        iterator end() {
+            return iterator{ _head };
+        }
+
+        const_iterator end() const {
+            return iterator{ _head };
+        }
+
+        reverse_iterator rbegin() {
+            return reverse_iterator{ end() };
+        }
+
+        const_reverse_iterator rbegin() const {
+            return const_reverse_iterator{ end() };
+        }
+
+        reverse_iterator rend() {
+            return reverse_iterator{ begin() };
+        }
+
+        const_reverse_iterator rend() const {
+            return const_reverse_iterator{ begin() };
+        }
+
+        const_iterator cbegin() const {
+            return begin();
+        }
+
+        const_iterator cend() const {
+            return end();
+        }
+
+        const_reverse_iterator crbegin() const {
+            return rbegin();
+        }
+
+        const_reverse_iterator crend() const {
+            return rend();
+        }
+
+        bool empty() const {
+            return _size == 0;
+        }
+
+        size_type size() const {
+            return _size;
+        }
+
+        size_type max_size() const {
+            return static_cast<size_type>(-1) / sizeof(value_type);
+        }
+
+        void resize(size_type new_size) {
+            _resize(new_size);
+        }
+
+        void resize(size_type new_size, const_reference value) {
+            this->_resize(new_size, value);
+        }
+
+        reference front() {
+            assert(!empty());
+            return *begin();
+        }
+
+        const_reference front() const {
+            assert(!empty());
+            return *begin();
+        }
+
+        reference back() {
+            assert(!empty());
+            return *--end();
+        }
+
+        const_reference back() const {
+            assert(!empty());
+            return *--end();
+        }
+
+        void push_front(const_reference value) {
+            this->insert(begin(), value);
+        }
+
+        void pop_front() {
+            assert(!empty());
+            this->erase(begin());
+        }
+
+        void push_back(const_reference value) {
+            this->insert(end(), value);
+        }
+
+        void pop_back() {
+            assert(!empty());
+            this->erase(--end());
+        }
+
+        iterator insert(const_iterator pos, const_reference value) {
+            NodeBase* prev{ pos.base()._ptr->prev };
+            prev->next->next->prev = prev->next = new Node{ prev, prev->next, value };
+            ++_size;
+            return prev->next;
+        }
+
+        iterator insert(const_iterator pos, size_type count, const_reference value) {
+            return this->_insert(pos.base()._ptr, count, value);
+        }
+
+        template <std::input_iterator It>
+        iterator insert(const_iterator pos, It first, It last) {
+            NodeBase *prev{ pos.base()._ptr->prev }, *cur{ prev };
+            while (first != last) {
+                cur = cur->next = new Node{ cur, cur->next, *first };
+                ++first, ++_size;
+            }
+            cur->next->prev = cur;
+            return prev->next;
+        }
+
+        iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
+            return this->insert(pos, list.begin(), list.end());
+        }
+
+        iterator erase(const_iterator pos) {
+            NodeBase* prev{ pos.base()._ptr->prev };
+            delete static_cast<Node*>(std::exchange(prev->next, prev->next->next));
+            --_size;
+            prev->next->prev = prev;
+            return prev->next;
+        }
+
+        iterator erase(const_iterator first, const_iterator last) {
+            NodeBase *first_ptr{ first.base()._ptr }, *last_ptr{ last.base()._ptr };
+            first_ptr->prev->next = last_ptr;
+            last_ptr->prev = first_ptr->prev;
+            while (first_ptr != last_ptr) {
+                delete static_cast<Node*>(std::exchange(first_ptr, first_ptr->next));
+                --_size;
+            }
+            return first_ptr;
+        }
+
+        void swap(LinkedList& other) noexcept {
+            std::ranges::swap(_head, other._head);
+            std::ranges::swap(_size, other._size);
+        }
+
+        friend void swap(LinkedList& left, LinkedList& right) noexcept {
+            left.swap(right);
+        }
+
+        void clear() {
+            this->erase(begin(), end());
+        }
+
+        friend bool operator==(const LinkedList& left, const LinkedList& right) {
+            return std::ranges::equal(left, right);
+        }
+
+        friend auto operator<=>(const LinkedList& left, const LinkedList& right) {
+            return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
+        }
+    };
+
+    template <class It>
+    LinkedList(It, It) -> LinkedList<std::iter_value_t<It>>;
 
     export template <class T>
     class Deque {
@@ -974,337 +1306,5 @@ namespace plastic {
 
     template <class It>
     Deque(It, It) -> Deque<std::iter_value_t<It>>;
-
-    export template <class T>
-    class List {
-    public:
-        using value_type = T;
-        using pointer = value_type*;
-        using const_pointer = const value_type*;
-        using reference = value_type&;
-        using const_reference = const value_type&;
-        using size_type = std::size_t;
-        using difference_type = std::ptrdiff_t;
-
-    private:
-        struct NodeBase {
-            NodeBase* prev{ this };
-            NodeBase* next{ this };
-        };
-
-        struct Node : NodeBase {
-            value_type value;
-        };
-
-    public:
-        class iterator {
-            friend List;
-
-        public:
-            using iterator_category = std::bidirectional_iterator_tag;
-            using value_type = value_type;
-            using difference_type = std::ptrdiff_t;
-            using pointer = value_type*;
-            using reference = value_type&;
-
-        private:
-            NodeBase* _ptr{};
-
-            iterator(NodeBase* ptr)
-                : _ptr{ ptr } {}
-
-        public:
-            iterator() = default;
-
-            reference operator*() const {
-                return static_cast<Node*>(_ptr)->value;
-            }
-
-            pointer operator->() const {
-                return std::addressof(static_cast<Node*>(_ptr)->value);
-            }
-
-            friend bool operator==(iterator left, iterator right) {
-                return left._ptr == right._ptr;
-            }
-
-            iterator& operator++() {
-                _ptr = _ptr->next;
-                return *this;
-            }
-
-            iterator operator++(int) {
-                iterator temp{ *this };
-                ++*this;
-                return temp;
-            }
-
-            iterator& operator--() {
-                _ptr = _ptr->prev;
-                return *this;
-            }
-
-            iterator operator--(int) {
-                iterator temp{ *this };
-                --*this;
-                return temp;
-            }
-        };
-
-        using const_iterator = std::const_iterator<iterator>;
-        using reverse_iterator = std::reverse_iterator<iterator>;
-        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-
-    private:
-        NodeBase* _head{ new NodeBase };
-        size_type _size{};
-
-        template <class... Args>
-            requires(sizeof...(Args) <= 1)
-        NodeBase* _insert(NodeBase* pos, size_type count, const Args&... args) {
-            NodeBase *prev{ pos->prev }, *cur{ prev };
-            _size += count;
-            while (count-- != 0) {
-                cur = cur->next = new Node{ cur, cur->next, args... };
-            }
-            cur->next->prev = cur;
-            return prev->next;
-        }
-
-        template <class... Args>
-            requires(sizeof...(Args) <= 1)
-        void _resize(size_type new_size, const Args&... args) {
-            if (new_size <= size()) {
-                while (size() != new_size) {
-                    pop_back();
-                }
-            } else {
-                this->_insert(_head, new_size - size(), args...);
-            }
-        }
-
-    public:
-        List() = default;
-
-        explicit List(size_type size) {
-            this->_insert(_head, size);
-        }
-
-        List(size_type size, const_reference value) {
-            this->insert(end(), size, value);
-        }
-
-        template <std::input_iterator It>
-        List(It first, It last) {
-            this->insert(end(), first, last);
-        }
-
-        List(const List& other)
-            : List(other.begin(), other.end()) {}
-
-        List(List&& other) noexcept {
-            this->swap(other);
-        }
-
-        List(std::initializer_list<value_type> list)
-            : List(list.begin(), list.end()) {}
-
-        ~List() {
-            clear();
-            delete _head;
-        }
-
-        List& operator=(const List& other) {
-            List temp(other);
-            this->swap(temp);
-            return *this;
-        }
-
-        List& operator=(List&& other) noexcept {
-            this->swap(other);
-            return *this;
-        }
-
-        List& operator=(std::initializer_list<value_type> list) {
-            List temp(list);
-            this->swap(temp);
-            return *this;
-        }
-
-        iterator begin() {
-            return iterator{ _head->next };
-        }
-
-        const_iterator begin() const {
-            return iterator{ _head->next };
-        }
-
-        iterator end() {
-            return iterator{ _head };
-        }
-
-        const_iterator end() const {
-            return iterator{ _head };
-        }
-
-        reverse_iterator rbegin() {
-            return reverse_iterator{ end() };
-        }
-
-        const_reverse_iterator rbegin() const {
-            return const_reverse_iterator{ end() };
-        }
-
-        reverse_iterator rend() {
-            return reverse_iterator{ begin() };
-        }
-
-        const_reverse_iterator rend() const {
-            return const_reverse_iterator{ begin() };
-        }
-
-        const_iterator cbegin() const {
-            return begin();
-        }
-
-        const_iterator cend() const {
-            return end();
-        }
-
-        const_reverse_iterator crbegin() const {
-            return rbegin();
-        }
-
-        const_reverse_iterator crend() const {
-            return rend();
-        }
-
-        bool empty() const {
-            return _size == 0;
-        }
-
-        size_type size() const {
-            return _size;
-        }
-
-        size_type max_size() const {
-            return static_cast<size_type>(-1) / sizeof(value_type);
-        }
-
-        void resize(size_type new_size) {
-            _resize(new_size);
-        }
-
-        void resize(size_type new_size, const_reference value) {
-            this->_resize(new_size, value);
-        }
-
-        reference front() {
-            assert(!empty());
-            return *begin();
-        }
-
-        const_reference front() const {
-            assert(!empty());
-            return *begin();
-        }
-
-        reference back() {
-            assert(!empty());
-            return *--end();
-        }
-
-        const_reference back() const {
-            assert(!empty());
-            return *--end();
-        }
-
-        void push_front(const_reference value) {
-            this->insert(begin(), value);
-        }
-
-        void pop_front() {
-            assert(!empty());
-            this->erase(begin());
-        }
-
-        void push_back(const_reference value) {
-            this->insert(end(), value);
-        }
-
-        void pop_back() {
-            assert(!empty());
-            this->erase(--end());
-        }
-
-        iterator insert(const_iterator pos, const_reference value) {
-            NodeBase* prev{ pos.base()._ptr->prev };
-            prev->next->next->prev = prev->next = new Node{ prev, prev->next, value };
-            ++_size;
-            return prev->next;
-        }
-
-        iterator insert(const_iterator pos, size_type count, const_reference value) {
-            return this->_insert(pos.base()._ptr, count, value);
-        }
-
-        template <std::input_iterator It>
-        iterator insert(const_iterator pos, It first, It last) {
-            NodeBase *prev{ pos.base()._ptr->prev }, *cur{ prev };
-            while (first != last) {
-                cur = cur->next = new Node{ cur, cur->next, *first };
-                ++first, ++_size;
-            }
-            cur->next->prev = cur;
-            return prev->next;
-        }
-
-        iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
-            return this->insert(pos, list.begin(), list.end());
-        }
-
-        iterator erase(const_iterator pos) {
-            NodeBase* prev{ pos.base()._ptr->prev };
-            delete static_cast<Node*>(std::exchange(prev->next, prev->next->next));
-            --_size;
-            prev->next->prev = prev;
-            return prev->next;
-        }
-
-        iterator erase(const_iterator first, const_iterator last) {
-            NodeBase *first_ptr{ first.base()._ptr }, *last_ptr{ last.base()._ptr };
-            first_ptr->prev->next = last_ptr;
-            last_ptr->prev = first_ptr->prev;
-            while (first_ptr != last_ptr) {
-                delete static_cast<Node*>(std::exchange(first_ptr, first_ptr->next));
-                --_size;
-            }
-            return first_ptr;
-        }
-
-        void swap(List& other) noexcept {
-            std::ranges::swap(_head, other._head);
-            std::ranges::swap(_size, other._size);
-        }
-
-        friend void swap(List& left, List& right) noexcept {
-            left.swap(right);
-        }
-
-        void clear() {
-            this->erase(begin(), end());
-        }
-
-        friend bool operator==(const List& left, const List& right) {
-            return std::ranges::equal(left, right);
-        }
-
-        friend auto operator<=>(const List& left, const List& right) {
-            return std::lexicographical_compare_three_way(left.begin(), left.end(), right.begin(), right.end());
-        }
-    };
-
-    template <class It>
-    List(It, It) -> List<std::iter_value_t<It>>;
 
 }
