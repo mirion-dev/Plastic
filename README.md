@@ -50,18 +50,428 @@ Removed structures: `BigInt`, `FixedArrayList`, `DeArrayList`, `SinglyLinkedList
 
 Same as the [standard algorithms](https://eel.is/c++draft/#algorithms) in namespace `ranges`.
 
-| **Category** | **Operations** |
-| --- | --- |
-| Non-modifying Sequence | `all_of`, `any_of`, `none_of`, `contains`, `contains_subrange`, `for_each`, `for_each_n`, `find`, `find_if`, `find_if_not`, `find_last`, `find_last_if`, `find_last_if_not`, `find_end`, `find_first_of`, `adjacent_find`, `count`, `count_if`, `mismatch`, `equal`, `is_permutation`, `search`, `search_n`, `starts_with`, `ends_with`, `fold_left`, `fold_left_first`, `fold_right`, `fold_right_last`, `fold_left_with_iter`, `fold_left_first_with_iter` |
-| Mutating Sequence | `copy`, `copy_n`, `copy_if`, `copy_backward`, `move`, `move_backward`, `swap_ranges`, `transform`, `replace`, `replace_if`, `replace_copy`, `replace_copy_if`, `fill`, `fill_n`, `generate`, `generate_n`, `remove`, `remove_if`, `remove_copy`, `remove_copy_if`, `unique`, `unique_copy`, `reverse`, `reverse_copy`, `rotate`, `rotate_copy`, `sample`, `shuffle`, `shift_left`, `shift_right` |
-| Sorting | `sort`, `stable_sort`, `partial_sort`, `partial_sort_copy`, `is_sorted`, `is_sorted_until` |
-| Nth element | `nth_element` |
-| Binary Search | `lower_bound`, `upper_bound`, `equal_range`, `binary_search` |
-| Partitioning | `is_partitioned`, `partition`, `stable_partition`, `partition_copy`, `partition_point` |
-| Merge | `merge`, `inplace_merge` |
-| Set | `includes`, `set_union`, `set_intersection`, `set_difference`, `set_symmetric_difference` |
-| Heap | `push_heap`, `pop_heap`, `make_heap`, `sort_heap`, `is_heap`, `is_heap_until` |
-| Minimum and Maximum | `min`, `max`, `minmax`, `min_element`, `max_element`, `minmax_element` |
-| Bounded Value | `clamp` |
-| Lexicographical Comparison | `lexicographical_compare` |
-| Permutation | `next_permutation`, `prev_permutation` |
+### Non-modifying Sequence
+
+#### `all_of`
+
+Time Complexity: `O()`.
+
+#### `any_of`
+
+Time Complexity: `O()`.
+
+#### `none_of`
+
+Time Complexity: `O()`.
+
+#### `contains`
+
+Time Complexity: `O()`.
+
+#### `contains_subrange`
+
+Time Complexity: `O()`.
+
+#### `for_each`
+
+Time Complexity: `O()`.
+
+#### `for_each_n`
+
+Time Complexity: `O()`.
+
+#### `find`
+
+Time Complexity: `O()`.
+
+#### `find_if`
+
+Time Complexity: `O()`.
+
+#### `find_if_not`
+
+Time Complexity: `O()`.
+
+#### `find_last`
+
+Time Complexity: `O()`.
+
+#### `find_last_if`
+
+Time Complexity: `O()`.
+
+#### `find_last_if_not`
+
+Time Complexity: `O()`.
+
+#### `find_end`
+
+Time Complexity: `O()`.
+
+#### `find_first_of`
+
+Time Complexity: `O()`.
+
+#### `adjacent_find`
+
+Time Complexity: `O()`.
+
+#### `count`
+
+Time Complexity: `O()`.
+
+#### `count_if`
+
+Time Complexity: `O()`.
+
+#### `mismatch`
+
+Time Complexity: `O()`.
+
+#### `equal`
+
+Time Complexity: `O()`.
+
+#### `is_permutation`
+
+Time Complexity: `O()`.
+
+#### `search`
+
+Time Complexity: `O()`.
+
+#### `search_n`
+
+Time Complexity: `O()`.
+
+#### `starts_with`
+
+Time Complexity: `O()`.
+
+#### `ends_with`
+
+Time Complexity: `O()`.
+
+#### `fold_left`
+
+Time Complexity: `O()`.
+
+#### `fold_left_first`
+
+Time Complexity: `O()`.
+
+#### `fold_right`
+
+Time Complexity: `O()`.
+
+#### `fold_right_last`
+
+Time Complexity: `O()`.
+
+#### `fold_left_with_iter`
+
+Time Complexity: `O()`.
+
+#### `fold_left_first_with_iter`
+
+Time Complexity: `O()`.
+
+### Mutating Sequence
+
+#### `copy`
+
+Time Complexity: `O()`.
+
+#### `copy_n`
+
+Time Complexity: `O()`.
+
+#### `copy_if`
+
+Time Complexity: `O()`.
+
+#### `copy_backward`
+
+Time Complexity: `O()`.
+
+#### `move`
+
+Time Complexity: `O()`.
+
+#### `move_backward`
+
+Time Complexity: `O()`.
+
+#### `swap_ranges`
+
+Time Complexity: `O()`.
+
+#### `transform`
+
+Time Complexity: `O()`.
+
+#### `replace`
+
+Time Complexity: `O()`.
+
+#### `replace_if`
+
+Time Complexity: `O()`.
+
+#### `replace_copy`
+
+Time Complexity: `O()`.
+
+#### `replace_copy_if`
+
+Time Complexity: `O()`.
+
+#### `fill`
+
+Time Complexity: `O()`.
+
+#### `fill_n`
+
+Time Complexity: `O()`.
+
+#### `generate`
+
+Time Complexity: `O()`.
+
+#### `generate_n`
+
+Time Complexity: `O()`.
+
+#### `remove`
+
+Time Complexity: `O()`.
+
+#### `remove_if`
+
+Time Complexity: `O()`.
+
+#### `remove_copy`
+
+Time Complexity: `O()`.
+
+#### `remove_copy_if`
+
+Time Complexity: `O()`.
+
+#### `unique`
+
+Time Complexity: `O()`.
+
+#### `unique_copy`
+
+Time Complexity: `O()`.
+
+#### `reverse`
+
+Time Complexity: `O()`.
+
+#### `reverse_copy`
+
+Time Complexity: `O()`.
+
+#### `rotate`
+
+Time Complexity: `O()`.
+
+#### `rotate_copy`
+
+Time Complexity: `O()`.
+
+#### `sample`
+
+Time Complexity: `O()`.
+
+#### `shuffle`
+
+Time Complexity: `O()`.
+
+#### `shift_left`
+
+Time Complexity: `O()`.
+
+#### `shift_right`
+
+Time Complexity: `O()`.
+
+### Sorting
+
+#### `sort`
+
+Time Complexity: `O()`.
+
+#### `stable_sort`
+
+Time Complexity: `O()`.
+
+#### `partial_sort`
+
+Time Complexity: `O()`.
+
+#### `partial_sort_copy`
+
+Time Complexity: `O()`.
+
+#### `is_sorted`
+
+Time Complexity: `O()`.
+
+#### `is_sorted_until`
+
+Time Complexity: `O()`.
+
+### N-th Element
+
+#### `nth_element`
+
+Time Complexity: `O()`.
+
+### Binary Search
+
+#### `lower_bound`
+
+Time Complexity: `O()`.
+
+#### `upper_bound`
+
+Time Complexity: `O()`.
+
+#### `equal_range`
+
+Time Complexity: `O()`.
+
+#### `binary_search`
+
+Time Complexity: `O()`.
+
+### Partitioning
+
+#### `is_partitioned`
+
+Time Complexity: `O()`.
+
+#### `partition`
+
+Time Complexity: `O()`.
+
+#### `stable_partition`
+
+Time Complexity: `O()`.
+
+#### `partition_copy`
+
+Time Complexity: `O()`.
+
+#### `partition_point`
+
+Time Complexity: `O()`.
+
+### Merge
+
+#### `merge`
+
+Time Complexity: `O()`.
+
+#### `inplace_merge`
+
+Time Complexity: `O()`.
+
+### Set
+
+#### `includes`
+
+Time Complexity: `O()`.
+
+#### `set_union`
+
+Time Complexity: `O()`.
+
+#### `set_intersection`
+
+Time Complexity: `O()`.
+
+#### `set_difference`
+
+Time Complexity: `O()`.
+
+#### `set_symmetric_difference`
+
+Time Complexity: `O()`.
+
+### Heap
+
+#### `push_heap`
+
+Time Complexity: `O()`.
+
+#### `pop_heap`
+
+Time Complexity: `O()`.
+
+#### `make_heap`
+
+Time Complexity: `O()`.
+
+#### `sort_heap`
+
+Time Complexity: `O()`.
+
+#### `is_heap`
+
+Time Complexity: `O()`.
+
+#### `is_heap_until`
+
+Time Complexity: `O()`.
+
+### Minimum and Maximum
+
+#### `min`
+
+Time Complexity: `O()`.
+
+#### `max`
+
+Time Complexity: `O()`.
+
+#### `minmax`
+
+Time Complexity: `O()`.
+
+#### `min_element`
+
+Time Complexity: `O()`.
+
+#### `max_element`
+
+Time Complexity: `O()`.
+
+#### `minmax_element`
+
+Time Complexity: `O()`.
+
+### Bounded Value
+
+#### `clamp`
+
+Time Complexity: `O()`.
+
+### Lexicographical Comparison
+
+#### `lexicographical_compare`
+
+Time Complexity: `O()`.
+
+### Permutation
+
+#### `next_permutation`
+
+Time Complexity: `O()`.
+
+#### `prev_permutation`
+
+Time Complexity: `O()`.

@@ -32,7 +32,7 @@ namespace plastic {
         }
     }
 
-#pragma region non-modifying sequence operations
+#pragma region non-modifying sequence
 
     template <satisfy_type Sat, std::input_iterator It, std::sentinel_for<It> Se, class TPr, class Pj>
     It find_impl(It first, Se last, const TPr& value_or_pred, Pj proj) {
@@ -723,7 +723,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region mutating sequence operations
+#pragma region mutating sequence
 
     export template <std::input_iterator It, std::sentinel_for<It> Se, std::weakly_incrementable Out>
         requires std::indirectly_copyable<It, Out>
@@ -1281,7 +1281,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region partitioning operations
+#pragma region partitioning
 
     export template <
         std::input_iterator It,
@@ -1415,7 +1415,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region merge operations
+#pragma region merge
 
     export template <
         std::input_iterator It1,
@@ -1484,7 +1484,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region heap operations
+#pragma region heap
 
     template <std::random_access_iterator It, class Pr, class Pj>
     void sift_up(It first, std::iter_difference_t<It> index, Pr pred, Pj proj) {
@@ -1620,7 +1620,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region sorting operations
+#pragma region sorting
 
     template <std::bidirectional_iterator It, class Pr, class Pj>
     std::ranges::subrange<It> median_partition(It first, It last, Pr pred, Pj proj) {
@@ -1843,7 +1843,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region nth element operations
+#pragma region nth element
 
     export template <
         std::random_access_iterator It,
@@ -1870,7 +1870,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region binary search operations
+#pragma region binary search
 
     export template <
         std::forward_iterator It,
@@ -1942,7 +1942,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region set operations
+#pragma region set
 
     export template <
         std::input_iterator It1,
@@ -2092,7 +2092,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region minimum and maximum operations
+#pragma region minimum and maximum
 
     export template <
         std::forward_iterator It,
@@ -2246,7 +2246,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region bounded value operations
+#pragma region bounded value
 
     export template <
         class T,
@@ -2266,7 +2266,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region lexicographical comparison operations
+#pragma region lexicographical comparison
 
     export template <
         std::input_iterator It1,
@@ -2294,7 +2294,7 @@ namespace plastic {
 
 #pragma endregion
 
-#pragma region permutation operations
+#pragma region permutation
 
     export template <
         std::bidirectional_iterator It,
