@@ -5,14 +5,18 @@ set_warnings("all", "error")
 
 add_requires("vcpkg::doctest", {debug = is_mode("debug"), configs = {shared = true}})
 
-add_defines("NOMINMAX", "UNICODE", "_UNICODE", "_CONSOLE")
+add_defines("_CONSOLE", "_UNICODE", "NOMINMAX", "UNICODE")
+add_defines(is_mode("debug") and "_DEBUG" or "NDEBUG")
 
-add_cxxflags("/JMC", "/sdl", "/permissive-", "/Zc:preprocessor", {tools = "cl", force = true})
+add_cxxflags("/diagnostics:caret", "/sdl", "/Zc:__cplusplus,checkGwOdr,enumTypes,inline,preprocessor,templateScope,throwingNew", {tools = "cl"})
+
+if is_mode("debug") then
+    add_cxxflags("/JMC", "/RTC1", {tools = "cl", force = true})
+end
 
 if is_mode("release") then
     set_symbols("debug")
     set_policy("build.optimization.lto", true)
-    add_cxxflags("/Oi", "/Gy", {tools = "cl"})
 end
 
 target("plastic")
@@ -26,5 +30,3 @@ target("plastic_test")
     add_files("tests/*.cpp", "tests/*.ixx")
     add_deps("plastic", {links = false})
     add_packages("vcpkg::doctest")
-
-    set_targetdir(is_mode("debug") and "build/tests/debug" or "build/tests/release")
